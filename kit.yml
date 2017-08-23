@@ -173,6 +173,9 @@ certificates:
       auctioneer_client:
         valid_for: 1y
         names: [ "auctioneer client" ]
+      trafficcontroller:
+        valid_for: 1y
+        names: [ "trafficcontroller" ]
 
     loggregator/certs:
       ca: { valid_for: 1y }

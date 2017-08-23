@@ -59,8 +59,12 @@ instance_groups:
         etcd: (( grab meta.cf-etcd ))
       uaa:
         url: (( grab meta.uaa.url ))
+        ca_cert: (( grab meta.uaa.ca_cert ))
       loggregator:
         tls:
+          cc_trafficcontroller:
+            cert: (( vault meta.vault "/diego/certs/trafficcontroller:certificate" ))
+            key:  (( vault meta.vault "/diego/certs/trafficcontroller:key" ))
           ca_cert: (( grab meta.metron_agent_properties.loggregator.tls.ca_cert ))
           trafficcontroller:
             cert: (( vault meta.vault "/loggregator/certs/trafficcontroller:certificate" ))
@@ -71,6 +75,8 @@ instance_groups:
       system_domain: (( grab params.system_domain ))
       cc:
         srv_api_uri: (( grab meta.cc_url ))
+        mutual_tls:
+          ca_cert: (( vault meta.vault "/diego/certs/ca:certificate" ))
       ssl:
         skip_cert_verify: (( grab params.skip_ssl_validation ))
   - name: route_registrar

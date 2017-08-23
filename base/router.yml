@@ -21,8 +21,7 @@ instance_groups:
         enable_ssl: false
         logging_level: (( grab params.log_level ))
         route_services_secret: (( grab meta.route_svcs_secret ))
-        ssl_cert: ~
-        ssl_key: ~
+        tls_pem: ~
         ssl_skip_validation: (( grab params.skip_ssl_validation ))
         status:
           user: health
