@@ -30,7 +30,7 @@ if contains "haproxy-tls" ${subkits[*]}; then
     trap "rm -f $tmpfile" INT QUIT EXIT TERM
     safe --quiet paste secret/$GENESIS_VAULT_PREFIX/haproxy/ssl combined@$tmpfile
   fi
-  json=$(echo $json | jq '. |= (.[] |= (.values[] |= (if .skip_ssl_validation == false then .skip_ssl_validation = true else . end ))')
+  json=$(echo $json | jq '. |= (.[] |= (.values[] |= (if .skip_ssl_validation == false then .skip_ssl_validation = true else . end )))')
 fi
 
 echo $json > $outfile
