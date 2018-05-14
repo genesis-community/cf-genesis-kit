@@ -1,0 +1,88 @@
+---
+meta:
+  default:
+    azs:
+      - (( replace ))
+      - z1
+
+properties:
+  diego:
+    rep:
+      use_azure_fault_domains: true
+
+instance_groups:
+  - name: consul_etcd
+    vm_extensions:
+      - (( append ))
+      - consul_as
+
+  - name: haproxy
+    vm_extensions:
+      - (( append ))
+      - haproxy_as
+
+  - name: nats
+    vm_extensions:
+      - (( append ))
+      - nats_as
+
+  - name: postgres
+    vm_extensions:
+      - (( append ))
+      - postgres_as
+
+  - name: blobstore
+    vm_extensions:
+      - (( append ))
+      - blobstore_as
+
+  - name: uaa
+    vm_extensions:
+      - (( append ))
+      - uaa_as
+
+  - name: api
+    vm_extensions:
+      - (( append ))
+      - api_as
+
+  - name: doppler
+    vm_extensions:
+      - (( append ))
+      - doppler_as
+
+  - name: loggregator_trafficcontroller
+    vm_extensions:
+      - (( append ))
+      - loggregator_tc_as
+
+  - name: router
+    vm_extensions:
+      - (( replace ))  # force replace to remove the cf-elb extension
+      - router_as
+
+  - name: bbs
+    vm_extensions:
+      - (( append ))
+      - bbs_as
+
+  - name: diego
+    vm_extensions:
+      - (( append ))
+      - diego_as
+
+  - name: access
+    vm_extensions:
+      - (( append ))
+      - access_as
+
+  - name: cell
+    vm_extensions:
+      - (( append ))
+      - cell_as
+
+
+  - name: smoke_tests
+    vm_extensions:
+      - (( append ))
+      - smoketest_as

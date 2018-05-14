@@ -1,0 +1,73 @@
+---
+meta:
+  blobstore:
+    user: blobstore
+    password: (( vault meta.vault "/blobstore/creds:password" ))
+    secret:   (( vault meta.vault "/blobstore/creds:secret" ))
+    ca_cert:  (( vault meta.vault "/blobstore/certs/ca:certificate" ))
+
+  blobstore_config:
+    blobstore_type: webdav
+    webdav_config:
+      public_endpoint: (( concat "https://blobstore." params.system_domain ))
+      private_endpoint: https://blobstore.service.cf.internal:4443
+      username: (( grab meta.blobstore.user ))
+      password: (( grab meta.blobstore.password ))
+      ca_cert:  (( grab meta.blobstore.ca_cert ))
+
+params:
+  blobstore_vm_type:   medium
+  blobstore_disk_pool: blobstore
+
+instance_groups:
+  - (( insert after "nats" ))
+  - name: blobstore
+    instances: 1
+    persistent_disk_pool: (( grab params.blobstore_disk_pool ))
+    vm_type: (( grab params.blobstore_vm_type ))
+    azs: (( grab params.availability_zones || meta.default.azs ))
+    stemcell: default
+    networks:
+    - name: (( grab params.cf_internal_network ))
+    jobs:
+      - name: consul_agent
+        release: consul
+        consumes:
+          consul_common: {from: consul_common_link}
+          consul_server: nil
+          consul_client: {from: consul_client_link}
+        properties:
+          consul:
+            agent:
+              services:
+                blobstore: {}
+
+      - name: blobstore
+        release: capi
+        properties:
+          system_domain: (( grab params.system_domain ))
+          blobstore:
+            admin_users:
+              - username: (( grab meta.blobstore.user ))
+                password: (( grab meta.blobstore.password ))
+            port: 8080
+            secure_link:
+              secret: (( grab meta.blobstore.secret ))
+            tls:
+              cert: (( vault meta.vault "/blobstore/certs/server:certificate" ))
+              port: 4443
+              private_key: (( vault meta.vault "/blobstore/certs/server:key" ))
+              ca_cert: (( grab meta.blobstore.ca_cert ))
+
+      - name: route_registrar
+        release: routing
+        properties:
+          route_registrar:
+            routes:
+              - name: blobstore
+                port: 8080
+                registration_interval: 20s
+                tags:
+                  component: blobstore
+                uris:
+                - (( concat "blobstore." params.system_domain ))

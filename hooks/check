@@ -1,0 +1,67 @@
+#!/bin/bash
+
+# Cloud Config checks
+if [[ -n "$GENESIS_CLOUD_CONFIG" ]] ; then
+  if ! want_feature proto; then
+    for t in consul nats doppler router bbs access errand; do
+      cloud_config_needs vm_type $(lookup params.${t}_vm_type small)
+    done
+    for t in uaa api loggregator diego; do
+      cloud_config_needs vm_type $(lookup params.${t}_vm_type medium)
+    done
+    if want_feature local-blobstore || want_feature blobstore-webdav; then
+      cloud_config_needs vm_type   $(lookup params.blobstore_vm_type   medium)
+      cloud_config_needs disk_type $(lookup params.blobstore_disk_pool blobstore)
+    fi
+    if want_feature local-db || want_feature db-internal-postgres; then
+      cloud_config_needs vm_type   $(lookup params.postgres_vm_type   large)
+      cloud_config_needs disk_type $(lookup params.postgres_disk_pool postgres)
+    fi
+
+    cloud_config_needs disk_type $(lookup params.consul_disk_pool consul)
+
+    cloud_config_needs network $(lookup params.cf_internal_network cf-core)
+    cloud_config_needs network $(lookup params.cf_edge_network     cf-edge)
+    cloud_config_needs network $(lookup params.cf_runtime_network  cf-runtime)
+    cloud_config_needs network $(lookup params.cf_db_network       cf-db)
+  fi
+fi
+
+# Environment Parameter checks
+ok=yes
+if want_feature 'tls'; then
+  vault="secret/$GENESIS_VAULT_PREFIX"
+
+  describe "  checking if our Cloud Foundry certificate matches the system domains..."
+  base=$(lookup params.base_domain)
+  sys=$(lookup params.system_domain "system.$base")
+  for domain in api.$sys login.$sys uaa.$sys something.uaa.$sys; do
+    if safe --quiet x509 validate "$vault/haproxy/ssl" --for "$domain" >/dev/null 2>&1; then
+      describe "    - $domain [#G{OK}]"
+    else
+      describe "    - $domain [#R{INVALID}]"
+      safe x509 validate "$vault/haproxy/ssl" --for "$domain" 2>&1 | sed -e 's/^/      /';
+      ok=no
+      echo
+    fi
+  done
+
+  describe "  checking if our Cloud Foundry certificate matches the app domains..."
+  for domain in $(lookup params.apps_domains "[\"run.$base\"]" | jq -r '.[]'); do
+    if safe --quiet x509 validate "$vault/haproxy/ssl" --for "something.$domain" >/dev/null 2>&1; then
+      describe "    - *.$domain [#G{OK}]"
+    else
+      describe "    - *.$domain [#R{INVALID}]"
+      safe x509 validate "$vault/haproxy/ssl" --for "something.$domain" 2>&1 | sed -e 's/^/      /';
+      ok=no
+      echo
+    fi
+  done
+fi
+
+if [[ "$ok" = "yes" ]]; then
+  describe "  environment files [#G{OK}]"
+else
+  describe "  environment files [#R{FAILED}]"
+  exit 1
+fi

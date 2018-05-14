@@ -1,5 +1,0 @@
----
-params:
-  availability_zones:
-  - (( replace ))
-  - z1

@@ -1,6 +1,0 @@
----
-params:
-  internal_only_domains: []
-  trusted_domain_cidrs: ""
-  disable_tls_10: false
-  disable_tls_11: false

@@ -1,0 +1,28 @@
+---
+meta:
+  external_db_username: (( vault meta.vault "/external_db:username" ))
+  external_db_password: (( vault meta.vault "/external_db:password" ))
+  external_db_port:     5432
+
+params:
+  external_db_host: (( param "Please provide the hostname / IP of your external PostgreSQL database instance" ))
+
+  uaadb_host:     (( grab meta.external_db_host ))
+  uaadb_user:     (( grab meta.external_db_username ))
+  uaadb_password: (( grab meta.external_db_password ))
+  uaadb_scheme:   postgresql
+  uaadb_port:     (( grab meta.external_db_port ))
+
+  ccdb_host:     (( grab meta.external_db_host ))
+  ccdb_user:     (( grab meta.external_db_username ))
+  ccdb_password: (( grab meta.external_db_password ))
+  ccdb_scheme:   postgres
+  ccdb_port:     (( grab meta.external_db_port ))
+
+  diegodb_host:     (( grab meta.external_db_host ))
+  diegodb_user:     (( grab meta.external_db_username ))
+  diegodb_password: (( grab meta.external_db_password ))
+  diegodb_scheme:   postgres
+  diegodb_port:     (( grab meta.external_db_port ))
+
+  diegodb_connection_string: (( concat params.diegodb_scheme "://" params.diegodb_user ":" params.diegodb_password "@" params.diegodb_host ":" params.diegodb_port "/" params.diegodb_name ))

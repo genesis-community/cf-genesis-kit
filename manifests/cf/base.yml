@@ -1,0 +1,226 @@
+---
+meta:
+  default:
+    proxy: []
+    azs: [z1, z2, z3]
+
+exodus:
+  api_url:        (( concat "https://" meta.api_hostname ))
+  admin_username: admin
+  admin_password: (( vault meta.vault "/admin_user:password" ))
+  system_domain:  (( grab params.system_domain ))
+  app_domain:     (( grab params.apps_domains[0] ))
+  app_domains:    (( grab params.apps_domains ))
+
+  vaulted_uaa_clients: (( concat meta.vault "/uaa/client_secrets:firehose" ))
+
+  system_org:   system
+  system_space: system
+
+params:
+  cf_internal_network:  cf-core
+  cf_edge_network:      cf-edge
+  cf_runtime_network:   cf-runtime
+  cf_db_network:        cf-db
+
+  base_domain: (( param "What is the base domain for this Cloud Foundry?" ))
+  system_domain: (( concat "system." params.base_domain ))
+  apps_domains: [ (( concat "run." params.base_domain )) ]
+
+  default_app_memory: 256
+
+  app_services_networks: []
+  cf_public_ips: []
+
+  skip_ssl_validation: false
+
+  log_level: info
+
+  logger_port: 443 # FIXME: make setup script override this?
+
+  stemcell_os:      ubuntu-trusty
+  stemcell_version: latest
+
+  consul_disk_pool:    consul
+
+  consul_instances:      3
+  nats_instances:        2
+  uaa_instances:         2
+  api_instances:         2
+  doppler_instances:     2
+  loggregator_instances: 2
+  router_instances:      2
+  bbs_instances:         2
+  diego_instances:       2
+  access_instances:      2
+  cell_instances:        3
+
+  consul_vm_type:      small
+  nats_vm_type:        small
+  uaa_vm_type:         medium
+  api_vm_type:         medium
+  doppler_vm_type:     small
+  loggregator_vm_type: medium
+  router_vm_type:      small
+  bbs_vm_type:         small
+  diego_vm_type:       medium
+  access_vm_type:      small
+  cell_vm_type:        runtime
+  errand_vm_type:      small
+
+  ccdb_name:      ccdb
+  ccdb_host:      (( param "What hostname/IP is the ccdb available at?" ))
+  ccdb_port:      (( param "What port is the ccdb listening on?" ))
+  ccdb_scheme:    (( param "Specify the type of database the ccdb is (postgres, mysql)" ))
+  ccdb_user:      (( param "Specify the user to connect to the ccdb" ))
+  ccdb_password:  (( param "Specify the password of the ccdb user" ))
+
+  uaadb_name:     uaadb
+  uaadb_host:     (( param "What hostname/IP is the uaadb available at?" ))
+  uaadb_port:     (( param "What port is the uaadb listening on?" ))
+  uaadb_scheme:   (( param "Specify the type of database the uaadb is (postgres, mysql)" ))
+  uaadb_user:     (( param "Specify the user to connect to the uaadb" ))
+  uaadb_password: (( param "Specify the password of the uaadb user" ))
+
+  diegodb_name:     diegodb
+  diegodb_host:     (( param "What hostname/IP is the diegodb available at?" ))
+  diegodb_port:     (( param "What port is the diegodb listening on?" ))
+  diegodb_scheme:   (( param "Specify the type of database the diegodb is (postgres, mysql)" ))
+  diegodb_user:     (( param "Specify the user to connect to the diegodb" ))
+  diegodb_password: (( param "Specify the password of the diegodb user" ))
+  diegodb_connection_string: (( param "The diegodb connection string was not specified in the subkit. This is a bug in the kit. Please contact your kit author for a fix." ))
+
+instance_groups:
+  - name: consul_etcd
+    instances: (( grab params.consul_instances ))
+    persistent_disk_pool: (( grab params.consul_disk_pool ))
+    vm_type: (( grab params.consul_vm_type ))
+    azs: (( grab params.availability_zones || meta.default.azs ))
+    stemcell: default
+    networks:
+      - name: (( grab params.cf_internal_network ))
+    update:
+      max_in_flight: 1
+      serial: true
+
+  - name: nats
+    instances: (( grab params.nats_instances ))
+    vm_type: (( grab params.nats_vm_type ))
+    azs: (( grab params.availability_zones || meta.default.azs ))
+    stemcell: default
+    networks:
+      - name: (( grab params.cf_internal_network ))
+        static_ips: (( static_ips(0, 1, 2, 3, 4) ))
+
+  - name: api
+    instances: (( grab params.api_instances ))
+    vm_type: (( grab params.api_vm_type ))
+    azs: (( grab params.availability_zones || meta.default.azs ))
+    stemcell: default
+    networks:
+    - name: (( grab params.cf_internal_network ))
+    update:
+      serial: true
+
+  - name: uaa
+    instances: (( grab params.uaa_instances ))
+    vm_type: (( grab params.uaa_vm_type ))
+    azs: (( grab params.availability_zones || meta.default.azs ))
+    stemcell: default
+    networks:
+    - name: (( grab params.cf_internal_network ))
+
+  - name: doppler
+    instances: (( grab params.doppler_instances ))
+    vm_type: (( grab params.doppler_vm_type ))
+    azs: (( grab params.availability_zones || meta.default.azs ))
+    stemcell: default
+    networks:
+    - name: (( grab params.cf_internal_network ))
+      static_ips: (( static_ips(15, 16, 17, 18, 19) ))
+
+  - name: loggregator_trafficcontroller
+    instances: (( grab params.loggregator_instances ))
+    vm_type: (( grab params.loggregator_vm_type ))
+    azs: (( grab params.availability_zones || meta.default.azs ))
+    stemcell: default
+    networks:
+    - name: (( grab params.cf_internal_network ))
+    migrated_from:
+    - name: log-api
+
+  - name: router
+    instances: (( grab params.router_instances ))
+    vm_type: (( grab params.router_vm_type ))
+    vm_extensions:
+    - cf-elb
+    azs: (( grab params.availability_zones || meta.default.azs ))
+    stemcell: default
+    networks:
+    - name: (( grab params.cf_edge_network ))
+      static_ips: (( static_ips(0, 1, 2, 3, 4) ))
+
+  - name: bbs
+    instances: (( grab params.bbs_instances ))
+    vm_type: (( grab params.bbs_vm_type ))
+    azs: (( grab params.availability_zones || meta.default.azs ))
+    stemcell: default
+    networks:
+      - name: (( grab params.cf_internal_network ))
+    migrated_from:
+      - name: diego-api
+
+  - name: diego # consul, metron, auctioneer, tps, cc_uploader, route_emitter
+    instances: (( grab params.diego_instances ))
+    vm_type: (( grab params.diego_vm_type ))
+    azs: (( grab params.availability_zones || meta.default.azs ))
+    stemcell: default
+    networks:
+      - name: (( grab params.cf_internal_network ))
+
+  - name: access
+    instances: (( grab params.access_instances ))
+    vm_type: (( grab params.access_vm_type ))
+    azs: (( grab params.availability_zones || meta.default.azs ))
+    stemcell: default
+    networks:
+      - name: (( grab params.cf_edge_network ))
+        static_ips: (( static_ips(5, 6, 7, 8, 9) ))
+    vm_extensions:
+      - ssh-elb
+    migrated_from:
+      - name: diego-brain
+
+  - name: cell
+    instances: (( grab params.cell_instances ))
+    vm_type: (( grab params.cell_vm_type ))
+    azs: (( grab params.availability_zones || meta.default.azs ))
+    stemcell: default
+    networks:
+      - name: (( grab params.cf_runtime_network ))
+    update:
+      serial: true
+      max_in_flight: 1
+    migrated_from:
+      - name: diego-cell
+
+  - name: smoke-tests
+    instances: 1
+    vm_type: (( grab params.errand_vm_type ))
+    azs: (( grab params.availability_zones || meta.default.azs ))
+    stemcell: default
+    networks:
+      - name: (( grab params.cf_internal_network ))
+    lifecycle: errand
+
+update:
+  canaries: 1
+  max_in_flight: 50
+  serial: false
+  canary_watch_time: 30000-120000
+  update_watch_time: 30000-120000
+
+stemcells:
+  - alias: default
+    os:      (( grab params.stemcell_os ))
+    version: (( grab params.stemcell_version ))

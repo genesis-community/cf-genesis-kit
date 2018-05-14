@@ -1,0 +1,9 @@
+---
+meta:
+  blobstore_config:
+    blobstore_type: fog
+    fog_connection:
+      provider: AzureRM
+      environment: AzureCloud
+      azure_storage_account_name: (( vault meta.vault "/blobstore:azurerm_sa_name" ))
+      azure_storage_access_key:   (( vault meta.vault "/blobstore:azurerm_sa_key" ))

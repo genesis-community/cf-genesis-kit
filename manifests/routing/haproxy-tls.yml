@@ -1,0 +1,23 @@
+---
+params:
+  disable_tls_10: false
+  disable_tls_11: false
+
+instance_groups:
+  - name: haproxy
+    jobs:
+      - name: haproxy
+        properties:
+          ha_proxy:
+            disable_tls_10: (( grab params.disable_tls_10 ))
+            disable_tls_11: (( grab params.disable_tls_11 ))
+
+            ssl_pem: (( vault meta.vault "/haproxy/ssl:combined" ))
+
+            tcp:
+              - (( append ))
+              - name: wss
+                port: 4443
+                ssl: true
+                backend_servers: (( grab instance_groups.router.networks[0].static_ips ))
+                backend_port: 80

@@ -1,9 +1,9 @@
 ---
-name: Cloud Foundry
-version: 0.0.1
-author: Geoff Franks <gfranks@starkandwayne.com>
-homepage: https://github.com/genesis-community/cf-genesis-kit
-github: https://github.com/genesis-community/cf-genesis-kit
+name:    Cloud Foundry
+version: 1.0.0
+author:  James Hunt <jhunt@starkandwayne.com>
+docs:    https://github.com/genesis-community/cf-genesis-kit
+code:    https://github.com/genesis-community/cf-genesis-kit
 
 description: |
   This kit will deploy OSS Cloud Foundry to BOSH. It contains
@@ -11,68 +11,6 @@ description: |
   customizations for Azure environments, and to enable an appropriate
   HA Proxy configuration if desired. It is loosely based off of the
   [cf-deployment](https://github.com/cloudfoundry/cf-deployment) repo.
-
-subkits:
-  # Needs to go first so that it blobstore job is deleted properly
-  # FIXME:  fix things so this is not merge-order-dependent
-  - prompt: Are you deploying Cloud Foundry on Azure?
-    subkit: azure
-    default: no
-
-  - prompt: What database backend will you use for uaadb, ccdb, and diegob?
-    type: database backend
-    choices:
-      - subkit: db-external-mysql
-        label: An MySQL databases deployed externally to Cloud Foundry (e.g. RDS)
-      - subkit: db-external-postgres
-        label: A Postgres databases deployed externally to Cloud Foundry (e.g. RDS)
-      - subkit: db-internal-postgres
-        label: I do not have external databases to offer Cloud Foundry. Please give me a single-point-of-failure Postgres
-
-  - prompt: What blobstore backend will you use for CloudFoundry?
-    type: blobstore backend
-    choices:
-      - subkit: blobstore-s3
-        label: Amazon S3
-      - subkit: blobstore-azure
-        label: Azure Blobstore
-      - subkit: blobstore-gcp
-        label: Google Cloud Platform Blobstore
-      - subkit: blobstore-webdav
-        label: A single-point-of-failure WebDAV server deployed alongside CF via BOSH
-
-  - prompt: |
-      Do you need to include an HA Proxy configuration in front of Cloud Foundry?
-      Common reasons for doing so include:
-
-      - Deploying to an IaaS that does not provide a built-in load-balancing option,
-        and not having hardware load balancers to use
-      - You have multiple app domains pointing to Cloud Foundry, and each require
-        unique SSL certificates, and your IaaS load balancer doesn't support SNI
-      - You have domains hosted in Cloud Foundry that should be restricted to
-        internal-only traffic
-    type: haproxy backend
-    choices:
-      - subkit: haproxy-notls
-        label: I need HA Proxy installed with Cloud Foundry, but will terminate SSL connections before they are sent to HA Proxy
-      - subkit: haproxy-tls
-        label: I need HA Proxy installed with Cloud Foundry, and HA Proxy will terminate SSL
-      - subkit: omit-haproxy
-        label: I will be using IaaS-provided load balancer doing SSL termination
-
-  - prompt: Do you want to enable NFS Volume Services in your Cloud Foundry?
-    subkit: nfs-volume-services
-
-  - prompt: Do you want to install the SHIELD agent to backup your database/blobstore if applicable?
-    subkit: shield
-
-  - prompt: "Do you want to deploy a non-production, bare-bones Cloud Foundry?"
-    type: HA-i-ness
-    choices:
-    - subkit: minimum-vms
-      label: "Yes, I want only one of each VM type, and **NO** HA to save on costs in a development environment"
-    - subkit: ~
-      label: "No, I need high availability!"
 
 certificates:
   base:
@@ -165,12 +103,25 @@ certificates:
         valid_for: 1y
         names: [ "statsdinjector" ]
 
-  blobstore-webdav:
+  blobstore-webdav: *local-blobstore-certs
+  local-blobstore: &local-blobstore-certs
     blobstore/certs:
       ca: { valid_for: 1y }
       server:
         valid_for: 1y
         names: [ "blobstore.service.cf.internal" ]
+
+  self-signed:
+    haproxy:
+      ca: { valid_for: 1y }
+      ssl:
+        valid_for: 1y
+        names:
+        - "*.${params.base_domain}"
+        - "*.system.${params.base_domain}"
+        - "*.run.${params.base_domain}"
+        - "*.uaa.system.${params.base_domain}"
+        - "*.login.system.${params.base_domain}"
 
 credentials:
   base:
@@ -218,212 +169,19 @@ credentials:
 
     ssh_proxy/host_key: ssh 2048
 
-  blobstore-webdav:
+  blobstore-webdav: *local-blobstore-creds
+  local-blobstore: &local-blobstore-creds
     blobstore/creds:
       password: random 64
       secret:   random 64
 
-  db-internal-postgres:
+  db-internal-postgres: *local-db-creds
+  local-db: &local-db-creds
     uaadb:
       password: random 64
     ccdb:
       password: random 64
     diegodb:
       password: random 64
-
-  shield-dbs:
-    postgres:
-      shield_password: random 64
-
-params:
-  base:
-    - ask: What is the base domain of your Cloud Foundry?
-      param: base_domain
-      description: |
-        This is used to autocalculate many domain-based values of your Cloud Foundry.
-        Changing it will have widespread changes throughout the installation. If you change
-        this, make sure to audit the domains available in your system org, as well as
-        the shared domains.
-      example: bosh-lite.com
-
-    - description: |
-        Used to scale out the number of VMs performing various jobs. Here are some commonly
-        scaled instance groups, but all can be used, following the pattern
-        `<instance_group_name>_instances`
-      params:
-        - cell_instances
-        - router_instances
-        - diego_instances
-        - loggregator_instances
-
-    - description: |
-        To ensure that CF apps have access to talk to their services, we've added a default
-        Application Security Group called `services`. It needs a list of networks that you
-        wish to allow applications to access.
-      ask: What networks will your CF apps need to talk to for their services?
-      type: list
-      param: app_services_networks
-
-    - description: |
-        To ensure that CF apps can talk to other CF applications, we've added a default
-        Application Security Group to allow access to the CF public IPs. This property
-        needs a list of all the public IPs your Cloud Foundry domains are in front of
-        Try `dig @8.8.8.8 +short myapp.<domain>` for each of your CF domains to get a full
-        list.
-      ask: What are all the Public IPs for your CF?
-      type: list
-      param: cf_public_ips
-
-    - description: |
-        Override the default amount of memory given to new Apps when they are created.
-        Users may request apps have more memory, but if
-        this is commonly overridden to the same value
-        for all apps, consider updating the default here
-      param: default_app_memory
-
-    - description: |
-        This tells various CF components to skip strict
-        SSL certificate validation when connecting over HTTPS
-        This should only be used in non-production environments,
-        if the SSL certs for CF itself are self-signed
-      param: skip_ssl_validation
-
-    - description: |
-        Sets the log level for various CF components (API, UAA, router, Consul)
-      param: log_level
-
-    - description: |
-        This is the port that CF will advertise the
-        doppler/loggregator endpoint on. Usually either
-        443 or 4443, depending on how your load balancer
-        handles WebSockets
-      param: logger_port
-
-  haproxy-no-tls: &haproxy
-    - param: internal_only_domains
-      description: |
-        The `internal_only_domains` are used to tell HA Proxy what domains to refuse requests for
-        unless the requests originate from addresses in the `trusted_domain_cidrs`. This is
-        useful for hiding private domains that only your apps should be able to see. Consider
-        using this even if the domain is not publicly resolvable, as HTTP Host header spoofing
-        could otherwise be used to access the private apps.
-    - param: trusted_domain_cidrs
-      description: |
-        The `trusted_domain_cidrs` are used to whitelist traffic destined for domains in the list
-        of `internal_only_domains`. If a request goes to an internal only domain, and isn't
-        from the trusted CIDRs, it is blocked. This should be specified as a space-separated list.
-
-  haproxy-tls:
-    - param: internal_only_domains
-      description: |
-        The `internal_only_domains` are used to tell HA Proxy what domains to refuse requests for
-        unless the requests originate from addresses in the `trusted_domain_cidrs`. This is
-        useful for hiding private domains that only your apps should be able to see. Consider
-        using this even if the domain is not publicly resolvable, as HTTP Host header spoofing
-        could otherwise be used to access the private apps.
-    - param: trusted_domain_cidrs
-      description: |
-        The `trusted_domain_cidrs` are used to whitelist traffic destined for domains in the list
-        of `internal_only_domains`. If a request goes to an internal only domain, and isn't
-        from the trusted CIDRs, it is blocked. This should be specified as a space-separated list.
-    - description: Disables TLS v1.0 or v1.1 respectively
-      params:
-        - disable_tls_10
-        - disable_tls_11
-
-  blobstore-azure:
-    - ask: "Please enter the Azure Storage Account Name to be used for the Cloud Controller blobstore"
-      vault: blobstore:azurerm_sa_name
-      description: |
-        This is the name of the Azure Storage Account that the `api` nodes will use
-        to manage the buildpack, app droplet, app package, and resource group blobstores.
-
-    - ask: "Please enter the Azure Storage Account Key to be used for the Cloud Controller blobstore"
-      vault: blobstore:azurerm_sa_key
-      description: |
-        This is the key of the Azure Storage Account that the `api` nodes will use
-        to manage the buildpack, app droplet, app package, and resource group blobstores.
-
-  blobstore-gcp:
-    - ask: "Please enter the GCP Storage Access Key ID to be used for the Cloud Controller blobstore"
-      vault: blobstore:gcp_sa_key
-      description: |
-        This is the Google Storage Access Key ID that the `api` nodes will use
-        to manage the buildpack, app droplet, app package, and resource group blobstores.
-    - ask: "Please enter the GCP Storage Access Secret Key to be used for the Cloud Controller blobstore"
-      vault: blobstore:gcp_sa_secret
-      description: |
-        This is the Google Storage Access Secret Key that the `api` nodes will use
-        to manage the buildpack, app droplet, app package, and resource group blobstores.
-
-  blobstore-s3:
-    - ask: "Please enter the AWS Access Key ID to be used for the Cloud Controller blobstore"
-      vault: blobstore:aws_access_key
-      description: |
-        This is the Amazon S3 Access Key ID that the `api` nodes will use
-        to manage the buildpack, app droplet, app package, and resource group blobstores.
-    - ask: "Please enter the AWS Secret Access Key to be used for the Cloud Controller blobstore"
-      vault: blobstore:aws_access_secret
-      description: |
-        This is the Amazon S3 Secret Access Key that the `api` nodes will use
-        to manage the buildpack, app droplet, app package, and resource group blobstores.
-
-  db-external-mysql: &external-db
-    - ask: "What hostname/IP is the UAA Database accessible at?"
-      description: |
-        This is the hostname that the `uaa` nodes will use to connect to their database with
-      param: uaadb_host
-    - ask: "What port is the UAA Database accessible at?"
-      description: |
-        This is the port that the `UAA` nodes will use to connect to their database with
-      param: uaadb_port
-    - ask: "What is the username used to connect to the UAA Database?"
-      vault: uaadb:user
-      description: |
-        This is the username that the `uaa` nodes will use to connect to their database with
-    - ask: "What is the password used to connect to the UAA Database?"
-      vault: uaadb:password
-      description: |
-        This is the password that the `uaa` nodes will use to connect to their database with
-
-    - ask: "What hostname/IP is the CC Database accessible at?"
-      description: |
-        This is the hostname that the `api` nodes will use to connect to their database with
-      param: ccdb_host
-    - ask: "What port is the CC Database accessible at?"
-      description: |
-        This is the port that the `apis` nodes will use to connect to their database with
-      param: ccdb_port
-    - ask: "What is the username used to connect to the CC Database?"
-      description: |
-        This is the username that the `api` nodes will use to connect to their database with
-      vault: ccdb:user
-    - ask: "What is the password used to connect to the CC Database?"
-      vault: ccdb:password
-      description: |
-        This is the password that the `api` nodes will use to connect to their database with
-
-    - ask: "What hostname/IP is the Diego Database accessible at?"
-      description: |
-        This is the hostname that the `bbs` nodes will use to connect to their database with
-      param: diegodb_host
-    - ask: "What port is the Diego Database accessible at?"
-      description: |
-        This is the port that the `bbs` nodes will use to connect to their database with
-      param: diegodb_port
-    - ask: "What is the username used to connect to the Diego Database?"
-      description: |
-        This is the username that the `bbs` nodes will use to connect to their database with
-      vault: diegodb:user
-    - ask: "What is the password used to connect to the Diego Database?"
-      vault: diegodb:password
-      description: |
-        This is the password that the `bbs` nodes will use to connect to their database with
-  db-external-postgres: *external-db
-
-  shield:
-    - ask: What is the Vault path to your SHIELD Agent public key?
-      description: |
-        This is usually something like `secret/path/to/keys/for/shield/agent:public`
-        If you are unsure, use `safe tree` to find it.
-      param: shield_key_vault_path
+    shield:
+      password: random 64

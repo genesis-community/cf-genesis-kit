@@ -1,0 +1,13 @@
+---
+instance_groups:
+  - name: cell
+    jobs:
+      - (( append ))
+      - name: nfsv3driver
+        release: nfs-volume
+
+releases:
+  - name: nfs-volume
+    version: 1.0.7
+    sha1: f609a25be32e1fc634e683cc3a89c0aaad1e70f0
+    url: https://bosh.io/d/github.com/cloudfoundry-incubator/nfs-volume-release?v=1.0.7

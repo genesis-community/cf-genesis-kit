@@ -1,0 +1,263 @@
+#!/bin/bash
+set -u
+
+use_db=
+use_lb=
+use_blobstore=
+use_provided_cert=
+azure=
+
+ask_for_haproxy() {
+  use_lb=haproxy
+  prompt_for cert select \
+    'Cloud Foundry requires a TLS certificate for to support HTTPS traffic.' \
+    -o '[provide]  I have a signed X.509 certificate for Cloud Foundry' \
+    -o '[generate] Please generate a new, self-signed certificate for Cloud Foundry'
+
+  case $cert in
+  generate)
+    # the kit.yml will generate the cert
+    ;;
+
+  provide)
+    use_provided_cert=yes
+    while true; do
+      prompt_for $GENESIS_VAULT_PREFIX/haproxy/ssl:certificate secret-block \
+        'Please provide the X.509 Certificate (and CA chain, if any), in PEM format'
+
+      prompt_for $GENESIS_VAULT_PREFIX/haproxy/ssl:key secret-block \
+        'Please provide the private key for that certificate'
+      safe x509 validate secret/$GENESIS_VAULT_PREFIX/haproxy/ssl
+
+      safe x509 show secret/$GENESIS_VAULT_PREFIX/haproxy/ssl
+      prompt_for ok boolean 'Is this the correct certificate?'
+      if [[ $ok == 'true' ]]; then
+        break
+      fi
+    done
+    echo
+
+    safe set secret/$GENESIS_VAULT_PREFIX/haproxy/ssl combined@<(
+      safe read secret/$GENESIS_VAULT_PREFIX/haproxy/ssl:certificate | sed -e '/^$/d'
+      safe read secret/$GENESIS_VAULT_PREFIX/haproxy/ssl:key         | sed -e '/^$/d'
+    )
+    ;;
+  esac
+}
+
+ask_for_database() {
+  inst=database
+  case "${1:-}" in
+  rds)
+    prompt_for database select \
+      'Where would you like to house Cloud Foundry configuration and metadata?' \
+      -o '[postgres-db]  PostgreSQL Amazon RDS' \
+      -o '[mysql-db]     MySQL Amazon RDS' \
+      -o '[local-db]     an internal database node (not HA)'
+
+    case $database in
+    postgres-db) inst="Amazon RDS PostgreSQL instance" ;;
+    mysql-db)    inst="Amazon RDS MySQL instance" ;;
+    esac
+    use_db=$database
+    ;;
+
+  gcp)
+    prompt_for database select \
+      'Where would you like to house Cloud Foundry configuration and metadata?' \
+      -o '[postgres-db]  PostgreSQL Google Cloud SQL' \
+      -o '[mysql-db]     MySQL Google Cloud SQL' \
+      -o '[local-db]     an internal database node (not HA)'
+
+    case $database in
+    postgres-db) inst="Google Cloud SQL PostgreSQL instance" ;;
+    mysql-db)    inst="Google Cloud SQL MySQL instance" ;;
+    esac
+    use_db=$database
+    ;;
+
+  '')
+    prompt_for database select \
+      'Where would you like to house Cloud Foundry configuration and metadata?' \
+      -o '[postgres-db]  External PostgreSQL Database' \
+      -o '[mysql-db]     External MySQL Database' \
+      -o '[local-db]     an internal database node (not HA)'
+
+    case $database in
+    postgres-db) inst="external PostgreSQL instance" ;;
+    mysql-db)    inst="external MySQL instance" ;;
+    esac
+    use_db=$database
+    ;;
+
+  *)
+    echo >&2 "Unknown database ask type $1"
+    exit 1
+    ;;
+  esac
+
+  case $database in
+  mysql-db|postgres-db)
+    prompt_for db_host line \
+      "What is the hostname or IP of your $isnt?"
+    prompt_for db_user line \
+      "What is your $inst database username?"
+    prompt_for $GENESIS_VAULT_PREFIX/uaadb:password secret-line \
+      "What is the password for the $inst $db_user user?"
+    safe --quiet set secret/$GENESIS_VAULT_PREFIX/uaadb user="$db_user"
+    safe --quiet cp secret/$GENESIS_VAULT_PREFIX/{uaadb,ccdb}
+    safe --quiet cp secret/$GENESIS_VAULT_PREFIX/{uaadb,diegodb}
+    ;;
+  esac
+}
+
+case "$(bosh_cpi)" in
+azure*)
+  azure=yes
+  echo "You appear to be deploying to Microsoft's Azure Cloud platform"
+  echo "(based on your BOSH director's configured Cloud Provider Interface)"
+  echo
+
+  prompt_for use_azure_stuff boolean \
+    'Would you like to use a deployed Azure Load Balancer to front this Cloud Foundry?'
+  if [[ $use_azure_stuff != 'true' ]]; then
+    ask_for_haproxy
+  fi
+
+  ask_for_database
+
+  prompt_for use_azure_stuff boolean \
+    'Would you like to use Azure Blob Store to store droplets and application bits?'
+  if [[ $use_azure_stuf == 'true' ]]; then
+    use_blobstore=azure
+    prompt_for $GENESIS_VAULT_PREFIX/blobstore:azurerm_sa_name secret-line \
+      'What is your Azure Storage Account Name?'
+    prompt_for $GENESIS_VAULT_PREFIX/blobstore:azurerm_sa_key secret-line \
+      'What is your Azure Storage Account Key?'
+  fi
+  ;;
+
+aws*)
+  echo "You appear to be deploying to Amazon's AWS Cloud platform"
+  echo "(based on your BOSH director's configured Cloud Provider Interface)"
+  echo
+
+  prompt_for use_aws_stuff boolean \
+    'Would you like to use an Elastic Load Balancer to front this Cloud Foundry?'
+  if [[ $use_aws_stuff != 'true' ]]; then
+    ask_for_haproxy
+  fi
+
+  ask_for_database rds
+
+  prompt_for use_aws_stuff boolean \
+    'Would you like to use Amazon S3 to store droplets and application bits?'
+  if [[ $use_aws_stuff == 'true' ]]; then
+    use_blobstore=aws
+    prompt_for $GENESIS_VAULT_PREFIX/blobstore:aws_access_key secret-line \
+      'What is your Amazon S3 Access Key ID?'
+    prompt_for $GENESIS_VAULT_PREFIX/blobstore:aws_access_secret secret-line \
+      'What is your Amazon S3 Secret Access Key?'
+  fi
+  ;;
+
+google*)
+  echo "You appear to be deploying to Google's Cloud platform"
+  echo "(based on your BOSH director's configured Cloud Provider Interface)"
+  echo
+
+  prompt_for use_gcp_stuff boolean \
+    'Would you like to use a Google Cloud Load Balancer to front this Cloud Foundry?'
+  if [[ $use_gcp_stuff != 'true' ]]; then
+    ask_for_haproxy
+  fi
+
+  ask_for_database gcp
+
+  prompt_for use_gcp_stuff boolean \
+    'Would you like to use Google Cloud Storage to store droplets and application bits?'
+  if [[ $use_gcp_stuff == 'true' ]]; then
+    use_blobstore=gcp
+    prompt_for $GENESIS_VAULT_PREFIX/blobstore:gcp_sa_key secret-line \
+      'What is your Google Cloud Storage Access Key ID?'
+    prompt_for $GENESIS_VAULT_PREFIX/blobstore:gcp_sa_secret secret-line \
+      'What is your Google Cloud Storage Secret Key?'
+  fi
+  ;;
+
+*)
+  ask_for_haproxy
+  ask_for_database
+  ;;
+esac;
+
+if [[ -z $use_blobstore ]]; then
+  use_blobstore=local-blobstore
+fi
+
+echo
+echo "Your Cloud Foundry instance needs a base domain, from which all the"
+echo "other endpoint URLs and domains will be fashioned."
+echo
+
+ok=
+while [[ $ok != "true" ]]; do
+  prompt_for base_domain line \
+    "What is the base domain of your Cloud Foundry?"
+
+      echo
+  describe "Using the base domain of #C{$base_domain},"
+      echo "you will get the following domains and endpoints:"
+      echo
+  describe "    apps: https://APP-NAME.#M{run}.#C{$base_domain}"
+  describe "  cf api: https://#M{api.system}.#C{$base_domain}"
+  describe "     uaa: https://#M{uaa.system}.#C{$base_domain}"
+  describe "          https://#M{login.system}.#C{$base_domain}"
+      echo
+
+  prompt_for ok boolean \
+    'Is this acceptable?'
+done
+
+(
+echo "---"
+echo "kit:"
+echo "  name:    $GENESIS_KIT_NAME"
+echo "  version: $GENESIS_KIT_VERSION"
+echo "  features:"
+if [[ $azure == 'yes' ]]; then
+  echo "    - azure"
+fi
+
+echo "    - $use_db"
+echo "    - $use_blobstore"
+
+if [[ $use_lb == 'haproxy' ]]; then
+  echo "    - haproxy"
+  echo "    - tls"
+  if [[ -z $use_provided_cert ]]; then
+    echo "    - self-signed" # FIXME: make this
+  fi
+fi
+
+echo
+echo "params:"
+echo "  env:   $GENESIS_ENVIRONMENT"
+echo
+echo "  # Cloud Foundry base domain"
+echo "  base_domain: $base_domain"
+
+case $use_db in
+mysql-db)
+  echo
+  echo "  # External MySQL configuration"
+  echo "  external_db_host: $db_host"
+  ;;
+
+postgres-db)
+  echo
+  echo "  # External PostgreSQL configuration"
+  echo "  external_db_host: $db_host"
+  ;;
+esac
+) >$GENESIS_ROOT/$GENESIS_ENVIRONMENT.yml

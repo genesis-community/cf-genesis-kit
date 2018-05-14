@@ -1,3 +1,0 @@
----
-instance_groups:
-- (( delete "postgres" ))

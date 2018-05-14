@@ -1,0 +1,22 @@
+#!/bin/bash
+set -eu
+
+if [[ $GENESIS_DEPLOY_RC == 0 ]]; then
+
+      echo; echo;
+  describe "#M{$GENESIS_ENVIRONMENT} Cloud Foundry deployed!"
+      echo
+      echo "For details about the deployment, run"
+      echo
+  describe "  #G{genesis info $GENESIS_ENVIRONMENT}"
+      echo
+      echo "To set up your local cf CLI installation with useful plugins:"
+      echo
+  describe "  #G{genesis do $GENESIS_ENVIRONMENT -- plugins}"
+      echo
+      echo "To log into Cloud Foundry, run"
+      echo
+  describe "  #G{genesis do $GENESIS_ENVIRONMENT -- login}"
+      echo
+
+fi
