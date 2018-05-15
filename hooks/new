@@ -225,10 +225,6 @@ echo "kit:"
 echo "  name:    $GENESIS_KIT_NAME"
 echo "  version: $GENESIS_KIT_VERSION"
 echo "  features:"
-if [[ $azure == 'yes' ]]; then
-  echo "    - azure"
-fi
-
 echo "    - $use_db"
 echo "    - $use_blobstore"
 

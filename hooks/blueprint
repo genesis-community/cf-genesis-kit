@@ -3,7 +3,7 @@ set -eu
 
 declare -a merge
 
-validate_features azure nfs-volume-services small-footprint \
+validate_features nfs-volume-services small-footprint \
                   local-db mysql-db postgres-db \
                   db-internal-postgres db-external-mysql db-external-postgres \
                   aws-blobstore azure-blobstore gcp-blobstore local-blobstore \
@@ -30,6 +30,10 @@ merge=( manifests/cf/base.yml
         manifests/cf/uaa.yml
 
         manifests/cf/smoke-tests.yml)
+
+case "$(bosh_cpi)" in
+(azure*) merge+=( manifests/azure.yml ) ;;
+esac
 
 for want in shield-dbs shield-blobstore; do
   if want_feature $want; then
