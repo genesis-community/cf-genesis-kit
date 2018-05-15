@@ -1,11 +1,10 @@
 #!/bin/bash
-set -u
+set -eu
 
 use_db=
 use_lb=
 use_blobstore=
 use_provided_cert=
-azure=
 
 ask_for_haproxy() {
   use_lb=haproxy
@@ -111,13 +110,15 @@ ask_for_database() {
   esac
 }
 
-case "$(bosh_cpi)" in
-azure*)
-  azure=yes
-  echo "You appear to be deploying to Microsoft's Azure Cloud platform"
-  echo "(based on your BOSH director's configured Cloud Provider Interface)"
-  echo
+prompt_for iaas select \
+	'What IaaS will this Blacksmith deploy services to?' \
+	-o '[aws]       Amazon Web Services'   \
+	-o '[azure]     Microsoft Azure'       \
+	-o '[google]    Google Cloud Platform' \
+	-o '[other]     Other (OpenStack, vSphere, etc.)'
 
+case "$iaas" in
+azure)
   prompt_for use_azure_stuff boolean \
     'Would you like to use a deployed Azure Load Balancer to front this Cloud Foundry?'
   if [[ $use_azure_stuff != 'true' ]]; then
@@ -137,11 +138,7 @@ azure*)
   fi
   ;;
 
-aws*)
-  echo "You appear to be deploying to Amazon's AWS Cloud platform"
-  echo "(based on your BOSH director's configured Cloud Provider Interface)"
-  echo
-
+aws)
   prompt_for use_aws_stuff boolean \
     'Would you like to use an Elastic Load Balancer to front this Cloud Foundry?'
   if [[ $use_aws_stuff != 'true' ]]; then
@@ -161,11 +158,7 @@ aws*)
   fi
   ;;
 
-google*)
-  echo "You appear to be deploying to Google's Cloud platform"
-  echo "(based on your BOSH director's configured Cloud Provider Interface)"
-  echo
-
+google)
   prompt_for use_gcp_stuff boolean \
     'Would you like to use a Google Cloud Load Balancer to front this Cloud Foundry?'
   if [[ $use_gcp_stuff != 'true' ]]; then
