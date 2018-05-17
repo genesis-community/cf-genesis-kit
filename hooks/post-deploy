@@ -12,7 +12,7 @@ if [[ $GENESIS_DEPLOY_RC == 0 ]]; then
       echo
       echo "To set up your local cf CLI installation with useful plugins:"
       echo
-  describe "  #G{genesis do $GENESIS_ENVIRONMENT -- plugins}"
+  describe "  #G{genesis do $GENESIS_ENVIRONMENT -- setup-cli}"
       echo
       echo "To log into Cloud Foundry, run"
       echo
