@@ -1,12 +1,10 @@
 ---
-meta:
+params:
+  external_db_host:     (( param "Please provide the hostname / IP of your external MySQL database instance" ))
   external_db_username: (( vault meta.vault "/external_db:username" ))
   external_db_password: (( vault meta.vault "/external_db:password" ))
   external_db_scheme:   mysql
   external_db_port:     3306
-
-params:
-  external_db_host: (( param "Please provide the hostname / IP of your external MySQL database instance" ))
 
   uaadb_host:     (( grab meta.external_db_host ))
   uaadb_user:     (( grab meta.external_db_username ))
