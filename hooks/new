@@ -185,7 +185,7 @@ google)
 esac;
 
 if [[ -z $use_blobstore ]]; then
-  use_blobstore=local-blobstore
+  use_blobstore=local
 fi
 
 echo
