@@ -6,22 +6,22 @@ params:
   external_db_scheme:   mysql
   external_db_port:     3306
 
-  uaadb_host:     (( grab meta.external_db_host ))
-  uaadb_user:     (( grab meta.external_db_username ))
-  uaadb_password: (( grab meta.external_db_password ))
-  uaadb_scheme:   (( grab meta.external_db_scheme ))
-  uaadb_port:     (( grab meta.external_db_port ))
+  uaadb_host:       (( grab params.external_db_host ))
+  uaadb_user:       (( grab params.external_db_username ))
+  uaadb_password:   (( grab params.external_db_password ))
+  uaadb_scheme:     (( grab params.external_db_scheme ))
+  uaadb_port:       (( grab params.external_db_port ))
 
-  ccdb_host:     (( grab meta.external_db_host ))
-  ccdb_user:     (( grab meta.external_db_username ))
-  ccdb_password: (( grab meta.external_db_password ))
-  ccdb_scheme:   (( grab meta.external_db_scheme ))
-  ccdb_port:     (( grab meta.external_db_port ))
+  ccdb_host:        (( grab params.external_db_host ))
+  ccdb_user:        (( grab params.external_db_username ))
+  ccdb_password:    (( grab params.external_db_password ))
+  ccdb_scheme:      (( grab params.external_db_scheme ))
+  ccdb_port:        (( grab params.external_db_port ))
 
-  diegodb_host:     (( grab meta.external_db_host ))
-  diegodb_user:     (( grab meta.external_db_username ))
-  diegodb_password: (( grab meta.external_db_password ))
-  diegodb_scheme:   (( grab meta.external_db_scheme ))
-  diegodb_port:     (( grab meta.external_db_port ))
+  diegodb_host:     (( grab params.external_db_host ))
+  diegodb_user:     (( grab params.external_db_username ))
+  diegodb_password: (( grab params.external_db_password ))
+  diegodb_scheme:   (( grab params.external_db_scheme ))
+  diegodb_port:     (( grab params.external_db_port ))
 
   diegodb_connection_string: (( concat params.diegodb_user ":" params.diegodb_password "@tcp(" params.diegodb_host ":" params.diegodb_port ")/" params.diegodb_name ))
