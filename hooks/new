@@ -98,7 +98,7 @@ ask_for_database() {
   case $database in
   mysql-db|postgres-db)
     prompt_for db_host line \
-      "What is the hostname or IP of your $isnt?"
+      "What is the hostname or IP of your $inst?"
     prompt_for db_user line \
       "What is your $inst database username?"
     prompt_for $GENESIS_VAULT_PREFIX/uaadb:password secret-line \
