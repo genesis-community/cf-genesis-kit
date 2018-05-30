@@ -219,7 +219,7 @@ echo "  name:    $GENESIS_KIT_NAME"
 echo "  version: $GENESIS_KIT_VERSION"
 echo "  features:"
 echo "    - $use_db"
-echo "    - $use_blobstore"
+echo "    - $use_blobstore-blobstore"
 
 if [[ $use_lb == 'haproxy' ]]; then
   echo "    - haproxy"
