@@ -111,11 +111,11 @@ ask_for_database() {
 }
 
 prompt_for iaas select \
-	'What IaaS will this Blacksmith deploy services to?' \
-	-o '[aws]       Amazon Web Services'   \
-	-o '[azure]     Microsoft Azure'       \
-	-o '[google]    Google Cloud Platform' \
-	-o '[other]     Other (OpenStack, vSphere, etc.)'
+  'What IaaS are you deploying to?' \
+  -o '[aws]       Amazon Web Services'   \
+  -o '[azure]     Microsoft Azure'       \
+  -o '[google]    Google Cloud Platform' \
+  -o '[other]     Other (OpenStack, vSphere, etc.)'
 
 case "$iaas" in
 azure)
