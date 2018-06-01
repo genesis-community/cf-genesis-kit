@@ -101,11 +101,9 @@ ask_for_database() {
       "What is the hostname or IP of your $inst?"
     prompt_for db_user line \
       "What is your $inst database username?"
-    prompt_for $GENESIS_VAULT_PREFIX/uaadb:password secret-line \
+    prompt_for $GENESIS_VAULT_PREFIX/external_db:password secret-line \
       "What is the password for the $inst $db_user user?"
-    safe --quiet set secret/$GENESIS_VAULT_PREFIX/uaadb user="$db_user"
-    safe --quiet cp secret/$GENESIS_VAULT_PREFIX/{uaadb,ccdb}
-    safe --quiet cp secret/$GENESIS_VAULT_PREFIX/{uaadb,diegodb}
+    safe --quiet set secret/$GENESIS_VAULT_PREFIX/external_db username="$db_user"
     ;;
   esac
 }
