@@ -6,7 +6,7 @@ target=$GENESIS_ENVIRONMENT
 list() {
   echo "The following addons are defined:"
   echo
-  echo "  login       Log into the Cloud Foundry instance ias the"
+  echo "  login       Log into the Cloud Foundry instance as the"
   echo "              admin user account.  This will overwrite local"
   echo "              cf CLI configuration!"
   echo
@@ -59,8 +59,6 @@ setup-cli)
     cf install-plugin -r CF-Community Targets
   fi
   cf plugins
-  cf set-target $target
-  cf list-targets
   ;;
 
 asg)

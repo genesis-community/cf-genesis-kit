@@ -26,16 +26,6 @@ instance_groups:
       - (( append ))
       - nats_as
 
-  - name: postgres
-    vm_extensions:
-      - (( append ))
-      - postgres_as
-
-  - name: blobstore
-    vm_extensions:
-      - (( append ))
-      - blobstore_as
-
   - name: uaa
     vm_extensions:
       - (( append ))
@@ -80,9 +70,3 @@ instance_groups:
     vm_extensions:
       - (( append ))
       - cell_as
-
-
-  - name: smoke_tests
-    vm_extensions:
-      - (( append ))
-      - smoketest_as
