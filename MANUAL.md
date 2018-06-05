@@ -220,7 +220,7 @@ The following secrets will be pulled from the vault:
 
 ## Choosing a Database
 
-Cloud Foundry storesits metadata in a set of relational databases,
+Cloud Foundry stores its metadata in a set of relational databases,
 either MySQL or PostgreSQL.  These database house things like the
 orgs and spaces defined, application instance counts, blobstore
 pointers (tying an app to its droplet, for instance) and more.
@@ -321,7 +321,7 @@ self-signed certificates (which will not be trusted by _any_
 browser), you can activate the `self-signed` feature.
 Certificates will then be automatically generated with the proper
 subject alternate names for all of the domains (system and apps)
-that Cloud Foundr will use.
+that Cloud Foundry will use.
 
 ## Small Footprint Cloud Foundry
 
