@@ -52,7 +52,8 @@ ask_for_database() {
       'Where would you like to house Cloud Foundry configuration and metadata?' \
       -o '[postgres-db]  PostgreSQL Amazon RDS' \
       -o '[mysql-db]     MySQL Amazon RDS' \
-      -o '[local-db]     an internal database node (not HA)'
+      -o '[local-db]     an internal database node (not HA)' \
+      -o '[local-ha-db]     internal HA database cluster'
 
     case $database in
     postgres-db) inst="Amazon RDS PostgreSQL instance" ;;
@@ -66,7 +67,8 @@ ask_for_database() {
       'Where would you like to house Cloud Foundry configuration and metadata?' \
       -o '[postgres-db]  PostgreSQL Google Cloud SQL' \
       -o '[mysql-db]     MySQL Google Cloud SQL' \
-      -o '[local-db]     an internal database node (not HA)'
+      -o '[local-db]     an internal database node (not HA)' \
+      -o '[local-ha-db]     internal HA database cluster'
 
     case $database in
     postgres-db) inst="Google Cloud SQL PostgreSQL instance" ;;
@@ -80,7 +82,8 @@ ask_for_database() {
       'Where would you like to house Cloud Foundry configuration and metadata?' \
       -o '[postgres-db]  External PostgreSQL Database' \
       -o '[mysql-db]     External MySQL Database' \
-      -o '[local-db]     an internal database node (not HA)'
+      -o '[local-db]     an internal database node (not HA)' \
+      -o '[local-ha-db]     internal HA database cluster'
 
     case $database in
     postgres-db) inst="external PostgreSQL instance" ;;

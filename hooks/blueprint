@@ -5,7 +5,7 @@ declare -a merge
 
 validate_features nfs-volume-services small-footprint \
                   local-db mysql-db postgres-db \
-                  db-internal-postgres db-external-mysql db-external-postgres \
+                  db-internal-postgres db-ha-internal-postgres db-external-mysql db-external-postgres \
                   aws-blobstore azure-blobstore gcp-blobstore local-blobstore \
                   blobstore-aws blobstore-azure blobstore-gcp blobstore-webdav \
                   haproxy tls self-signed \
@@ -105,6 +105,12 @@ for want in ${GENESIS_REQUESTED_FEATURES}; do
     database=$(( database + 1 ))
     echo >&2 "The db-internal-postgres flag has been renamed to 'local-db'"
     merge+=( manifests/db/local.yml )
+    ;;
+
+  db-ha-internal-postgres)
+    database=$(( database + 1 ))
+    echo >&2 "The db-ha-internal-postgres flag has been renamed to 'local-ha-db'"
+    merge+=( manifests/db/halocal.yml )
     ;;
 
   db-external-*)
