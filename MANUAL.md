@@ -213,10 +213,16 @@ blobstore.
 
 The following secrets will be pulled from the vault:
 
-  - **Access Key** - The Amazon Access Key ID (and its counterpart
-    secret key) for use when dealing with the GCP API.
-    It is stored in the vault, at `secret/$env/blobstore`.
+  - **Service Account** - The Google Cloud Storage service account
+    to use when dealing with the GCP API.  Three things are
+    stored: the project name, the service account email address,
+    and the JSON key (the actual credentials) of the account.
+    These are stored in the vault, at `secret/$env/blobstore`.
 
+Note: prior versions of the Cloud Foundry kit leveraged legacy
+Amazon-like access-key/secret-key credentials.  It now uses
+service accounts because Google limits you to 5 legacy keys per
+user account.
 
 ## Choosing a Database
 
