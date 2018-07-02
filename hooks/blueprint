@@ -4,7 +4,7 @@ set -eu
 declare -a merge
 
 validate_features nfs-volume-services small-footprint \
-                  local-db mysql-db postgres-db \
+                  local-db local-ha-db mysql-db postgres-db \
                   db-internal-postgres db-ha-internal-postgres db-external-mysql db-external-postgres \
                   aws-blobstore azure-blobstore gcp-blobstore local-blobstore \
                   blobstore-aws blobstore-azure blobstore-gcp blobstore-webdav \
@@ -96,7 +96,7 @@ database=0
 for want in ${GENESIS_REQUESTED_FEATURES}; do
   case "$want" in
   # Database selector feature flags
-  mysql-db|postgres-db|local-db)
+  mysql-db|postgres-db|local-db|local-ha-db)
     database=$(( database + 1 ))
     merge+=( manifests/db/${want%-db}.yml )
     ;;
@@ -110,7 +110,7 @@ for want in ${GENESIS_REQUESTED_FEATURES}; do
   db-ha-internal-postgres)
     database=$(( database + 1 ))
     echo >&2 "The db-ha-internal-postgres flag has been renamed to 'local-ha-db'"
-    merge+=( manifests/db/halocal.yml )
+    merge+=( manifests/db/local-ha.yml )
     ;;
 
   db-external-*)
@@ -122,7 +122,7 @@ for want in ${GENESIS_REQUESTED_FEATURES}; do
 done
 # If we haven't chosen a database, use local
 if [[ $database == 0 ]]; then
-  merge+=( manifests/db/local.yml )
+  merge+=( manifests/db/local-db.yml )
 fi
 
 

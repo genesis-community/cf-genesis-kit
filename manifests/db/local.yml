@@ -24,9 +24,9 @@ params:
 
 releases:
   - name: postgres
-    version: 1.0.4
-    sha1: 8b82c86b7763abdb8f117523b852d1e1c9a20eeb
-    url: https://github.com/cloudfoundry-community/postgres-boshrelease/releases/download/v1.0.4/postgres-1.0.4.tgz
+    version: 3.0.0
+    url: https://github.com/cloudfoundry-community/postgres-boshrelease/releases/download/v3.0.0/postgres-3.0.0.tgz
+    sha1: a5070c285d44b3ac0fb678b1ae640461668b87c5
 
 instance_groups:
   - (( insert after "nats" ))
@@ -50,20 +50,7 @@ instance_groups:
       - name: postgres
         release: postgres
         properties:
-          pgpool:
-            databases:
-              - name:        (( grab params.ccdb_name ))
-                users:      [(( grab params.ccdb_user ))]
-                extensions: [citext, pgcrypto]
-
-              - name:        (( grab params.uaadb_name ))
-                users:      [(( grab params.uaadb_user ))]
-                extensions: [citext, pgcrypto]
-
-              - name:        (( grab params.diegodb_name ))
-                users:      [(( grab params.diegodb_user ))]
-                extensions: [citext, pgcrypto]
-
+          postgres:
             users:
             - username: (( grab params.uaadb_user ))
               password: (( grab params.uaadb_password ))
@@ -77,11 +64,23 @@ instance_groups:
             - username: shield
               password: (( vault meta.vault "/shield:password" ))
               admin: true
+            databases:
+              - name:        (( grab params.ccdb_name ))
+                users:      [(( grab params.ccdb_user ))]
+                extensions: [citext, pgcrypto]
 
-          postgres:
+              - name:        (( grab params.uaadb_name ))
+                users:      [(( grab params.uaadb_user ))]
+                extensions: [citext, pgcrypto]
+
+              - name:        (( grab params.diegodb_name ))
+                users:      [(( grab params.diegodb_user ))]
+                extensions: [citext, pgcrypto]
+                
             config:
               port: 5432
               listen_addresses: '*'
+              max_connections: (( grab params.postgres_max_connections || 100 ))
             hba:
             - host all all 0.0.0.0/0 md5
             - host all all ::/0 md5

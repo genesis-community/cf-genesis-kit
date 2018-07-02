@@ -83,7 +83,7 @@ ask_for_database() {
       -o '[postgres-db]  External PostgreSQL Database' \
       -o '[mysql-db]     External MySQL Database' \
       -o '[local-db]     an internal database node (not HA)' \
-      -o '[local-ha-db]     internal HA database cluster'
+      -o '[local-ha-db]  internal HA database cluster'
 
     case $database in
     postgres-db) inst="external PostgreSQL instance" ;;
@@ -98,6 +98,7 @@ ask_for_database() {
     ;;
   esac
 
+
   case $database in
   mysql-db|postgres-db)
     prompt_for db_host line \
@@ -107,6 +108,10 @@ ask_for_database() {
     prompt_for $GENESIS_VAULT_PREFIX/external_db:password secret-line \
       "What is the password for the $inst $db_user user?"
     safe --quiet set secret/$GENESIS_VAULT_PREFIX/external_db username="$db_user"
+    ;;
+  local-ha-db)
+    prompt_for postgres_vip line \
+      "What VIP would you like to use?"
     ;;
   esac
 }
@@ -249,6 +254,11 @@ postgres-db)
   echo "  # External PostgreSQL configuration"
   echo "  external_db_host: $db_host"
   ;;
+
+local-ha-db)
+  echo
+  echo "  # VIP for the HA Postgres DB"
+  echo "  postgres_vip: $postgres_vip"
 esac
 ) >$GENESIS_ROOT/$GENESIS_ENVIRONMENT.yml
 
