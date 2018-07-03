@@ -53,7 +53,7 @@ ask_for_database() {
       -o '[postgres-db]  PostgreSQL Amazon RDS' \
       -o '[mysql-db]     MySQL Amazon RDS' \
       -o '[local-db]     an internal database node (not HA)' \
-      -o '[local-ha-db]     internal HA database cluster'
+      -o '[local-ha-db]  internal HA database cluster'
 
     case $database in
     postgres-db) inst="Amazon RDS PostgreSQL instance" ;;

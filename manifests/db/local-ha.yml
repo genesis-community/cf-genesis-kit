@@ -1,93 +1,24 @@
 ---
 params:
-  uaadb_host:     (( grab params.postgres_vip ))
-  uaadb_user:     uaaadmin
-  uaadb_password: (( vault meta.vault "/uaadb:password" ))
-  uaadb_scheme:   postgresql
-  uaadb_port:     5432
-
+  uaadb_host:    (( grab params.postgres_vip ))
   ccdb_host:     (( grab params.postgres_vip ))
-  ccdb_user:     ccadmin
-  ccdb_password: (( vault meta.vault "/ccdb:password" ))
-  ccdb_scheme:   postgres
-  ccdb_port:     5432
-
-  diegodb_host:     (( grab params.postgres_vip ))
-  diegodb_user:     diegoadmin
-  diegodb_password: (( vault meta.vault "/diegodb:password" ))
-  diegodb_scheme:   postgres
-  diegodb_port:     5432
-  diegodb_connection_string: (( concat params.diegodb_scheme "://" params.diegodb_user ":" params.diegodb_password "@" params.diegodb_host ":" params.diegodb_port "/" params.diegodb_name ))
-
-  postgres_disk_pool: postgres
-  postgres_vm_type:   large
-
-releases:
-  - name: postgres
-    version: 3.0.0
-    url: https://github.com/cloudfoundry-community/postgres-boshrelease/releases/download/v3.0.0/postgres-3.0.0.tgz
-    sha1: a5070c285d44b3ac0fb678b1ae640461668b87c5
-
-
+  diegodb_host:  (( grab params.postgres_vip ))
 
 instance_groups:
-  - (( insert after "nats" ))
   - name: postgres
     instances: 2
-    persistent_disk_pool: (( grab params.postgres_disk_pool ))
-    vm_type: (( grab params.postgres_vm_type ))
-    azs: (( grab params.availability_zones || meta.default.azs ))
-    stemcell: default
     networks:
       - name: (( grab params.cf_db_network ))
     jobs:
-      - name: consul_agent
-        release: consul
-        consumes:
-          consul_common: {from: consul_common_link}
-          consul_server: nil
-          consul_client: {from: consul_client_link}
       - name: vip
+        release: postgres
         properties:
           vip: (( grab params.postgres_vip ))
           readonly_port: 7432
-        release: postgres
       - name: postgres
-        release: postgres
         properties:
           postgres:
-            users:
-            - username: (( grab params.uaadb_user ))
-              password: (( grab params.uaadb_password ))
-
-            - username: (( grab params.ccdb_user ))
-              password: (( grab params.ccdb_password ))
-
-            - username: (( grab params.diegodb_user ))
-              password: (( grab params.diegodb_password ))
-
-            - username: shield
-              password: (( vault meta.vault "/shield:password" ))
-              admin: true
-            databases:
-              - name:        (( grab params.ccdb_name ))
-                users:      [(( grab params.ccdb_user ))]
-                extensions: [citext, pgcrypto]
-
-              - name:        (( grab params.uaadb_name ))
-                users:      [(( grab params.uaadb_user ))]
-                extensions: [citext, pgcrypto]
-
-              - name:        (( grab params.diegodb_name ))
-                users:      [(( grab params.diegodb_user ))]
-                extensions: [citext, pgcrypto]
-                
             config:
               port: 6432
-              listen_addresses: '*'
-              max_connections: (( grab params.postgres_max_connections || 100 ))
-            hba:
-            - host all all 0.0.0.0/0 md5
-            - host all all ::/0 md5
             replication:
               enabled: true

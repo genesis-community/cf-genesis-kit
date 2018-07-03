@@ -1,0 +1,5 @@
+instance_groups:
+  - name: postgres
+    networks:
+      - name: (( grab params.cf_db_network ))
+        static_ips: (( static_ips 0 ))

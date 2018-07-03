@@ -36,10 +36,6 @@ instance_groups:
     vm_type: (( grab params.postgres_vm_type ))
     azs: (( grab params.availability_zones || meta.default.azs ))
     stemcell: default
-    networks:
-      - name: (( grab params.cf_db_network ))
-        static_ips: (( static_ips 0 ))
-
     jobs:
       - name: consul_agent
         release: consul
@@ -52,18 +48,18 @@ instance_groups:
         properties:
           postgres:
             users:
-            - username: (( grab params.uaadb_user ))
-              password: (( grab params.uaadb_password ))
+              - username: (( grab params.uaadb_user ))
+                password: (( grab params.uaadb_password ))
 
-            - username: (( grab params.ccdb_user ))
-              password: (( grab params.ccdb_password ))
+              - username: (( grab params.ccdb_user ))
+                password: (( grab params.ccdb_password ))
 
-            - username: (( grab params.diegodb_user ))
-              password: (( grab params.diegodb_password ))
+              - username: (( grab params.diegodb_user ))
+                password: (( grab params.diegodb_password ))
 
-            - username: shield
-              password: (( vault meta.vault "/shield:password" ))
-              admin: true
+              - username: shield
+                password: (( vault meta.vault "/shield:password" ))
+                admin: true
             databases:
               - name:        (( grab params.ccdb_name ))
                 users:      [(( grab params.ccdb_user ))]
