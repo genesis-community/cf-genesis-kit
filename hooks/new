@@ -68,7 +68,7 @@ ask_for_database() {
       -o '[postgres-db]  PostgreSQL Google Cloud SQL' \
       -o '[mysql-db]     MySQL Google Cloud SQL' \
       -o '[local-db]     an internal database node (not HA)' \
-      -o '[local-ha-db]     internal HA database cluster'
+      -o '[local-ha-db]  internal HA database cluster'
 
     case $database in
     postgres-db) inst="Google Cloud SQL PostgreSQL instance" ;;
