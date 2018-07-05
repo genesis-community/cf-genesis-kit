@@ -101,17 +101,16 @@ for want in ${GENESIS_REQUESTED_FEATURES}; do
     merge+=( manifests/db/${want%-db}.yml )
     ;;
 
-  local-db|local-ha-db)
+  local-db)
     database=$(( database + 1 ))
     merge+=( manifests/db/local.yml )
-    case "$want" in
-      local-db)
-        merge+=( manifests/db/local-single.yml )
-        ;;
-      local-ha-db)
-        merge+=( manifests/db/local-ha.yml )
-        ;;
-    esac
+    merge+=( manifests/db/local-single.yml )
+    ;;
+
+  local-ha-db)
+    database=$(( database + 1 ))
+    merge+=( manifests/db/local.yml )
+    merge+=( manifests/db/local-ha.yml )
     ;;
 
   db-internal-postgres)

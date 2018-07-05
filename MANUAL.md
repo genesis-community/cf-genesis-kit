@@ -243,6 +243,24 @@ release into play.
 
 [1]: https://github.com/cloudfoundry-community/postgres-boshrelease
 
+#### Local Postgres (non-HA) DB
+
+The following parameters are defined:
+
+  - `postgres_vm_type` - The VM type (per cloud config) to use
+    when deploying the standalone database node.
+    Defaults to `large`.
+
+  - `postgres_disk_pool` - The disk type (per cloud config) to use
+    when provisioning the persistent storage for the database.
+    Defaults to `postgres`.
+
+  - `postgres_max_connections` - How many connections the internal
+    Postgres DB should maintain at once. Only used if internal
+    DB is deployed. Defaults to `100`.
+
+#### Local Postgres (HA) DB
+
 The following parameters are defined:
 
   - `postgres_vm_type` - The VM type (per cloud config) to use
@@ -258,9 +276,7 @@ The following parameters are defined:
     DB is deployed. Defaults to `100`.
 
   - `postgres_vip` - What VRRP VIP to use for the HAProxy/keepalived.
-
-If the `local-ha-db` feature is chosen, a VRRP VIP must be manually
-provided either via the Wizard or as `postgres_vip`
+    This field has no default, and must be provided.
 
 ### Using an External MySQL / MariaDB Database
 

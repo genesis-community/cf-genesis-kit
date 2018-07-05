@@ -185,3 +185,13 @@ credentials:
       password: random 64
     shield:
       password: random 64
+
+  local-ha-db:
+    uaadb:
+      password: random 64
+    ccdb:
+      password: random 64
+    diegodb:
+      password: random 64
+    shield:
+      password: random 64
