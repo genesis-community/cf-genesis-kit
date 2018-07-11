@@ -13,7 +13,7 @@ if [[ -n "$GENESIS_CLOUD_CONFIG" ]] ; then
       cloud_config_needs vm_type   $(lookup params.blobstore_vm_type   medium)
       cloud_config_needs disk_type $(lookup params.blobstore_disk_pool blobstore)
     fi
-    if want_feature local-db || want_feature db-internal-postgres; then
+    if want_feature local-db || want_feature db-internal-postgres || want_feature local-ha-db; then
       cloud_config_needs vm_type   $(lookup params.postgres_vm_type   large)
       cloud_config_needs disk_type $(lookup params.postgres_disk_pool postgres)
     fi
@@ -24,6 +24,12 @@ if [[ -n "$GENESIS_CLOUD_CONFIG" ]] ; then
     cloud_config_needs network $(lookup params.cf_edge_network     cf-edge)
     cloud_config_needs network $(lookup params.cf_runtime_network  cf-runtime)
     cloud_config_needs network $(lookup params.cf_db_network       cf-db)
+
+    if want_feature autoscaler; then
+      cloud_config_needs network   $(lookup params.autoscaler_network    cf-autoscaler)
+      cloud_config_needs vm_type   $(lookup params.autoscaler_vm_type    default)
+    fi
+
   fi
 fi
 

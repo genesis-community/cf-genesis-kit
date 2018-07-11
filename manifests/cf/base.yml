@@ -17,6 +17,8 @@ exodus:
   system_org:   system
   system_space: system
 
+  autoscaler_enabled: false
+
 params:
   cf_internal_network:  cf-core
   cf_edge_network:      cf-edge

@@ -22,6 +22,12 @@ params:
   postgres_disk_pool: postgres
   postgres_vm_type:   large
 
+  autoscalerdb_name:     autoscalerdb
+  autoscalerdb_host:     (( grab instance_groups.postgres.networks[0].static_ips[0] ))
+  autoscalerdb_user:     autoscaler
+  autoscalerdb_password: (( vault meta.vault "/autoscalerdb:password" ))
+  autoscalerdb_port:     5432
+
 releases:
   - name: postgres
     version: 3.0.0
@@ -57,6 +63,12 @@ instance_groups:
               - username: (( grab params.diegodb_user ))
                 password: (( grab params.diegodb_password ))
 
+<<<<<<< HEAD
+              - username: (( grab params.autoscalerdb_user ))
+                password: (( grab params.autoscalerdb_password ))
+
+=======
+>>>>>>> 775c762... Add support for new internal HA Postgres DB (#28)
               - username: shield
                 password: (( vault meta.vault "/shield:password" ))
                 admin: true
@@ -72,7 +84,14 @@ instance_groups:
               - name:        (( grab params.diegodb_name ))
                 users:      [(( grab params.diegodb_user ))]
                 extensions: [citext, pgcrypto]
+<<<<<<< HEAD
+
+              - name:       (( grab params.autoscalerdb_name ))
+                users:      [(( grab params.autoscalerdb_user ))]
+                extensions: [citext, pgcrypto]
+=======
                 
+>>>>>>> 775c762... Add support for new internal HA Postgres DB (#28)
             config:
               port: 5432
               listen_addresses: '*'

@@ -3,29 +3,29 @@ set -eu
 vault="secret/$GENESIS_VAULT_PREFIX"
 target=$GENESIS_ENVIRONMENT
 
+
 list() {
   echo "The following addons are defined:"
   echo
-  echo "  login       Log into the Cloud Foundry instance as the"
-  echo "              admin user account.  This will overwrite local"
-  echo "              cf CLI configuration!"
+  echo "  login             Log into the Cloud Foundry instance as the"
+  echo "                    admin user account.  This will overwrite local"
+  echo "                    cf CLI configuration!"
   echo
-  echo "  setup-cli   Installs cf CLI plugins like 'Targets', which"
-  echo "              helps to manage multiple Cloud Foundries from a"
-  echo "              single jumpbox."
+  echo "  setup-cli         Installs cf CLI plugins like 'Targets', which"
+  echo "                    helps to manage multiple Cloud Foundries from a"
+  echo "                    single jumpbox."
   echo
-  echo "  asg         Generates application security group definitions,"
-  echo "              in JSON, which can then be fed into Cloud Foundry."
+  echo "  bind-autoscaler   Binds the Autoscaler service broker to your"
+  echo "                    deployed CF. Only works if the autoscaler"
+  echo "                    feature was enabled during deploy."
+  echo
+  echo "  asg               Generates application security group definitions,"
+  echo "                    in JSON, which can then be fed into Cloud Foundry."
   echo
 }
 
-case $GENESIS_ADDON_SCRIPT in
-list)
-  list
-  exit 0
-  ;;
 
-login)
+login() {
   if ! cf plugins | grep -q '^cf-targets'; then
     describe "#Y{The cf-targets plugin does not seem to be installed}"
         echo "Install it first, via 'genesis do $GENESIS_ENVIRONMENT -- setup-cli'"
@@ -49,7 +49,19 @@ login)
   cf save-target -f $target
   echo ; echo
   cf target
+}
+
+case $GENESIS_ADDON_SCRIPT in
+list)
+  list
+  exit 0
   ;;
+
+login)
+  login
+  exit 0
+  ;;
+
 
 setup-cli)
   if ! cf list-plugin-repos | grep -q CF-Community; then
@@ -75,6 +87,27 @@ asg)
   lookup params.app_services_networks '[]' | jq '.[] | { "destination": ., "protocol": "all" }' | jq -s
   echo
   ;;
+
+bind-autoscaler)
+  if [[ $(exodus autoscaler_enabled) != "1" ]]; then
+    echo "This Genesis deployment does not have the Autoscaler feature."
+    exit -1
+  fi
+  login
+  username=$(safe read $vault/autoscaler/servicebroker_account:username)
+  password=$(safe read $vault/autoscaler/servicebroker_account:password)
+  base=$(exodus system_domain)
+  url="autoscalerservicebroker.$base"
+  if [[ $(exodus self-signed) == "1" ]]; then
+    cf create-service-broker autoscaler $username $password http://$url
+    echo "Successfully created the service broker."
+    exit 0
+  fi
+  cf create-service-broker autoscaler $username $password https://$url
+  echo "Successfully created the service broker."
+  exit 0
+  ;;
+
 
 *)
   echo "Unrecognized Cloud Foundry Genesis Kit addon."

@@ -382,6 +382,38 @@ NFS volumes provided by the NFS Volume Services Broker.
 
 There are currently no parameters defined for this feature.
 
+
+## App Autoscaler
+
+If you wish to dynamically scale your instances based on pre-defined policies via Cloud Foundry's [App Autoscaler](https://github.com/cloudfoundry-incubator/app-autoscaler), you can do so via the `autoscaler` feature. It acts as a service broker, and must be bound to your organization & space. The following parameters are configurable:
+
+  - `autoscaler_instances` - How many instances to deploy of Autoscaler itself. Defaults to `1`
+  - `autoscaler_network` - Which network to deploy Autoscaler on. Defaults to `cf-autoscaler`
+  - `autoscaler_vm_type` - Which VM type to use for Autoscaler VMs. These can be low-CPU, small-disk VMs. Defaults to `default`
+
+  - `autoscaler_db_name` - Name of the SQL database name for autoscaler to use. Defaults to `autoscalerdb`. Only used if external PostgreSQL is selected for CF.
+
+  - `autoscaler_broker_url` - URL to register with the Route Register. Defaults to `autoscalerservicebroker.system.basedomain.com`
+
+  - `autoscaler_plans` - A YAML list of plans for the service broker. Defaults to:
+  ```
+    - id: autoscaler-example-plan-id
+    name: autoscaler-example-plan
+    description: This is the example service plan for the Auto-Scaling service.
+  ```
+
+  ### Autoscaler DB
+
+  App Autoscaler requires a PostgreSQL server. If you've enabled the `local-db` or `local-db-ha` feature, Autoscaler automatically uses that information and sets up the proper tables. No extra configuration is necessary.
+
+  If an external PostgreSQL server is used, you will need to create a database with the name defined by `params.autoscaler_db_name` (defaults to `autoscalerdb` if undefined). No other configuration is required, as the feature will grab the necessary db information previously provided.
+
+  If an external MySQL server is used, a local non-HA PostgreSQL DB is deployed alongside Autoscaler. No extra configuration is necessary. This DB will only be used to store Autoscaler state information.
+
+  ### Service Binding
+
+An addon called `bind-autoscaler` is available that will automatically create the service broker within your CF deployment named `autoscaler`. An operator will still need to enable access and bind the service to each app manually. More information about App Autoscaler can be found on [App Autoscaler's Policy Documentation](https://github.com/cloudfoundry-incubator/app-autoscaler/blob/develop/docs/Policy_definition.rst)
+
 # Cloud Configuration
 
 Aside from the different VM and disk types described above, in the

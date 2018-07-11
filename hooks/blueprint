@@ -11,6 +11,7 @@ validate_features nfs-volume-services small-footprint \
                   haproxy tls self-signed \
                   shield-dbs shield-blobstore \
                   minimum-vms \
+                  autoscaler autoscaler-postgres \
                   haproxy-tls haproxy-notls omit-haproxy
 
 merge=( manifests/cf/base.yml
@@ -103,14 +104,14 @@ for want in ${GENESIS_REQUESTED_FEATURES}; do
 
   local-db)
     database=$(( database + 1 ))
-    merge+=( manifests/db/local.yml )
-    merge+=( manifests/db/local-single.yml )
+    merge+=( manifests/db/local.yml
+             manifests/db/local-single.yml )
     ;;
 
   local-ha-db)
     database=$(( database + 1 ))
-    merge+=( manifests/db/local.yml )
-    merge+=( manifests/db/local-ha.yml )
+    merge+=( manifests/db/local.yml
+             manifests/db/local-ha.yml )
     ;;
 
   db-internal-postgres)
@@ -128,7 +129,7 @@ for want in ${GENESIS_REQUESTED_FEATURES}; do
 done
 # If we haven't chosen a database, use local
 if [[ $database == 0 ]]; then
-  merge+=( manifests/db/local.yml )
+  merge+=( manifests/db/local.yml, manifests/db/local-single.yml )
 fi
 
 
@@ -185,8 +186,21 @@ elif want_feature haproxy-notls; then
   merge+=( manifests/routing/haproxy.yml )
 fi
 
+if want_feature self-signed; then
+  merge+=( manifests/addons/self-signed.yml )
+fi
 
 
+
+# AUTOSCALER
+
+if want_feature autoscaler; then
+  merge+=( manifests/addons/app-autoscaler.yml )
+  if want_feature mysql-db; then
+    merge+=( manifests/db/local.yml
+             manifests/db/local-single.yml )
+  fi
+fi
    ######     ###    ##    ## #### ######## ##    ##
   ##    ##   ## ##   ###   ##  ##     ##     ##  ##
   ##        ##   ##  ####  ##  ##     ##      ####

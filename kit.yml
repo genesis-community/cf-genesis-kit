@@ -103,13 +103,14 @@ certificates:
         valid_for: 1y
         names: [ "statsdinjector" ]
 
-  blobstore-webdav: *local-blobstore-certs
+  
   local-blobstore: &local-blobstore-certs
     blobstore/certs:
       ca: { valid_for: 1y }
       server:
         valid_for: 1y
         names: [ "blobstore.service.cf.internal" ]
+  blobstore-webdav: *local-blobstore-certs
 
   self-signed:
     haproxy:
@@ -122,6 +123,46 @@ certificates:
         - "*.run.${params.base_domain}"
         - "*.uaa.system.${params.base_domain}"
         - "*.login.system.${params.base_domain}"
+
+  autoscaler:
+    autoscaler/certs:
+      ca: {valid_for: 1y }
+      scheduler_client:
+        valid_for: 1y
+        names: [ "scheduler client" ]
+      scheduler_server:
+        valid_for: 1y
+        names: [ "autoscalerscheduler.service.cf.internal" ]
+      servicebroker_client:
+        valid_for: 1y
+        names: [ "servicebroker client" ]
+      servicebroker_public:
+        valid_for: 1y
+        names: [ "autoscalerservicebroker.system.${params.base_domain}" ]
+      servicebroker_server:
+        valid_for: 1y
+        names: [ "servicebroker.service.cf.internal" ]
+      apiserver_client:
+        valid_for: 1y
+        names: [ "apiserver client" ]
+      apiserver_public:
+        valid_for: 1y
+        names: [ "autoscaler.system.${params.base_domain}" ]
+      apiserver_server:
+        valid_for: 1y
+        names: [ "apiserver.service.cf.internal" ]
+      metricscollector_client:
+        valid_for: 1y
+        names: [ "metricscollector client" ]
+      metricscollector_server:
+        valid_for: 1y
+        names: [ "metricscollector.service.cf.internal" ]
+      scalingengine_client:
+        valid_for: 1y
+        names: [ "scalingengine client" ]
+      scalingengine_server:
+        valid_for: 1y
+        names: [ "scalingengine.service.cf.internal" ]
 
 credentials:
   base:
@@ -175,6 +216,8 @@ credentials:
       password: random 64
       secret:   random 64
 
+  local-ha-db: *local-db-creds
+  autoscaler-postgres: *local-db-creds
   db-internal-postgres: *local-db-creds
   local-db: &local-db-creds
     uaadb:
@@ -185,13 +228,9 @@ credentials:
       password: random 64
     shield:
       password: random 64
+    autoscalerdb:
+      password: random 64
 
-  local-ha-db:
-    uaadb:
-      password: random 64
-    ccdb:
-      password: random 64
-    diegodb:
-      password: random 64
-    shield:
-      password: random 64
+  autoscaler:
+    autoscaler/servicebroker_account:
+      username: random 16

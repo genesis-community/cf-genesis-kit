@@ -9,7 +9,7 @@ use_provided_cert=
 ask_for_haproxy() {
   use_lb=haproxy
   prompt_for cert select \
-    'Cloud Foundry requires a TLS certificate for to support HTTPS traffic.' \
+    'Cloud Foundry requires a TLS certificate to support HTTPS traffic.' \
     -o '[provide]  I have a signed X.509 certificate for Cloud Foundry' \
     -o '[generate] Please generate a new, self-signed certificate for Cloud Foundry'
 
@@ -196,6 +196,9 @@ if [[ -z $use_blobstore ]]; then
   use_blobstore=local
 fi
 
+prompt_for use_autoscaler boolean \
+  'Would you like to use App Autoscaler to dynamically scale CF applications?'
+
 echo
 echo "Your Cloud Foundry instance needs a base domain, from which all the"
 echo "other endpoint URLs and domains will be fashioned."
@@ -234,6 +237,13 @@ if [[ $use_lb == 'haproxy' ]]; then
   echo "    - tls"
   if [[ -z $use_provided_cert ]]; then
     echo "    - self-signed" # FIXME: make this
+  fi
+fi
+
+if [[ $use_autoscaler == 'true' ]]; then
+  echo "    - autoscaler"
+  if [[ $use_db == 'mysql-db' ]]; then
+    echo "    - autoscaler-postgres"
   fi
 fi
 
