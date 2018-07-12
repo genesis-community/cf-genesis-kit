@@ -1,6 +1,8 @@
 releases:
 - name: app-autoscaler
-  version: latest
+  url: https://app-autoscaler-boshrelease.s3.amazonaws.com/app-autoscaler.tgz
+  sha1: 7be27f150828f3f09499c72ef18dce4b4f5bd18d
+  version: 0+dev.4
 - name: consul
   version: latest
 - name: routing
