@@ -22,7 +22,7 @@ params:
   postgres_disk_pool: postgres
   postgres_vm_type:   large
 
-  autoscalerdb_name:     autoscalerdb
+  autoscalerdb_name:     autoscaler
   autoscalerdb_host:     (( grab instance_groups.postgres.networks[0].static_ips[0] ))
   autoscalerdb_user:     autoscaler
   autoscalerdb_password: (( vault meta.vault "/autoscalerdb:password" ))

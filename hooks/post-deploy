@@ -21,7 +21,7 @@ if [[ $GENESIS_DEPLOY_RC == 0 ]]; then
   if [[ $(exodus autoscaler_enabled) == "1" ]]; then
       echo "To bind the App Autoscaler service broker, run"
       echo
-  describe "  #G{genesis info $GENESIS_ENVIRONMENT -- bind-autoscaler}"
+  describe "  #G{genesis do $GENESIS_ENVIRONMENT -- bind-autoscaler}"
       echo
   fi
 

@@ -3,13 +3,6 @@ releases:
   url: https://app-autoscaler-boshrelease.s3.amazonaws.com/app-autoscaler.tgz
   sha1: 7be27f150828f3f09499c72ef18dce4b4f5bd18d
   version: 0+dev.4
-- name: consul
-  version: latest
-- name: routing
-  url: https://bosh.io/d/github.com/cloudfoundry-incubator/cf-routing-release?v=0.162.0
-  sha1: f17cf09d2414f5f486d18bbd57b17fd48fb69773
-  version: '0.162.0'
-
 
 exodus:
   autoscaler_enabled: true
@@ -19,7 +12,7 @@ exodus:
 
 instance_groups:
 # APIServer Instance Group
-- name: apiserver
+- name: as-apiserver
   azs: (( grab params.availability_zones || meta.default.azs ))
   instances: (( grab params.autoscaler_instances || 1 ))
   networks:
@@ -73,7 +66,7 @@ instance_groups:
             client_key: (( vault meta.vault "/autoscaler/certs/servicebroker_client:key" ))
         policy_db: &database
           databases:
-          - name: (( grab params.autoscalerdb_name || params.autoscaler_db_name || "autoscalerdb" ))
+          - name: "(( grab params.autoscalerdb_name ))"
             tag: default
           address: (( grab params.autoscalerdb_host || params.external_db_host ))
           db_scheme: postgres
@@ -105,7 +98,7 @@ instance_groups:
             - (( concat "autoscaler." params.system_domain ))
       
 # Scheduler Instance Group
-- name: scheduler_autoscaler
+- name: as-scheduler
   azs: (( grab params.availability_zones || meta.default.azs ))
   instances: (( grab params.autoscaler_instances || 1 ))
   networks:
@@ -148,7 +141,7 @@ instance_groups:
         policy_db: *database
       
 # Service-Broker Instance Group
-- name: servicebroker
+- name: as-servicebroker
   azs: (( grab params.availability_zones || meta.default.azs ))
   instances: (( grab params.autoscaler_instances || 1 ))
   networks:
@@ -212,7 +205,7 @@ instance_groups:
           uris:
             - (( grab meta.broker_url ))
 # Pruner Instance Group
-- name: pruner
+- name: as-pruner
   azs: (( grab params.availability_zones || meta.default.azs ))
   instances: (( grab params.autoscaler_instances || 1 ))
   networks:
@@ -252,7 +245,7 @@ instance_groups:
             level: debug 
 
 # Metric-collector Instance Group
-- name: metricscollector
+- name: as-metricscollector
   azs: (( grab params.availability_zones || meta.default.azs ))
   instances: (( grab params.autoscaler_instances || 1 ))
   networks:
@@ -308,7 +301,7 @@ instance_groups:
           server_key: (( vault meta.vault "/autoscaler/certs/metricscollector_server:key" ))
 
 # Event-Generator Instance Group
-- name: eventgenerator
+- name: as-eventgenerator
   azs: (( grab params.availability_zones || meta.default.azs ))
   instances: (( grab params.autoscaler_instances || 1 ))
   networks:
@@ -373,7 +366,7 @@ instance_groups:
             client_key: (( vault meta.vault "/autoscaler/certs/metricscollector_client:key" ))
 
 # Scaling-Engine Instance Group
-- name: scalingengine
+- name: as-scalingengine
   azs: (( grab params.availability_zones || meta.default.azs ))
   instances: (( grab params.autoscaler_instances || 1 ))
   networks:
