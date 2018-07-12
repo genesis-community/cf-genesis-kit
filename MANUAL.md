@@ -392,18 +392,40 @@ you can do so via the `autoscaler` feature. It acts as a service
 broker, and must be bound to your organization & space. The following
 parameters are configurable:
 
-  - `autoscaler_instances` - How many instances to deploy of
-    Autoscaler itself. Defaults to `1`
+  ### BOSH-Related Params
+  
   - `autoscaler_network` - Which network to deploy Autoscaler on.
     Defaults to `cf-autoscaler`
-  - `autoscaler_vm_type` - Which VM type to use for Autoscaler VMs.
-    These can be low-CPU, small-disk VMs. Defaults to `default`
+  - `autoscaler_api_instances` - How many instances to deploy of the
+    Autoscaler API server. Defaults to `1`
+  - `autoscaler_api_vm_type` - Which VM type to use for the Autoscaler API 
+    instance. Defaults to `default`
 
-  - `autoscaler_broker_url` - URL to register with the Route Register.
-    Defaults to `autoscalerservicebroker.$system_domain`
+  - `autoscaler_broker_instances` - How many instances to deploy of the
+    Autoscaler service broker. Defaults to `1`
+  - `autoscaler_broker_vm_type` - Which VM type to use for the 
+    Autoscaler API instance. Defaults to `default`
 
-  - `autoscaler_plans` - A YAML list of plans for the service broker.
-    Defaults to:
+  - `autoscaler_scheduler_instances` - How many instances to deploy of the Autoscaler scheduler. Defaults to `1`
+  - `autoscaler_scheduler_vm_type` - Which VM type to use for the Autoscaler scheduler instance. Defaults to `default`
+
+  - `autoscaler_collector_instances` - How many instances to deploy of the Autoscaler metrics collector. Defaults to `1`
+  - `autoscaler_collector_vm_type` - Which VM type to use for the Autoscaler MetricsCollector instance. Defaults to `default`
+
+  - `autoscaler_pruner_instances` - How many instances to deploy of the Autoscaler pruner. Defaults to `1`
+  - `autoscaler_pruner_vm_type` - Which VM type to use for the Autoscaler pruner instance. Defaults to `default`
+
+  - `autoscaler_scaler_instances` - How many instances to deploy of the Autoscaler event generator. Defaults to `1`
+  - `autoscaler_scaler_vm_type` - Which VM type to use for the Autoscaler event generator instance. Defaults to `default`
+
+  - `autoscaler_engine_instances` - How many instances to deploy of the Autoscaler scaling engine. Defaults to `1`
+  - `autoscaler_engine_vm_type` - Which VM type to use for the Autoscaler scaling engine instance. Defaults to `default`
+
+  ### Autoscaler-Related Params
+
+  - `autoscaler_broker_url` - URL to register with the Route Register. Defaults to `autoscalerservicebroker.$system_domain`
+
+  - `autoscaler_plans` - A YAML list of plans for the service broker. Defaults to:
   ```
   - id: autoscaler-example-plan-id
     name: autoscaler-example-plan

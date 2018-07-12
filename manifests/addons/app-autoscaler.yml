@@ -12,13 +12,13 @@ exodus:
 
 instance_groups:
 # APIServer Instance Group
-- name: as-apiserver
+- name: as-api
   azs: (( grab params.availability_zones || meta.default.azs ))
-  instances: (( grab params.autoscaler_instances || 1 ))
+  instances: (( grab params.autoscaler_api_instances || 1 ))
   networks:
   - name: (( grab params.autoscaler_network || "cf-autoscaler"  )) 
   stemcell: default
-  vm_type: (( grab params.autoscaler_vm_type || "default" ))
+  vm_type: (( grab params.autoscaler_api_vm_type || "default" ))
   jobs:
   - name: consul_agent
     release: consul
@@ -66,7 +66,7 @@ instance_groups:
             client_key: (( vault meta.vault "/autoscaler/certs/servicebroker_client:key" ))
         policy_db: &database
           databases:
-          - name: "(( grab params.autoscalerdb_name ))"
+          - name: autoscaler
             tag: default
           address: (( grab params.autoscalerdb_host || params.external_db_host ))
           db_scheme: postgres
@@ -100,11 +100,11 @@ instance_groups:
 # Scheduler Instance Group
 - name: as-scheduler
   azs: (( grab params.availability_zones || meta.default.azs ))
-  instances: (( grab params.autoscaler_instances || 1 ))
+  instances: (( grab params.autoscaler_scheduler_instances || 1 ))
   networks:
   - name: (( grab params.autoscaler_network || "cf-autoscaler"  )) 
   stemcell: default
-  vm_type: large
+  vm_type: (( grab params.autoscaler_scheduler_vm_type || "default" ))
   jobs:
   - name: consul_agent
     release: consul
@@ -141,13 +141,13 @@ instance_groups:
         policy_db: *database
       
 # Service-Broker Instance Group
-- name: as-servicebroker
+- name: as-broker
   azs: (( grab params.availability_zones || meta.default.azs ))
-  instances: (( grab params.autoscaler_instances || 1 ))
+  instances: (( grab params.autoscaler_broker_instances || 1 ))
   networks:
   - name: (( grab params.autoscaler_network || "cf-autoscaler"  )) 
   stemcell: default
-  vm_type: (( grab params.autoscaler_vm_type || "default" ))
+  vm_type: (( grab params.autoscaler_broker_vm_type || "default" ))
   jobs:
   - name: consul_agent
     release: consul
@@ -207,11 +207,11 @@ instance_groups:
 # Pruner Instance Group
 - name: as-pruner
   azs: (( grab params.availability_zones || meta.default.azs ))
-  instances: (( grab params.autoscaler_instances || 1 ))
+  instances: (( grab params.autoscaler_pruner_instances || 1 ))
   networks:
   - name: (( grab params.autoscaler_network || "cf-autoscaler"  )) 
   stemcell: default
-  vm_type: (( grab params.autoscaler_vm_type || "default" ))
+  vm_type: (( grab params.autoscaler_pruner_vm_type || "default" ))
   jobs:
   - name: consul_agent
     release: consul
@@ -245,13 +245,13 @@ instance_groups:
             level: debug 
 
 # Metric-collector Instance Group
-- name: as-metricscollector
+- name: as-collector
   azs: (( grab params.availability_zones || meta.default.azs ))
-  instances: (( grab params.autoscaler_instances || 1 ))
+  instances: (( grab params.autoscaler_collector_instances || 1 ))
   networks:
   - name: (( grab params.autoscaler_network || "cf-autoscaler"  )) 
   stemcell: default
-  vm_type: (( grab params.autoscaler_vm_type || "default" ))
+  vm_type: (( grab params.autoscaler_collector_vm_type || "default" ))
   jobs:
   - name: consul_agent
     release: consul
@@ -301,13 +301,13 @@ instance_groups:
           server_key: (( vault meta.vault "/autoscaler/certs/metricscollector_server:key" ))
 
 # Event-Generator Instance Group
-- name: as-eventgenerator
+- name: as-scaler
   azs: (( grab params.availability_zones || meta.default.azs ))
-  instances: (( grab params.autoscaler_instances || 1 ))
+  instances: (( grab params.autoscaler_scaler_instances || 1 ))
   networks:
   - name: (( grab params.autoscaler_network || "cf-autoscaler"  )) 
   stemcell: default
-  vm_type: (( grab params.autoscaler_vm_type || "default" ))
+  vm_type: (( grab params.autoscaler_scaler_vm_type || "default" ))
   jobs:
   - name: consul_agent
     release: consul
@@ -366,13 +366,13 @@ instance_groups:
             client_key: (( vault meta.vault "/autoscaler/certs/metricscollector_client:key" ))
 
 # Scaling-Engine Instance Group
-- name: as-scalingengine
+- name: as-engine
   azs: (( grab params.availability_zones || meta.default.azs ))
-  instances: (( grab params.autoscaler_instances || 1 ))
+  instances: (( grab params.autoscaler_engine_instances || 1 ))
   networks:
   - name: (( grab params.autoscaler_network || "cf-autoscaler"  )) 
   stemcell: default
-  vm_type: (( grab params.autoscaler_vm_type || "default" ))
+  vm_type: (( grab params.autoscaler_engine_vm_type || "default" ))
   jobs:
   - name: consul_agent
     release: consul

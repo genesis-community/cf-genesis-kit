@@ -82,7 +82,7 @@ instance_groups:
                 users:      [(( grab params.diegodb_user ))]
                 extensions: [citext, pgcrypto]
 
-              - name:       (( grab params.autoscalerdb_name ))
+              - name:       autoscaler
                 users:      [(( grab params.autoscalerdb_user ))]
                 extensions: [citext, pgcrypto]
 
