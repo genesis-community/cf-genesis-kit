@@ -103,14 +103,13 @@ certificates:
         valid_for: 1y
         names: [ "statsdinjector" ]
 
-  
+  blobstore-webdav: *local-blobstore-certs
   local-blobstore: &local-blobstore-certs
     blobstore/certs:
       ca: { valid_for: 1y }
       server:
         valid_for: 1y
         names: [ "blobstore.service.cf.internal" ]
-  blobstore-webdav: *local-blobstore-certs
 
   self-signed:
     haproxy:
