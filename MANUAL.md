@@ -396,6 +396,7 @@ parameters are configurable:
   
   - `autoscaler_network` - Which network to deploy Autoscaler on.
     Defaults to `cf-autoscaler`
+
   - `autoscaler_api_instances` - How many instances to deploy of the
     Autoscaler API server. Defaults to `1`
   - `autoscaler_api_vm_type` - Which VM type to use for the Autoscaler API 

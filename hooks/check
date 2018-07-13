@@ -26,8 +26,14 @@ if [[ -n "$GENESIS_CLOUD_CONFIG" ]] ; then
     cloud_config_needs network $(lookup params.cf_db_network       cf-db)
 
     if want_feature autoscaler; then
-      cloud_config_needs network   $(lookup params.autoscaler_network    cf-autoscaler)
-      cloud_config_needs vm_type   $(lookup params.autoscaler_vm_type    default)
+      cloud_config_needs network   $(lookup params.autoscaler_network            cf-autoscaler)
+      cloud_config_needs vm_type   $(lookup params.autoscaler_api_vm_type        default)
+      cloud_config_needs vm_type   $(lookup params.autoscaler_broker_vm_type     default)
+      cloud_config_needs vm_type   $(lookup params.autoscaler_scheduler_vm_type  default)
+      cloud_config_needs vm_type   $(lookup params.autoscaler_collector_vm_type  default)
+      cloud_config_needs vm_type   $(lookup params.autoscaler_pruner_vm_type     default)
+      cloud_config_needs vm_type   $(lookup params.autoscaler_scaler_vm_type     default)
+      cloud_config_needs vm_type   $(lookup params.autoscaler_engine_vm_type     default)
     fi
 
   fi
