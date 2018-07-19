@@ -130,10 +130,10 @@ instance_groups:
           passwd: (( concat "https://login." params.system_domain "/forgot_password" ))
           signup: (( concat "https://login." params.system_domain "/create_account" ))
         branding:
-          product_logo: (( grab meta.branding.cf_branding_product_logo ))
-          square_logo: (( grab meta.branding.cf_branding_square_logo ))
-          footer_legal_text: (( grab meta.branding.cf_branding_footer_legal_text ))
-          footer_links: (( grab meta.branding.cf_branding_footer_links ))
+          product_logo: (( grab meta.branding.product_logo ))
+          square_logo: (( grab meta.branding.square_logo ))
+          footer_legal_text: (( grab meta.branding.footer_legal_text ))
+          footer_links: (( grab meta.branding.footer_links ))
         saml:
           activeKeyId: default_key
           keys:

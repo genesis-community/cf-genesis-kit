@@ -95,6 +95,10 @@ params:
   diegodb_password: (( param "Specify the password of the diegodb user" ))
   diegodb_connection_string: (( param "The diegodb connection string was not specified in the subkit. This is a bug in the kit. Please contact your kit author for a fix." ))
 
+  locketdb_name: locketdb
+  silkdb_name: silkdb
+  policyserverdb_name:  policyserverdb
+
 instance_groups:
   - name: consul_etcd
     instances: (( grab params.consul_instances ))
