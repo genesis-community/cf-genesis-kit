@@ -13,6 +13,11 @@ instance_groups:
     release: diego
     properties:
       diego:
+        loggregator:
+          use_v2_api: true
+          ca_cert: (( grab meta.certs.loggregator.ca ))
+          cert: (( grab meta.certs.loggregator.metron.server.cert ))
+          key: (( grab meta.certs.loggregator.metron.server.key ))
         auctioneer:
           bbs:
             ca_cert: (( grab meta.certs.diego.ca ))
@@ -61,3 +66,22 @@ instance_groups:
           uaa:
             ca_cert: (( grab meta.certs.uaa.ca ))
             client_secret: (( grab meta.uaa.tcp_emitter_secret ))
+
+  - name: scheduler
+    release: cf-syslog-drain
+    properties:
+      scalablesyslog:
+        scheduler:
+          api:
+            url: https://cloud-controller-ng.service.cf.internal:9023
+          tls:
+            client:
+              ca: (( grab meta.certs.loggregator.ca ))
+              cert: (( grab meta.certs.loggregator.syslogger.client.cert ))
+              key: (( grab meta.certs.loggregator.syslogger.client.key ))
+              adapter_cn: "ss-adapter"
+            api:
+              ca: (( grab meta.certs.diego.ca ))
+              cert: (( grab meta.certs.loggregator.syslogger.api.cert ))
+              key: (( grab meta.certs.loggregator.syslogger.api.key ))
+              cn: "cloud-controller-ng.service.cf.internal"

@@ -30,6 +30,7 @@ params:
   apps_domains: [ (( concat "run." params.base_domain )) ]
 
   default_app_memory: 256
+  default_app_disk_in_mb: 1000
 
   app_services_networks: []
   cf_public_ips: []
@@ -56,6 +57,7 @@ params:
   diego_instances:       2
   access_instances:      2
   cell_instances:        3
+  syslogger_instances:   2
 
   consul_vm_type:      small
   nats_vm_type:        small
@@ -69,6 +71,7 @@ params:
   access_vm_type:      small
   cell_vm_type:        runtime
   errand_vm_type:      small
+  syslogger_vm_type:   small
 
   ccdb_name:      ccdb
   ccdb_host:      (( param "What hostname/IP is the ccdb available at?" ))
@@ -140,6 +143,14 @@ instance_groups:
     networks:
     - name: (( grab params.cf_internal_network ))
       static_ips: (( static_ips 5 6 7 8 9 ))
+
+  - name: syslogger
+    instances: (( grab params.syslogger_instances ))
+    vm_type: (( grab params.syslogger_vm_type ))
+    azs: (( grab params.availability_zones || meta.default.azs ))
+    stemcell: default
+    networks:
+    - name: (( grab params.cf_internal_network ))
 
   - name: loggregator_trafficcontroller
     instances: (( grab params.loggregator_instances ))

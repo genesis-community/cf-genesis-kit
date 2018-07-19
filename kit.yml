@@ -18,10 +18,13 @@ certificates:
       ca: { valid_for: 1y }
       server:
         valid_for: 1y
-        names: [ server.dc1.cf.internal ]
+        names: [ "server.dc1.cf.internal", "127.0.0.1" ]
       agent:
         valid_for: 1y
-        names: [ consul_agent ]
+        names: [ "consul_agent", "127.0.0.1" ]
+
+    consul/certs/application_ca:
+      ca: { valid_for: 1y }
 
     etcd/certs:
       ca: { valid_for: 1y }
@@ -49,6 +52,24 @@ certificates:
         - "login.system.${params.base_domain}"
         - "*.login.system.${params.base_domain}"
 
+    network_policy/certs:
+      ca: { valid_for: 1y }
+      server:
+        valid_for: 1y
+        names: [ "policy-server.service.cf.internal" ]
+      client:
+        valid_for: 1y
+        names: [ "clientName" ]
+
+    silk/certs:
+      ca: { valid_for: 1y }
+      server:
+        valid_for: 1y
+        names: [ "silk-controller.service.cf.internal" ]
+      client:
+        valid_for: 1y
+        names: [ "clientName" ]
+
     diego/certs:
       ca: { valid_for: 1y }
       capi:
@@ -68,7 +89,7 @@ certificates:
         names: [ "syslogdrainbinder" ]
       bbs:
         valid_for: 1y
-        names: [ "bbs.service.cf.internal", "*.bbs.service.cf.internal" ]
+        names: [ "bbs.service.cf.internal", "*.bbs.service.cf.internal", "127.0.0.1" ]
       bbs_client:
         valid_for: 1y
         names: [ "bbs client" ]
@@ -77,7 +98,7 @@ certificates:
         names: [ "tps client" ]
       rep:
         valid_for: 1y
-        names: [ "cell.service.cf.internal", "*.cell.service.cf.internal" ]
+        names: [ "cell.service.cf.internal", "*.cell.service.cf.internal", "127.0.0.1" ]
       rep_client:
         valid_for: 1y
         names: [ "rep client" ]
@@ -87,21 +108,39 @@ certificates:
       auctioneer_client:
         valid_for: 1y
         names: [ "auctioneer client" ]
+      locket_server:
+        valid_for: 1y
+        names: [ "locket.service.cf.internal" ]
+      syslogger_scheduler:
+        valid_for: 1y
+        names: [ "ss-scheduler" ]
+      
+    diego/certs/instance_identity:
+      ca: { valid_for: 1y }
 
     loggregator/certs:
       ca: { valid_for: 1y }
       doppler:
         valid_for: 1y
-        names: [ "doppler" ]
+        names: [ "doppler", "127.0.0.1" ]
       metron:
         valid_for: 1y
-        names: [ "metron" ]
+        names: [ "metron", "127.0.0.1" ]
       trafficcontroller:
         valid_for: 1y
-        names: [ "trafficcontroller" ]
+        names: [ "trafficcontroller", "127.0.0.1" ]
       statsdinjector:
         valid_for: 1y
-        names: [ "statsdinjector" ]
+        names: [ "statsdinjector", "127.0.0.1" ]
+      syslogger_server:
+        valid_for: 1y
+        names: [ "ss-adapter" ]
+      syslogger_rlp:
+        valid_for: 1y
+        names: [ "ss-adapter-rlp" ]
+      syslogger_client:
+        valid_for: 1y
+        names: [ "ss-scheduler" ]
 
   blobstore-webdav: *local-blobstore-certs
   local-blobstore: &local-blobstore-certs
@@ -174,6 +213,8 @@ credentials:
     admin_user:
       password: random 64
 
+    uaa/encryption_key:
+      current: random 64 fixed
     uaa/jwt_signing_key: rsa 4096 fixed
     uaa/client_secrets:
       admin_client:   random 64
@@ -188,6 +229,7 @@ credentials:
       ssh_proxy:      random 64
       tcp_emitter:    random 64
       tcp_router:     random 64
+      network_policy: random 64
 
     cc:
       directory_key:     random 16 allowed-chars a-z0-9 fixed
@@ -228,6 +270,10 @@ credentials:
     shield:
       password: random 64
     autoscalerdb:
+      password: random 64
+    cfnetworkingdb:
+      password: random 64
+    locketdb:
       password: random 64
 
   autoscaler:

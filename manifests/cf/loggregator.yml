@@ -16,38 +16,26 @@ instance_groups:
 
   - name: doppler
     release: loggregator
+    provides:
+      doppler: {as: doppler, shared: true}
     properties:
-      doppler_endpoint:
-        shared_secret: (( grab meta.loggregator.endpoint_secret ))
+      # doppler_endpoint:
+      #   shared_secret: (( grab meta.loggregator.endpoint_secret ))
+      doppler:
+        disable_announce: true
       loggregator:
+        disable_syslog_drains: true
         tls:
           ca_cert: (( grab meta.certs.loggregator.ca ))
           doppler: (( grab meta.certs.loggregator.doppler.server ))
-        etcd:
-          require_ssl: true
-          ca_cert: (( grab meta.certs.etcd.ca ))
-          machines: (( grab meta.cf-etcd.machines ))
+      
+        # etcd:
+        #   require_ssl: true
+        #   ca_cert: (( grab meta.certs.etcd.ca ))
+        #   machines: (( grab meta.cf-etcd.machines ))
 
-      doppler:
-        etcd: (( grab meta.certs.etcd.client ))
-
-  - name: syslog_drain_binder
-    release: loggregator
-    properties:
-      system_domain: (( grab params.system_domain ))
-      cc:
-        mutual_tls:
-          ca_cert: (( grab meta.cc.mutual_tls.ca_cert ))
-      loggregator:
-        tls:
-          # Syslog Drain Binder doesn't need the CA Cert for whatever reason
-          syslogdrainbinder: (( grab meta.certs.diego.syslogdrainbinder.server ))
-        etcd:
-          require_ssl: true
-          ca_cert: (( grab meta.certs.etcd.ca ))
-          machines: (( grab meta.cf-etcd.machines ))
-      syslog_drain_binder:
-        etcd: (( grab meta.certs.etcd.client ))
+      # doppler:
+      #   etcd: (( grab meta.certs.etcd.client ))
 
 #####################################
 #       TRAFFIC CONTROLLER          #
@@ -68,6 +56,8 @@ instance_groups:
 
   - name: loggregator_trafficcontroller
     release: loggregator
+    consumes:
+      doppler: {from: doppler}
     properties:
       system_domain: (( grab params.system_domain ))
       cc:
@@ -93,6 +83,16 @@ instance_groups:
       uaa:
         internal_url: (( grab meta.uaa.internal_url ))
         ca_cert: (( grab meta.certs.uaa.ca ))
+
+  - name: reverse_log_proxy
+    release: loggregator
+    provides:
+      reverse_log_proxy: {as: reverse_log_proxy, shared: true}
+    properties:
+      loggregator:
+        tls:
+          ca_cert: (( grab meta.certs.loggregator.ca ))
+          reverse_log_proxy: (( grab meta.certs.loggregator.syslogger.rlp ))
 
   - name: route_registrar
     release: routing

@@ -4,6 +4,7 @@ meta:
   certs:
     consul:
       ca: (( vault meta.vault "/consul/certs/ca:certificate" ))
+      application_ca: (( vault meta.vault "/consul/certs/application_ca/ca:certificate" ))
 
       server:
         server_cert: (( vault meta.vault "/consul/certs/server:certificate" ))
@@ -12,9 +13,26 @@ meta:
         agent_cert:  (( vault meta.vault "/consul/certs/agent:certificate" ))
         agent_key:   (( vault meta.vault "/consul/certs/agent:key" ))
 
+    network_policy:
+      ca: (( vault meta.vault "/network_policy/certs/ca:certificate" ))
+      server_cert: (( vault meta.vault "/network_policy/certs/server:certificate" ))
+      server_key: (( vault meta.vault "/network_policy/certs/server:key" ))
+      client_cert: (( vault meta.vault "/network_policy/certs/client:certificate" ))
+      client_key: (( vault meta.vault "/network_policy/certs/client:key" ))
+
+    silk:
+      ca: (( vault meta.vault "/silk/certs/ca:certificate" ))
+      server_cert: (( vault meta.vault "/silk/certs/server:certificate" ))
+      server_key: (( vault meta.vault "/silk/certs/server:key" ))
+      client_cert: (( vault meta.vault "/silk/certs/client:certificate" ))
+      client_key: (( vault meta.vault "/silk/certs/client:key" ))
 
     diego:
       ca: (( vault meta.vault "/diego/certs/ca:certificate" ))
+
+      executer:
+        ca: (( vault meta.vault "/diego/certs/instance_identity/ca:certificate" ))
+        ca_private: (( vault meta.vault "/diego/certs/instance_identity/ca:key" ))
 
       auctioneer:
         server:
@@ -66,6 +84,10 @@ meta:
           client_cert: (( vault meta.vault "/diego/certs/rep_client:certificate" ))
           client_key: (( vault meta.vault "/diego/certs/rep_client:key" ))
 
+      locket:
+        server_cert: (( vault meta.vault "/diego/certs/locket_server:certificate" ))
+        server_key: (( vault meta.vault "/diego/certs/locket_server:key" ))
+
 
     etcd:
       ca: (( vault meta.vault "/etcd/certs/ca:certificate" ))
@@ -104,8 +126,22 @@ meta:
           cert: (( vault meta.vault "/loggregator/certs/statsdinjector:certificate" ))
           key: (( vault meta.vault "/loggregator/certs/statsdinjector:key" ))
 
+      syslogger:
+        server:
+          cert: (( vault meta.vault "/loggregator/certs/syslogger_server:certificate" ))
+          key: (( vault meta.vault "/loggregator/certs/syslogger_server:key" ))
+        rlp:
+          cert: (( vault meta.vault "/loggregator/certs/syslogger_rlp:certificate" ))
+          key: (( vault meta.vault "/loggregator/certs/syslogger_rlp:key" ))
+        client:
+          cert: (( vault meta.vault "/loggregator/certs/syslogger_client:certificate" ))
+          key: (( vault meta.vault "/loggregator/certs/syslogger_client:key" ))
+        api:
+          cert: (( vault meta.vault "/diego/certs/syslogger_scheduler:certificate" ))
+          key: (( vault meta.vault "/diego/certs/syslogger_scheduler:key" ))
+
     uaa:
-      ca: (( vault meta.vault "/uaa/certs/ca:certificate" ))
+      ca: (( vault meta.vault "/uaa/certs/ca:certificate" )) 
       server:
         cert: (( vault meta.vault "/uaa/certs/server:certificate" ))
         key: (( vault meta.vault "/uaa/certs/server:key" ))

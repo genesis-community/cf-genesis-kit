@@ -17,6 +17,11 @@ instance_groups:
   - name: uaa
     release: uaa
     properties:
+      encryption:
+        active_key_label: default_key
+        encryption_keys:
+          - label: default_key
+            passphrase: (( vault meta.vault "/uaa/encryption_key:current" ))
       uaa:
         admin:
           client_secret: (( grab meta.uaa.admin_client_secret ))
@@ -40,7 +45,7 @@ instance_groups:
             authorized-grant-types: password,refresh_token
             override: true
             refresh-token-validity: 2592000
-            scope: cloud_controller.read,cloud_controller.write,openid,password.write,cloud_controller.admin,scim.read,scim.write,doppler.firehose,uaa.user,routing.router_groups.read,routing.router_groups.write
+            scope: network.admin,network.write,cloud_controller.read,cloud_controller.write,openid,password.write,cloud_controller.admin,scim.read,scim.write,doppler.firehose,uaa.user,routing.router_groups.read,routing.router_groups.write,cloud_controller.admin_read_only,cloud_controller.global_auditor,perm.admin
             secret: ''
           cloud_controller_username_lookup:
             authorities: scim.userids
@@ -79,6 +84,10 @@ instance_groups:
             authorities: routing.routes.read,routing.router_groups.read
             authorized-grant-types: client_credentials
             secret: (( grab meta.uaa.tcp_router_secret ))
+          network-policy:
+            authorities: uaa.resource,cloud_controller.admin_read_only
+            authorized-grant-types: client_credentials
+            secret: (( grab meta.uaa.network_policy_secret ))
         logging_level: (( grab params.log_level ))
         issuer: (( concat "https://uaa." params.system_domain ))
         jwt:
@@ -115,10 +124,18 @@ instance_groups:
         links:
           passwd: (( concat "https://login." params.system_domain "/forgot_password" ))
           signup: (( concat "https://login." params.system_domain "/create_account" ))
+        branding:
+          product_logo: (( grab params.cf_branding_product_logo || nil ))
+          square_logo: (( grab params.cf_branding_square_logo  || nil ))
+          footer_legal_text: (( grab params.cf_branding_footer_legal_text || nil ))
+          footer_links: (( grab params.cf_branding_footer_links || nil ))
         saml:
-          serviceProviderKey: (( grab meta.uaa.ssl_key ))
-          serviceProviderKeyPassword: ""
-          serviceProviderCertificate: (( grab meta.uaa.ssl_cert ))
+          activeKeyId: default_key
+          keys:
+            default_key:
+              key: (( grab meta.uaa.ssl_key ))
+              certificate: (( grab meta.uaa.ssl_cert ))
+              passphrase: ""
       uaadb:
         address: (( grab params.uaadb_host ))
         databases:
@@ -155,6 +172,7 @@ instance_groups:
     release: statsd-injector
     properties: (( grab meta.statsd_injector ))
 
+
 meta:
   admin:
     user:     admin
@@ -178,6 +196,7 @@ meta:
     ssh_proxy_secret:      (( vault meta.vault "/uaa/client_secrets:ssh_proxy" ))
     tcp_emitter_secret:    (( vault meta.vault "/uaa/client_secrets:tcp_emitter" ))
     tcp_router_secret:     (( vault meta.vault "/uaa/client_secrets:tcp_router" ))
+    network_policy_secret: (( vault meta.vault "/uaa/client_secrets:network_policy" ))
 
     jwt_private_key:       (( vault meta.vault "/uaa/jwt_signing_key:private" ))
     ssl_cert: (( grab meta.certs.uaa.server.cert ))

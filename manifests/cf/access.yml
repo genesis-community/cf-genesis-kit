@@ -11,6 +11,11 @@ instance_groups:
   - name: ssh_proxy
     release: diego
     properties:
+      loggregator:
+        use_v2_api: true
+        ca_cert: (( grab meta.certs.loggregator.ca ))
+        cert: (( grab meta.certs.loggregator.metron.server.cert ))
+        key: (( grab meta.certs.loggregator.metron.server.key ))
       diego:
         ssl:
           skip_cert_verify: (( grab params.skip_ssl_validation ))
@@ -25,5 +30,13 @@ instance_groups:
           uaa:
             port: (( grab meta.uaa.ssl_port ))
             ca_cert: (( grab meta.certs.uaa.ca ))
+    
 
-  - { name: file_server,    release: diego }
+  - name: file_server
+    release: diego
+    properties:
+      loggregator:
+        use_v2_api: true
+        ca_cert: (( grab meta.certs.loggregator.ca ))
+        cert: (( grab meta.certs.loggregator.metron.server.cert ))
+        key: (( grab meta.certs.loggregator.metron.server.key ))

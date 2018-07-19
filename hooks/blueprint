@@ -28,6 +28,7 @@ merge=( manifests/cf/base.yml
         manifests/cf/metron_agent.yml
         manifests/cf/nats.yml
         manifests/cf/router.yml
+        manifests/cf/syslogger.yml
         manifests/cf/uaa.yml
 
         manifests/cf/smoke-tests.yml)

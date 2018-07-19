@@ -9,7 +9,11 @@ instance_groups:
       consul_server: nil
       consul_client: {from: consul_client_link}
 
-  - { name: cflinuxfs2-rootfs-setup, release: cflinuxfs2 }
+  - name: cflinuxfs2-rootfs-setup
+    release: cflinuxfs2
+    properties:
+      cflinuxfs2-rootfs:
+        trusted_certs: (( grab meta.certs.consul.application_ca ))
 
   - name: garden
     release: garden-runc
@@ -17,32 +21,68 @@ instance_groups:
       garden:
         default_container_grace_time: 0
         destroy_containers_on_start: true
-        graph_cleanup_threshold_in_mb: 0
         cleanup_process_dirs_on_wait: true
         deny_networks:
         - 0.0.0.0/0
         persistent_image_list:
         - "/var/vcap/packages/cflinuxfs2/rootfs.tar"
+      grootfs:
+        reserved_space_for_other_jobs_in_mb: 15360
 
   - name: rep
     release: diego
     properties:
+      loggregator:
+        use_v2_api: true
+        ca_cert: (( grab meta.certs.loggregator.ca ))
+        cert: (( grab meta.certs.loggregator.metron.server.cert ))
+        key: (( grab meta.certs.loggregator.metron.server.key ))
       tls:
         ca_cert: (( grab meta.certs.diego.ca ))
         cert: (( grab meta.certs.diego.rep.server.server_cert ))
         key: (( grab meta.certs.diego.rep.server.server_key ))
+      containers:
+        trusted_ca_certificates:
+          - (( grab meta.certs.consul.application_ca ))
+      enable_declarative_healthcheck: true
       diego:
         ssl:
           skip_cert_verify: (( grab params.skip_ssl_validation ))
         rep:
-          bbs:
-            ca_cert: (( grab meta.certs.diego.ca ))
-            .: (( inject meta.certs.diego.bbs.client ))
           enable_legacy_api_endpoints: false
           evacuation_timeout_in_seconds: 60
           listen_addr_admin: ~
           preloaded_rootfses:
           - cflinuxfs2:/var/vcap/packages/cflinuxfs2/rootfs.tar
-          require_tls: true
           ca_cert: (( grab meta.certs.diego.ca ))
           .: (( inject meta.certs.diego.rep.server ))
+        executor:
+          instance_identity_ca_cert: (( grab meta.certs.diego.executer.ca ))
+          instance_identity_key: (( grab meta.certs.diego.executer.ca_private ))
+
+  - name: garden-cni
+    release: cf-networking
+    
+  - name: netmon
+    release: cf-networking
+
+  - name: vxlan-policy-agent
+    release: cf-networking
+    properties:
+      cf_networking:
+        vxlan_policy_agent:
+          ca_cert: (( grab meta.certs.network_policy.ca ))
+          client_cert: (( grab meta.certs.network_policy.client_cert ))
+          client_key: (( grab meta.certs.network_policy.client_key ))
+
+  - name: silk-daemon
+    release: cf-networking
+    properties:
+      cf_networking:
+        silk_daemon:
+          ca_cert: (( grab meta.certs.silk.ca ))
+          client_cert: (( grab meta.certs.silk.client_cert ))
+          client_key: (( grab meta.certs.silk.client_key ))
+
+  - name: cni
+    release: cf-networking

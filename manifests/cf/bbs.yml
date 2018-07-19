@@ -8,10 +8,21 @@ instance_groups:
         consul_common: {from: consul_common_link}
         consul_server: nil
         consul_client: {from: consul_client_link}
+      properties:
+        consul:
+          agent:
+            services:
+              silk-controller:
+                name: silk-controller
 
     - name: bbs
       release: diego
       properties:
+        loggregator:
+          use_v2_api: true
+          ca_cert: (( grab meta.certs.loggregator.ca ))
+          cert: (( grab meta.certs.loggregator.metron.server.cert ))
+          key: (( grab meta.certs.loggregator.metron.server.key ))
         diego:
           bbs:
             active_key_label: key1
@@ -32,14 +43,51 @@ instance_groups:
               #no ssl to the sql backend
               db_driver: (( grab params.diegodb_scheme ))
               max_open_connections: 500
-              db_connection_string: (( grab params.diegodb_connection_string ))
-            # Etcd keys aren't actually used by diego (unless you're migrating off
-            # etcd into a sql database), but for whatever reason they
-            # don't have defaults in the BOSH Release and so we need to populate
-            # them with garbage
-            etcd:
-              machines: []
-              ca_cert: ""
-              client_cert: ""
-              client_key: ""
+              db_port: (( grab params.diegodb_port ))
+              db_schema: (( grab params.diegodb_scheme ))
+              db_host: (( grab params.diegodb_host ))
+              db_password: (( grab params.diegodb_password ))
+              db_username: (( grab params.diegodb_user ))
+             # db_connection_string: (( grab params.diegodb_connection_string ))
+ 
+    - name: silk-controller
+      release: cf-networking
+      properties:
+        cf_networking:
+          silk_controller:
+            ca_cert: (( grab meta.certs.silk.ca ))
+            server_cert: (( grab meta.certs.silk.server_cert ))
+            server_key: (( grab meta.certs.silk.server_key ))
+            database:
+              type: (( grab params.silkdb_scheme ))
+              username: (( grab params.silkdb_user ))
+              password: (( grab params.silkdb_password ))
+              host: (( grab params.silkdb_host ))
+              port: (( grab params.silkdb_port ))
+              name: (( grab params.silkdb_name ))
+          silk_daemon:
+            ca_cert: (( grab meta.certs.silk.ca ))
+            server_cert: (( grab meta.certs.silk.client_cert ))
+            server_key: (( grab meta.certs.silk.client_key ))
 
+    - name: locket
+      release: diego
+      properties:
+        tls:
+          ca_cert: (( grab meta.certs.diego.ca ))
+          cert: (( grab meta.certs.diego.locket.server_cert ))
+          key: (( grab meta.certs.diego.locket.server_key ))
+        diego:
+          locket:
+            sql:
+              db_host: (( grab params.locketdb_host ))
+              db_port:  (( grab params.locketdb_port ))
+              db_schema:  (( grab params.locketdb_scheme ))
+              db_username:  (( grab params.locketdb_user ))
+              db_password:  (( grab params.locketdb_password ))
+              db_driver:  (( grab params.locketdb_scheme ))
+        loggregator:
+          use_v2_api: true
+          ca_cert: (( grab meta.certs.loggregator.ca ))
+          cert: (( grab meta.certs.loggregator.metron.server.cert ))
+          key: (( grab meta.certs.loggregator.metron.server.key ))

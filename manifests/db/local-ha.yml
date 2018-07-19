@@ -1,9 +1,12 @@
 ---
 params:
-  uaadb_host:         (( grab params.postgres_vip ))
-  ccdb_host:          (( grab params.postgres_vip ))
-  diegodb_host:       (( grab params.postgres_vip ))
-  autoscalerdb_host:  (( grab params.postgres_vip))
+  uaadb_host:          (( grab params.postgres_vip ))
+  ccdb_host:           (( grab params.postgres_vip ))
+  diegodb_host:        (( grab params.postgres_vip ))
+  autoscalerdb_host:   (( grab params.postgres_vip ))
+  policyserverdb_host: (( grab params.postgres_vip ))
+  locketdb_host:       (( grab params.postgres_vip ))
+  silkdb_host:         (( grab params.postgres_vip ))
 instance_groups:
   - name: postgres
     instances: 2

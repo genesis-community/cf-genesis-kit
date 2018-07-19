@@ -1,0 +1,28 @@
+---
+instance_groups:
+- name: syslogger
+  jobs:
+  - name: consul_agent
+    release: consul
+    consumes:
+      consul_common: {from: consul_common_link}
+      consul_server: nil
+      consul_client: {from: consul_client_link}
+  - name: adapter
+    release: cf-syslog-drain
+    properties:
+      scalablesyslog:
+        adapter:
+          tls:
+            ca: (( grab meta.certs.loggregator.ca ))
+            cert: (( grab meta.certs.loggregator.syslogger.server.cert ))
+            key: (( grab meta.certs.loggregator.syslogger.server.key ))
+            cn: ss-adapter
+          logs:
+            addr: reverse-log-proxy.service.cf.internal:8082
+        adapter_rlp:
+          tls:
+            ca: (( grab meta.certs.loggregator.ca ))
+            cert: (( grab meta.certs.loggregator.syslogger.rlp.cert ))
+            key: (( grab meta.certs.loggregator.syslogger.rlp.key ))
+            cn: reverselogproxy

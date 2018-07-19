@@ -13,6 +13,9 @@ instance_groups:
         agent:
           services:
             cloud_controller_ng: {}
+            policy-server-internal:
+              name: policy-server
+
 
   - { name: java-buildpack,          release: java-buildpack }
   - { name: go-buildpack,            release: go-buildpack }
@@ -89,7 +92,6 @@ instance_groups:
     release: statsd-injector
     properties: (( grab meta.statsd_injector ))
 
-
   - name: route_registrar
     release: routing
     properties:
@@ -102,6 +104,35 @@ instance_groups:
             component: CloudController
           uris:
           - (( grab meta.api_hostname ))
+        - name: policy-server
+          port: 4002
+          registration_interval: 20s
+          uris:
+          - (( concat meta.api_hostname "/networking" ))
+
+  - name: policy-server
+    release: cf-networking
+    properties:
+      cf_networking:
+        policy_server:
+          uaa_client_secret: (( vault meta.vault "/uaa/client_secrets:network_policy" ))
+          uaa_ca: (( grab meta.certs.uaa.ca ))
+          database:
+            type: (( grab params.policyserverdb_scheme ))
+            username: (( grab params.policyserverdb_user ))
+            password: (( grab params.policyserverdb_password ))
+            host: (( grab params.policyserverdb_host ))
+            port: (( grab params.policyserverdb_port ))
+            name: (( grab params.policyserverdb_name ))
+    
+  - name: policy-server-internal
+    release: cf-networking
+    properties:
+      cf_networking:
+        policy_server_internal:
+          ca_cert: (( grab meta.certs.network_policy.ca ))
+          server_cert: (( grab meta.certs.network_policy.server_cert ))
+          server_key: (( grab meta.certs.network_policy.server_key ))
 
 meta:
   api_hostname: (( concat "api." params.system_domain ))
@@ -139,6 +170,7 @@ meta:
     logging_level: (( grab params.log_level )) # Filters log messages output to info or higher
 
     default_app_memory: (( grab params.default_app_memory ))
+    default_app_disk_in_mb: (( grab params.default_app_disk_in_mb ))
     default_running_security_groups:
     - public_networks
     - dns
@@ -220,6 +252,8 @@ meta:
     loggregator:
       tls:
         ca_cert: (( grab meta.certs.loggregator.ca ))
-        statsd_injector: (( grab meta.certs.loggregator.statsdinjector.server ))
+        statsd_injector:
+          cert: (( grab meta.certs.loggregator.statsdinjector.server.cert ))
+          key: (( grab meta.certs.loggregator.statsdinjector.server.key ))
     statsd_injector:
       deployment: (( grab params.system_domain ))

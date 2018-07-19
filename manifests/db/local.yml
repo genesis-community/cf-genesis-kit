@@ -28,6 +28,27 @@ params:
   autoscalerdb_password: (( vault meta.vault "/autoscalerdb:password" ))
   autoscalerdb_port:     5432
 
+  policyserverdb_name:     policyserverdb
+  policyserverdb_host:     (( grab instance_groups.postgres.networks[0].static_ips[0] ))
+  policyserverdb_user:     policyserveradmin
+  policyserverdb_scheme:   postgres
+  policyserverdb_password: (( vault meta.vault "/autoscalerdb:password" ))
+  policyserverdb_port:     5432
+
+  silkdb_name:     silkdb
+  silkdb_host:     (( grab instance_groups.postgres.networks[0].static_ips[0] ))
+  silkdb_user:     silkadmin
+  silkdb_scheme:   postgres
+  silkdb_password: (( vault meta.vault "/autoscalerdb:password" ))
+  silkdb_port:     5432
+
+  locketdb_name:     locketdb
+  locketdb_host:     (( grab instance_groups.postgres.networks[0].static_ips[0] ))
+  locketdb_user:     locketadmin
+  locketdb_scheme:   postgres
+  locketdb_password: (( vault meta.vault "/autoscalerdb:password" ))
+  locketdb_port:     5432
+
 releases:
   - name: postgres
     version: 3.0.0
@@ -66,6 +87,15 @@ instance_groups:
               - username: (( grab params.autoscalerdb_user ))
                 password: (( grab params.autoscalerdb_password ))
 
+              - username: (( grab params.silkdb_user ))
+                password: (( grab params.silkdb_password ))
+
+              - username: (( grab params.policyserverdb_user ))
+                password: (( grab params.policyserverdb_password ))
+
+              - username: (( grab params.locketdb_user ))
+                password: (( grab params.locketdb_password ))
+
               - username: shield
                 password: (( vault meta.vault "/shield:password" ))
                 admin: true
@@ -82,10 +112,22 @@ instance_groups:
                 users:      [(( grab params.diegodb_user ))]
                 extensions: [citext, pgcrypto]
 
-              - name:       autoscaler
+              - name:       autoscaler #can't be changed, autoscaler release migrations have a hardcoded db name expectation
                 users:      [(( grab params.autoscalerdb_user ))]
                 extensions: [citext, pgcrypto]
 
+              - name:        (( grab params.policyserverdb_name ))
+                users:      [(( grab params.policyserverdb_user ))]
+                extensions: [citext, pgcrypto]
+
+              - name:        (( grab params.locketdb_name ))
+                users:      [(( grab params.locketdb_user ))]
+                extensions: [citext, pgcrypto]
+
+
+              - name:        (( grab params.silkdb_name ))
+                users:      [(( grab params.silkdb_user ))]
+                extensions: [citext, pgcrypto]
             config:
               port: 5432
               listen_addresses: '*'
