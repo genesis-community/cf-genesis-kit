@@ -18,10 +18,10 @@ certificates:
       ca: { valid_for: 1y }
       server:
         valid_for: 1y
-        names: [ "server.dc1.cf.internal", "127.0.0.1" ]
+        names: [ "server.dc1.cf.internal" ]
       agent:
         valid_for: 1y
-        names: [ "consul_agent", "127.0.0.1" ]
+        names: [ "consul_agent" ]
 
     consul/certs/application_ca:
       ca: { valid_for: 1y }
@@ -89,7 +89,7 @@ certificates:
         names: [ "syslogdrainbinder" ]
       bbs:
         valid_for: 1y
-        names: [ "bbs.service.cf.internal", "*.bbs.service.cf.internal", "127.0.0.1" ]
+        names: [ "bbs.service.cf.internal", "*.bbs.service.cf.internal" ]
       bbs_client:
         valid_for: 1y
         names: [ "bbs client" ]
@@ -122,16 +122,16 @@ certificates:
       ca: { valid_for: 1y }
       doppler:
         valid_for: 1y
-        names: [ "doppler", "127.0.0.1" ]
+        names: [ "doppler" ]
       metron:
         valid_for: 1y
-        names: [ "metron", "127.0.0.1" ]
+        names: [ "metron" ]
       trafficcontroller:
         valid_for: 1y
-        names: [ "trafficcontroller", "127.0.0.1" ]
+        names: [ "trafficcontroller" ]
       statsdinjector:
         valid_for: 1y
-        names: [ "statsdinjector", "127.0.0.1" ]
+        names: [ "statsdinjector"]
       syslogger_server:
         valid_for: 1y
         names: [ "ss-adapter" ]
