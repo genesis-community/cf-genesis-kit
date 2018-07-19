@@ -177,10 +177,12 @@ google)
     'Would you like to use Google Cloud Storage to store droplets and application bits?'
   if [[ $use_gcp_stuff == 'true' ]]; then
     use_blobstore=gcp
-    prompt_for $GENESIS_VAULT_PREFIX/blobstore:gcp_sa_key secret-line \
-      'What is your Google Cloud Storage Access Key ID?'
-    prompt_for $GENESIS_VAULT_PREFIX/blobstore:gcp_sa_secret secret-line \
-      'What is your Google Cloud Storage Secret Key?'
+    prompt_for $GENESIS_VAULT_PREFIX/blobstore:gcp_project_name secret-line \
+      'What is your Google Cloud Project Name?'
+    prompt_for $GENESIS_VAULT_PREFIX/blobstore:gcp_client_email secret-line \
+      'What is the Cloud Storage Service Account ID (@<project>.iam.gserviceaccount.com)?'
+    prompt_for $GENESIS_VAULT_PREFIX/blobstore:gcp_json_key secret-block \
+      'What is the Cloud Storage Service Account (JSON) Key?'
   fi
   ;;
 

@@ -4,5 +4,6 @@ meta:
     blobstore_type: fog
     fog_connection:
       provider: Google
-      google_storage_access_key_id:     (( vault meta.vault "/blobstore:gcp_sa_key" ))
-      google_storage_secret_access_key: (( vault meta.vault "/blobstore:gcp_sa_secret" ))
+      google_project:         (( vault meta.vault "/blobstore:gcp_project_name" ))
+      google_client_email:    (( vault meta.vault "/blobstore:gcp_client_email" ))
+      google_json_key_string: (( vault meta.vault "/blobstore:gcp_json_key" ))
