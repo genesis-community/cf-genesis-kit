@@ -24,4 +24,22 @@ params:
   diegodb_scheme:   (( grab params.external_db_scheme ))
   diegodb_port:     (( grab params.external_db_port ))
 
+  policyserverdb_host:     (( grab params.external_db_host ))
+  policyserverdb_user:     (( grab params.external_db_username ))
+  policyserverdb_password: (( grab params.external_db_password ))
+  policyserverdb_scheme:   (( grab params.external_db_scheme ))
+  policyserverdb_port:     (( grab params.external_db_port ))
+
+  silkdb_host:     (( grab params.external_db_host ))
+  silkdb_user:     (( grab params.external_db_username ))
+  silkdb_password: (( grab params.external_db_password ))
+  silkdb_scheme:   (( grab params.external_db_scheme ))
+  silkdb_port:     (( grab params.external_db_port ))
+
+  locketdb_host:     (( grab params.external_db_host ))
+  locketdb_user:     (( grab params.external_db_username ))
+  locketdb_password: (( grab params.external_db_password ))
+  locketdb_scheme:   (( grab params.external_db_scheme ))
+  locketdb_port:     (( grab params.external_db_port ))
+
   diegodb_connection_string: (( concat params.diegodb_user ":" params.diegodb_password "@tcp(" params.diegodb_host ":" params.diegodb_port ")/" params.diegodb_name ))
