@@ -54,6 +54,7 @@ instance_groups:
           listen_addr_admin: ~
           preloaded_rootfses:
           - cflinuxfs2:/var/vcap/packages/cflinuxfs2/rootfs.tar
+          require_tls: true
           ca_cert: (( grab meta.certs.diego.ca ))
           .: (( inject meta.certs.diego.rep.server ))
         executor:

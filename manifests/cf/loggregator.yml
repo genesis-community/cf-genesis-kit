@@ -19,24 +19,22 @@ instance_groups:
     provides:
       doppler: {as: doppler, shared: true}
     properties:
-      # doppler_endpoint:
-      #   shared_secret: (( grab meta.loggregator.endpoint_secret ))
+      doppler_endpoint:
+        shared_secret: (( grab meta.loggregator.endpoint_secret ))
       doppler:
         disable_announce: true
+        etcd: (( grab meta.certs.etcd.client ))
       loggregator:
         disable_syslog_drains: true
         tls:
           ca_cert: (( grab meta.certs.loggregator.ca ))
           doppler: (( grab meta.certs.loggregator.doppler.server ))
-      
-        # etcd:
-        #   require_ssl: true
-        #   ca_cert: (( grab meta.certs.etcd.ca ))
-        #   machines: (( grab meta.cf-etcd.machines ))
+        etcd:
+          require_ssl: true
+          ca_cert: (( grab meta.certs.etcd.ca ))
+          machines: (( grab meta.cf-etcd.machines ))
 
-      # doppler:
-      #   etcd: (( grab meta.certs.etcd.client ))
-
+          
 #####################################
 #       TRAFFIC CONTROLLER          #
 #####################################

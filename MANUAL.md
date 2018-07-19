@@ -29,6 +29,36 @@ Cloud Foundry.
     assign a pushed application that did not specify its memory
     requirements, explicitly.  Defaults to `256`.
 
+  - `default_app_disk_in_mb` - How much disk (in megabytes) to
+    assign a pushed application that did not specify its memory
+    requirements, explicitly. Defaults to `1000`.
+
+  - `uaa_lockout_failure_count` - Amount of failed UAA login attempts
+    before lockout.
+
+  - `uaa_lockout_failure_time_between_failures` - How much time
+    (in seconds) in which `uaa_lockout_failure_count` must occur in 
+    order for account to be locked. Defaults to `1200`.
+  
+  - `uaa_lockout_punishment_time` - How long (in seconds) the account
+    is locked out for violating `uaa_lock_failure_count` within 
+    `uaa_lockout_failure_time_between_failures`. Defaults to `300`.
+
+  - `uaa_refresh_token_validity` - How long (in seconds) a CF refresh
+    is valid for. Defaults to `2592000`.
+
+  - `cf_branding_product_logo` - A base64 encoded image to display on
+    the web UI login prompt. Defaults to `nil`.
+
+  - `cf_branding_square_logo` - A base64 encoded image to display
+    in areas where a smaller logo is necessary. Defaults to `nil`.
+
+  - `cf_footer_legal_text` - A string to display in the footer,
+    typically used for compliance text. Defaults to `nil`.
+
+  - `cf_footer_links` - A YAML list of links to enumerate in the footer
+    of the web UI. Defaults to `nil`
+
 ## Deployment Parameters
 
   - `stemcell_os`
@@ -111,6 +141,11 @@ Cloud Foundry.
   - `errand_vm_type` - What type of VM to deploy for the
     smoke-tests errand.  Defaults to `small`.
 
+  - `syslogger_instances` - How many scalable syslog VMs to deploy.
+
+  - `syslogger_vm_type` - What type of VM to deploy for the scalable
+    syslog. Defaults to `small`.
+
 ## Networking Parameters
 
 The Cloud Foundry Genesis Kit makes some assumptions about how
@@ -125,7 +160,6 @@ least into easily firewalled CIDR ranges:
     Cloud Foundry, namely the Cloud Controller API, Consul, log
     subsystem, NATS, UAA, etc.  If it doesn't fit into a more
     specific network, it goes in core.
-
 
   - **cf-edge** - A more exposed network, for components that
     directly receive traffic from the outside world, including the
