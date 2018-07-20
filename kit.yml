@@ -279,3 +279,4 @@ credentials:
   autoscaler:
     autoscaler/servicebroker_account:
       username: random 16
+      password: random 64
