@@ -141,7 +141,7 @@ meta:
           key: (( vault meta.vault "/diego/certs/syslogger_scheduler:key" ))
 
     uaa:
-      ca: (( vault meta.vault "/uaa/certs/ca:certificate" )) 
+      ca: (( vault meta.vault "/uaa/certs/ca:certificate" ))
       server:
         cert: (( vault meta.vault "/uaa/certs/server:certificate" ))
         key: (( vault meta.vault "/uaa/certs/server:key" ))

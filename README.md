@@ -24,7 +24,7 @@ genesis init --kit cf -d my-cf-configs
 Learn More
 ----------
 
-For more in-depth documentation, check out the [manual][5].
+For more in-depth documentation, check out the [manual][3].
 
 [1]: https://docs.cloudfoundry.org
 [2]: https://github.com/cloudfoundry/cf-deployment

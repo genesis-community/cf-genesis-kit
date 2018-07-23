@@ -1,8 +1,8 @@
 #!/bin/bash
 
-#An in-situ upgrade of CF required $GENESIS_VAULT_PREFIX/diego/certs/rep to include 127.0.0.1
-#as a SAN. Rather than bothering the operator for an internal cert with no impact on external
-#performance, it's better to just delete and regen the cert automatically.
+# An in-situ upgrade of CF required $GENESIS_VAULT_PREFIX/diego/certs/rep to include 127.0.0.1
+# as a SAN. Rather than bothering the operator for an internal cert with no impact on external
+# performance, it's better to just delete and regen the cert automatically.
 if safe exists "$vault/diego/certs/rep" && ! safe --quiet x509 validate "$vault/diego/certs/rep" --for "127.0.0.1" >/dev/null 2>&1; then
   describe "  performing one-time update of Diego Rep certificate"
   safe rm "$vault/diego/certs/rep"

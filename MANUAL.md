@@ -33,31 +33,37 @@ Cloud Foundry.
     assign a pushed application that did not specify its memory
     requirements, explicitly. Defaults to `1000`.
 
-  - `uaa_lockout_failure_count` - Amount of failed UAA login attempts
+  - `uaa_lockout_failure_count` - Number of failed UAA login attempts
     before lockout.
 
-  - `uaa_lockout_failure_time_between_failures` - How much time
-    (in seconds) in which `uaa_lockout_failure_count` must occur in 
-    order for account to be locked. Defaults to `1200`.
+  - `uaa_lockout_window` - How much time (in seconds) in which
+    `uaa_lockout_failure_count` must occur in order for account
+    to be locked. Defaults to `1200`.
   
-  - `uaa_lockout_punishment_time` - How long (in seconds) the account
-    is locked out for violating `uaa_lock_failure_count` within 
+  - `uaa_lockout_time` - How long (in seconds) the account
+    is locked out for violating `uaa_lockout_failure_count` within 
     `uaa_lockout_failure_time_between_failures`. Defaults to `300`.
 
   - `uaa_refresh_token_validity` - How long (in seconds) a CF refresh
     is valid for. Defaults to `2592000`.
 
   - `cf_branding_product_logo` - A base64 encoded image to display on
-    the web UI login prompt. Defaults to `nil`.
+    the web UI login prompt. Defaults to `nil`. Read more in the
+    [Branding][2] section.
 
   - `cf_branding_square_logo` - A base64 encoded image to display
     in areas where a smaller logo is necessary. Defaults to `nil`.
+    Read more in the [Branding][2] section.
 
   - `cf_footer_legal_text` - A string to display in the footer,
-    typically used for compliance text. Defaults to `nil`.
+    typically used for compliance text. Defaults to `nil`. Read more
+    in the [Branding][2] section.
 
   - `cf_footer_links` - A YAML list of links to enumerate in the footer
-    of the web UI. Defaults to `nil`
+    of the web UI. Defaults to `nil`. Read more in the [Branding][2]
+    section.
+
+    [2]: (#branding)
 
 ## Deployment Parameters
 
@@ -491,6 +497,55 @@ create the service broker within your CF deployment named
 the service to each app manually. More information about App
 Autoscaler can be found on [App Autoscaler's Policy
 Documentation](https://git.io/fNt3l)
+
+# Branding
+An operator may need to set the branding options available through a
+typical UAA deployment. Genesis exposes these configuration options
+via parameters. Use cases, and examples are below:
+
+## Logos
+
+- `cf_branding_product_logo`
+
+  The `cf_branding_product_logo` is base64 encoded image that's
+  displayed on pages such as `login.$system_domain`. Base64 is a
+  binary-to-text encoding scheme. This allows us to fit an image into
+  a YAML file. To convert your image into base64, use the following
+  command:
+
+  `cat logo.png | base64 | tr -d '\n' > logo.png.base64`
+
+  This shell command takes `logo.png` and converts it to base64,
+  and then strips the `\n` characters usually found in base64 output.
+  This content is then placed in `logo.png.base64`, whose contents 
+  can be easily pasted into your Genesis environment file.
+
+- `cf_branding_square_logo`
+
+  The `cf_branding_square_logo` is a smaller version of your
+  `cf_branding_product_logo`, used in the navigation header and other
+  places within the CF web UI. You can use the command listed directly
+  above to convert your image to base64.
+
+## Footer Text & Legal
+
+- `cf_footer_legal_text` 
+  A string to display in the footer, typically used for compliance
+  text. This string is displayed on all UAA pages.
+
+- `cf_footer_links`
+  A YAML list of links to display at the footer of all UAA pages.
+  Example:
+```
+params:
+  cf_footer_links:
+    Terms: /exampleTerms
+    Privacy Agreement: privacy_example.html
+    Plug: http://starkandwayne.com/
+```
+
+  Where the resulting link will be the string "Terms" that directs to
+  `/exampleTerms`
 
 # Cloud Configuration
 

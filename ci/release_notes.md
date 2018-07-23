@@ -1,21 +1,26 @@
 
 # Overview
+
 This release updates CF components to more recent versions. Most
 notably, this version brings the following related CF changes:
-* Diego now uses mTLS for communication.
-* CAPI now supports IAM Service Accounts when authenticating with
+
+- Diego now uses mTLS for communication.
+- CAPI now supports IAM Service Accounts when authenticating with
   Google Cloud Storage
-* Scalable Syslog is now used, allowing multiple VMs to handle log
+- Scalable Syslog is now used, allowing multiple VMs to handle log
   output.
 
 
 To accommodate these changes, the following kit-related changes were
 made:
+
 * 3 new databases are necessary: `silkdb`, `locketdb`, and 
   `policyserverdb`
-* Parameters for `syslogger` VM type and instance count
-* Self-signed certs for internal mTLS communication 
-
+* The `rep` internal certificate needs to be signed for `127.0.0.1`
+  for mTLS reasons. This Genesis kit now has a `pre-deploy` hook
+  that will automatically delete and generate a new `rep`
+  certificate with the appropriate alternative names if the prior
+  `rep` certificate was not signed for `127.0.0.1`
 
 Various configuration parameters were added, and are detailed below.
 

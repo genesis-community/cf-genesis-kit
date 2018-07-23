@@ -184,10 +184,10 @@ meta:
     password: (( vault meta.vault "/admin_user:password" ))
 
   branding:
-    product_logo: (( grab params.cf_branding_product_logo || nil ))
-    square_logo: (( grab params.cf_branding_square_logo  || nil ))
-    footer_legal_text: (( grab params.cf_branding_footer_legal_text || nil ))
-    footer_links: (( grab params.cf_branding_footer_links || nil ))
+    product_logo:       (( grab params.cf_branding_product_logo       || nil ))
+    square_logo:        (( grab params.cf_branding_square_logo        || nil ))
+    footer_legal_text:  (( grab params.cf_branding_footer_legal_text  || nil ))
+    footer_links:       (( grab params.cf_branding_footer_links       || nil ))
 
   uaa:
     url: (( concat "https://uaa." params.system_domain ))
@@ -195,11 +195,11 @@ meta:
     port: 8080
     ssl_port: 8443
 
-    failure_count: (( grab params.uaa_lockout_failure_count || 5 ))
-    failure_timeout: (( grab params.uaa_lockout_punishment_time || 300 ))
-    time_between_failures: (( grab params.uaa_lockout_time_between_failures || 1200 ))
+    failure_count:         (( grab params.uaa_lockout_failure_count          || 5 ))
+    failure_timeout:       (( grab params.uaa_lockout_punishment_time        || 300 ))
+    time_between_failures: (( grab params.uaa_lockout_time_between_failures  || 1200 ))
 
-    refresh_token_validity: (( grab params.uaa_refresh_token_validity || 2592000 ))
+    refresh_token_validity: (( grab params.uaa_refresh_token_validity        || 2592000 ))
 
     admin_client_secret:   (( vault meta.vault "/uaa/client_secrets:admin_client" ))
     cc_broker_secret:      (( vault meta.vault "/uaa/client_secrets:cc_broker" ))
@@ -215,6 +215,6 @@ meta:
     tcp_router_secret:     (( vault meta.vault "/uaa/client_secrets:tcp_router" ))
     network_policy_secret: (( vault meta.vault "/uaa/client_secrets:network_policy" ))
 
-    jwt_private_key:       (( vault meta.vault "/uaa/jwt_signing_key:private" ))
-    ssl_cert: (( grab meta.certs.uaa.server.cert ))
-    ssl_key: (( grab meta.certs.uaa.server.key ))
+    jwt_private_key:  (( vault meta.vault "/uaa/jwt_signing_key:private" ))
+    ssl_cert:         (( grab meta.certs.uaa.server.cert ))
+    ssl_key:          (( grab meta.certs.uaa.server.key ))

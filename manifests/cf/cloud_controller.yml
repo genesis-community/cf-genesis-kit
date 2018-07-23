@@ -14,8 +14,7 @@ instance_groups:
           services:
             cloud_controller_ng: {}
             policy-server-internal:
-              name: policy-server
-
+              name: policy-server # health check scripts are located at `/var/vcap/jobs/policy-server`, hence the rename.
 
   - { name: java-buildpack,          release: java-buildpack }
   - { name: go-buildpack,            release: go-buildpack }
