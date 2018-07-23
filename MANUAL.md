@@ -63,6 +63,11 @@ Cloud Foundry.
     of the web UI. Defaults to `nil`. Read more in the [Branding][2]
     section.
 
+  - `grootfs_reserved_space` - The amount of space (in MB) the garbage
+    collection for Garden should keep free for other jobs. GC will
+    delete unneeded layers as need to keep this space free. `-1`
+    disables GC. Defaults to `15360`.
+
     [2]: (#branding)
 
 ## Deployment Parameters
