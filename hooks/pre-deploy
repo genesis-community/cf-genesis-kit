@@ -1,4 +1,5 @@
 #!/bin/bash
+vault="secret/$GENESIS_VAULT_PREFIX"
 
 # An in-situ upgrade of CF required $GENESIS_VAULT_PREFIX/diego/certs/rep to include 127.0.0.1
 # as a SAN. Rather than bothering the operator for an internal cert with no impact on external
