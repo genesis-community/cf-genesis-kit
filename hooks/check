@@ -33,6 +33,8 @@ if [[ -n "$GENESIS_CLOUD_CONFIG" ]] ; then
     fi
 
   fi
+  # Check if there were any errors reported from the above checks.
+  check_cloud_config
 fi
 
 # Environment Parameter checks
