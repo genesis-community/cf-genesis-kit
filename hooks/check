@@ -1,5 +1,6 @@
 #!/bin/bash
 
+cc_ok=yes
 # Cloud Config checks
 if [[ -n "$GENESIS_CLOUD_CONFIG" ]] ; then
   if ! want_feature proto; then
@@ -18,6 +19,8 @@ if [[ -n "$GENESIS_CLOUD_CONFIG" ]] ; then
       cloud_config_needs disk_type $(lookup params.postgres_disk_pool postgres)
     fi
 
+    cloud_config_needs vm_type $(lookup param.cell_vm_type runtime)
+
     cloud_config_needs disk_type $(lookup params.consul_disk_pool consul)
 
     cloud_config_needs network $(lookup params.cf_internal_network cf-core)
@@ -34,11 +37,16 @@ if [[ -n "$GENESIS_CLOUD_CONFIG" ]] ; then
 
   fi
   # Check if there were any errors reported from the above checks.
-  check_cloud_config
+  if check_cloud_config ; then
+    describe "  cloud config [#G{OK}]"
+  else
+    describe "  cloud config [#R{FAILED}]"
+    cc_ok=no
+  fi
 fi
 
 # Environment Parameter checks
-ok=yes
+env_ok=yes
 if want_feature 'tls'; then
   vault="secret/$GENESIS_VAULT_PREFIX"
 
@@ -51,7 +59,7 @@ if want_feature 'tls'; then
     else
       describe "    - $domain [#R{INVALID}]"
       safe x509 validate "$vault/haproxy/ssl" --for "$domain" 2>&1 | sed -e 's/^/      /';
-      ok=no
+      env_ok=no
       echo
     fi
   done
@@ -63,15 +71,18 @@ if want_feature 'tls'; then
     else
       describe "    - *.$domain [#R{INVALID}]"
       safe x509 validate "$vault/haproxy/ssl" --for "something.$domain" 2>&1 | sed -e 's/^/      /';
-      ok=no
+      env_ok=no
       echo
     fi
   done
 fi
 
-if [[ "$ok" = "yes" ]]; then
+if [[ "$env_ok" == "yes" ]]; then
   describe "  environment files [#G{OK}]"
 else
   describe "  environment files [#R{FAILED}]"
+fi
+
+if [[ "$env_ok" == "no" || "$cc_ok" == "no" ]] ; then
   exit 1
 fi
