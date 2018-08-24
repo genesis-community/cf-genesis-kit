@@ -145,7 +145,7 @@ fi
 
 for want in ${GENESIS_REQUESTED_FEATURES}; do
   case "$want" in
-  azure|nfs-volume-services|small-footprint)
+  azure|nfs-volume-services)
     merge+=( manifests/addons/$want.yml )
     ;;
 
@@ -193,7 +193,13 @@ fi
 
 
 
-# AUTOSCALER
+   ###    ##     ## ########  #######   ######   ######     ###    ##       ######## ########
+  ## ##   ##     ##    ##    ##     ## ##    ## ##    ##   ## ##   ##       ##       ##     ##
+ ##   ##  ##     ##    ##    ##     ## ##       ##        ##   ##  ##       ##       ##     ##
+##     ## ##     ##    ##    ##     ##  ######  ##       ##     ## ##       ######   ########
+######### ##     ##    ##    ##     ##       ## ##       ######### ##       ##       ##   ##
+##     ## ##     ##    ##    ##     ## ##    ## ##    ## ##     ## ##       ##       ##    ##
+##     ##  #######     ##     #######   ######   ######  ##     ## ######## ######## ##     ##
 
 if want_feature autoscaler; then
   merge+=( manifests/addons/app-autoscaler.yml )
@@ -202,6 +208,21 @@ if want_feature autoscaler; then
              manifests/db/local-single.yml )
   fi
 fi
+
+
+
+########  #######   #######  ######## ########  ########  #### ##    ## ########
+##       ##     ## ##     ##    ##    ##     ## ##     ##  ##  ###   ##    ##
+##       ##     ## ##     ##    ##    ##     ## ##     ##  ##  ####  ##    ##
+######   ##     ## ##     ##    ##    ########  ########   ##  ## ## ##    ##
+##       ##     ## ##     ##    ##    ##        ##   ##    ##  ##  ####    ##
+##       ##     ## ##     ##    ##    ##        ##    ##   ##  ##   ###    ##
+##        #######   #######     ##    ##        ##     ## #### ##    ##    ##
+
+if want_feature small-footprint; then
+  merge+=( manifests/addons/small-footprint.yml )
+fi
+
    ######     ###    ##    ## #### ######## ##    ##
   ##    ##   ## ##   ###   ##  ##     ##     ##  ##
   ##        ##   ##  ####  ##  ##     ##      ####
