@@ -51,7 +51,7 @@ instance_groups:
         agent:
           services:
             loggregator_trafficcontroller: {}
-              reverse_log_proxy: {}
+            reverse_log_proxy: {}
   - name: loggregator_trafficcontroller
     release: loggregator
     consumes:
