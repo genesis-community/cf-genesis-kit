@@ -1,5 +1,11 @@
 # Bug Fixes
 
+- Added syslog_drain to Loggregator services. Syslog draining should now work
+  as expected
+- Fixed Locket and Diego using wrong database name regardless of configuration
+
+# Important, Please Read
+
 Previously, we had an incorrect spruce operation that confused `scheme` and
 `schema`, which resulted in locketdb and diegodb data being written to a
 database named `postgres` (rather than `locketdb` and `diegodb`, respectively.)
