@@ -44,7 +44,7 @@ instance_groups:
               db_driver: (( grab params.diegodb_scheme ))
               max_open_connections: 500
               db_port: (( grab params.diegodb_port ))
-              db_schema: (( grab params.diegodb_scheme ))
+              db_schema: (( grab params.diegodb_name ))
               db_host: (( grab params.diegodb_host ))
               db_password: (( grab params.diegodb_password ))
               db_username: (( grab params.diegodb_user ))
@@ -82,7 +82,7 @@ instance_groups:
             sql:
               db_host: (( grab params.locketdb_host ))
               db_port:  (( grab params.locketdb_port ))
-              db_schema:  (( grab params.locketdb_scheme ))
+              db_schema:  (( grab params.locketdb_name ))
               db_username:  (( grab params.locketdb_user ))
               db_password:  (( grab params.locketdb_password ))
               db_driver:  (( grab params.locketdb_scheme ))
