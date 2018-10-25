@@ -1,21 +1,21 @@
 addons:
 - (( append ))
-- name: metron_agent
+- name: loggregator_agent
   include:
     stemcell:
-    - os: ubuntu-trusty
+    - os: ubuntu-xenial
   exclude:
     jobs:
     - name: smoke_tests
       release: cf-smoke-tests
   jobs:
-  - name: metron_agent
-    release: loggregator
+  - name: loggregator_agent
+    release: loggregator-agent
     properties:
       loggregator:
         tls:
           ca_cert: (( grab meta.certs.loggregator.ca ))
-          metron: (( grab meta.certs.loggregator.metron.server ))
+          agent: (( grab meta.certs.loggregator.metron.server ))
       metron_agent:
         deployment: (( grab name ))
       metron_endpoint:
@@ -23,8 +23,195 @@ addons:
 - name: bpm
   include:
     stemcell:
-    - os: ubuntu-trusty
+    - os: ubuntu-xenial
   jobs:
   - name: bpm
     release: bpm
   name: bpm
+- name: bosh-dns-aliases
+  jobs:
+  - name: bosh-dns-aliases
+    release: bosh-dns-aliases
+    properties:
+      aliases:
+      - domain: '_.cell.service.cf.internal'
+        targets:
+        - query: '_'
+          instance_group: diego-cell
+          deployment: cf
+          network: default
+          domain: bosh
+        - query: '_'
+          instance_group: windows-cell
+          deployment: cf
+          network: default
+          domain: bosh
+        - query: '_'
+          instance_group: windows2012R2-cell
+          deployment: cf
+          network: default
+          domain: bosh
+        - query: '_'
+          instance_group: windows2016-cell
+          deployment: cf
+          network: default
+          domain: bosh
+        - query: '_'
+          instance_group: isolated-diego-cell
+          deployment: cf
+          network: default
+          domain: bosh
+      - domain: auctioneer.service.cf.internal
+        targets:
+        - query: 'q-s4'
+          instance_group: scheduler
+          deployment: cf
+          network: default
+          domain: bosh
+      - domain: cf-etcd.service.cf.internal
+        targets:
+        - query: '*'
+          instance_group: cf-etcd
+          deployment: cf
+          network: default
+          domain: bosh
+      - domain: bbs.service.cf.internal
+        targets:
+        - query: 'q-s4'
+          instance_group: diego-api
+          deployment: cf
+          network: default
+          domain: bosh
+      - domain: bits.service.cf.internal
+        targets:
+        - query: '*'
+          instance_group: bits
+          deployment: cf
+          network: default
+          domain: bosh
+      - domain: consul.service.cf.internal
+        targets:
+        - query: '*'
+          instance_group: consul_etcd
+          deployment: cf
+          network: default
+          domain: bosh
+      - domain: blobstore.service.cf.internal
+        targets:
+        - query: '*'
+          instance_group: singleton-blobstore
+          deployment: cf
+          network: default
+          domain: bosh
+      - domain: cc-uploader.service.cf.internal
+        targets:
+        - query: '*'
+          instance_group: api
+          deployment: cf
+          network: default
+          domain: bosh
+      - domain: cloud-controller-ng.service.cf.internal
+        targets:
+        - query: '*'
+          instance_group: api
+          deployment: cf
+          network: default
+          domain: bosh
+      - domain: credhub.service.cf.internal
+        targets:
+        - query: '*'
+          instance_group: credhub
+          deployment: cf
+          network: default
+          domain: bosh
+      - domain: doppler.service.cf.internal
+        targets:
+        - query: '*'
+          instance_group: doppler
+          deployment: cf
+          network: default
+          domain: bosh
+      - domain: file-server.service.cf.internal
+        targets:
+        - query: '*'
+          instance_group: api
+          deployment: cf
+          network: default
+          domain: bosh
+      - domain: gorouter.service.cf.internal
+        targets:
+        - query: '*'
+          instance_group: router
+          deployment: cf
+          network: default
+          domain: bosh
+      - domain: locket.service.cf.internal
+        targets:
+        - query: '*'
+          instance_group: diego-api
+          deployment: cf
+          network: default
+          domain: bosh
+      - domain: loggregator-trafficcontroller.service.cf.internal
+        targets:
+        - query: '*'
+          instance_group: log-api
+          deployment: cf
+          network: default
+          domain: bosh
+      - domain: policy-server.service.cf.internal
+        targets:
+        - query: '*'
+          instance_group: api
+          deployment: cf
+          network: default
+          domain: bosh
+      - domain: reverse-log-proxy.service.cf.internal
+        targets:
+        - query: '*'
+          instance_group: log-api
+          deployment: cf
+          network: default
+          domain: bosh
+      - domain: routing-api.service.cf.internal
+        targets:
+        - query: '*'
+          instance_group: api
+          deployment: cf
+          network: default
+          domain: bosh
+      - domain: silk-controller.service.cf.internal
+        targets:
+        - query: '*'
+          instance_group: diego-api
+          deployment: cf
+          network: default
+          domain: bosh
+      - domain: sql-db.service.cf.internal
+        targets:
+        - query: '*'
+          instance_group: database
+          deployment: cf
+          network: default
+          domain: bosh
+      - domain: ssh-proxy.service.cf.internal
+        targets:
+        - query: '*'
+          instance_group: scheduler
+          deployment: cf
+          network: default
+          domain: bosh
+      - domain: tps.service.cf.internal
+        targets:
+        - query: '*'
+          instance_group: scheduler
+          deployment: cf
+          network: default
+          domain: bosh
+      - domain: uaa.service.cf.internal
+        targets:
+        - query: '*'
+          instance_group: uaa
+          deployment: cf
+          network: default
+          domain: bosh

@@ -112,26 +112,26 @@ instance_groups:
   - name: policy-server
     release: cf-networking
     properties:
-      cf_networking:
-        policy_server:
-          uaa_client_secret: (( vault meta.vault "/uaa/client_secrets:network_policy" ))
-          uaa_ca: (( grab meta.certs.uaa.ca ))
-          database:
-            type: (( grab params.policyserverdb_scheme ))
-            username: (( grab params.policyserverdb_user ))
-            password: (( grab params.policyserverdb_password ))
-            host: (( grab params.policyserverdb_host ))
-            port: (( grab params.policyserverdb_port ))
-            name: (( grab params.policyserverdb_name ))
+      #cf_networking:
+      #  policy_server:
+      uaa_client_secret: (( vault meta.vault "/uaa/client_secrets:network_policy" ))
+      uaa_ca: (( grab meta.certs.uaa.ca ))
+      database:
+        type: (( grab params.policyserverdb_scheme ))
+        username: (( grab params.policyserverdb_user ))
+        password: (( grab params.policyserverdb_password ))
+        host: (( grab params.policyserverdb_host ))
+        port: (( grab params.policyserverdb_port ))
+        name: (( grab params.policyserverdb_name ))
     
   - name: policy-server-internal
     release: cf-networking
     properties:
-      cf_networking:
-        policy_server_internal:
-          ca_cert: (( grab meta.certs.network_policy.ca ))
-          server_cert: (( grab meta.certs.network_policy.server_cert ))
-          server_key: (( grab meta.certs.network_policy.server_key ))
+      #cf_networking:
+      #policy_server_internal:
+      ca_cert: (( grab meta.certs.network_policy.ca ))
+      server_cert: (( grab meta.certs.network_policy.server_cert ))
+      server_key: (( grab meta.certs.network_policy.server_key ))
 
 meta:
   api_hostname: (( concat "api." params.system_domain ))
@@ -159,6 +159,9 @@ meta:
     staging_upload_user:     staging_upload_user
     staging_upload_password: (( vault meta.vault "/cc:staging_upload" ))
     db_encryption_key:       (( vault meta.vault "/cc:db_encryption_key" ))
+    public_tls:
+      ca_cert: (( grab meta.certs.diego.public_tls.certificate ))
+      .: (( inject meta.certs.diego.public_tls ))
     mutual_tls:
       ca_cert: (( grab meta.certs.diego.ca ))
       .: (( inject meta.certs.diego.capi.server ))

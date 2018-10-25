@@ -65,25 +65,21 @@ instance_groups:
     release: cf-networking
     
   - name: netmon
-    release: cf-networking
+    release: silk
 
   - name: vxlan-policy-agent
-    release: cf-networking
+    release: silk
     properties:
-      cf_networking:
-        vxlan_policy_agent:
-          ca_cert: (( grab meta.certs.network_policy.ca ))
-          client_cert: (( grab meta.certs.network_policy.client_cert ))
-          client_key: (( grab meta.certs.network_policy.client_key ))
+        ca_cert: (( grab meta.certs.network_policy.ca ))
+        client_cert: (( grab meta.certs.network_policy.client_cert ))
+        client_key: (( grab meta.certs.network_policy.client_key ))
 
   - name: silk-daemon
-    release: cf-networking
+    release: silk
     properties:
-      cf_networking:
-        silk_daemon:
-          ca_cert: (( grab meta.certs.silk.ca ))
-          client_cert: (( grab meta.certs.silk.client_cert ))
-          client_key: (( grab meta.certs.silk.client_key ))
+      ca_cert: (( grab meta.certs.silk.ca ))
+      client_cert: (( grab meta.certs.silk.client_cert ))
+      client_key: (( grab meta.certs.silk.client_key ))
 
-  - name: cni
-    release: cf-networking
+  - name: silk-cni
+    release: silk

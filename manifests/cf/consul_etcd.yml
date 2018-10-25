@@ -56,6 +56,6 @@ instance_groups:
 
 meta:
   cf-etcd:
-    dns_suffix: cf-etcd.service.cf.internal
+    dns_suffix: consul.service.cf.internal
     machines:
-    - cf-etcd.service.cf.internal
+    - consul.service.cf.internal

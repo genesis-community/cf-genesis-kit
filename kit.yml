@@ -114,6 +114,9 @@ certificates:
       syslogger_scheduler:
         valid_for: 1y
         names: [ "ss-scheduler" ]
+      public_tls:
+        valid_for: 1y
+        names: [ "api.${params.base_domain}", "cloud-controller-ng.service.cf.internal" ]
       
     diego/certs/instance_identity:
       ca: { valid_for: 1y }
@@ -141,6 +144,24 @@ certificates:
       syslogger_client:
         valid_for: 1y
         names: [ "ss-scheduler" ]
+
+    dns_healthcheck_tls:
+      ca: { valid_for: 1y }
+      server:
+        valid_for: 1y
+        names: [ "health.bosh-dns" ]
+      client:
+        valid_for: 1y
+        names: [ "health.bosh-dns" ]
+
+    dns_api_tls:
+      ca: { valid_for: 1y }
+      server:
+        valid_for: 1y
+        names: [ "api.bosh-dns" ]
+      client:
+        valid_for: 1y
+        names: [ "api.bosh-dns" ]
 
   blobstore-webdav: *local-blobstore-certs
   local-blobstore: &local-blobstore-certs

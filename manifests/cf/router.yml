@@ -24,6 +24,7 @@ instance_groups:
           gorouter:
             secret: (( grab meta.uaa.gorouter_secret ))
       router:
+        ca_certs: (( grab meta.certs.diego.ca ))
         enable_ssl: false
         logging_level: (( grab params.log_level ))
         route_services_secret: (( vault meta.vault "/gorouter/route_services:secret" ))

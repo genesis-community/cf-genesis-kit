@@ -29,6 +29,9 @@ meta:
 
     diego:
       ca: (( vault meta.vault "/diego/certs/ca:certificate" ))
+      public_tls: 
+        certificate: (( vault meta.vault "/diego/certs/public_tls:certificate" ))
+        private_key: (( vault meta.vault "/diego/certs/public_tls:key" ))
 
       executer:
         ca: (( vault meta.vault "/diego/certs/instance_identity/ca:certificate" ))

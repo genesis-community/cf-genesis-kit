@@ -51,24 +51,22 @@ instance_groups:
              # db_connection_string: (( grab params.diegodb_connection_string ))
  
     - name: silk-controller
-      release: cf-networking
+      release: silk
       properties:
-        cf_networking:
-          silk_controller:
-            ca_cert: (( grab meta.certs.silk.ca ))
-            server_cert: (( grab meta.certs.silk.server_cert ))
-            server_key: (( grab meta.certs.silk.server_key ))
-            database:
-              type: (( grab params.silkdb_scheme ))
-              username: (( grab params.silkdb_user ))
-              password: (( grab params.silkdb_password ))
-              host: (( grab params.silkdb_host ))
-              port: (( grab params.silkdb_port ))
-              name: (( grab params.silkdb_name ))
-          silk_daemon:
-            ca_cert: (( grab meta.certs.silk.ca ))
-            server_cert: (( grab meta.certs.silk.client_cert ))
-            server_key: (( grab meta.certs.silk.client_key ))
+        ca_cert: (( grab meta.certs.silk.ca ))
+        server_cert: (( grab meta.certs.silk.server_cert ))
+        server_key: (( grab meta.certs.silk.server_key ))
+        database:
+          type: (( grab params.silkdb_scheme ))
+          username: (( grab params.silkdb_user ))
+          password: (( grab params.silkdb_password ))
+          host: (( grab params.silkdb_host ))
+          port: (( grab params.silkdb_port ))
+          name: (( grab params.silkdb_name ))
+        silk_daemon:
+          ca_cert: (( grab meta.certs.silk.ca ))
+          server_cert: (( grab meta.certs.silk.client_cert ))
+          server_key: (( grab meta.certs.silk.client_key ))
 
     - name: locket
       release: diego

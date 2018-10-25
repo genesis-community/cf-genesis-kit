@@ -41,7 +41,7 @@ params:
 
   logger_port: 443 # FIXME: make setup script override this?
 
-  stemcell_os:      ubuntu-trusty
+  stemcell_os:      ubuntu-xenial
   stemcell_version: latest
 
   consul_disk_pool:    consul
@@ -100,6 +100,16 @@ params:
   policyserverdb_name:  policyserverdb
 
 instance_groups:
+
+  - name: nats
+    instances: (( grab params.nats_instances ))
+    vm_type: (( grab params.nats_vm_type ))
+    azs: (( grab params.availability_zones || meta.default.azs ))
+    stemcell: default
+    networks:
+      - name: (( grab params.cf_internal_network ))
+        static_ips: (( static_ips 0 1 2 3 4 ))
+
   - name: consul_etcd
     instances: (( grab params.consul_instances ))
     persistent_disk_pool: (( grab params.consul_disk_pool ))
@@ -111,15 +121,6 @@ instance_groups:
     update:
       max_in_flight: 1
       serial: true
-
-  - name: nats
-    instances: (( grab params.nats_instances ))
-    vm_type: (( grab params.nats_vm_type ))
-    azs: (( grab params.availability_zones || meta.default.azs ))
-    stemcell: default
-    networks:
-      - name: (( grab params.cf_internal_network ))
-        static_ips: (( static_ips 0 1 2 3 4 ))
 
   - name: api
     instances: (( grab params.api_instances ))
