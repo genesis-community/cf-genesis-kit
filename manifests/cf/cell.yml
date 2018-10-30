@@ -25,6 +25,8 @@ instance_groups:
   - name: rep
     release: diego
     properties:
+      bpm:
+        enabled: true
       enable_consul_service_registration: false
       loggregator:
         use_v2_api: true
