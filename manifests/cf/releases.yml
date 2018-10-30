@@ -15,18 +15,14 @@ releases:
   version: "2.17.0"
   url: "https://bosh.io/d/github.com/cloudfoundry/cf-networking-release?v=2.17.0"
   sha1: "0088d75912db87c28084347dc488370a9aa9fad0"
-- name: "cf-smoke-tests"
-  version: "40.0.11"
-  url: "https://bosh.io/d/github.com/cloudfoundry/cf-smoke-tests-release?v=40.0.11"
-  sha1: "22655584fdf43411411a16403fe7ed8ee10d8cfa"
+- name: cf-smoke-tests
+  url: https://bosh.io/d/github.com/cloudfoundry/cf-smoke-tests-release?v=40.0.5
+  version: 40.0.5
+  sha1: 6f6081d24490a82c5b9fea73283e0cfe21cbf207
 - name: "cflinuxfs2"
   version: "1.242.0"
   url: "https://bosh.io/d/github.com/cloudfoundry/cflinuxfs2-release?v=1.242.0"
   sha1: "99821c729c05646c203a684a15a0971a5af08e35"
-- name: consul
-  url: https://bosh.io/d/github.com/cloudfoundry-incubator/consul-release?v=193
-  version: "193"
-  sha1: 3596fa1a1692d9e48d2e28789b60e0c72e984d31
 - name: "diego"
   version: "2.19.0"
   url: "https://bosh.io/d/github.com/cloudfoundry/diego-release?v=2.19.0"
@@ -35,10 +31,6 @@ releases:
   version: "2.1.5"
   url: "https://bosh.io/d/github.com/cloudfoundry/dotnet-core-buildpack-release?v=2.1.5"
   sha1: "188dace870c94749a3abc21cb538c08e0f4f3d8c"
-- name: etcd
-  url: https://bosh.io/d/github.com/cloudfoundry-incubator/etcd-release?v=104
-  version: "104"
-  sha1: 91d27a5a583d22acaf926023063fcdb2003522e6
 - name: "garden-runc"
   version: "1.16.7"
   url: "https://bosh.io/d/github.com/cloudfoundry/garden-runc-release?v=1.16.7"
@@ -107,3 +99,7 @@ releases:
   version: "0.0.3"
   url: "https://bosh.io/d/github.com/cloudfoundry/bosh-dns-aliases-release?v=0.0.3"
   sha1: "b0d0a0350ed87f1ded58b2ebb469acea0e026ccc"
+# - name: cf-cli
+#   url: https://bosh.io/d/github.com/bosh-packages/cf-cli-release?v=1.9.0
+#   version: 1.9.0
+#   sha1: 9dfcb2ffec5abb77ea9bd4561655a8444405c481

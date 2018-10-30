@@ -4,7 +4,7 @@ cc_ok=yes
 # Cloud Config checks
 if [[ -n "$GENESIS_CLOUD_CONFIG" ]] ; then
   if ! want_feature proto; then
-    for t in consul nats doppler router bbs access errand syslogger; do
+    for t in nats doppler router bbs access errand syslogger; do
       cloud_config_needs vm_type $(lookup params.${t}_vm_type small)
     done
     for t in uaa api loggregator diego; do
@@ -21,8 +21,6 @@ if [[ -n "$GENESIS_CLOUD_CONFIG" ]] ; then
     fi
 
     cloud_config_needs vm_type $(lookup param.cell_vm_type runtime)
-
-    cloud_config_needs disk_type $(lookup params.consul_disk_pool consul)
 
     cloud_config_needs network $(lookup params.cf_internal_network cf-core)
     cloud_config_needs network $(lookup params.cf_edge_network     cf-edge)

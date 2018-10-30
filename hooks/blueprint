@@ -22,7 +22,6 @@ merge=( manifests/cf/base.yml
         manifests/cf/bbs.yml
         manifests/cf/cell.yml
         manifests/cf/cloud_controller.yml
-        manifests/cf/consul_etcd.yml
         manifests/cf/diego.yml
         manifests/cf/loggregator.yml
         manifests/cf/metron_agent.yml

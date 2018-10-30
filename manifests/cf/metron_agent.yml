@@ -37,181 +37,140 @@ addons:
       - domain: '_.cell.service.cf.internal'
         targets:
         - query: '_'
-          instance_group: diego-cell
-          deployment: cf
-          network: default
-          domain: bosh
-        - query: '_'
-          instance_group: windows-cell
-          deployment: cf
-          network: default
-          domain: bosh
-        - query: '_'
-          instance_group: windows2012R2-cell
-          deployment: cf
-          network: default
-          domain: bosh
-        - query: '_'
-          instance_group: windows2016-cell
-          deployment: cf
-          network: default
-          domain: bosh
-        - query: '_'
-          instance_group: isolated-diego-cell
-          deployment: cf
-          network: default
+          instance_group: cell
+          deployment: (( grab name ))
+          network: (( grab params.cf_runtime_network ))
           domain: bosh
       - domain: auctioneer.service.cf.internal
         targets:
         - query: 'q-s4'
-          instance_group: scheduler
-          deployment: cf
-          network: default
-          domain: bosh
-      - domain: cf-etcd.service.cf.internal
-        targets:
-        - query: '*'
-          instance_group: cf-etcd
-          deployment: cf
-          network: default
+          instance_group: diego
+          deployment: (( grab name ))
+          network: (( grab params.cf_internal_network ))
           domain: bosh
       - domain: bbs.service.cf.internal
         targets:
         - query: 'q-s4'
-          instance_group: diego-api
-          deployment: cf
-          network: default
-          domain: bosh
-      - domain: bits.service.cf.internal
-        targets:
-        - query: '*'
-          instance_group: bits
-          deployment: cf
-          network: default
-          domain: bosh
-      - domain: consul.service.cf.internal
-        targets:
-        - query: '*'
-          instance_group: consul_etcd
-          deployment: cf
-          network: default
+          instance_group: bbs
+          deployment: (( grab name ))
+          network: (( grab params.cf_internal_network ))
           domain: bosh
       - domain: blobstore.service.cf.internal
         targets:
         - query: '*'
-          instance_group: singleton-blobstore
-          deployment: cf
-          network: default
+          instance_group: blobstore
+          deployment: (( grab name ))
+          network: (( grab params.cf_internal_network ))
           domain: bosh
       - domain: cc-uploader.service.cf.internal
         targets:
         - query: '*'
           instance_group: api
-          deployment: cf
-          network: default
+          deployment: (( grab name ))
+          network: (( grab params.cf_internal_network ))
           domain: bosh
       - domain: cloud-controller-ng.service.cf.internal
         targets:
         - query: '*'
           instance_group: api
-          deployment: cf
-          network: default
+          deployment: (( grab name ))
+          network: (( grab params.cf_internal_network ))
           domain: bosh
       - domain: credhub.service.cf.internal
         targets:
         - query: '*'
           instance_group: credhub
-          deployment: cf
+          deployment: (( grab name ))
           network: default
           domain: bosh
       - domain: doppler.service.cf.internal
         targets:
         - query: '*'
           instance_group: doppler
-          deployment: cf
-          network: default
+          deployment: (( grab name ))
+          network: (( grab params.cf_internal_network ))
           domain: bosh
       - domain: file-server.service.cf.internal
         targets:
         - query: '*'
           instance_group: api
-          deployment: cf
-          network: default
+          deployment: (( grab name ))
+          network: (( grab params.cf_internal_network ))
           domain: bosh
       - domain: gorouter.service.cf.internal
         targets:
         - query: '*'
           instance_group: router
-          deployment: cf
-          network: default
+          deployment: (( grab name ))
+          network: (( grab params.cf_edge_network ))
           domain: bosh
       - domain: locket.service.cf.internal
         targets:
         - query: '*'
-          instance_group: diego-api
-          deployment: cf
-          network: default
+          instance_group: bbs
+          deployment: (( grab name ))
+          network: (( grab params.cf_internal_network ))
           domain: bosh
       - domain: loggregator-trafficcontroller.service.cf.internal
         targets:
         - query: '*'
-          instance_group: log-api
-          deployment: cf
-          network: default
+          instance_group: loggregator-trafficcontroller
+          deployment: (( grab name ))
+          network: (( grab params.cf_internal_network ))
           domain: bosh
       - domain: policy-server.service.cf.internal
         targets:
         - query: '*'
           instance_group: api
-          deployment: cf
-          network: default
+          deployment: (( grab name ))
+          network: (( grab params.cf_internal_network ))
           domain: bosh
       - domain: reverse-log-proxy.service.cf.internal
         targets:
         - query: '*'
-          instance_group: log-api
-          deployment: cf
-          network: default
+          instance_group: loggregator-trafficcontroller
+          deployment: (( grab name ))
+          network: (( grab params.cf_internal_network ))
           domain: bosh
       - domain: routing-api.service.cf.internal
         targets:
         - query: '*'
           instance_group: api
-          deployment: cf
-          network: default
+          deployment: (( grab name ))
+          network: (( grab params.cf_internal_network ))
           domain: bosh
       - domain: silk-controller.service.cf.internal
         targets:
         - query: '*'
-          instance_group: diego-api
-          deployment: cf
-          network: default
+          instance_group: bbs
+          deployment: (( grab name ))
+          network: (( grab params.cf_internal_network ))
           domain: bosh
       - domain: sql-db.service.cf.internal
         targets:
         - query: '*'
           instance_group: database
-          deployment: cf
+          deployment: (( grab name ))
           network: default
           domain: bosh
       - domain: ssh-proxy.service.cf.internal
         targets:
         - query: '*'
-          instance_group: scheduler
-          deployment: cf
-          network: default
+          instance_group: access
+          deployment: (( grab name ))
+          network: (( grab params.cf_edge_network ))
           domain: bosh
       - domain: tps.service.cf.internal
         targets:
         - query: '*'
-          instance_group: scheduler
-          deployment: cf
-          network: default
+          instance_group: diego
+          deployment: (( grab name ))
+          network: (( grab params.cf_internal_network ))
           domain: bosh
       - domain: uaa.service.cf.internal
         targets:
         - query: '*'
           instance_group: uaa
-          deployment: cf
-          network: default
+          deployment: (( grab name ))
+          network: (( grab params.cf_internal_network ))
           domain: bosh

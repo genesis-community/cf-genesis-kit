@@ -2,13 +2,6 @@
 instance_groups:
 - name: cell
   jobs:
-  - name: consul_agent
-    release: consul
-    consumes:
-      consul_common: {from: consul_common_link}
-      consul_server: nil
-      consul_client: {from: consul_client_link}
-
   - name: cflinuxfs2-rootfs-setup
     release: cflinuxfs2
     properties:
@@ -32,6 +25,7 @@ instance_groups:
   - name: rep
     release: diego
     properties:
+      enable_consul_service_registration: false
       loggregator:
         use_v2_api: true
         ca_cert: (( grab meta.certs.loggregator.ca ))

@@ -11,11 +11,6 @@ properties:
       use_azure_fault_domains: true
 
 instance_groups:
-  - name: consul_etcd
-    vm_extensions:
-      - (( append ))
-      - consul_as
-
   - name: haproxy
     vm_extensions:
       - (( append ))
