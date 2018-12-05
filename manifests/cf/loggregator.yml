@@ -60,6 +60,166 @@ instance_groups:
           ca_cert: (( grab meta.certs.loggregator.ca ))
           reverse_log_proxy: (( grab meta.certs.loggregator.syslogger.rlp ))
 
+  - name: reverse_log_proxy_gateway
+    release: loggregator
+    properties:
+      http:
+        address: "0.0.0.0:8088"
+      logs_provider:
+        ca_cert:  (( grab meta.certs.loggregator.ca ))
+        client_cert: (( grab meta.certs.loggregator.syslogger.rlp.cert ))
+        client_key: (( grab meta.certs.loggregator.syslogger.rlp.key ))
+      cc:
+        capi_internal_addr: https://cloud-controller-ng.service.cf.internal:9023
+        ca_cert: (( grab meta.certs.diego.ca ))
+        cert: (( grab meta.certs.diego.rlp_gateway.cert ))
+        key: (( grab meta.certs.diego.rlp_gateway.key ))
+        common_name: cloud-controller-ng.service.cf.internal
+      uaa:
+        ca_cert: (( grab meta.certs.uaa.ca ))
+        client_id: doppler
+        client_secret: (( grab meta.uaa.doppler_secret ))
+        internal_addr: https://uaa.service.cf.internal:8443
+
+  - name: log-cache
+    release: log-cache
+    provides:
+      log-cache: {shared: true}
+    properties:
+      egress_port: 8080
+      health_addr: localhost:6060
+      tls:
+        ca_cert: (( grab meta.certs.loggregator.ca ))
+        cert: (( grab meta.certs.loggregator.logcache.cert ))
+        key: (( grab meta.certs.loggregator.logcache.key ))
+ 
+  - name: log-cache-gateway
+    release: log-cache
+    properties:
+      gateway_addr: localhost:8084
+
+  - name: log-cache-nozzle
+    release: log-cache
+    consumes:
+      reverse_log_proxy: {from: reverse_log_proxy}
+    properties:
+      logs_provider:
+        tls:
+          ca_cert: (( grab meta.certs.loggregator.ca ))
+          cert: (( grab meta.certs.loggregator.rlp_gateway.cert ))
+          key: (( grab meta.certs.loggregator.rlp_gateway.key ))
+
+  - name: log-cache-expvar-forwarder
+    release: log-cache
+    properties:
+      loggregator_agent:
+        tls:
+          ca_cert: (( grab meta.certs.loggregator.ca ))
+          cert: (( grab meta.certs.loggregator.rlp_gateway.cert ))
+          key: (( grab meta.certs.loggregator.rlp_gateway.key ))
+      maps: []
+      counters:
+        # Log Cache
+      - name: egress
+        source_id: log-cache
+        addr: http://localhost:6060/debug/vars
+        template: "{{.LogCache.Egress}}"
+      - name: ingress
+        source_id: log-cache
+        addr: http://localhost:6060/debug/vars
+        template: "{{.LogCache.Ingress}}"
+      - name: expired
+        source_id: log-cache
+        addr: http://localhost:6060/debug/vars
+        template: "{{.LogCache.Expired}}"
+      - name: dropped
+        source_id: log-cache
+        addr: http://localhost:6060/debug/vars
+        template: "{{.LogCache.Dropped}}"
+      - name: promql-timeout
+        source_id: log-cache
+        addr: http://localhost:6060/debug/vars
+        template: "{{.LogCache.PromQLTimeout}}"
+
+        # Nozzle
+      - name: egress
+        source_id: log-cache-nozzle
+        addr: http://localhost:6061/debug/vars
+        template: "{{.Nozzle.Egress}}"
+      - name: ingress
+        source_id: log-cache-nozzle
+        addr: http://localhost:6061/debug/vars
+        template: "{{.Nozzle.Ingress}}"
+      - name: err
+        source_id: log-cache-nozzle
+        addr: http://localhost:6061/debug/vars
+        template: "{{.Nozzle.Err}}"
+      - name: dropped
+        source_id: log-cache-nozzle
+        addr: http://localhost:6061/debug/vars
+        template: "{{.Nozzle.Dropped}}"
+      gauges:
+        # Log Cache
+      - name: cache-period
+        source_id: log-cache
+        addr: http://localhost:6060/debug/vars
+        template: "{{.LogCache.CachePeriod}}"
+      - name: store-size
+        source_id: log-cache
+        addr: http://localhost:6060/debug/vars
+        template: "{{.LogCache.StoreSize}}"
+      - name: total-system-memory
+        source_id: log-cache
+        addr: http://localhost:6060/debug/vars
+        template: "{{.LogCache.TotalSystemMemory}}"
+      - name: available-system-memory
+        source_id: log-cache
+        addr: http://localhost:6060/debug/vars
+        template: "{{.LogCache.AvailableSystemMemory}}"
+      - name: promql-instant-query-time
+        source_id: log-cache
+        addr: http://localhost:6060/debug/vars
+        template: "{{.LogCache.PromQLInstantQueryTime}}"
+      - name: promql-range-query-time
+        source_id: log-cache
+        addr: http://localhost:6060/debug/vars
+        template: "{{.LogCache.PromQLRangeQueryTime}}"
+
+        # CF Auth Proxy
+      - name: last-uaa-latency
+        source_id: log-cache-cf-auth-proxy
+        addr: http://localhost:6065/debug/vars
+        template: "{{.CFAuthProxy.LastUAALatency}}"
+      - name: last-capi-v3-apps-latency
+        source_id: log-cache-cf-auth-proxy
+        addr: http://localhost:6065/debug/vars
+        template: "{{.CFAuthProxy.LastCAPIV3AppsLatency}}"
+      - name: last-capi-v2-list-service-instances-latency
+        source_id: log-cache-cf-auth-proxy
+        addr: http://localhost:6065/debug/vars
+        template: "{{.CFAuthProxy.LastCAPIV2ListServiceInstancesLatency}}"
+      - name: last-capi-v4-log-access-latency
+        source_id: log-cache-cf-auth-proxy
+        addr: http://localhost:6065/debug/vars
+        template: "{{.CFAuthProxy.LastCAPIV4LogAccessLatency}}"
+      - name: last-capi-v2-service-instances-latency
+        source_id: log-cache-cf-auth-proxy
+        addr: http://localhost:6065/debug/vars
+        template: "{{.CFAuthProxy.LastCAPIV2ServiceInstancesLatency}}"
+
+  - name: log-cache-cf-auth-proxy
+    release: log-cache
+    properties:
+      cc:
+        ca_cert: (( grab meta.certs.diego.ca ))
+        common_name: cloud-controller-ng.service.cf.internal
+      proxy_port: 8083
+      uaa:
+        ca_cert: (( grab meta.certs.uaa.ca ))
+        client_id: doppler
+        client_secret: (( grab meta.uaa.doppler_secret ))
+        internal_addr: https://uaa.service.cf.internal:8443
+
   - name: route_registrar
     release: routing
     properties:
@@ -76,6 +236,12 @@ instance_groups:
           uris:
           - (( concat "doppler." params.system_domain ))
           - (( concat "*.doppler." params.system_domain ))
+        - name: log-cache-reverse-proxy
+          port: 8083
+          registration_interval: 20s
+          uris:
+          - (( concat "log-cache." params.system_domain ))
+          - (( concat "*.log-cache." params.system_domain ))
 
 meta:
   loggregator:

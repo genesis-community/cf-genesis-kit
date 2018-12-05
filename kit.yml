@@ -105,7 +105,9 @@ certificates:
       public_tls:
         valid_for: 1y
         names: [ "api.${params.base_domain}", "cloud-controller-ng.service.cf.internal" ]
-      
+      loggregator_rlp_gateway:
+        valid_for: 1y
+        names: [ "rlp-gateway" ]
     diego/certs/instance_identity:
       ca: { valid_for: 1y }
 
@@ -128,10 +130,17 @@ certificates:
         names: [ "ss-adapter" ]
       syslogger_rlp:
         valid_for: 1y
-        names: [ "ss-adapter-rlp" ]
+        names: [ "ss-adapter-rlp", "reverselogproxy" ]
       syslogger_client:
         valid_for: 1y
         names: [ "ss-scheduler" ]
+      log_cache:
+        valid_for: 1y
+        names: ["log-cache", "log_cache", "logcache"]
+      rlp_gateway:
+        valid_for: 1y
+        names: ["rlp_gateway"]
+
 
     dns_healthcheck_tls:
       ca: { valid_for: 1y }

@@ -99,7 +99,7 @@ releases:
   version: "0.0.3"
   url: "https://bosh.io/d/github.com/cloudfoundry/bosh-dns-aliases-release?v=0.0.3"
   sha1: "b0d0a0350ed87f1ded58b2ebb469acea0e026ccc"
-# - name: cf-cli
-#   url: https://bosh.io/d/github.com/bosh-packages/cf-cli-release?v=1.9.0
-#   version: 1.9.0
-#   sha1: 9dfcb2ffec5abb77ea9bd4561655a8444405c481
+- name: log-cache
+  url: https://bosh.io/d/github.com/cloudfoundry/log-cache-release?v=2.0.2
+  version: 2.0.2
+  sha1: 1f52248096ce2263405f3c82278e4f2aaddf1599

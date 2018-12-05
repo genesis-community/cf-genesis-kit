@@ -33,6 +33,9 @@ Cloud Foundry.
     assign a pushed application that did not specify its memory
     requirements, explicitly. Defaults to `1000`.
 
+  - `availability_zones` - Which AZs to deploy to. Defaults to 
+    `[z1, z2, z3]`
+
   - `uaa_lockout_failure_count` - Number of failed UAA login attempts
     before lockout.
 

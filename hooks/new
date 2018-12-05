@@ -272,6 +272,11 @@ local-ha-db)
   echo "  # VIP for the HA Postgres DB"
   echo "  postgres_vip: $postgres_vip"
 esac
+
+if [[ -z $use_provided_cert ]]; then
+  echo "  # Skip SSL validation since we use self-signed certs"
+  echo "  skip_ssl_validation: true" # FIXME: make this
+fi
 ) >$GENESIS_ROOT/$GENESIS_ENVIRONMENT.yml
 
 prompt_for edit boolean \

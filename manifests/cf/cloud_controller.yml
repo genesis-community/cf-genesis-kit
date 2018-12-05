@@ -23,6 +23,8 @@ instance_groups:
         oauth_client_id: ssh-proxy
       ccdb: (( grab meta.ccdb ))
       cc: (( grab meta.cc ))
+      doppler:
+        port: (( grab params.logger_port ))
       logger_endpoint:
         port: (( grab params.logger_port ))
       uaa:

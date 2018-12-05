@@ -53,6 +53,10 @@ meta:
           client_cert: (( vault meta.vault "/diego/certs/bbs_client:certificate" ))
           client_key:  (( vault meta.vault "/diego/certs/bbs_client:key" ))
 
+      rlp_gateway:
+        cert: (( vault meta.vault "/diego/certs/loggregator_rlp_gateway:certificate" ))
+        key: (( vault meta.vault "/diego/certs/loggregator_rlp_gateway:key" ))
+
       capi:
         server:
           public_cert: (( vault meta.vault "/diego/certs/capi:certificate" ))
@@ -118,6 +122,14 @@ meta:
         server:
           cert: (( vault meta.vault "/loggregator/certs/metron:certificate" ))
           key: (( vault meta.vault "/loggregator/certs/metron:key" ))
+
+      logcache:
+        cert: (( vault meta.vault "/loggregator/certs/log_cache:certificate" ))
+        key: (( vault meta.vault "/loggregator/certs/log_cache:key" ))
+
+      rlp_gateway:
+        cert: (( vault meta.vault "/loggregator/certs/rlp_gateway:certificate" ))
+        key: (( vault meta.vault "/loggregator/certs/rlp_gateway:key" ))
 
       trafficcontroller:
         server:

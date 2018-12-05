@@ -65,7 +65,7 @@ addons:
       - domain: cc-uploader.service.cf.internal
         targets:
         - query: '*'
-          instance_group: api
+          instance_group: diego
           deployment: (( grab name ))
           network: (( grab params.cf_internal_network ))
           domain: bosh
@@ -93,9 +93,9 @@ addons:
       - domain: file-server.service.cf.internal
         targets:
         - query: '*'
-          instance_group: api
+          instance_group: access
           deployment: (( grab name ))
-          network: (( grab params.cf_internal_network ))
+          network: (( grab params.cf_edge_network ))
           domain: bosh
       - domain: gorouter.service.cf.internal
         targets:
