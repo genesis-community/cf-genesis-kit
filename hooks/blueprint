@@ -17,7 +17,7 @@ validate_features nfs-volume-services small-footprint \
 merge=( manifests/cf/base.yml
         manifests/cf/releases.yml
         manifests/cf/certs.yml
-
+        manifests/cf/consul_etcd.yml
         manifests/cf/access.yml
         manifests/cf/bbs.yml
         manifests/cf/cell.yml
@@ -249,6 +249,19 @@ vault="secret/$GENESIS_VAULT_PREFIX"
 if safe exists "$vault/diego/certs/rep" >/dev/null 2>&1 && ! safe --quiet x509 validate "$vault/diego/certs/rep" --for "127.0.0.1" >/dev/null 2>&1; then
   echo >&2 "  performing one-time update of Diego Rep certificate"
   safe rm "$vault/diego/certs/rep" >/dev/null 2>&1
+  vault_target=$(safe target --json | jq --raw-output '.name')
+  genesis -C $GENESIS_ROOT add-secrets $GENESIS_ENVIRONMENT --vault $vault_target >/dev/null 2>&1
+fi
+
+# An in-situ upgrade of CF required $GENESIS_VAULT_PREFIX/loggregator/certs/syslogger_rlp to include
+# reverselogproxy as a SAN. Rather than bothering the operator for an internal cert with no impact on 
+# external performance, it's better to just delete and regen the cert automatically.
+
+# If an operator is upgrading from 1.2.X to a newer version, the add-secrets command also has the nice
+# benefit of generating all the new certificates required for log-cache.
+if safe exists "$vault/loggregator/certs/syslogger_rlp" >/dev/null 2>&1 && ! safe --quiet x509 validate "$vault/loggregator/certs/syslogger_rlp" --for "reverselogproxy" >/dev/null 2>&1; then
+  echo >&2 "  performing one-time update of Reverse Log Proxy certificate"
+  safe rm "$vault/loggregator/certs/syslogger_rlp" >/dev/null 2>&1
   vault_target=$(safe target --json | jq --raw-output '.name')
   genesis -C $GENESIS_ROOT add-secrets $GENESIS_ENVIRONMENT --vault $vault_target >/dev/null 2>&1
 fi

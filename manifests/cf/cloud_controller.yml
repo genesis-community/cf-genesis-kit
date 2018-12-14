@@ -2,6 +2,20 @@
 instance_groups:
 - name: api
   jobs:
+  - name: consul_agent	
+    release: consul	
+    consumes:	
+      consul_common: {from: consul_common_link}	
+      consul_server: nil	
+      consul_client: {from: consul_client_link}	
+    properties:	
+      consul:	
+        agent:	
+          services:	
+            cloud_controller_ng: {}	
+            policy-server-internal:	
+              name: policy-server # health check scripts are located at `/var/vcap/jobs/policy-server`, hence the rename.
+
   - { name: java-buildpack,          release: java-buildpack }
   - { name: go-buildpack,            release: go-buildpack }
   - { name: binary-buildpack,        release: binary-buildpack }
@@ -238,7 +252,6 @@ meta:
     volume_services_enabled: true
 
   statsd_injector:
-    enable_consul_service_registration: false
     loggregator:
       tls:
         ca_cert: (( grab meta.certs.loggregator.ca ))

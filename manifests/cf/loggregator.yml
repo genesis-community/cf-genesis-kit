@@ -2,6 +2,17 @@
 instance_groups:
 - name: doppler
   jobs:
+  - name: consul_agent	
+    release: consul	
+    consumes:	
+      consul_common: {from: consul_common_link}	
+      consul_server: nil	
+      consul_client: {from: consul_client_link}	
+    properties:	
+      consul:	
+        agent:	
+          services:	
+            doppler: { name: doppler }
   - name: doppler
     release: loggregator
     provides:
@@ -17,13 +28,28 @@ instance_groups:
         tls:
           ca_cert: (( grab meta.certs.loggregator.ca ))
           doppler: (( grab meta.certs.loggregator.doppler.server ))
-
+        etcd:
+          require_ssl: true
+          ca_cert: (( grab meta.certs.etcd.ca ))
+          machines: (( grab meta.cf-etcd.machines ))
           
 #####################################
 #       TRAFFIC CONTROLLER          #
 #####################################
 - name: loggregator_trafficcontroller
   jobs:
+  - name: consul_agent	
+    release: consul	
+    consumes:	
+      consul_common: {from: consul_common_link}	
+      consul_server: nil	
+      consul_client: {from: consul_client_link}	
+    properties:	
+      consul:	
+        agent:	
+          services:	
+            loggregator_trafficcontroller: {}	
+            reverse_log_proxy: {}
   - name: loggregator_trafficcontroller
     release: loggregator
     consumes:

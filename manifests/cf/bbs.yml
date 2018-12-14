@@ -2,10 +2,22 @@
 instance_groups:
 - name: bbs
   jobs:
+    - name: consul_agent	
+      release: consul	
+      consumes:	
+        consul_common: {from: consul_common_link}	
+        consul_server: nil	
+        consul_client: {from: consul_client_link}	
+      properties:	
+        consul:	
+          agent:	
+            services:	
+              silk-controller:	
+                name: silk-controller
     - name: bbs
       release: diego
       properties:
-        enable_consul_service_registration: false
+        enable_consul_service_registration: true
         loggregator:
           use_v2_api: true
           ca_cert: (( grab meta.certs.loggregator.ca ))
@@ -13,8 +25,8 @@ instance_groups:
           key: (( grab meta.certs.loggregator.metron.server.key ))
         diego:
           bbs:
-            skip_consul_lock: true
-            detect_consul_cell_registrations: false
+            skip_consul_lock: false
+            detect_consul_cell_registrations: true
             active_key_label: key1
             encryption_keys:
               - label: key1

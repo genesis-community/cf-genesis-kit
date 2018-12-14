@@ -2,6 +2,12 @@
 instance_groups:
 - name: syslogger
   jobs:
+  - name: consul_agent	
+    release: consul	
+    consumes:	
+      consul_common: {from: consul_common_link}	
+      consul_server: nil	
+      consul_client: {from: consul_client_link}
   - name: adapter
     release: cf-syslog-drain
     properties:

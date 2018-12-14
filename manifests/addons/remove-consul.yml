@@ -1,0 +1,90 @@
+---
+instance_groups:
+- name: nats
+  jobs:
+  - (( delete "consul_agent" ))
+
+- name: api
+  jobs:
+  - (( delete "consul_agent" ))
+
+- name: uaa
+  jobs:
+  - (( delete "consul_agent" ))
+
+- name: doppler
+  jobs:
+  - (( delete "consul_agent" ))
+
+- name: syslogger
+  jobs:
+  - (( delete "consul_agent" ))
+
+- name: loggregator_trafficcontroller
+  jobs:
+  - (( delete "consul_agent" ))
+
+- name: router
+  jobs:
+  - (( delete "consul_agent" ))
+
+- name: bbs
+  jobs:
+  - (( delete "consul_agent" ))
+  - name: bbs
+    release: diego
+    properties:
+      enable_consul_service_registration: false
+      diego:
+        bbs:
+          skip_consul_lock: true
+          detect_consul_cell_registrations: false
+  - name: locket
+    release: diego
+    properties:
+      enable_consul_service_registration: false
+
+- name: diego
+  jobs:
+  - (( delete "consul_agent" ))
+  - name: auctioneer
+    release: diego
+    properties:
+      enable_consul_service_registration: false
+      diego:
+        auctioneer:
+          skip_consul_lock: true
+          watcher:
+            locket:
+            skip_consul_lock: true
+  - name: route_emitter
+    release: diego
+    properties:
+      locks:
+        consul:
+          enabled: false
+
+- name: cell
+  jobs:
+  - name: rep
+    release: diego
+    properties:
+      enable_consul_service_registration: false
+
+- name: blobstore
+  jobs:
+  - (( delete "consul_agent" ))
+
+
+- name: postgres
+  jobs:
+  - (( delete "consul_agent" ))
+
+
+- name: haproxy
+  jobs:
+  - (( delete "consul_agent" ))
+
+meta:
+  statsd_injector:
+    enable_consul_service_registration: false

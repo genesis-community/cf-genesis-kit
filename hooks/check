@@ -43,6 +43,25 @@ if [[ -n "$GENESIS_CLOUD_CONFIG" ]] ; then
   fi
 fi
 
+
+# Runtime config checks
+runtime_ok=yes
+
+# Check for BOSH DNS
+if [[ $(bosh rc | spruce json | jq -r '.addons[] | select(.name == "bosh-dns")') == "" ]]; then
+  runtime_ok=no
+  describe "  #R{Errors were found} in your runtime-config:"
+  describe "    - #R{BOSH DNS is not in the runtime-config, which is required}"
+  describe ""
+fi
+
+# Check if there were any errors reported from runtime config checks
+if [[ "$runtime_ok" == "yes" ]]; then
+  describe "  runtime config [#G{OK}]"
+else
+  describe "  runtime config [#R{FAILED}]"
+fi
+
 # Environment Parameter checks
 env_ok=yes
 if want_feature 'tls'; then
@@ -81,6 +100,6 @@ else
   describe "  environment files [#R{FAILED}]"
 fi
 
-if [[ "$env_ok" == "no" || "$cc_ok" == "no" ]] ; then
+if [[ "$env_ok" == "no" || "$cc_ok" == "no" || "$runtime_ok" == no ]] ; then
   exit 1
 fi

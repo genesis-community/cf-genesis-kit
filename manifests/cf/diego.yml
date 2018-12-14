@@ -2,10 +2,16 @@
 instance_groups:
 - name: diego
   jobs:
+  - name: consul_agent	
+    release: consul	
+    consumes:	
+      consul_common: {from: consul_common_link}	
+      consul_server: nil	
+      consul_client: {from: consul_client_link}
   - name: auctioneer
     release: diego
     properties:
-      enable_consul_service_registration: false
+      enable_consul_service_registration: true
       diego:
         loggregator:
           use_v2_api: true
@@ -13,7 +19,7 @@ instance_groups:
           cert: (( grab meta.certs.loggregator.metron.server.cert ))
           key: (( grab meta.certs.loggregator.metron.server.key ))
         auctioneer:
-          skip_consul_lock: true
+          skip_consul_lock: false
           bbs:
             ca_cert: (( grab meta.certs.diego.ca ))
             .: (( inject meta.certs.diego.bbs.client ))
@@ -39,7 +45,7 @@ instance_groups:
           watcher:
             locket:
               api_location: "locket.service.cf.internal:8891"
-            skip_consul_lock: true
+            skip_consul_lock: false
 
   - name: cc_uploader
     release: capi
@@ -58,7 +64,7 @@ instance_groups:
     properties:
       locks:
         consul:
-          enabled: false
+          enabled: true
       diego:
         route_emitter:
           bbs:

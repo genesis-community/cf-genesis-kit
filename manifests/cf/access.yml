@@ -2,10 +2,16 @@
 instance_groups:
 - name: access
   jobs:
+  - name: consul_agent
+    release: consul
+    consumes:
+      consul_common: {from: consul_common_link}
+      consul_server: nil
+      consul_client: {from: consul_client_link}
   - name: ssh_proxy
     release: diego
     properties:
-      enable_consul_service_registration: false
+      enable_consul_service_registration: true
       loggregator:
         use_v2_api: true
         ca_cert: (( grab meta.certs.loggregator.ca ))

@@ -44,6 +44,8 @@ params:
   stemcell_os:      ubuntu-xenial
   stemcell_version: latest
 
+  consul_disk_pool:    consul
+
   nats_instances:        2
   uaa_instances:         2
   api_instances:         2
@@ -55,6 +57,7 @@ params:
   access_instances:      2
   cell_instances:        3
   syslogger_instances:   2
+  consul_instances:      3
 
   nats_vm_type:        small
   uaa_vm_type:         medium
@@ -68,6 +71,7 @@ params:
   cell_vm_type:        runtime
   errand_vm_type:      small
   syslogger_vm_type:   small
+  consul_vm_type:      small
 
   ccdb_name:      ccdb
   ccdb_host:      (( param "What hostname/IP is the ccdb available at?" ))
@@ -96,6 +100,18 @@ params:
   policyserverdb_name:  policyserverdb
 
 instance_groups:
+
+  - name: consul_etcd
+    instances: (( grab params.consul_instances ))	
+    persistent_disk_pool: (( grab params.consul_disk_pool ))	
+    vm_type: (( grab params.consul_vm_type ))	
+    azs: (( grab params.availability_zones || meta.default.azs ))	
+    stemcell: default	
+    networks:	
+      - name: (( grab params.cf_internal_network ))	
+    update:	
+      max_in_flight: 1	
+      serial: true
 
   - name: nats
     instances: (( grab params.nats_instances ))

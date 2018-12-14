@@ -30,6 +30,17 @@ instance_groups:
     networks:
     - name: (( grab params.cf_internal_network ))
     jobs:
+      - name: consul_agent	
+        release: consul	
+        consumes:	
+          consul_common: {from: consul_common_link}	
+          consul_server: nil	
+          consul_client: {from: consul_client_link}	
+        properties:	
+          consul:	
+            agent:	
+              services:	
+                blobstore: {}
       - name: blobstore
         release: capi
         properties:

@@ -14,6 +14,17 @@ description: |
 
 certificates:
   base:
+    consul/certs:	
+      ca: { valid_for: 1y }	
+      server:	
+        valid_for: 1y	
+        names: [ "server.dc1.cf.internal" ]	
+      agent:	
+        valid_for: 1y	
+        names: [ "consul_agent" ]	
+     consul/certs/application_ca:	
+      ca: { valid_for: 1y }	
+
     etcd/certs:
       ca: { valid_for: 1y }
       client:
