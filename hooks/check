@@ -33,6 +33,11 @@ if [[ -n "$GENESIS_CLOUD_CONFIG" ]] ; then
       done
     fi
 
+    if ! want_feature migrate-1.3-without-consul; then
+      cloud_config_needs vm_type $(lookup params.consul_vm_type small)
+      cloud_config_needs disk_type $(lookup params.consul_disk_pool consul)
+    fi
+
   fi
   # Check if there were any errors reported from the above checks.
   if check_cloud_config ; then

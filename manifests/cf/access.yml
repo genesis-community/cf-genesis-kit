@@ -31,7 +31,7 @@ instance_groups:
           uaa:
             port: (( grab meta.uaa.ssl_port ))
             ca_cert: (( grab meta.certs.uaa.ca ))
-    
+
   - name: file_server
     release: diego
     properties:

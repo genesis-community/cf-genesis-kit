@@ -2,18 +2,18 @@
 instance_groups:
 - name: api
   jobs:
-  - name: consul_agent	
-    release: consul	
-    consumes:	
-      consul_common: {from: consul_common_link}	
-      consul_server: nil	
-      consul_client: {from: consul_client_link}	
-    properties:	
-      consul:	
-        agent:	
-          services:	
-            cloud_controller_ng: {}	
-            policy-server-internal:	
+  - name: consul_agent
+    release: consul
+    consumes:
+      consul_common: {from: consul_common_link}
+      consul_server: nil
+      consul_client: {from: consul_client_link}
+    properties:
+      consul:
+        agent:
+          services:
+            cloud_controller_ng: {}
+            policy-server-internal:
               name: policy-server # health check scripts are located at `/var/vcap/jobs/policy-server`, hence the rename.
 
   - { name: java-buildpack,          release: java-buildpack }
@@ -114,8 +114,6 @@ instance_groups:
   - name: policy-server
     release: cf-networking
     properties:
-      #cf_networking:
-      #  policy_server:
       uaa_client_secret: (( vault meta.vault "/uaa/client_secrets:network_policy" ))
       uaa_ca: (( grab meta.certs.uaa.ca ))
       database:
@@ -129,8 +127,6 @@ instance_groups:
   - name: policy-server-internal
     release: cf-networking
     properties:
-      #cf_networking:
-      #policy_server_internal:
       ca_cert: (( grab meta.certs.network_policy.ca ))
       server_cert: (( grab meta.certs.network_policy.server_cert ))
       server_key: (( grab meta.certs.network_policy.server_key ))
@@ -186,6 +182,7 @@ meta:
     - services
     - load_balancer
     default_to_diego_backend: true
+
     droplets:
       .: (( inject meta.blobstore_config ))
       droplet_directory_key: (( concat params.env "-cc-droplets-" meta.cc.directory_key ))

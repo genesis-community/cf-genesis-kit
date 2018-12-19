@@ -2,17 +2,18 @@
 instance_groups:
 - name: doppler
   jobs:
-  - name: consul_agent	
-    release: consul	
-    consumes:	
-      consul_common: {from: consul_common_link}	
-      consul_server: nil	
-      consul_client: {from: consul_client_link}	
-    properties:	
-      consul:	
-        agent:	
-          services:	
+  - name: consul_agent
+    release: consul
+    consumes:
+      consul_common: {from: consul_common_link}
+      consul_server: nil
+      consul_client: {from: consul_client_link}
+    properties:
+      consul:
+        agent:
+          services:
             doppler: { name: doppler }
+
   - name: doppler
     release: loggregator
     provides:

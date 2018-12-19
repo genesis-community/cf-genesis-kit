@@ -1,8 +1,0 @@
-Bumping diego to 2.18, making the Xenial series of stemcells standard for deployments
-
-# New Features
-
-- This release now targets the Ubuntu Xenial stemcell series,
-  starting on 97.x.  Xenial Xerus 16.04 is a Canonical LTS
-  release, and will continue to receive security updates through
-  April of 2021.  Trusty Tahr 14.04 is EOL as of April 2019.
