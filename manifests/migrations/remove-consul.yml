@@ -1,5 +1,7 @@
 ---
 instance_groups:
+- (( delete "consul_etcd" ))
+- (( merge ))
 - name: nats
   jobs:
   - (( delete "consul_agent" ))
@@ -31,6 +33,7 @@ instance_groups:
 - name: bbs
   jobs:
   - (( delete "consul_agent" ))
+  - (( merge ))
   - name: bbs
     release: diego
     properties:
@@ -47,6 +50,7 @@ instance_groups:
 - name: diego
   jobs:
   - (( delete "consul_agent" ))
+  - (( merge ))
   - name: auctioneer
     release: diego
     properties:
@@ -63,6 +67,13 @@ instance_groups:
       locks:
         consul:
           enabled: false
+  - name: tps
+    release: capi
+    properties:
+      capi:
+        tps:
+          watcher:
+            skip_consul_lock: true
 
 - name: cell
   jobs:
@@ -71,19 +82,21 @@ instance_groups:
     properties:
       enable_consul_service_registration: false
 
-- name: blobstore
+- name: access
   jobs:
   - (( delete "consul_agent" ))
+  - (( merge ))
+  - name: ssh_proxy
+    properties:
+      enable_consul_service_registration: false
 
-
-- name: postgres
+- name: cell
   jobs:
   - (( delete "consul_agent" ))
-
-
-- name: haproxy
-  jobs:
-  - (( delete "consul_agent" ))
+  - (( merge ))
+  - name: rep
+    properties:
+      enable_consul_service_registration: false
 
 meta:
   statsd_injector:

@@ -15,47 +15,13 @@ instance_groups:
       properties:
         consul:
           agent:
+            rewrite_resolv: false
             log_level: (( grab params.log_level ))
             mode: server
             domain: cf.internal
-            # etcd is colo'd on this node, so we need a dns name for it
-            services:
-              etcd:
-                name: cf-etcd
 
           .: (( inject meta.certs.consul.server ))
           ..: (( inject meta.certs.consul.agent ))
           ca_cert: (( grab meta.certs.consul.ca ))
           encrypt_keys:
           - (( vault meta.vault "/consul/encryption_key:current" ))
-
-    - name: etcd
-      release: etcd
-      properties:
-        etcd:
-          advertise_urls_dns_suffix: (( grab meta.cf-etcd.dns_suffix ))
-          cluster:
-          - instances: (( grab instance_groups.consul_etcd.instances ))
-            name: consul_etcd
-          ca_cert: (( grab meta.certs.etcd.ca ))
-          require_ssl: true
-          .: (( inject meta.certs.etcd.client ))
-          ..: (( inject meta.certs.etcd.server ))
-          ...: (( inject meta.certs.etcd.peer ))
-          peer_require_ssl: true
-
-    - name: etcd_metrics_server
-      release: etcd
-      properties:
-        etcd_metrics_server:
-          etcd:
-            ca_cert: (( grab meta.certs.etcd.ca ))
-            .: (( inject meta.certs.etcd.client ))
-            require_ssl: true
-            dns_suffix: (( grab meta.cf-etcd.dns_suffix ))
-
-meta:
-  cf-etcd:
-    dns_suffix: cf-etcd.service.cf.internal
-    machines:
-    - cf-etcd.service.cf.internal

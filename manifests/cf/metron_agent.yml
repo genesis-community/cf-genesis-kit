@@ -76,6 +76,13 @@ addons:
           deployment: (( grab name ))
           network: (( grab params.cf_internal_network ))
           domain: bosh
+      - domain: consul.service.cf.internal
+        targets:
+        - query: '*'
+          instance_group: consul
+          deployment: (( grab name ))
+          network: (( grab params.cf_internal_network ))
+          domain: bosh
       - domain: credhub.service.cf.internal
         targets:
         - query: '*'
@@ -173,4 +180,46 @@ addons:
           instance_group: uaa
           deployment: (( grab name ))
           network: (( grab params.cf_internal_network ))
+          domain: bosh
+      - domain: apiserver.service.cf.internal
+        targets:
+        - query: '*'
+          instance_group: as-api
+          deployment: (( grab name ))
+          network: (( grab params.autoscaler_network ))
+          domain: bosh
+      - domain: autoscalerscheduler.service.cf.internal
+        targets:
+        - query: '*'
+          instance_group: as-scheduler
+          deployment: (( grab name ))
+          network: (( grab params.autoscaler_network ))
+          domain: bosh
+      - domain: servicebroker.service.cf.internal
+        targets:
+        - query: '*'
+          instance_group: as-broker
+          deployment: (( grab name ))
+          network: (( grab params.autoscaler_network ))
+          domain: bosh
+      - domain: metricscollector.service.cf.internal
+        targets:
+        - query: '*'
+          instance_group: as-collector
+          deployment: (( grab name ))
+          network: (( grab params.autoscaler_network ))
+          domain: bosh
+      - domain: eventgenerator.service.cf.internal
+        targets:
+        - query: '*'
+          instance_group: as-scaler
+          deployment: (( grab name ))
+          network: (( grab params.autoscaler_network ))
+          domain: bosh
+      - domain: scalingengine.service.cf.internal
+        targets:
+        - query: '*'
+          instance_group: as-engine
+          deployment: (( grab name ))
+          network: (( grab params.autoscaler_network ))
           domain: bosh

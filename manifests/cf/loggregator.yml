@@ -22,16 +22,11 @@ instance_groups:
         shared_secret: (( grab meta.loggregator.endpoint_secret ))
       doppler:
         disable_announce: true
-        etcd: (( grab meta.certs.etcd.client ))
       loggregator:
         disable_syslog_drains: true
         tls:
           ca_cert: (( grab meta.certs.loggregator.ca ))
           doppler: (( grab meta.certs.loggregator.doppler.server ))
-        etcd:
-          require_ssl: true
-          ca_cert: (( grab meta.certs.etcd.ca ))
-          machines: (( grab meta.cf-etcd.machines ))
           
 #####################################
 #       TRAFFIC CONTROLLER          #
@@ -70,8 +65,6 @@ instance_groups:
           cc_trafficcontroller: (( grab meta.certs.diego.capi.client ))
         uaa:
           client_secret: (( grab meta.uaa.doppler_secret ))
-      traffic_controller:
-        etcd: (( grab meta.certs.etcd.client ))
       uaa:
         internal_url: (( grab meta.uaa.internal_url ))
         ca_cert: (( grab meta.certs.uaa.ca ))

@@ -1,0 +1,5 @@
+---
+instance_groups:
+  - name: postgres
+    jobs:
+    - (( delete "consul_agent" ))

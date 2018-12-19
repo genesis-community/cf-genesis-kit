@@ -99,6 +99,8 @@ params:
   silkdb_name: silkdb
   policyserverdb_name:  policyserverdb
 
+  autoscaler_network: cf-autoscaler
+
 instance_groups:
 
   - name: consul_etcd

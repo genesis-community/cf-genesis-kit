@@ -1,0 +1,61 @@
+instance_groups:
+  - name: as-api
+    jobs:
+      - (( delete "consul_agent" ))
+      - (( merge ))
+      - name: "apiserver"
+        properties:
+          autoscaler:
+            api_server:
+              require_consul: false
+    
+  - name: as-scheduler
+    jobs:
+      - (( delete "consul_agent" ))
+      - (( merge ))
+      - name: "scheduler"
+        properties:
+          autoscaler:
+            scheduler:
+              require_consul: false
+
+  - name: as-broker
+    jobs:
+      - (( delete "consul_agent" ))
+      - (( merge ))
+      - name: "servicebroker"
+        properties:
+          autoscaler:
+            service_broker:
+              require_consul: false
+
+  - name: as-pruner
+    jobs:
+      - (( delete "consul_agent" ))
+
+  - name: as-collector
+    jobs:
+      - (( delete "consul_agent" ))
+      - (( merge ))
+      - name: eventgenerator
+        properties:
+          autoscaler:
+            require_consul: false
+
+  - name: as-scaler
+    jobs:
+      - (( delete "consul_agent" ))
+      - (( merge ))
+      - name: metricscollector
+        properties:
+          autoscaler:
+            require_consul: false
+
+  - name: as-engine
+    jobs:
+      - (( delete "consul_agent" ))
+      - (( merge ))
+      - name: scalingengine
+        properties:
+          autoscaler:
+            require_consul: false

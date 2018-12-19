@@ -107,6 +107,3 @@ releases:
   url: https://bosh.io/d/github.com/cloudfoundry-incubator/consul-release?v=193
   version: "193"
   sha1: 3596fa1a1692d9e48d2e28789b60e0c72e984d31
-- name: etcd
-  url: https://bosh.io/d/github.com/cloudfoundry-incubator/etcd-release?v=104
-  version: "104"

@@ -12,7 +12,8 @@ validate_features nfs-volume-services small-footprint \
                   shield-dbs shield-blobstore \
                   minimum-vms \
                   autoscaler autoscaler-postgres \
-                  haproxy-tls haproxy-notls omit-haproxy
+                  haproxy-tls haproxy-notls omit-haproxy \
+                  migrate-1.3-without-consul
 
 merge=( manifests/cf/base.yml
         manifests/cf/releases.yml
@@ -220,6 +221,43 @@ fi
 
 if want_feature small-footprint; then
   merge+=( manifests/addons/small-footprint.yml )
+fi
+
+##     ## ####  ######   ########     ###    ######## ####  #######  ##    ##  ######  
+###   ###  ##  ##    ##  ##     ##   ## ##      ##     ##  ##     ## ###   ## ##    ## 
+#### ####  ##  ##        ##     ##  ##   ##     ##     ##  ##     ## ####  ## ##       
+## ### ##  ##  ##   #### ########  ##     ##    ##     ##  ##     ## ## ## ##  ######  
+##     ##  ##  ##    ##  ##   ##   #########    ##     ##  ##     ## ##  ####       ## 
+##     ##  ##  ##    ##  ##    ##  ##     ##    ##     ##  ##     ## ##   ### ##    ## 
+##     ## ####  ######   ##     ## ##     ##    ##    ####  #######  ##    ##  ######  
+
+if want_feature migrate-1.3-without-consul; then
+  merge+=( manifests/migrations/remove-consul.yml )
+
+  for want in ${GENESIS_REQUESTED_FEATURES}; do
+    case "$want" in
+    # Remove consul from optional features
+    local-db|local-ha-db)
+      merge+=( manifests/migrations/remove-consul-postgres.yml )
+      ;;
+
+    haproxy)
+      merge+=( manifests/migrations/remove-consul-haproxy.yml )
+      ;;
+
+    autoscaler)
+      merge+=( manifests/migrations/remove-consul-autoscaler.yml )
+      if want_feature mysql-db; then
+        merge+=( manifests/migrations/remove-consul-postgres.yml )
+      fi
+      ;;
+
+    local-blobstore)
+      merge+=( manifests/migrations/remove-consul-blobstore.yml )
+      ;;
+
+    esac
+  done
 fi
 
    ######     ###    ##    ## #### ######## ##    ##

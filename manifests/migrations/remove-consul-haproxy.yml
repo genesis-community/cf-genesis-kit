@@ -1,0 +1,5 @@
+---
+instance_groups:
+  - name: haproxy
+    jobs:
+    - (( delete "consul_agent" ))
