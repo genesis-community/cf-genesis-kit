@@ -3,20 +3,22 @@
 # for constituent releases.
 
 core:
+  - name:  bosh-dns-aliases
+    label: bosh-dns-aliases (new)
+    notes: https://github.com/cloudfoundry/bosh-dns-aliases-release/releases/tag/v${version}
+
   - name:  bpm
-    label: bpm (new)
     notes: https://github.com/cloudfoundry-incubator/bpm-release/releases/tag/v${version}
 
   - name:  capi
     notes: https://github.com/cloudfoundry/capi-release/releases/tag/${version}
 
-  - name:  etcd
   - name:  cf-smoke-tests
 
   - name:  cf-networking
     notes: https://github.com/cloudfoundry/cf-networking-release/releases/tag/v${version}
 
-  - name: cflinuxfs2
+  - name:  cflinuxfs2
     notes: https://github.com/cloudfoundry/cflinuxfs2-release/releases/tag/v${version}
 
   - name:  cf-syslog-drain
@@ -34,11 +36,23 @@ core:
   - name:  loggregator
     notes: https://github.com/cloudfoundry/loggregator-release/releases/tag/v${version}
 
+  - name:  loggregator-agent
+    label: loggregator-agent (renamed from metron_agent)
+    notes: https://github.com/cloudfoundry/log-cache-release/releases/tag/v${version}
+
+  - name:  log-cache
+    label: log-cache (new)
+    notes: https://github.com/cloudfoundry/log-cache-release/releases/tag/v${version}
+
   - name:  nats
     notes: https://github.com/cloudfoundry/nats-release/releases/tag/v${version}
 
   - name:  routing
     notes: https://github.com/cloudfoundry/routing-release/releases/tag/${version}
+
+  - name:  silk
+    label: silk (renamed from cf-networking)
+    notes: https://github.com/cloudfoundry/silk-release/releases/tag/${version}
 
   - name:  statsd-injector
     notes: https://github.com/cloudfoundry/statsd-injector-release/releases/tag/v${version}

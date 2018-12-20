@@ -12,7 +12,7 @@ sub github {
 	my $url = shift;
 	my ($org, $repo, $tag) = ($url =~ m{github.com/(.*?)/(.*?)/releases/tag/(.*?)$});
 
-	my $out = qx(curl -Ls -u $ENV{GITHUB_ACCESS_TOKEN} https://api.github.com/repos/$org/$repo/releases/tags/$tag);
+	my $out = qx(curl -Ls -H 'Authorization: token $ENV{GITHUB_ACCESS_TOKEN}' https://api.github.com/repos/$org/$repo/releases/tags/$tag);
 	my $data = decode_json($out);
 	return "-" unless $data->{published_at};
 	my ($year, $mon, $day) = ($data->{published_at} =~ m/^(\d{4})-(\d{2})-(\d{2})/);

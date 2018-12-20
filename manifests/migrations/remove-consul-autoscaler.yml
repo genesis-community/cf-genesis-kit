@@ -3,7 +3,7 @@ instance_groups:
     jobs:
       - (( delete "consul_agent" ))
       - (( merge ))
-      - name: "apiserver"
+      - name: apiserver
         properties:
           autoscaler:
             api_server:
@@ -13,7 +13,7 @@ instance_groups:
     jobs:
       - (( delete "consul_agent" ))
       - (( merge ))
-      - name: "scheduler"
+      - name: scheduler
         properties:
           autoscaler:
             scheduler:
@@ -23,7 +23,7 @@ instance_groups:
     jobs:
       - (( delete "consul_agent" ))
       - (( merge ))
-      - name: "servicebroker"
+      - name: servicebroker
         properties:
           autoscaler:
             service_broker:

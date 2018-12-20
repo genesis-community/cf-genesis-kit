@@ -44,7 +44,7 @@ instance_groups:
       consul:
         agent:
           services:
-            loggregator_trafficcontroller: {}	
+            loggregator_trafficcontroller: {}
             reverse_log_proxy: {}
   - name: loggregator_trafficcontroller
     release: loggregator
@@ -178,6 +178,7 @@ instance_groups:
         source_id: log-cache-nozzle
         addr: http://localhost:6061/debug/vars
         template: "{{.Nozzle.Dropped}}"
+
       gauges:
         # Log Cache
       - name: cache-period

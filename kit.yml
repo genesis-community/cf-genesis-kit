@@ -14,30 +14,17 @@ description: |
 
 certificates:
   base:
-    consul/certs:	
-      ca: { valid_for: 1y }	
-      server:	
-        valid_for: 1y	
-        names: [ "server.dc1.cf.internal" ]	
-      agent:	
-        valid_for: 1y	
-        names: [ "consul_agent" ]	
-     consul/certs/application_ca:	
-      ca: { valid_for: 1y }	
-
-    etcd/certs:
+    consul/certs:
       ca: { valid_for: 1y }
-      client:
-        valid_for: 1y
-        names: [ clientName ]
       server:
         valid_for: 1y
-        names: [ "cf-etcd.service.cf.internal", "*.cf-etcd.service.cf.internal" ]
-    etcd/peer_certs:
-      ca: { valid_for: 1y }
-      peer:
+        names: [ "server.dc1.cf.internal" ]
+      agent:
         valid_for: 1y
-        names: [ "cf-etcd.service.cf.internal", "*.cf-etcd.service.cf.internal" ]
+        names: [ "consul_agent" ]
+
+    consul/certs/application_ca:
+      ca: { valid_for: 1y }
 
     uaa/certs:
       ca: { valid_for: 1y }

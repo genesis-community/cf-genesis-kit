@@ -26,13 +26,16 @@ merge=( manifests/cf/base.yml
         manifests/cf/consul_etcd.yml
         manifests/cf/diego.yml
         manifests/cf/loggregator.yml
-        manifests/cf/metron_agent.yml
         manifests/cf/nats.yml
         manifests/cf/router.yml
         manifests/cf/syslogger.yml
         manifests/cf/uaa.yml
 
-        manifests/cf/smoke-tests.yml)
+        manifests/cf/smoke-tests.yml
+        
+        manifests/cf/addon-logging.yml
+        manifests/cf/addon-bpm.yml
+        manifests/cf/addon-dns.yml)
 
 case "$(bosh_cpi)" in
 (azure*) merge+=( manifests/azure.yml ) ;;

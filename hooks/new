@@ -236,7 +236,7 @@ if [[ $use_lb == 'haproxy' ]]; then
   echo "    - haproxy"
   echo "    - tls"
   if [[ -z $use_provided_cert ]]; then
-    echo "    - self-signed" # FIXME: make this
+    echo "    - self-signed"
   fi
 fi
 

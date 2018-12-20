@@ -194,8 +194,6 @@ meta:
       package: java-buildpack-cflinuxfs2
     - name: ruby_buildpack
       package: ruby-buildpack-cflinuxfs2
-    - name: dotnet_core_buildpack
-      package: dotnet-core-buildpack-cflinuxfs2
     - name: nodejs_buildpack
       package: nodejs-buildpack-cflinuxfs2
     - name: go_buildpack
@@ -206,6 +204,8 @@ meta:
       package: php-buildpack-cflinuxfs2
     - name: binary_buildpack
       package: binary-buildpack-cflinuxfs2
+    - name: dotnet_core_buildpack
+      package: dotnet-core-buildpack-cflinuxfs2
     packages:
       .: (( inject meta.blobstore_config ))
       app_package_directory_key: (( concat params.env "-cc-packages-" meta.cc.directory_key ))
