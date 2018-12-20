@@ -275,7 +275,7 @@ esac
 
 if [[ -z $use_provided_cert ]]; then
   echo "  # Skip SSL validation since we use self-signed certs"
-  echo "  skip_ssl_validation: true" # FIXME: make this
+  echo "  skip_ssl_validation: true"
 fi
 ) >$GENESIS_ROOT/$GENESIS_ENVIRONMENT.yml
 
