@@ -5,6 +5,7 @@ meta:
       - z1
 
 params: 
+  consul_instances:      1
   haproxy_instances:     1
   nats_instances:        1
   uaa_instances:         1

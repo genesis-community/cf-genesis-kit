@@ -41,6 +41,7 @@ instance_groups:
             agent:
               services:
                 blobstore: {}
+
       - name: blobstore
         release: capi
         properties:

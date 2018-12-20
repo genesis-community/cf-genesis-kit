@@ -14,6 +14,7 @@ instance_groups:
             services:
               silk-controller:
                 name: silk-controller
+
     - name: bbs
       release: diego
       properties:
