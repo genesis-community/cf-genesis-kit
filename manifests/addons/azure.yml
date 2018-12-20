@@ -15,7 +15,7 @@ instance_groups:
     vm_extensions:
       - (( append ))
       - consul_as
- 
+
   - name: haproxy
     vm_extensions:
       - (( append ))

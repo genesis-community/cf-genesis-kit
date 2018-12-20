@@ -13,6 +13,7 @@ instance_groups:
         agent:
           services:
             uaa: {}
+
   - name: uaa
     release: uaa
     properties:
