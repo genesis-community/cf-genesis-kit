@@ -135,7 +135,7 @@ azure)
 
   prompt_for use_azure_stuff boolean \
     'Would you like to use Azure Blob Store to store droplets and application bits?'
-  if [[ $use_azure_stuf == 'true' ]]; then
+  if [[ $use_azure_stuff == 'true' ]]; then
     use_blobstore=azure
     prompt_for $GENESIS_VAULT_PREFIX/blobstore:azurerm_sa_name secret-line \
       'What is your Azure Storage Account Name?'

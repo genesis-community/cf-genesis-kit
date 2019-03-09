@@ -38,7 +38,7 @@ merge=( manifests/cf/base.yml
         manifests/cf/addon-dns.yml)
 
 case "$(bosh_cpi)" in
-(azure*) merge+=( manifests/azure.yml ) ;;
+(azure*) merge+=( manifests/addons/azure.yml ) ;;
 esac
 
 for want in shield-dbs shield-blobstore; do
