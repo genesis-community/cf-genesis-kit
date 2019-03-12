@@ -227,7 +227,7 @@ case "$(bosh_cpi)" in
 (azure*)
   merge+=( manifests/addons/azure.yml )
   if want_feature haproxy; then
-    merge+=( maniests/addons/azure-with-haproxy.yml )
+    merge+=( manifests/addons/azure-with-haproxy.yml )
   fi
   ;;
 esac
