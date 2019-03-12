@@ -32,14 +32,10 @@ merge=( manifests/cf/base.yml
         manifests/cf/uaa.yml
 
         manifests/cf/smoke-tests.yml
-        
+
         manifests/cf/addon-logging.yml
         manifests/cf/addon-bpm.yml
         manifests/cf/addon-dns.yml)
-
-case "$(bosh_cpi)" in
-(azure*) merge+=( manifests/addons/azure.yml ) ;;
-esac
 
 for want in shield-dbs shield-blobstore; do
   if want_feature $want; then
@@ -226,6 +222,16 @@ fi
 if want_feature small-footprint; then
   merge+=( manifests/addons/small-footprint.yml )
 fi
+
+case "$(bosh_cpi)" in
+(azure*)
+  merge+=( manifests/addons/azure.yml )
+  if want_feature haproxy; then
+    merge+=( maniests/addons/azure-with-haproxy.yml )
+  fi
+  ;;
+esac
+
 
 ##     ## ####  ######   ########     ###    ######## ####  #######  ##    ##  ######  
 ###   ###  ##  ##    ##  ##     ##   ## ##      ##     ##  ##     ## ###   ## ##    ## 
