@@ -1,0 +1,5 @@
+instance_groups:
+  - name: haproxy
+    vm_extensions:
+      - (( append ))
+      - haproxy_as

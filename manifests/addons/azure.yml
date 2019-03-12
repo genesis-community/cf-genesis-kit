@@ -16,11 +16,6 @@ instance_groups:
       - (( append ))
       - consul_as
 
-  - name: haproxy
-    vm_extensions:
-      - (( append ))
-      - haproxy_as
-
   - name: nats
     vm_extensions:
       - (( append ))

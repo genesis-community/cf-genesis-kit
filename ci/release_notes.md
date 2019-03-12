@@ -14,3 +14,5 @@
 - Again with the `migrate-1.3-without-consul` feature, if using default
   blobstore or database, the consul components were not being removed.  This
   is now fixed.
+
+- Fix edge case for deploying CF to Azure with HAProxy in the mix
