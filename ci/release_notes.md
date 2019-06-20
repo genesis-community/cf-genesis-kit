@@ -10,3 +10,7 @@
   ```
   
   This fix swaps them, placing them in the correct hierarchy.
+
+- Again with the `migrate-1.3-without-consul` feature, if using default
+  blobstore or database, the consul components were not being removed.  This
+  is now fixed.
