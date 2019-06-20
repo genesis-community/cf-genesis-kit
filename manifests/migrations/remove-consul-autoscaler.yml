@@ -37,7 +37,7 @@ instance_groups:
     jobs:
       - (( delete "consul_agent" ))
       - (( merge ))
-      - name: eventgenerator
+      - name: metricscollector
         properties:
           autoscaler:
             require_consul: false
@@ -46,7 +46,7 @@ instance_groups:
     jobs:
       - (( delete "consul_agent" ))
       - (( merge ))
-      - name: metricscollector
+      - name: eventgenerator
         properties:
           autoscaler:
             require_consul: false
