@@ -23,7 +23,6 @@ merge=( manifests/cf/base.yml
         manifests/cf/bbs.yml
         manifests/cf/cell.yml
         manifests/cf/cloud_controller.yml
-        manifests/cf/consul_etcd.yml
         manifests/cf/diego.yml
         manifests/cf/loggregator.yml
         manifests/cf/nats.yml
@@ -42,6 +41,10 @@ for want in shield-dbs shield-blobstore; do
     echo >&2 "The '$want' feature has been deprecated, in favor of BOSH add-ons"
   fi
 done
+if want_feature migrate-1.3-without-consul; then
+  echo >&2 "You no longer need to explicitly specify the 'migrate-1.3-without-consul' feature."
+  echo >&2 "If you remove it, everything will still work as expected."
+fi
 if want_feature omit-haproxy; then
   echo >&2 "You no longer need to explicitly specify the 'omit-haproxy' feature."
   echo >&2 "If you remove it, everything will still work as expected."
@@ -232,49 +235,6 @@ case "$(bosh_cpi)" in
   ;;
 esac
 
-
-##     ## ####  ######   ########     ###    ######## ####  #######  ##    ##  ######
-###   ###  ##  ##    ##  ##     ##   ## ##      ##     ##  ##     ## ###   ## ##    ##
-#### ####  ##  ##        ##     ##  ##   ##     ##     ##  ##     ## ####  ## ##
-## ### ##  ##  ##   #### ########  ##     ##    ##     ##  ##     ## ## ## ##  ######
-##     ##  ##  ##    ##  ##   ##   #########    ##     ##  ##     ## ##  ####       ##
-##     ##  ##  ##    ##  ##    ##  ##     ##    ##     ##  ##     ## ##   ### ##    ##
-##     ## ####  ######   ##     ## ##     ##    ##    ####  #######  ##    ##  ######
-
-if want_feature migrate-1.3-without-consul; then
-  merge+=( manifests/migrations/remove-consul.yml )
-
-  for want in ${GENESIS_REQUESTED_FEATURES}; do
-    case "$want" in
-    # Remove consul from optional features
-    local-db|local-ha-db)
-      merge+=( manifests/migrations/remove-consul-postgres.yml )
-      ;;
-
-    haproxy)
-      merge+=( manifests/migrations/remove-consul-haproxy.yml )
-      ;;
-
-    autoscaler)
-      merge+=( manifests/migrations/remove-consul-autoscaler.yml )
-      if want_feature mysql-db; then
-        merge+=( manifests/migrations/remove-consul-postgres.yml )
-      fi
-      ;;
-
-    local-blobstore)
-      merge+=( manifests/migrations/remove-consul-blobstore.yml )
-      ;;
-
-    esac
-  done
-  if [[ $database == 0 ]]; then
-    merge+=( manifests/migrations/remove-consul-postgres.yml )
-  fi
-  if [[ $blobstore == 0 ]]; then
-    merge+=( manifests/migrations/remove-consul-blobstore.yml )
-  fi
-fi
 
    ######     ###    ##    ## #### ######## ##    ##
   ##    ##   ## ##   ###   ##  ##     ##     ##  ##

@@ -2,17 +2,6 @@
 # This file should abstract out the cert paths in the vault
 meta:
   certs:
-    consul:
-      ca: (( vault meta.vault "/consul/certs/ca:certificate" ))
-      application_ca: (( vault meta.vault "/consul/certs/application_ca/ca:certificate" ))
-
-      server:
-        server_cert: (( vault meta.vault "/consul/certs/server:certificate" ))
-        server_key:  (( vault meta.vault "/consul/certs/server:key" ))
-      agent:
-        agent_cert:  (( vault meta.vault "/consul/certs/agent:certificate" ))
-        agent_key:   (( vault meta.vault "/consul/certs/agent:key" ))
-
     network_policy:
       ca: (( vault meta.vault "/network_policy/certs/ca:certificate" ))
       server_cert: (( vault meta.vault "/network_policy/certs/server:certificate" ))

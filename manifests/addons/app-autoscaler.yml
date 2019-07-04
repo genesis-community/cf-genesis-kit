@@ -20,17 +20,6 @@ instance_groups:
   stemcell: default
   vm_type: (( grab params.autoscaler_api_vm_type || "default" ))
   jobs:
-  - name: consul_agent
-    release: consul
-    consumes:
-      consul_common: {from: consul_common_link}
-      consul_server: nil
-      consul_client: {from: consul_client_link}
-    properties:
-      consul:
-        agent:
-          services:
-            apiserver: {}
   - name: apiserver
     release: app-autoscaler
     properties:
@@ -48,6 +37,7 @@ instance_groups:
           public_ca_cert: (( vault meta.vault "/autoscaler/certs/ca:certificate" ))
           public_server_cert: (( vault meta.vault "/autoscaler/certs/apiserver_public:certificate" ))
           public_server_key:  (( vault meta.vault "/autoscaler/certs/apiserver_public:key" ))
+          require_consul: false
           scheduler:
             ca_cert: (( vault meta.vault "/autoscaler/certs/ca:certificate" ))
             client_cert: (( vault meta.vault "/autoscaler/certs/scheduler_client:certificate" ))
@@ -106,21 +96,6 @@ instance_groups:
   stemcell: default
   vm_type: (( grab params.autoscaler_scheduler_vm_type || "default" ))
   jobs:
-  - name: consul_agent
-    release: consul
-    consumes:
-      consul_common: {from: consul_common_link}
-      consul_server: nil
-      consul_client: {from: consul_client_link}
-    properties:
-      consul:
-        agent:
-          services:
-            autoscalerscheduler: 
-              check:
-                tcp: 127.0.0.1:6102
-                interval: 30s
-                timeout: 10s
   - name: scheduler
     release: app-autoscaler
     properties:
@@ -131,6 +106,7 @@ instance_groups:
           job_reschedule_maxcount: 6
           notification_reschedule_maxcount: 3
           ca_cert: (( vault meta.vault "/autoscaler/certs/ca:certificate" ))
+          require_consul: false
           server_cert: (( vault meta.vault "/autoscaler/certs/scheduler_server:certificate" ))
           server_key: (( vault meta.vault "/autoscaler/certs/scheduler_server:key" ))
           scaling_engine:
@@ -149,17 +125,6 @@ instance_groups:
   stemcell: default
   vm_type: (( grab params.autoscaler_broker_vm_type || "default" ))
   jobs:
-  - name: consul_agent
-    release: consul
-    consumes:
-      consul_common: {from: consul_common_link}
-      consul_server: nil
-      consul_client: {from: consul_client_link}
-    properties:
-      consul:
-        agent:
-          services:
-            servicebroker: {}
   - name: servicebroker
     release: app-autoscaler
     properties:
@@ -177,6 +142,7 @@ instance_groups:
           username: (( vault meta.vault "/autoscaler/servicebroker_account:username"))
           password: (( vault meta.vault "/autoscaler/servicebroker_account:password"))
           http_request_timeout: 5000
+          require_consul: false
           dashboard_redirect_uri: ""
           catalog: 
             services:
@@ -213,18 +179,6 @@ instance_groups:
   stemcell: default
   vm_type: (( grab params.autoscaler_pruner_vm_type || "default" ))
   jobs:
-  - name: consul_agent
-    release: consul
-    consumes:
-      consul_common: {from: consul_common_link}
-      consul_server: nil
-      consul_client: {from: consul_client_link}
-    properties:
-      consul:
-        agent:
-          services:
-            pruner: 
-              check: {}
   - name: pruner
     release: app-autoscaler
     properties:
@@ -253,21 +207,6 @@ instance_groups:
   stemcell: default
   vm_type: (( grab params.autoscaler_collector_vm_type || "default" ))
   jobs:
-  - name: consul_agent
-    release: consul
-    consumes:
-      consul_common: {from: consul_common_link}
-      consul_server: nil
-      consul_client: {from: consul_client_link}
-    properties:
-      consul:
-        agent:
-          services:
-            metricscollector:
-              check:
-                tcp: 127.0.0.1:6103
-                interval: 30s
-                timeout: 10s
   - name: metricscollector
     release: app-autoscaler
     properties:
@@ -278,6 +217,7 @@ instance_groups:
         instancemetrics_db_connection_config: *databaseConnectionConfig
         policy_db_connection_config: *databaseConnectionConfig
         lock_db_connection_config: *databaseConnectionConfig
+        require_consul: false
         cf: &cfCredentials
           api: (( concat "https://" meta.api_hostname ))
           grant_type: password
@@ -309,18 +249,6 @@ instance_groups:
   stemcell: default
   vm_type: (( grab params.autoscaler_scaler_vm_type || "default" ))
   jobs:
-  - name: consul_agent
-    release: consul
-    consumes:
-      consul_common: {from: consul_common_link}
-      consul_server: nil
-      consul_client: {from: consul_client_link}
-    properties:
-      consul:
-        agent:
-          services:
-            eventgenerator: 
-              check: {}
   - name: eventgenerator
     release: app-autoscaler
     properties:
@@ -331,6 +259,7 @@ instance_groups:
         appmetrics_db_connection_config: *databaseConnectionConfig
         policy_db_connection_config: *databaseConnectionConfig
         lock_db_connection_config: *databaseConnectionConfig
+        require_consul: false
         eventgenerator:
           logging:
             level: debug
@@ -374,21 +303,6 @@ instance_groups:
   stemcell: default
   vm_type: (( grab params.autoscaler_engine_vm_type || "default" ))
   jobs:
-  - name: consul_agent
-    release: consul
-    consumes:
-      consul_common: {from: consul_common_link}
-      consul_server: nil
-      consul_client: {from: consul_client_link}
-    properties:
-      consul:
-        agent:
-          services:
-            scalingengine: 
-              check:
-                tcp: 127.0.0.1:6104
-                interval: 30s
-                timeout: 10s
   - name: scalingengine
     release: app-autoscaler
     properties:
@@ -401,6 +315,7 @@ instance_groups:
         scheduler_db_connection_config: *databaseConnectionConfig
         policy_db_connection_config: *databaseConnectionConfig
         lock_db_connection_config: *databaseConnectionConfig
+        require_consul: false
         cf: *cfCredentials
         scalingengine:
           logging:

@@ -1,5 +1,0 @@
----
-instance_groups:
-- name: blobstore
-  jobs:
-  - (( delete "consul_agent" ))

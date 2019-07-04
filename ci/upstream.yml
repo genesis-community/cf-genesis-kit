@@ -24,9 +24,6 @@ core:
   - name:  cf-syslog-drain
     notes: https://github.com/cloudfoundry/cf-syslog-drain-release/releases/tag/v${version}
 
-  - name:  consul
-    notes: https://github.com/cloudfoundry-incubator/consul-release/releases/tag/v${version}
-
   - name:  diego
     notes: https://github.com/cloudfoundry/diego-release/releases/tag/v${version}
 

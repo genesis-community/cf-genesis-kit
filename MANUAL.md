@@ -94,16 +94,6 @@ runtime config.
 
 ## Sizing & Scaling Parameters
 
-  - `consul_instances` - How many Consul nodes to deploy.
-    Defaults to `3`.
-
-  - `consul_vm_type` - What type of VM to deploy for nodes in the
-    Consul service discovery cluster.  Defaults to `small`.
-
-  - `consul_disk_pool` - The persistent disk pool that Consul VMs will
-    use.  This pool must exist in your cloud config.  Defaults to
-    `consul`.
-
   - `nats_instances` - How many NATS message bus nodes to deploy.
     Defaults to `2`.
 
@@ -185,9 +175,9 @@ We define four networks, which serve to isolate components at
 least into easily firewalled CIDR ranges:
 
   - **cf-core** - Contains core components of the apparatus of
-    Cloud Foundry, namely the Cloud Controller API, Consul, log
-    subsystem, NATS, UAA, etc.  If it doesn't fit into a more
-    specific network, it goes in core.
+    Cloud Foundry, namely the Cloud Controller API, log subsystem,
+    NATS, UAA, etc.  If it doesn't fit into a more specific network,
+    it goes in core.
 
   - **cf-edge** - A more exposed network, for components that
     directly receive traffic from the outside world, including the
@@ -595,28 +585,27 @@ availability sets for things that need HA / fault-tolerance.
 You must, in turn, define the following VM extensions in your
 cloud config:
 
-  1.  `consul_as` - Consul service discovery cluster availability set.
-  2.  `haproxy_as` - HAProxy availability set.
-  3.  `nats_as` - NATS Message Bus cluster availability set.
-  4.  `uaa_as` - UAA nodes availability set.
-  5.  `api_as` - Cloud Controller API nodes availability set.
-  6.  `doppler_as` - Doppler node availability set.
-  7.  `loggregator_tc_as` - Loggregator / Traffic Controller
+  1.  `haproxy_as` - HAProxy availability set.
+  2.  `nats_as` - NATS Message Bus cluster availability set.
+  3.  `uaa_as` - UAA nodes availability set.
+  4.  `api_as` - Cloud Controller API nodes availability set.
+  5.  `doppler_as` - Doppler node availability set.
+  6.  `loggregator_tc_as` - Loggregator / Traffic Controller
       availability set.
-  8.  `router_as` - gorouter availability set.
-  9.  `bbs_as` - Diego BBS availability set.
-  10. `diego_as` - Diego auctioneer availability set.
-  11. `access_as` - SSH Proxy / Access VM availability set.
-  12. `cell_as` - Diego Cell (runtime) availability set.
+  7.  `router_as` - gorouter availability set.
+  8.  `bbs_as` - Diego BBS availability set.
+  9. `diego_as` - Diego auctioneer availability set.
+  10. `access_as` - SSH Proxy / Access VM availability set.
+  11. `cell_as` - Diego Cell (runtime) availability set.
 
 An example `vm_extension` might be:
 
 ```
 ---
 vm_extensions:
-  - name: consul_as
+  - name: uaa_as
     cloud_properties:
-      availability_set: us-west-prod-consul
+      availability_set: us-west-prod-uaa
 
     # etc.
 ```
@@ -633,6 +622,8 @@ vm_extensions:
 
 
 # History
+
+Version 1.5.0 completely removes usage of consul, instead relying on BOSH DNS.
 
 Version 1.0.0 was the first version to support Genesis 2.6 hooks
 for addon scripts and `genesis info`.

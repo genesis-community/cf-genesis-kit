@@ -27,10 +27,6 @@ releases:
   url: https://bosh.io/d/github.com/cloudfoundry/cflinuxfs3-release?v=0.51.0
   version: 0.51.0
   sha1: 97d802e3dff2b9d464327a31c5b4e27d671c45ab
-- name: consul
-  url: https://bosh.io/d/github.com/cloudfoundry-incubator/consul-release?v=193
-  version: "193"
-  sha1: 3596fa1a1692d9e48d2e28789b60e0c72e984d31
 - name: diego
   version: "2.19.0"
   url: https://bosh.io/d/github.com/cloudfoundry/diego-release?v=2.19.0

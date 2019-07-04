@@ -49,13 +49,6 @@ addons:
           deployment: (( grab name ))
           network: (( grab params.cf_internal_network ))
           domain: bosh
-      - domain: consul.service.cf.internal
-        targets:
-        - query: '*'
-          instance_group: consul
-          deployment: (( grab name ))
-          network: (( grab params.cf_internal_network ))
-          domain: bosh
       - domain: credhub.service.cf.internal
         targets:
         - query: '*'

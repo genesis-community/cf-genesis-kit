@@ -46,9 +46,6 @@ params:
   stemcell_os:      ubuntu-xenial
   stemcell_version: latest
 
-  consul_disk_pool:    consul
-
-  consul_instances:      3
   nats_instances:        2
   uaa_instances:         2
   api_instances:         2
@@ -61,7 +58,6 @@ params:
   cell_instances:        3
   syslogger_instances:   2
 
-  consul_vm_type:      small
   nats_vm_type:        small
   uaa_vm_type:         medium
   api_vm_type:         medium
@@ -104,18 +100,6 @@ params:
   autoscaler_network: cf-autoscaler
 
 instance_groups:
-  - name: consul_etcd
-    instances: (( grab params.consul_instances ))
-    persistent_disk_pool: (( grab params.consul_disk_pool ))
-    vm_type: (( grab params.consul_vm_type ))
-    azs: (( grab params.availability_zones || meta.default.azs ))
-    stemcell: default
-    networks:
-      - name: (( grab params.cf_internal_network ))
-    update:
-      max_in_flight: 1
-      serial: true
-
   - name: nats
     instances: (( grab params.nats_instances ))
     vm_type: (( grab params.nats_vm_type ))
@@ -191,7 +175,7 @@ instance_groups:
     migrated_from:
       - name: diego-api
 
-  - name: diego # consul, metron, auctioneer, tps, cc_uploader, route_emitter
+  - name: diego # metron, auctioneer, tps, cc_uploader, route_emitter
     instances: (( grab params.diego_instances ))
     vm_type: (( grab params.diego_vm_type ))
     azs: (( grab params.availability_zones || meta.default.azs ))
