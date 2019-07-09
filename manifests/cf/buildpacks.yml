@@ -1,0 +1,45 @@
+releases:
+- name:    binary-buildpack
+  version: "1.0.31"
+  url:     (( concat "https://bosh.io/d/github.com/cloudfoundry/binary-buildpack-release?v=" releases.binary-buildpack.version ))
+  sha1:    2828671ec47424bbc06d609ef53eea3197a5ffd7
+
+- name:    dotnet-core-buildpack
+  version: "2.1.5"
+  url:     (( concat "https://bosh.io/d/github.com/cloudfoundry/dotnet-core-buildpack-release?v=" releases.dotnet-core-buildpack.version ))
+  sha1:    188dace870c94749a3abc21cb538c08e0f4f3d8c
+
+- name:    go-buildpack
+  version: "1.8.28"
+  url:     (( concat "https://bosh.io/d/github.com/cloudfoundry/go-buildpack-release?v=" releases.go-buildpack.version ))
+  sha1:    cde33a1eda5392dd5c887d4d72568aabefb1f20a
+
+- name:    java-buildpack
+  version: "4.16.1"
+  url:     (( concat "https://bosh.io/d/github.com/cloudfoundry/java-buildpack-release?v=" releases.java-buildpack.version ))
+  sha1:    2e24d3da499fc62fd3f012f13188e7e7e7857c2a
+
+- name:    nodejs-buildpack
+  version: "1.6.32"
+  url:     (( concat "https://bosh.io/d/github.com/cloudfoundry/nodejs-buildpack-release?v=" releases.nodejs-buildpack.version ))
+  sha1:    69c02ed7bfcc145447222b7366d6ad41c07d86e5
+
+- name:    php-buildpack
+  version: "4.3.61"
+  url:     (( concat "https://bosh.io/d/github.com/cloudfoundry/php-buildpack-release?v=" releases.php-buildpack.version ))
+  sha1:    9c5f9f040135fda81da44c6e1b0a1da878b04bfb
+
+- name:    python-buildpack
+  version: "1.6.21"
+  url:     (( concat "https://bosh.io/d/github.com/cloudfoundry/python-buildpack-release?v=" releases.python-buildpack.version ))
+  sha1:    03b8618c5940889529e0aa6c129436e17c2a28d3
+
+- name:    ruby-buildpack
+  version: "1.7.24"
+  url:     (( concat "https://bosh.io/d/github.com/cloudfoundry/ruby-buildpack-release?v=" releases.ruby-buildpack.version ))
+  sha1:    d696be61e29dd0ea60129df148747831feece51f
+
+- name:    staticfile-buildpack
+  version: "1.4.32"
+  url:     (( concat "https://bosh.io/d/github.com/cloudfoundry/staticfile-buildpack-release?v=" releases.staticfile-buildpack.version ))
+  sha1:    5851241b881f3315383fe4d2a50ca89fe2a5d331
