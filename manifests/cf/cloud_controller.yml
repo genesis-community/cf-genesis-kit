@@ -102,6 +102,7 @@ instance_groups:
     properties:
       uaa_client_secret: (( vault meta.vault "/uaa/client_secrets:network_policy" ))
       uaa_ca: (( grab meta.certs.uaa.ca ))
+      enable_space_developer_self_service: true
       database:
         type: (( grab params.policyserverdb_scheme ))
         username: (( grab params.policyserverdb_user ))
