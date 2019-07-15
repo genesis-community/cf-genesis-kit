@@ -85,6 +85,10 @@ runtime config.
     delete unneeded layers as need to keep this space free. `-1`
     disables GC. Defaults to `15360`.
 
+  - `vm_strategy` - The method used for managing vm rotation.  By default, it
+    is `delete-create`, but it can also be set to `create-swap-delete` to
+    minimize downtime.
+
     [2]: (#branding)
 
 ## Deployment Parameters

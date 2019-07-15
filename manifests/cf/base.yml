@@ -58,6 +58,8 @@ params:
   cell_instances:        3
   syslogger_instances:   2
 
+  vm_strategy: delete-create # also allows `create-swap-delete`
+
   nats_vm_type:        small
   uaa_vm_type:         medium
   api_vm_type:         medium
@@ -224,6 +226,7 @@ update:
   serial: false
   canary_watch_time: 30000-120000
   update_watch_time: 30000-120000
+  vm_strategy: (( grab params.vm_strategy ))
 
 stemcells:
   - alias: default
