@@ -37,7 +37,6 @@ instance_groups:
     properties:
       capi:
         tps:
-          listener_enabled: false
           bbs:
             ca_cert: (( grab meta.certs.diego.ca ))
             .: (( inject meta.certs.diego.bbs.client ))
