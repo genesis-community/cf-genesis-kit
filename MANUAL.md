@@ -514,6 +514,11 @@ the service to each app manually. More information about App
 Autoscaler can be found on [App Autoscaler's Policy
 Documentation](https://git.io/fNt3l)
 
+# Zero-downtime App Deployments
+
+This kit allows for using the v3 api's [Zero Downtime (ZDT) deployments](https://docs.cloudfoundry.org/devguide/deploy-apps/rolling-deploy.html) via the
+capi release's cc_deployment_updater.
+
 # Branding
 An operator may need to set the branding options available through a
 typical UAA deployment. Genesis exposes these configuration options

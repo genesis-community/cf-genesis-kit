@@ -70,6 +70,12 @@ certificates:
       cc_uploader_server:
         valid_for: 1y
         names: ["cc-uploader.service.cf.internal"]
+      cc_deployment_updater:
+        valid_for: 1y
+        names: [ "cc_deployment_updater" ]
+      cc_deployment_updater_server:
+        valid_for: 1y
+        names: ["cc-uploader.service.cf.internal"]
       syslogdrainbinder:
         valid_for: 1y
         names: [ "syslogdrainbinder" ]

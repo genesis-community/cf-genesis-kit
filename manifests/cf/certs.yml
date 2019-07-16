@@ -62,6 +62,14 @@ meta:
           client_cert: (( vault meta.vault "/diego/certs/cc_uploader:certificate" ))
           client_key: (( vault meta.vault "/diego/certs/cc_uploader:key" ))
 
+      cc_deployment_updater:
+        server:
+          server_cert: (( vault meta.vault "/diego/certs/cc_deployment_updater_server:certificate" ))
+          server_key:  (( vault meta.vault "/diego/certs/cc_deployment_updater_server:key" ))
+        client:
+          server_cert: (( vault meta.vault "/diego/certs/cc_deployment_updater:certificate" ))
+          server_key:  (( vault meta.vault "/diego/certs/cc_deployment_updater:key" ))
+
       rep:
         server:
           server_cert: (( vault meta.vault "/diego/certs/rep:certificate" ))

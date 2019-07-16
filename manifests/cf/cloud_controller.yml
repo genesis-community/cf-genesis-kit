@@ -75,6 +75,19 @@ instance_groups:
             scope: openid,cloud_controller_service_permissions.read
             secret: (( grab meta.uaa.cc_broker_secret ))
 
+  - name: cc_deployment_updater
+    release: capi
+    properties:
+      cc:
+        db_encryption_key: (( vault meta.vault "/cc:db_encryption_key" ))
+        temporary_disable_deployments: (( grab meta.cc.temporary_disable_deployments ))
+        mutual_tls:
+          ca_cert: (( grab meta.certs.diego.ca ))
+          private_key: (( grab meta.certs.diego.cc_deployment_updater_server.key ))
+          public_cert: (( grab meta.certs.diego.cc_deployment_updater.cert ))
+      ccdb:
+        .: (( inject meta.ccdb ))
+
   - name: statsd_injector
     release: statsd-injector
     properties: (( grab meta.statsd_injector ))
@@ -110,7 +123,7 @@ instance_groups:
         host: (( grab params.policyserverdb_host ))
         port: (( grab params.policyserverdb_port ))
         name: (( grab params.policyserverdb_name ))
-    
+
   - name: policy-server-internal
     release: cf-networking
     properties:
@@ -262,6 +275,7 @@ meta:
       rules: (( grab params.cf_public_ips ))
 
     volume_services_enabled: true
+    temporary_disable_deployments: (( grab params.temporary_disable_cc_deployments || "false" ))
 
   statsd_injector:
     enable_consul_service_registration: false
