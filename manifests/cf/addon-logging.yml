@@ -21,3 +21,67 @@ addons:
         deployment: (( grab name ))
       metron_endpoint:
         shared_secret: (( grab meta.loggregator.endpoint_secret ))
+  - name: loggr-expvar-forwarder
+    release: loggregator-agent
+    properties:
+      log_agent:
+        ca_cert: (( grab meta.certs.loggregator.ca ))
+        client_cert: (( grab meta.certs.loggregator.expvar_forwarder.cert ))
+        client_key: (( grab meta.certs.loggregator.expvar_forwarder.key ))
+      default_source_id: metron
+      counters:
+      - addr: http://127.0.0.1:14824/debug/vars
+        name: dropped
+        template: "{{.Agent.Dropped}}"
+      - addr: http://127.0.0.1:14824/debug/vars
+        name: dropped
+        template: "{{.Agent.DroppedEgressV2}}"
+        tags:
+          direction: egress
+          metric_version: "2.0"
+      - addr: http://127.0.0.1:14824/debug/vars
+        name: dropped
+        template: "{{.Agent.DroppedIngressV2}}"
+        tags:
+          direction: ingress
+          metric_version: "2.0"
+
+      - addr: http://127.0.0.1:14824/debug/vars
+        name: egress
+        template: "{{.Agent.Egress}}"
+      - addr: http://127.0.0.1:14824/debug/vars
+        name: egress
+        template: "{{.Agent.EgressV2}}"
+        tags:
+          metric_version: "2.0"
+
+      - addr: http://127.0.0.1:14824/debug/vars
+        name: ingress
+        template: "{{.Agent.Ingress}}"
+      - addr: http://127.0.0.1:14824/debug/vars
+        name: ingress
+        template: "{{.Agent.IngressV2}}"
+        tags:
+          metric_version: "2.0"
+
+      gauges:
+      - addr: http://127.0.0.1:14824/debug/vars
+        name: average_envelopes
+        unit: bytes/minute
+        template: "{{.Agent.AverageEnvelope}}"
+        tags:
+          loggregator: v1
+      - addr: http://127.0.0.1:14824/debug/vars
+        name: average_envelopes
+        unit: bytes/minute
+        template: "{{.Agent.AverageEnvelopeV2}}"
+        tags:
+          metric_version: "2.0"
+          loggregator: v2
+
+      - addr: http://127.0.0.1:14824/debug/vars
+        name: origin_mappings
+        unit: bytes/minute
+        template: "{{.Agent.OriginMappingsV2}}"
+        tags:
+          metric_version: "2.0"

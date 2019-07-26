@@ -144,6 +144,9 @@ certificates:
       rlp_gateway:
         valid_for: 1y
         names: ["rlp_gateway"]
+      expvar_forwarder:
+        valid-for: 1y
+        names: ["extvar_forwarder"]
 
 
     dns_healthcheck_tls:
