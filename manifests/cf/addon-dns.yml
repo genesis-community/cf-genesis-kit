@@ -1,4 +1,7 @@
 ---
+features:
+  use_dns_addresses: true
+
 addons:
 - (( append ))
 - name: bosh-dns-aliases
