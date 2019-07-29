@@ -17,9 +17,6 @@ instance_groups:
         cleanup_process_dirs_on_wait: true
         deny_networks:
         - 0.0.0.0/0
-        persistent_image_list:
-        - cflinuxfs2:/var/vcap/packages/cflinuxfs2/rootfs.tar
-        - cflinuxfs3:/var/vcap/packages/cflinuxfs3/rootfs.tar
       grootfs:
         reserved_space_for_other_jobs_in_mb: (( grab params.grootfs_reserved_space || 15360 ))
 
