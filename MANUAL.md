@@ -519,6 +519,17 @@ Documentation](https://git.io/fNt3l)
 This kit allows for using the v3 api's [Zero Downtime (ZDT) deployments](https://docs.cloudfoundry.org/devguide/deploy-apps/rolling-deploy.html) via the
 capi release's cc_deployment_updater.
 
+# DNS
+
+This release makes use of the BOSH DNS, and uses DNS addresses instead of IP
+addresses.  If IP addresses are needed instead, you can turn off this feature
+for for this deployment by setting `features.use_dns_addresses` to `false`.
+You may also have to turn off `director.local_dns.use_dns_addresses` as well.
+
+See [Native DNS Support](https://bosh.io/docs/dns) for more information about
+DNS, and [here](https://bosh.io/docs/dns/#links) for specific information
+about using DNS entries in links.
+
 # Branding
 An operator may need to set the branding options available through a
 typical UAA deployment. Genesis exposes these configuration options
