@@ -1,0 +1,11 @@
+instance_groups:
+- name: cell
+  jobs:
+  - name: rep
+    properties:
+      containers:
+        proxy:
+          enabled: true
+          require_and_verify_client_certificates: true
+          trusted_ca_certificates: (( grab meta.certs.diego.ca ))
+          verify_subject_alt_name: gorouter.service.cf.internal

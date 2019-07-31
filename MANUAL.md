@@ -412,6 +412,11 @@ Certificates will then be automatically generated with the proper
 subject alternate names for all of the domains (system and apps)
 that Cloud Foundry will use.
 
+## Container Routing Integrity
+
+The `container-routing-integrity` feature enables TLS Validation of the cells.
+See [HTTP Routing#With TLS Enabled](https://docs.cloudfoundry.org/concepts/http-routing.html#with-tls)
+
 ## Small Footprint Cloud Foundry
 
 Sometimes, you may want to sacrifice redundancy and high
