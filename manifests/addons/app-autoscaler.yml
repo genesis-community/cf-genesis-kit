@@ -314,6 +314,7 @@ instance_groups:
         scheduler_db_connection_config: *databaseConnectionConfig
         policy_db_connection_config: *databaseConnectionConfig
         lock_db_connection_config: *databaseConnectionConfig
+        require_consul: false
         cf: *cfCredentials
         scalingengine:
           logging:
