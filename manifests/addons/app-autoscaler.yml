@@ -1,8 +1,10 @@
 releases:
-- name: app-autoscaler
-  url: https://app-autoscaler-boshrelease.s3.amazonaws.com/app-autoscaler.tgz
-  sha1: 7be27f150828f3f09499c72ef18dce4b4f5bd18d
-  version: 0+dev.4
+- name: "app-autoscaler"
+  version: "1.2.2"
+  url: "https://bosh.io/d/github.com/cloudfoundry-incubator/app-autoscaler-release?v=1.2.2"
+  sha1: "a40251667ba15568f793a1c53d6207e10497eebf"
+- name: bpm
+  version: 1.1.1
 
 exodus:
   autoscaler_enabled: true
@@ -25,12 +27,17 @@ instance_groups:
     properties:
       autoscaler:
         api_server:
+          cache_ttl: 600
+          http_client_timeout: 60000
+          service_offering_enabled: true
           db_config: &dbConfig
             idle_timeout: 1000
             max_connections: 10
             min_connections: 0
           port: 6100
           publicPort: &apiServerPublicPort 6106
+          health:
+            port: 6200
           ca_cert: (( vault meta.vault "/autoscaler/certs/ca:certificate" ))
           server_cert: (( vault meta.vault "/autoscaler/certs/apiserver_server:certificate" ))
           server_key:  (( vault meta.vault "/autoscaler/certs/apiserver_server:key" ))
@@ -50,6 +57,10 @@ instance_groups:
             ca_cert: (( vault meta.vault "/autoscaler/certs/ca:certificate" ))
             client_cert: (( vault meta.vault "/autoscaler/certs/metricscollector_client:certificate" ))
             client_key: (( vault meta.vault "/autoscaler/certs/metricscollector_client:key" ))
+          eventgenerator:
+            ca_cert: (( vault meta.vault "/autoscaler/certs/ca:certificate" ))
+            client_cert: (( vault meta.vault "/autoscaler/certs/eventgenerator_client:certificate" ))
+            client_key: (( vault meta.vault "/autoscaler/certs/eventgenerator_client:key" ))    
           service_broker:
             ca_cert: (( vault meta.vault "/autoscaler/certs/ca:certificate" ))
             client_cert: (( vault meta.vault "/autoscaler/certs/servicebroker_client:certificate" ))
@@ -72,6 +83,9 @@ instance_groups:
         cf:
           api: (( concat "https://" meta.api_hostname ))
           skip_ssl_validation: (( grab params.skip_ssl_validation ))
+          grant_type: client_credentials
+          client_id: app_autoscaler
+          secret: (( vault meta.vault "/uaa/client_secrets:app_autoscaler" )) 
   - name: route_registrar
     release: routing
     consumes:
@@ -101,7 +115,9 @@ instance_groups:
     properties:
       autoscaler:
         scheduler:
-          port: 6102
+          port: &schedulerPort 6102
+          health:
+            port: &schedulerHealthPort 6202 
           job_reschedule_interval_millisecond: 10000
           job_reschedule_maxcount: 6
           notification_reschedule_maxcount: 3
@@ -115,7 +131,6 @@ instance_groups:
             client_key: (( vault meta.vault "/autoscaler/certs/scalingengine_client:key" ))
         scheduler_db: *database
         policy_db: *database
-      
 # Service-Broker Instance Group
 - name: as-broker
   azs: (( grab params.availability_zones || meta.default.azs ))
@@ -133,6 +148,8 @@ instance_groups:
           db_config: *dbConfig
           publicPort: &servicebrokerPort 6101
           port: 6107
+          health:
+            port: 6201
           ca_cert: (( vault meta.vault "/autoscaler/certs/ca:certificate" ))
           server_cert: (( vault meta.vault "/autoscaler/certs/servicebroker_server:certificate" ))
           server_key: (( vault meta.vault "/autoscaler/certs/servicebroker_server:key" ))
@@ -170,33 +187,6 @@ instance_groups:
             component: autoscaler_service_broker
           uris:
             - (( grab meta.broker_url ))
-# Pruner Instance Group
-- name: as-pruner
-  azs: (( grab params.availability_zones || meta.default.azs ))
-  instances: (( grab params.autoscaler_pruner_instances || 1 ))
-  networks:
-  - name: (( grab params.autoscaler_network || "cf-autoscaler"  )) 
-  stemcell: default
-  vm_type: (( grab params.autoscaler_pruner_vm_type || "default" ))
-  jobs:
-  - name: pruner
-    release: app-autoscaler
-    properties:
-      autoscaler:
-        appmetrics_db: *database
-        instancemetrics_db: *database
-        scalingengine_db: *database
-        appmetrics_db_connection_config: *databaseConnectionConfig
-        instancemetrics_db_connection_config: *databaseConnectionConfig
-        scalingengine_db_connection_config: *databaseConnectionConfig
-        lock_db: *database
-        pruner:
-          db_lock: 
-            ttl: 15s
-            retry_interval: 5s
-          enable_db_lock: false
-          logging:
-            level: debug 
 
 # Metric-collector Instance Group
 - name: as-collector
@@ -223,14 +213,16 @@ instance_groups:
           grant_type: password
           username: admin
           password: (( vault meta.vault "/admin_user:password" ))
-          client_id: ""
-          secret: ""
+          client_id: app_autoscaler
+          secret: (( vault meta.vault "/uaa/client_secrets:app_autoscaler" ))
           skip_ssl_validation: (( grab params.skip_ssl_validation ))
         metricscollector:
           logging:
             level: debug
           server:
             port: &metricsCollectorPort 6103
+          health: 
+            port: &metricsCollectorHealthPort 6203
           collector:
             refresh_interval: 60s
             collect_interval: 30s
@@ -263,6 +255,13 @@ instance_groups:
         eventgenerator:
           logging:
             level: debug
+          server:
+            port: &eventGeneratorPort 6105
+          health:
+            port: &eventGeneratorHealthPort 6205
+          ca_cert: (( vault meta.vault "/autoscaler/certs/ca:certificate" ))
+          server_cert: (( vault meta.vault "/autoscaler/certs/eventgenerator_server:certificate" ))
+          server_key: (( vault meta.vault "/autoscaler/certs/eventgenerator_server:key" ))
           aggregator:
             aggregator_execute_interval: 40s
             policy_poller_interval: 40s
@@ -283,7 +282,7 @@ instance_groups:
           enable_db_lock: false
           scaling_engine:
             host: scalingengine.service.cf.internal
-            port: 6104
+            port: *scalingEnginePort
             ca_cert: (( vault meta.vault "/autoscaler/certs/ca:certificate" ))
             client_cert: (( vault meta.vault "/autoscaler/certs/scalingengine_client:certificate" ))
             client_key: (( vault meta.vault "/autoscaler/certs/scalingengine_client:key" ))
@@ -315,13 +314,14 @@ instance_groups:
         scheduler_db_connection_config: *databaseConnectionConfig
         policy_db_connection_config: *databaseConnectionConfig
         lock_db_connection_config: *databaseConnectionConfig
-        require_consul: false
         cf: *cfCredentials
         scalingengine:
           logging:
             level: debug
           server:
-            port: 6104
+            port: &scalingEnginePort 6104
+          health:
+            port: &scalingEngineHealthPort 6204
           defaultCoolDownSecs: 300
           lockSize: 32
           ca_cert:  (( vault meta.vault "/autoscaler/certs/ca:certificate" ))
@@ -332,6 +332,51 @@ instance_groups:
             retry_interval: 5s
           enable_db_lock: true
 
+#as-operator
+- name: as-operator
+  azs: (( grab params.availability_zones || meta.default.azs ))
+  instances: (( grab params.autoscaler_engine_instances || 1 ))
+  networks:
+  - name: (( grab params.autoscaler_network || "cf-autoscaler"  ))
+  stemcell: default
+  vm_type: (( grab params.autoscaler_engine_vm_type || "default" ))
+  jobs:
+  - name: operator
+    release: app-autoscaler
+    properties:
+      autoscaler:
+        cf: *cfCredentials
+        policy_db: *database
+        appmetrics_db: *database
+        instancemetrics_db: *database
+        scalingengine_db: *database
+        policy_db_connection_config: *databaseConnectionConfig
+        appmetrics_db_connection_config: *databaseConnectionConfig
+        instancemetrics_db_connection_config: *databaseConnectionConfig
+        scalingengine_db_connection_config: *databaseConnectionConfig
+        lock_db: *database
+        require_consul: false
+        operator:
+          http_client_timeout: 60s
+          app_sync_interval: 24h
+          scaling_engine:
+            port: *scalingEnginePort
+            ca_cert: (( vault meta.vault "/autoscaler/certs/ca:certificate" ))
+            client_cert: (( vault meta.vault "/autoscaler/certs/scalingengine_client:certificate" ))
+            client_key: (( vault meta.vault "/autoscaler/certs/scalingengine_client:key" ))        
+          scheduler:
+            port: *schedulerPort
+            ca_cert: (( vault meta.vault "/autoscaler/certs/ca:certificate" ))
+            client_cert: (( vault meta.vault "/autoscaler/certs/scheduler_client:certificate" ))
+            client_key: (( vault meta.vault "/autoscaler/certs/scheduler_client:key" ))
+          db_lock: 
+            ttl: 15s
+            retry_interval: 5s
+          enable_db_lock: false
+          logging:
+            level: debug 
+          health:
+            port: &operatorHealthPort 6208          
 
 meta:
   broker_url: (( grab params.autoscaler_broker_url || meta.broker_url_default ))
