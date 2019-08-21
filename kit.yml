@@ -240,6 +240,7 @@ credentials:
     uaa/jwt_signing_key: rsa 4096 fixed
     uaa/client_secrets:
       admin_client:   random 64
+      app_autoscaler: random 64
       cc_broker:      random 64
       cc_service_key_client: random 64
       cc_routing:     random 64
