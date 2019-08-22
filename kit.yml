@@ -111,7 +111,7 @@ certificates:
         names: [ "api.${params.base_domain}", "cloud-controller-ng.service.cf.internal" ]
       loggregator_rlp_gateway:
         valid_for: 1y
-        names: [ "rlp-gateway" ]
+        names: [ "rlp-gateway", "log-api.service.cf.internal" ]
     diego/certs/instance_identity:
       ca: { valid_for: 1y }
 
@@ -119,31 +119,31 @@ certificates:
       ca: { valid_for: 1y }
       doppler:
         valid_for: 1y
-        names: [ "doppler" ]
+        names: [ "doppler", "doppler.service.cf.internal" ]
       metron:
         valid_for: 1y
         names: [ "metron" ]
       trafficcontroller:
         valid_for: 1y
-        names: [ "trafficcontroller" ]
+        names: [ "trafficcontroller", "log-api.service.cf.internal" ]
       statsdinjector:
         valid_for: 1y
-        names: [ "statsdinjector"]
+        names: [ "statsdinjector", "uaa.service.cf.internal" ]
       syslogger_server:
         valid_for: 1y
-        names: [ "ss-adapter" ]
+        names: [ "ss-adapter", "adapter.service.cf.internal" ]
       syslogger_rlp:
         valid_for: 1y
-        names: [ "ss-adapter-rlp", "reverselogproxy" ]
+        names: [ "ss-adapter-rlp", "reverselogproxy", "adapter.service.cf.internal" ]
       syslogger_client:
         valid_for: 1y
-        names: [ "ss-scheduler" ]
+        names: [ "ss-scheduler", "scheduler.service.cf.internal" ]
       log_cache:
         valid_for: 1y
-        names: ["log-cache", "log_cache", "logcache"]
+        names: ["log-cache", "log_cache", "logcache", "doppler.service.cf.internal" ]
       rlp_gateway:
         valid_for: 1y
-        names: ["rlp_gateway"]
+        names: ["rlp_gateway", "log-api.service.cf.internal" ]
       expvar_forwarder:
         valid-for: 1y
         names: ["extvar_forwarder"]
