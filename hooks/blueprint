@@ -14,7 +14,8 @@ validate_features nfs-volume-services small-footprint \
                   autoscaler autoscaler-postgres \
                   haproxy-tls haproxy-notls omit-haproxy \
                   migrate-1.3-without-consul\
-                  container-routing-integrity
+                  container-routing-integrity\
+                  native-garden-runc
 
 merge=( manifests/cf/base.yml
         manifests/cf/releases.yml
@@ -150,7 +151,7 @@ fi
 
 for want in ${GENESIS_REQUESTED_FEATURES}; do
   case "$want" in
-  azure|nfs-volume-services|container-routing-integrity)
+  azure|nfs-volume-services|container-routing-integrity|native-garden-runc)
     merge+=( manifests/addons/$want.yml )
     ;;
 

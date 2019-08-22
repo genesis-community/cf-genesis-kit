@@ -8,10 +8,13 @@ instance_groups:
   - name: cflinuxfs3-rootfs-setup
     release: cflinuxfs3
 
+  - name: containerd
+    release: garden-runc
   - name: garden
     release: garden-runc
     properties:
       garden:
+        experimental_containerd_mode: true
         default_container_grace_time: 0
         destroy_containers_on_start: true
         cleanup_process_dirs_on_wait: true
