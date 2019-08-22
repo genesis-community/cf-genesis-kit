@@ -11,12 +11,6 @@ addons:
         ca_cert: (( grab meta.certs.loggregator.ca.certificate ))
         cert:    (( grab meta.certs.loggregator.forwarder_agent.certificate ))
         key:     (( grab meta.certs.loggregator.forwarder_agent.private_key ))
-      api:
-        tls:
-          ca_cert: (( grab meta.certs.diego.ca.certificate))
-          cert:    (( grab meta.certs.diego.forwarder_api_tls.certificate))
-          key:     (( grab meta.certs.diego.forwarder_api_tls.private_key))
-          cn:      "cloud-controller-ng.service.cf.internal"
 
 - name: udp_forwarder
   include:

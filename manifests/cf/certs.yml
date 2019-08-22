@@ -83,10 +83,6 @@ meta:
           cert: (( vault meta.vault "/diego/certs/syslogdrainbinder:certificate" ))
           key: (( vault meta.vault "/diego/certs/syslogdrainbinder:key" ))
 
-      forwarder_api_tls:
-        cert: (( vault meta.vault "/loggregator/certs/forwarder_api_tls:certificate" ))
-        key: (( vault meta.vault "/loggregator/certs/forwarder_api_tls:key" ))
-
       tps:
         client:
           client_cert: (( vault meta.vault "/diego/certs/rep_client:certificate" ))
