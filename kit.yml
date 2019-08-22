@@ -262,6 +262,7 @@ credentials:
       tcp_emitter:    random 64
       tcp_router:     random 64
       network_policy: random 64
+      cf_smoke_tests: random 64
 
     cc:
       directory_key:     random 16 allowed-chars a-z0-9 fixed

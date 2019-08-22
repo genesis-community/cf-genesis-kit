@@ -40,6 +40,10 @@ instance_groups:
             refresh-token-validity: (( grab meta.uaa.refresh_token_validity ))
             scope: network.admin,network.write,cloud_controller.read,cloud_controller.write,openid,password.write,cloud_controller.admin,scim.read,scim.write,doppler.firehose,uaa.user,routing.router_groups.read,routing.router_groups.write,cloud_controller.admin_read_only,cloud_controller.global_auditor,perm.admin
             secret: ''
+          cf_smoke_tests:
+            authorities: cloud_controller.admin
+            authorized-grant-types: client_credentials
+            secret: (( grab meta.uaa.cf_smoke_tests ))
           cloud_controller_username_lookup:
             authorities: scim.userids
             authorized-grant-types: client_credentials
@@ -202,6 +206,7 @@ meta:
     tcp_emitter_secret:    (( vault meta.vault "/uaa/client_secrets:tcp_emitter" ))
     tcp_router_secret:     (( vault meta.vault "/uaa/client_secrets:tcp_router" ))
     network_policy_secret: (( vault meta.vault "/uaa/client_secrets:network_policy" ))
+    cf_smoke_tests:        (( vault meta.vault "/uaa/client_secrets:cf_smoke_tests" ))
 
     jwt_private_key:  (( vault meta.vault "/uaa/jwt_signing_key:private" ))
     ssl_cert:         (( grab meta.certs.uaa.server.cert ))

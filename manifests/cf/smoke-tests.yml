@@ -8,8 +8,8 @@ instance_groups:
       smoke_tests:
         api: (( concat "https://api." params.system_domain ))
         apps_domain: (( grab params.apps_domains[0] ))
-        user:     (( grab meta.admin.user ))
-        password: (( grab meta.admin.password ))
+        client: cf_smoke_tests
+        client_secret: (( grab meta.uaa.cf_smoke_tests ))
         org: cf_smoke_tests_org
         space: cf_smoke_tests_space
         cf_dial_timeout_in_seconds: 300
