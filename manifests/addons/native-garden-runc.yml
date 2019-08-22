@@ -5,4 +5,4 @@ instance_groups:
     - name: garden
       properties:
         garden:
-          (( prune "experimental_containerd_mode" ))
+          (( prune "containerd_mode" ))
