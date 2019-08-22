@@ -112,6 +112,9 @@ certificates:
       loggregator_rlp_gateway:
         valid_for: 1y
         names: [ "rlp-gateway", "log-api.service.cf.internal" ]
+      ssh_proxy_backends_tls:
+        valid_for: 1y
+        names: [ "ssh_proxy_backends_tls", "ssh-proxy.service.cf.internal" ]
     diego/certs/instance_identity:
       ca: { valid_for: 1y }
 

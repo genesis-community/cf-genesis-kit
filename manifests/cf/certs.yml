@@ -92,6 +92,11 @@ meta:
         server_cert: (( vault meta.vault "/diego/certs/locket_server:certificate" ))
         server_key: (( vault meta.vault "/diego/certs/locket_server:key" ))
 
+        ssh_proxy_backends_tls:
+          client:
+            cert: (( vault meta.vault "/diego/certs/ssh_proxy_backends_tls:certificate" ))
+            key: (( vault meta.vault "/diego/certs/ssh_proxy_backends_tls:key" ))
+
     loggregator:
       ca: (( vault meta.vault "/loggregator/certs/ca:certificate" ))
 

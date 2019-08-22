@@ -8,4 +8,16 @@ instance_groups:
           enabled: true
           require_and_verify_client_certificates: true
           trusted_ca_certificates: (( grab meta.certs.diego.ca ))
-          verify_subject_alt_name: gorouter.service.cf.internal
+          verify_subject_alt_name:
+            - gorouter.service.cf.internal
+            - ssh-proxy.service.cf.internal
+- name: access
+  jobs:
+  - name: ssh_proxy
+    properties:
+      backends:
+        tls:
+          enabled: true
+          ca_certificate: (( grab meta.certs.diego.ca ))
+          client_certificate: (( grab meta.certs.diego.ssh_proxy_backends_tls.client.cert ))
+          client_private_key: (( grab meta.certs.diego.ssh_proxy_backends_tls.client.key ))
