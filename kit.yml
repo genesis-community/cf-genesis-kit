@@ -112,9 +112,13 @@ certificates:
       loggregator_rlp_gateway:
         valid_for: 1y
         names: [ "rlp-gateway", "log-api.service.cf.internal" ]
+      forwarder_api_tls:
+        valid_for: 1y
+        names: [ "forwarder" ]
       ssh_proxy_backends_tls:
         valid_for: 1y
         names: [ "ssh_proxy_backends_tls", "ssh-proxy.service.cf.internal" ]
+
     diego/certs/instance_identity:
       ca: { valid_for: 1y }
 
@@ -150,6 +154,9 @@ certificates:
       expvar_forwarder:
         valid-for: 1y
         names: ["extvar_forwarder"]
+      forwarder_agent:
+        valid-for: 1y
+        names: [ "metron" ]
 
 
     dns_healthcheck_tls:

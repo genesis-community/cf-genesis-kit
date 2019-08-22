@@ -1,0 +1,41 @@
+addons:
+- name: forwarder_agent
+  include:
+    stemcell:
+    - os: ubuntu-xenial
+  jobs:
+  - name: loggr-forwarder-agent
+    release: loggregator-agent
+    properties:
+      tls:
+        ca_cert: (( grab meta.certs.loggregator.ca.certificate ))
+        cert:    (( grab meta.certs.loggregator.forwarder_agent.certificate ))
+        key:     (( grab meta.certs.loggregator.forwarder_agent.private_key ))
+      api:
+        tls:
+          ca_cert: (( grab meta.certs.diego.ca.certificate))
+          cert:    (( grab meta.certs.diego.forwarder_api_tls.certificate))
+          key:     (( grab meta.certs.diego.forwarder_api_tls.private_key))
+          cn:      "cloud-controller-ng.service.cf.internal"
+
+- name: udp_forwarder
+  include:
+    stemcell:
+    - os: ubuntu-xenial
+  jobs:
+  - name: loggr-udp-forwarder
+    release: loggregator-agent
+    properties:
+      loggregator:
+        ingress_port: 3459
+        tls:
+          ca_cert: (( grab meta.certs.loggregator.ca ))
+          cert: (( grab meta.certs.loggregator.metron.server.cert ))
+          key: (( grab meta.certs.loggregator.metron.server.key ))
+
+- name: loggregator_agent
+  jobs:
+  - name: loggregator_agent
+    properties:
+      grpc_port:   3459
+      disable_udp: true

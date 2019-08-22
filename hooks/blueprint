@@ -15,7 +15,8 @@ validate_features nfs-volume-services small-footprint \
                   haproxy-tls haproxy-notls omit-haproxy \
                   migrate-1.3-without-consul\
                   container-routing-integrity\
-                  native-garden-runc
+                  native-garden-runc\
+                  loggregator-forwarder-agent
 
 merge=( manifests/cf/base.yml
         manifests/cf/releases.yml
