@@ -20,6 +20,7 @@ instance_groups:
             require_ssl: true
             ca_cert: (( grab meta.certs.diego.ca ))
           enable_cf_auth: true
+          disable_healthcheck_server: true
           host_key: (( vault meta.vault "/ssh_proxy/host_key:private" ))
           uaa_secret: (( grab meta.uaa.ssh_proxy_secret ))
           uaa:

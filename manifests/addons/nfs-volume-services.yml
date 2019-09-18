@@ -1,4 +1,9 @@
 ---
+
+meta:
+  cc:
+    volume_services_enabled: true
+
 instance_groups:
   - name: cell
     jobs:
@@ -8,6 +13,6 @@ instance_groups:
 
 releases:
   - name: nfs-volume
-    version: 1.0.7
-    sha1: f609a25be32e1fc634e683cc3a89c0aaad1e70f0
-    url: https://bosh.io/d/github.com/cloudfoundry-incubator/nfs-volume-release?v=1.0.7
+    version: 2.2.0
+    url: (( concat "https://bosh.io/d/github.com/cloudfoundry/nfs-volume-release?v=" releases.nfs-volume.version ))
+    sha1: 0302809949ab4978eb76d02f47f21ed8a68ea0f6

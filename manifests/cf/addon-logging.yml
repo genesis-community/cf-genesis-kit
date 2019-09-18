@@ -25,9 +25,9 @@ addons:
     release: loggregator-agent
     properties:
       log_agent:
-        ca_cert: (( grab meta.certs.loggregator.ca ))
-        client_cert: (( grab meta.certs.loggregator.expvar_forwarder.cert ))
-        client_key: (( grab meta.certs.loggregator.expvar_forwarder.key ))
+        ca_cert: (( vault meta.vault "/loggregator/certs/ca:certificate" ))
+        client_cert: (( vault meta.vault "/loggregator/certs/expvar_forwarder:certificate" ))
+        client_key: (( vault meta.vault "/loggregator/certs/expvar_forwarder:key" ))
       default_source_id: metron
       counters:
       - addr: http://127.0.0.1:14824/debug/vars

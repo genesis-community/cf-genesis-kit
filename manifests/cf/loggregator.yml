@@ -36,6 +36,8 @@ instance_groups:
       ssl:
         skip_cert_verify: (( grab params.skip_ssl_validation ))
       loggregator:
+        outgoing_cert: (( grab meta.certs.loggregator.trafficcontroller.server.cert ))
+        outgoing_key: (( grab meta.certs.loggregator.trafficcontroller.server.key ))
         tls:
           ca_cert: (( grab meta.certs.loggregator.ca ))
           trafficcontroller: (( grab meta.certs.loggregator.trafficcontroller.server ))
@@ -82,7 +84,6 @@ instance_groups:
     provides:
       log-cache: {shared: true}
     properties:
-      egress_port: 8080
       health_addr: localhost:6060
       tls:
         ca_cert: (( grab meta.certs.loggregator.ca ))
@@ -173,6 +174,10 @@ instance_groups:
         source_id: log-cache
         addr: http://localhost:6060/debug/vars
         template: "{{.LogCache.AvailableSystemMemory}}"
+      - name: uptime
+        source_id: log-cache
+        addr: http://localhost:6060/debug/vars
+        template: "{{.LogCache.Uptime}}"
       - name: promql-instant-query-time
         source_id: log-cache
         addr: http://localhost:6060/debug/vars
@@ -211,6 +216,8 @@ instance_groups:
         ca_cert: (( grab meta.certs.diego.ca ))
         common_name: cloud-controller-ng.service.cf.internal
       proxy_port: 8083
+      external_cert: (( vault meta.vault "/loggregator/certs/log_cache:certificate" ))
+      external_key:  (( vault meta.vault "/loggregator/certs/log_cache:key" ))
       uaa:
         ca_cert: (( grab meta.certs.uaa.ca ))
         client_id: doppler
@@ -222,11 +229,6 @@ instance_groups:
     properties:
       route_registrar:
         routes:
-        - name: loggregator
-          port: 8080
-          registration_interval: 20s
-          uris:
-          - (( concat "loggregator." params.system_domain ))
         - name: doppler
           port: 8081
           registration_interval: 20s
@@ -235,7 +237,9 @@ instance_groups:
           - (( concat "*.doppler." params.system_domain ))
         - name: log-cache-reverse-proxy
           port: 8083
+          tls_port: 8083
           registration_interval: 20s
+          server_cert_domain_san: (( concat "log-cache." params.system_domain ))
           uris:
           - (( concat "log-cache." params.system_domain ))
           - (( concat "*.log-cache." params.system_domain ))

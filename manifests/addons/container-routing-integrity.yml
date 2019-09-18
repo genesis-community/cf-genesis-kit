@@ -7,7 +7,8 @@ instance_groups:
         proxy:
           enabled: true
           require_and_verify_client_certificates: true
-          trusted_ca_certificates: (( grab meta.certs.diego.ca ))
+          trusted_ca_certificates:
+            - (( vault meta.vault "/diego/certs/instance_identity:certificate" ))
           verify_subject_alt_name:
             - gorouter.service.cf.internal
             - ssh-proxy.service.cf.internal

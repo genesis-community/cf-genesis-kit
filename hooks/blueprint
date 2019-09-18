@@ -152,7 +152,7 @@ fi
 
 for want in ${GENESIS_REQUESTED_FEATURES}; do
   case "$want" in
-  azure|nfs-volume-services|container-routing-integrity|native-garden-runc)
+  azure|nfs-volume-services|container-routing-integrity|native-garden-runc|loggregator-forwarder-agent)
     merge+=( manifests/addons/$want.yml )
     ;;
 

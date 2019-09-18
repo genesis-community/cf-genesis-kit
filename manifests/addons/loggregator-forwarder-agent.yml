@@ -9,8 +9,8 @@ addons:
     properties:
       tls:
         ca_cert: (( grab meta.certs.loggregator.ca.certificate ))
-        cert:    (( grab meta.certs.loggregator.forwarder_agent.certificate ))
-        key:     (( grab meta.certs.loggregator.forwarder_agent.private_key ))
+        cert:    (( vault meta.vault "loggregator.forwarder_agent:certificate" ))
+        key:     (( vault meta.vault "loggregator.forwarder_agent:key" ))
 
 - name: udp_forwarder
   include:

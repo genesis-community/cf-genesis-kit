@@ -83,8 +83,8 @@ instance_groups:
         temporary_disable_deployments: (( grab meta.cc.temporary_disable_deployments ))
         mutual_tls:
           ca_cert: (( grab meta.certs.diego.ca ))
-          private_key: (( grab meta.certs.diego.cc_deployment_updater_server.key ))
-          public_cert: (( grab meta.certs.diego.cc_deployment_updater.cert ))
+          private_key: (( vault meta.vault "/diego/certs/cc_deployment_updater_server:key" ))
+          public_cert: (( vault meta.vault "/diego/certs/cc_deployment_updater:certificate" ))
       ccdb:
         .: (( inject meta.ccdb ))
 
@@ -157,6 +157,10 @@ meta:
     staging_upload_user:     staging_upload_user
     staging_upload_password: (( vault meta.vault "/cc:staging_upload" ))
     db_encryption_key:       (( vault meta.vault "/cc:db_encryption_key" ))
+    temporary_use_logcache:  true
+    logcache_tls:
+      certificate: (( vault meta.vault "/loggregator/certs/log_cache:certificate" ))
+      private_key: (( vault meta.vault "/loggregator/certs/log_cache:key" ))
     public_tls:
       ca_cert: (( grab meta.certs.diego.public_tls.certificate ))
       .: (( inject meta.certs.diego.public_tls ))
@@ -193,6 +197,8 @@ meta:
     - name: cflinuxfs3
       description: Cloud Foundry Linux-based filesystem (Ubuntu 18.04)
     default_stack: (( grab params.default_stack ))
+    diego:
+      docker_staging_stack: (( grab params.default_stack ))
     install_buildpacks:
     - name: staticfile_buildpack
       package: staticfile-buildpack-cflinuxfs2

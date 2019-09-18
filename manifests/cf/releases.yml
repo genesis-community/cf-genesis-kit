@@ -1,90 +1,96 @@
 releases:
 - name:    bpm
-  version: "0.13.0"
-  url:     (( concat "https://bosh.io/d/github.com/cloudfoundry-incubator/bpm-release?v=" releases.bpm.version ))
-  sha1:    4b6ebfdaa467c04855528172b099e565d679e0f5
+  version: "1.1.0"
+  url:     (( concat "https://bosh.io/d/github.com/cloudfoundry/bpm-release?v=" releases.bpm.version ))
+  sha1:    82e83a5e8ebd6e07f6ca0765e94eb69e03324a19
 
 - name:    capi
-  version: "1.70.0"
+  version: "1.83.0"
   url:     (( concat "https://bosh.io/d/github.com/cloudfoundry/capi-release?v=" releases.capi.version ))
-  sha1:    bf66504c6479cff3754fb1e114e7ea45767db04c
+  sha1:    339e21175080d77e648e0181b394a6aa2679d271
 
 - name:    cf-networking
-  version: "2.17.0"
+  version: "2.23.0"
   url:     (( concat "https://bosh.io/d/github.com/cloudfoundry/cf-networking-release?v=" releases.cf-networking.version ))
-  sha1:    0088d75912db87c28084347dc488370a9aa9fad0
+  sha1:    d1e8982a26287edc239116c2013de098fb9e15a8
 
 - name:    cf-smoke-tests
+  version: "40.0.112"
   url:     (( concat "https://bosh.io/d/github.com/cloudfoundry/cf-smoke-tests-release?v=" releases.cf-smoke-tests.version ))
-  version: "40.0.5"
-  sha1:    6f6081d24490a82c5b9fea73283e0cfe21cbf207
+  sha1:    26a8c40836fe8b0168fd4f0b02260d9b70cec595
 
 - name:    cflinuxfs2
-  version: "1.242.0"
+  version: "1.286.0"
   url:     (( concat "https://bosh.io/d/github.com/cloudfoundry/cflinuxfs2-release?v=" releases.cflinuxfs2.version ))
-  sha1:    99821c729c05646c203a684a15a0971a5af08e35
+  sha1:    cbee634a14c42b7f9be48506f6a551960cac1652
 
 - name:    cflinuxfs3
+  version: "0.113.0"
   url:     (( concat "https://bosh.io/d/github.com/cloudfoundry/cflinuxfs3-release?v=" releases.cflinuxfs3.version ))
-  version: 0.51.0
-  sha1:    97d802e3dff2b9d464327a31c5b4e27d671c45ab
+  sha1:    5132bdcc0975d404033e9dafba9d2acea50085a4
 
+- name:    cf-cli
+  version: "1.16.0"
+  url:     (( concat "https://bosh.io/d/github.com/bosh-packages/cf-cli-release?v=" releases.cf-cli.version ))
+  sha1:    fa5d89b88a07822665d82e00f1629b98935b17e8
+  
 - name:    diego
-  version: "2.19.0"
+  version: "2.34.0"
   url:     (( concat "https://bosh.io/d/github.com/cloudfoundry/diego-release?v=" releases.diego.version ))
-  sha1:    d71a7977786c8266ab5e31a13366d5b949a24f09
+  sha1:    2ef1517f78126e0ef079244a83941a83b6dd0731
 
-- name:    "garden-runc"
-  version: "1.18.3"
+- name:    garden-runc
+  version: "1.19.3"
   url:     (( concat "https://bosh.io/d/github.com/cloudfoundry/garden-runc-release?v=" releases.garden-runc.version ))
-  sha1:    "1aa15e644c6c0c6c7ec072bf668fe5d9bcc4c632"
+  sha1:    76810f5dd66d8320b344b3eca197c5b669a3a633
 
 - name:    loggregator
-  version: "104.0"
+  version: "105.5"
   url:     (( concat "https://bosh.io/d/github.com/cloudfoundry/loggregator-release?v=" releases.loggregator.version ))
-  sha1:    fc9f722ab0d321427942ed36dae70a49f084f9cf
-
-- name:    nats
-  version: "26"
-  url:     (( concat "https://bosh.io/d/github.com/cloudfoundry/nats-release?v=" releases.nats.version ))
-  sha1:    2f2c27acdfff81f3519968921686522518ab5783
-
-- name:    routing
-  version: "0.182.0"
-  url:     (( concat "https://bosh.io/d/github.com/cloudfoundry-incubator/cf-routing-release?v=" releases.routing.version ))
-  sha1:    6e341a527a0dd2c920b54dea82156ae9bc0b29eb
-
-- name:    statsd-injector
-  version: "1.4.0"
-  url:     (( concat "https://bosh.io/d/github.com/cloudfoundry/statsd-injector-release?v=" releases.statsd-injector.version ))
-  sha1:    25c1c7d6217709d5217d32f70a48f203b79d3a16
-
-- name:    cf-syslog-drain
-  version: "7.1"
-  url:     (( concat "https://bosh.io/d/github.com/cloudfoundry/cf-syslog-drain-release?v=" releases.cf-syslog-drain.version ))
-  sha1:    7e9648f44c6513ea5cb84531c9c5d1ae0730f202
-
-- name:    uaa
-  version: "62.0"
-  url:     (( concat "https://bosh.io/d/github.com/cloudfoundry/uaa-release?v=" releases.uaa.version ))
-  sha1:    4423bb02d1be2d3c2f212465f4598c9eb62a4b63
-
-- name:    silk
-  version: "2.17.0"
-  url:     (( concat "https://bosh.io/d/github.com/cloudfoundry/silk-release?v=" releases.silk.version ))
-  sha1:    752a269d854ca3840b1ec5f6d664efb3901e73e5
+  sha1:    62b9210def7c5179f6088b9449f551f57f1a1ee8
 
 - name:    loggregator-agent
-  version: "2.3"
+  version: "3.9"
   url:     (( concat "https://bosh.io/d/github.com/cloudfoundry/loggregator-agent-release?v=" releases.loggregator-agent.version ))
-  sha1:    7532818b5d518b87b57cf36ddc2bf81758f606f9
+  sha1:    bf723af956a61c7b51db0ba535c871bad24dd289
+
+- name:    log-cache
+  version: "2.2.2"
+  url:     (( concat "https://bosh.io/d/github.com/cloudfoundry/log-cache-release?v=" releases.log-cache.version ))
+  sha1:    634dd3e134d0dac00f3f86beb00c06653579af4b
+
+- name:    nats
+  version: "27"
+  url:     (( concat "https://bosh.io/d/github.com/cloudfoundry/nats-release?v=" releases.nats.version ))
+  sha1:    9817e8e460b8619a99a0a0fbec8220dc12b2a6f5
+
+- name:    routing
+  version: "0.188.0"
+  url:     (( concat "https://bosh.io/d/github.com/cloudfoundry-incubator/cf-routing-release?v=" releases.routing.version ))
+  sha1:    d3420851c470790e8980ff0c506f75e3e52c15d9
+
+- name:    statsd-injector
+  version: "1.10.0"
+  url:     (( concat "https://bosh.io/d/github.com/cloudfoundry/statsd-injector-release?v=" releases.statsd-injector.version ))
+  sha1:    255cfb2815e692576efd5caa082f5a48f6799ca0
+
+- name:    cf-syslog-drain
+  version: "10.2"
+  url:     (( concat "https://bosh.io/d/github.com/cloudfoundry/cf-syslog-drain-release?v=" releases.cf-syslog-drain.version ))
+  sha1:    fe9fd8946c39554425b534cdb8ce14f3923a31f8
+
+- name:    uaa
+  version: "72.0"
+  url:     (( concat "https://bosh.io/d/github.com/cloudfoundry/uaa-release?v=" releases.uaa.version ))
+  sha1:    7130e5ac640ed1e1f52c09e76995e4d0680f3b45
+
+- name:    silk
+  version: "2.23.0"
+  url:     (( concat "https://bosh.io/d/github.com/cloudfoundry/silk-release?v=" releases.silk.version ))
+  sha1:    ecd2f3f05a308ae1920d17f941e38be0a5ec5ee9
 
 - name:    bosh-dns-aliases
   version: "0.0.3"
   url:     (( concat "https://bosh.io/d/github.com/cloudfoundry/bosh-dns-aliases-release?v=" releases.bosh-dns-aliases.version ))
   sha1:    b0d0a0350ed87f1ded58b2ebb469acea0e026ccc
 
-- name:    log-cache
-  url:     (( concat "https://bosh.io/d/github.com/cloudfoundry/log-cache-release?v=" releases.log-cache.version ))
-  version: "2.0.2"
-  sha1:    1f52248096ce2263405f3c82278e4f2aaddf1599

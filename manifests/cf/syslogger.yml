@@ -12,8 +12,6 @@ instance_groups:
             cert: (( grab meta.certs.loggregator.syslogger.server.cert ))
             key: (( grab meta.certs.loggregator.syslogger.server.key ))
             cn: ss-adapter
-          logs:
-            addr: reverse-log-proxy.service.cf.internal:8082
         adapter_rlp:
           tls:
             ca: (( grab meta.certs.loggregator.ca ))
