@@ -158,6 +158,13 @@ meta:
     staging_upload_password: (( vault meta.vault "/cc:staging_upload" ))
     db_encryption_key:       (( vault meta.vault "/cc:db_encryption_key" ))
     temporary_use_logcache:  true
+
+    # we put log-cache on the LTC, not on the dopplers, so the
+    # default from the capi-release is insufficient
+    logcache:
+      host: loggregator-trafficcontroller.service.cf.internal
+      port: 8080
+
     logcache_tls:
       certificate: (( vault meta.vault "/loggregator/certs/log_cache:certificate" ))
       private_key: (( vault meta.vault "/loggregator/certs/log_cache:key" ))
