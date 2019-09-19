@@ -1,12 +1,26 @@
 ---
+meta:
+  trusted_cas:
+    - (( vault meta.vault "/diego/certs/ca:certificate" ))
+
+params:
+  trusted_cas: []
+
 instance_groups:
 - name: cell
   jobs:
 
   - name: cflinuxfs2-rootfs-setup
     release: cflinuxfs2
+    properties:
+      cflinuxfs2-rootfs:
+        trusted_certs: (( join "\n" meta.trusted_cas params.trusted_cas ))
+
   - name: cflinuxfs3-rootfs-setup
     release: cflinuxfs3
+    properties:
+      cflinuxfs3-rootfs:
+        trusted_certs: (( join "\n" meta.trusted_cas params.trusted_cas ))
 
   - name: containerd
     release: garden-runc
