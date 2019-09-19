@@ -232,7 +232,8 @@ instance_groups:
       route_registrar:
         routes:
         - name: doppler
-          port: 8081
+          tls_port: 8081
+          server_cert_domain_san: (( concat "doppler." params.system_domain ))
           registration_interval: 20s
           uris:
           - (( concat "doppler." params.system_domain ))
