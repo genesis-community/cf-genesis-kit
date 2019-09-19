@@ -50,10 +50,10 @@ params:
   locketdb_port:     5432
 
 releases:
-- name: postgres
-  version: 3.1.5
-  url: https://github.com/cloudfoundry-community/postgres-boshrelease/releases/download/v3.1.5/postgres-3.1.5.tgz
-  sha1: 30feaf3522b205812f3d363380dee57d20e5e32a
+- name:    postgres
+  version: 3.2.0
+  url:     https://github.com/cloudfoundry-community/postgres-boshrelease/releases/download/v3.2.0/postgres-3.2.0.tgz
+  sha1:    470c2b6d98d988ad9dc36dedcd8133e247de63f7
 
 instance_groups:
   - (( insert after "nats" ))

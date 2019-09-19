@@ -63,6 +63,8 @@ instance_groups:
     properties:
       http:
         address: "0.0.0.0:8088"
+        cert: (( vault meta.vault "/loggregator/certs/rlp_gateway:certificate" ))
+        key:  (( vault meta.vault "/loggregator/certs/rlp_gateway:key" ))
       logs_provider:
         ca_cert:  (( grab meta.certs.loggregator.ca ))
         client_cert: (( grab meta.certs.loggregator.syslogger.rlp.cert ))

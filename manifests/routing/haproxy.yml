@@ -1,7 +1,7 @@
 ---
 params:
   internal_only_domains: []
-  trusted_domain_cidrs: ""
+  trusted_domain_cidrs: ~
 
   haproxy_instances: 2
   haproxy_vm_type:   small
