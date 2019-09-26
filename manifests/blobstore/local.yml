@@ -23,7 +23,7 @@ instance_groups:
   - (( insert after "nats" ))
   - name: blobstore
     instances: 1
-    persistent_disk_pool: (( grab params.blobstore_disk_pool ))
+    persistent_disk_type: (( grab params.blobstore_disk_pool ))
     vm_type: (( grab params.blobstore_vm_type ))
     azs: (( grab params.availability_zones || meta.default.azs ))
     stemcell: default

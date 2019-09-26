@@ -19,6 +19,11 @@ instance_groups:
         admin:
           client_secret: (( grab meta.uaa.admin_client_secret ))
         clients:
+          app_autoscaler:
+            authorities: cloud_controller.read,cloud_controller.admin,uaa.resource
+            authorized-grant-types: client_credentials
+            scope: openid,cloud_controller_service_permissions.read
+            secret: (( grab meta.uaa.app_autoscaler ))
           cc-service-dashboards:
             authorities: clients.read,clients.write,clients.admin
             authorized-grant-types: client_credentials

@@ -219,7 +219,7 @@ certificates:
         names: [ "scalingengine.service.cf.internal" ]
       eventgenerator_server:
         valid_for: 1y
-        names: [ "eventgenerator.service.cf.internal" ]  
+        names: [ "eventgenerator.service.cf.internal" ]
       eventgenerator_client:
         valid_for: 1y
         names: [ "eventgenerator client" ]
