@@ -15,8 +15,9 @@ instance_groups:
   - (( insert before "nats" ))
   - name: haproxy
     instances: (( grab params.haproxy_instances ))
-    vm_type: (( grab params.haproxy_vm_type ))
-    azs: (( grab params.availability_zones || meta.default.azs ))
+    vm_type:   (( grab params.haproxy_vm_type ))
+    azs:       (( grab params.availability_zones || meta.default.azs ))
+
     stemcell: default
     networks:
       - name: (( grab params.cf_edge_network ))
@@ -29,9 +30,12 @@ instance_groups:
     jobs:
       - name: haproxy
         release: haproxy
+        consumes:
+          http_backend: { from: gorouter  }
+          tcp_backend:  { from: ssh-proxy }
+
         properties:
           ha_proxy:
-            backend_servers: (( grab instance_groups.router.networks[0].static_ips ))
             internal_only_domains: (( grab params.internal_only_domains ))
             trusted_domain_cidrs:  (( grab params.trusted_domain_cidrs ))
             ssl_pem: ~

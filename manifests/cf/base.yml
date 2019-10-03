@@ -163,7 +163,6 @@ instance_groups:
     stemcell: default
     networks:
     - name: (( grab params.cf_edge_network ))
-      static_ips: (( static_ips 0 1 2 3 4 ))
 
   - name: bbs
     instances: (( grab params.bbs_instances ))
@@ -190,7 +189,6 @@ instance_groups:
     stemcell: default
     networks:
       - name: (( grab params.cf_edge_network ))
-        static_ips: (( static_ips 5 6 7 8 9 ))
     vm_extensions:
       - ssh-elb
     migrated_from:
