@@ -19,11 +19,6 @@ releases:
     url:     (( concat "https://bosh.io/d/github.com/cloudfoundry/cf-smoke-tests-release?v=" releases.cf-smoke-tests.version ))
     sha1:    26a8c40836fe8b0168fd4f0b02260d9b70cec595
 
-  - name:    cflinuxfs2
-    version: "1.286.0"
-    url:     (( concat "https://bosh.io/d/github.com/cloudfoundry/cflinuxfs2-release?v=" releases.cflinuxfs2.version ))
-    sha1:    cbee634a14c42b7f9be48506f6a551960cac1652
-
   - name:    cflinuxfs3
     version: "0.113.0"
     url:     (( concat "https://bosh.io/d/github.com/cloudfoundry/cflinuxfs3-release?v=" releases.cflinuxfs3.version ))

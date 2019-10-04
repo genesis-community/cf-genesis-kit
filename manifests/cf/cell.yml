@@ -10,12 +10,6 @@ instance_groups:
   - name: cell
     jobs:
 
-    - name: cflinuxfs2-rootfs-setup
-      release: cflinuxfs2
-      properties:
-        cflinuxfs2-rootfs:
-          trusted_certs: (( join "\n" meta.trusted_cas params.trusted_cas ))
-
     - name: cflinuxfs3-rootfs-setup
       release: cflinuxfs3
       properties:
@@ -62,7 +56,6 @@ instance_groups:
             evacuation_timeout_in_seconds: 60
             listen_addr_admin: ~
             preloaded_rootfses:
-              - cflinuxfs2:/var/vcap/packages/cflinuxfs2/rootfs.tar
               - cflinuxfs3:/var/vcap/packages/cflinuxfs3/rootfs.tar
             require_tls: true
             ca_cert: (( grab meta.certs.diego.ca ))
