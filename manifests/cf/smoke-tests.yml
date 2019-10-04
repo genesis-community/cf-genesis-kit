@@ -2,9 +2,6 @@
 instance_groups:
   - name: smoke-tests
     jobs:
-      - name: cf-cli-6-linux
-        release: cf-cli
-
       - name: smoke_tests
         release: cf-smoke-tests
         properties:
@@ -20,3 +17,6 @@ instance_groups:
 
             cf_dial_timeout_in_seconds: 300
             skip_ssl_validation: (( grab params.skip_ssl_validation ))
+
+      - name: cf-cli-6-linux
+        release: cf-cli
