@@ -60,18 +60,18 @@ params:
 
   vm_strategy: delete-create # also allows `create-swap-delete`
 
-  nats_vm_type:        nats
-  uaa_vm_type:         uaa
-  api_vm_type:         api
-  doppler_vm_type:     doppler
-  loggregator_vm_type: loggregator
-  router_vm_type:      router
-  bbs_vm_type:         bbs
-  diego_vm_type:       diego
   access_vm_type:      access
+  api_vm_type:         api
+  bbs_vm_type:         bbs
   cell_vm_type:        runtime
+  diego_vm_type:       diego
+  doppler_vm_type:     doppler
   errand_vm_type:      errand
+  loggregator_vm_type: loggregator
+  nats_vm_type:        nats
+  router_vm_type:      router
   syslogger_vm_type:   syslogger
+  uaa_vm_type:         uaa
 
   ccdb_name:      ccdb
   ccdb_host:      (( param "What hostname/IP is the ccdb available at?" ))

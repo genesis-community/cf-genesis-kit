@@ -4,11 +4,8 @@ cc_ok=yes
 # Cloud Config checks
 if [[ -n "$GENESIS_CLOUD_CONFIG" ]] ; then
   if ! want_feature proto; then
-    for t in nats doppler router bbs access errand syslogger; do
-      cloud_config_needs vm_type $(lookup params.${t}_vm_type small)
-    done
-    for t in uaa api loggregator diego; do
-      cloud_config_needs vm_type $(lookup params.${t}_vm_type medium)
+    for t in access api bbs cell diego doppler errand loggregator nats router syslogger uaa; do
+      cloud_config_needs vm_type $(lookup params.${t}_vm_type $t)
     done
     if want_feature local-blobstore || want_feature blobstore-webdav; then
       cloud_config_needs vm_type   $(lookup params.blobstore_vm_type   blobstore)
@@ -19,8 +16,6 @@ if [[ -n "$GENESIS_CLOUD_CONFIG" ]] ; then
       cloud_config_needs disk_type $(lookup params.postgres_disk_pool postgres)
       cloud_config_needs network   $(lookup params.cf_db_network      cf-db)
     fi
-
-    cloud_config_needs vm_type $(lookup params.cell_vm_type runtime)
 
     cloud_config_needs network $(lookup params.cf_internal_network cf-core)
     cloud_config_needs network $(lookup params.cf_edge_network     cf-edge)
