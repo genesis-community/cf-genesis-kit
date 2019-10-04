@@ -20,7 +20,7 @@ params:
   diegodb_connection_string: (( concat params.diegodb_scheme "://" params.diegodb_user ":" params.diegodb_password "@" params.diegodb_host ":" params.diegodb_port "/" params.diegodb_name ))
 
   postgres_disk_pool: postgres
-  postgres_vm_type:   large
+  postgres_vm_type:   postgres
 
   autoscalerdb_name:     autoscaler
   autoscalerdb_host:     (( grab instance_groups.postgres.networks[0].static_ips[0] ))

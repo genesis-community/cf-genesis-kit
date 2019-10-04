@@ -11,11 +11,11 @@ if [[ -n "$GENESIS_CLOUD_CONFIG" ]] ; then
       cloud_config_needs vm_type $(lookup params.${t}_vm_type medium)
     done
     if want_feature local-blobstore || want_feature blobstore-webdav; then
-      cloud_config_needs vm_type   $(lookup params.blobstore_vm_type   medium)
+      cloud_config_needs vm_type   $(lookup params.blobstore_vm_type   blobstore)
       cloud_config_needs disk_type $(lookup params.blobstore_disk_pool blobstore)
     fi
     if want_feature local-db || want_feature db-internal-postgres || want_feature local-ha-db; then
-      cloud_config_needs vm_type   $(lookup params.postgres_vm_type   large)
+      cloud_config_needs vm_type   $(lookup params.postgres_vm_type   postgres)
       cloud_config_needs disk_type $(lookup params.postgres_disk_pool postgres)
       cloud_config_needs network   $(lookup params.cf_db_network      cf-db)
     fi

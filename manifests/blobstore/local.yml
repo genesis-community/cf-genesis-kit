@@ -16,7 +16,7 @@ meta:
       ca_cert:  (( grab meta.blobstore.ca_cert ))
 
 params:
-  blobstore_vm_type:   medium
+  blobstore_vm_type:   blobstore
   blobstore_disk_pool: blobstore
 
 instance_groups:
