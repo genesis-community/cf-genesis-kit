@@ -22,9 +22,9 @@ if [[ -n "$GENESIS_CLOUD_CONFIG" ]] ; then
     cloud_config_needs network $(lookup params.cf_runtime_network  cf-runtime)
 
     if want_feature autoscaler; then
-      cloud_config_needs network   $(lookup params.autoscaler_network            cf-autoscaler)
-      for t in api broker scheduler collector scaler engine; do
-        cloud_config_needs vm_type $(lookup params.autoscaler_${t}_vm_type default)
+      cloud_config_needs network   $(lookup params.autoscaler_network cf-autoscaler)
+      for t in api broker scheduler collector scaler engine operator; do
+        cloud_config_needs vm_type $(lookup params.autoscaler_${t}_vm_type as-${t})
       done
     fi
 
