@@ -102,65 +102,68 @@ runtime config.
     Defaults to `2`.
 
   - `nats_vm_type` - What type of VM to deploy for the nodes in
-    the NATS message bus cluster.  Defaults to `small`.
+    the NATS message bus cluster.  Defaults to `nats`. 
+    Recommend `1 cpu / 2g mem`.
 
   - `uaa_instances` - How many UAA nodes to deploy.
     Defaults to `2`.
 
   - `uaa_vm_type` - What type of VM to deploy for the nodes in
-    the UAA cluster.  Defaults to `medium`.
+    the UAA cluster.  Defaults to `uaa`. Recommend `2 cpu / 4g mem`.
 
   - `api_instances` - How many Cloud Controller API nodes to
     deploy.  Defaults to `2`.
 
   - `api_vm_type` - What type of VM to deploy for the nodes in
-    the Cloud Controller API cluster.  Defaults to `medium`.
+    the Cloud Controller API cluster.  Defaults to `api`. 
+    Recommend `2 cpu / 4g mem`.
 
   - `doppler_instance` - How many doppler nodes to deploy.
     Defaults to `2`.
 
   - `doppler_vm_type` - What type of VM to deploy for the doppler
-    nodes.  Defaults to `small`.
+    nodes.  Defaults to `doppler`. Recommend `1 cpu / 2g mem`.
 
   - `loggregator_instances` - How many loggregator / traffic
     controller nodes to deploy.  Defaults to `2`.
 
   - `loggregator_vm_type` - What type of VM to deploy for the
-    loggregator traffic controller nodes.  Defaults to `medium`.
+    loggregator traffic controller nodes.  Defaults to `loggregator`. 
+    Recommend `2 cpu / 4g mem`.
 
   - `router_instances` - How many gorouter nodes to deploy.
     Defaults to `2`.
 
   - `router_vm_type` - What type of VM to deploy for the gorouter
-    nodes.  Defaults to `small`.
+    nodes.  Defaults to `router`. Recommend `1 cpu / 2g mem`.
 
   - `bbs_instances` - How many Diego BBS nodes to deploy.
     Defaults to `2`.
 
   - `bbs_vm_type` - What type of VM to deploy for the Diego BBS
-    nodes.  Defaults to `small`.
+    nodes.  Defaults to `bbs`. Recommend `1 cpu / 2g mem`.
 
   - `diego_instances` - How many Diego auctioneers to deploy.
     Defaults to `2`.
 
   - `diego_vm_type` - What type of VM to deploy for the Diego
     orchestration nodes (not the cells, the auctioneers).
-    Defaults to `medium`.
+    Defaults to `diego`. Recommend `2 cpu / 4g mem`.
 
   - `cell_instances` - How many Diego Cells (runtimes) to deploy.
     Defaults to `3`.
 
   - `cell_vm_type` - What type of VM to deploy for the Diego Cells
     (application runtime).  These are usually very large machines.
-    Defaults to `cell`.
+    Defaults to `cell`. Recommend `4 cpu / 16g mem`.
 
   - `errand_vm_type` - What type of VM to deploy for the
-    smoke-tests errand.  Defaults to `small`.
+    smoke-tests errand.  Defaults to `errand`. Recommend `1 cpu / 2g mem`.
 
   - `syslogger_instances` - How many scalable syslog VMs to deploy.
 
   - `syslogger_vm_type` - What type of VM to deploy for the scalable
-    syslog. Defaults to `small`.
+    syslog. Defaults to `syslogger`. Recommend `1 cpu / 2g mem`.
 
 ## Networking Parameters
 
@@ -216,7 +219,8 @@ persistent disk provisioned by BOSH.
 The following parameters are defined:
 
   - `blobstore_vm_type` - The type of VM (per cloud config) to use
-    when deploying the WebDAV blobstore VM.  Defaults to `medium`.
+    when deploying the WebDAV blobstore VM.  Defaults to `blobstore`. 
+    Recommend `1 cpu / 2g mem`.
 
   - `blobstore_disk_pool` - The disk type (per cloud config) to
     use when provisioning the persistent disk for the WebDAV VM.
@@ -305,7 +309,7 @@ The following parameters are defined:
 
   - `postgres_vm_type` - The VM type (per cloud config) to use
     when deploying the standalone database node.
-    Defaults to `large`.
+    Defaults to `postgres`. Recommend `2 cpu / 4g mem`.
 
   - `postgres_disk_pool` - The disk type (per cloud config) to use
     when provisioning the persistent storage for the database.
@@ -321,7 +325,7 @@ The following parameters are defined:
 
   - `postgres_vm_type` - The VM type (per cloud config) to use
     when deploying the standalone database node.
-    Defaults to `large`.
+    Defaults to `postgres`. Recommend `2 cpu / 4g mem`.
 
   - `postgres_disk_pool` - The disk type (per cloud config) to use
     when provisioning the persistent storage for the database.
@@ -456,38 +460,43 @@ parameters are configurable:
     the Autoscaler API server. Defaults to `1`.
 
   - `autoscaler_api_vm_type` - Which VM type to use for the
-    Autoscaler API instance. Defaults to `as-api`.
+    Autoscaler API instance. Defaults to `as-api`. 
+    Recommend `1 cpu / 2g mem`.
 
   - `autoscaler_broker_instances` - How many instances to deploy
     of the Autoscaler service broker. Defaults to `1`.
 
   - `autoscaler_broker_vm_type` - Which VM type to use for the
-    Autoscaler API instance. Defaults to `as-broker`.
+    Autoscaler API instance. Defaults to `as-broker`. 
+    Recommend `1 cpu / 2g mem`.
 
   - `autoscaler_scheduler_instances` - How many instances to
     deploy of the Autoscaler scheduler. Defaults to `1`.
 
   - `autoscaler_scheduler_vm_type` - Which VM type to use for the
-    Autoscaler scheduler instance. Defaults to `as-scheduler`.
+    Autoscaler scheduler instance. Defaults to `as-scheduler`. 
+    Recommend `1 cpu / 2g mem`.
 
   - `autoscaler_collector_instances` - How many instances to
     deploy of the Autoscaler metrics collector. Defaults to `1`.
 
   - `autoscaler_collector_vm_type` - Which VM type to use for the
     Autoscaler MetricsCollector instance. Defaults to
-    `as-collector`.
+    `as-collector`.  Recommend `1 cpu / 2g mem`.
 
   - `autoscaler_scaler_instances` - How many instances to deploy
     of the Autoscaler event generator. Defaults to `1`.
 
   - `autoscaler_scaler_vm_type` - Which VM type to use for the
-    Autoscaler event generator instance. Defaults to `as-scaler`.
+    Autoscaler event generator instance. Defaults to `as-scaler`.  
+    Recommend `1 cpu / 2g mem`.
 
   - `autoscaler_engine_instances` - How many instances to deploy
     of the Autoscaler scaling engine. Defaults to `1`.
 
   - `autoscaler_engine_vm_type` - Which VM type to use for the
-    Autoscaler scaling engine instance. Defaults to `as-engine`.
+    Autoscaler scaling engine instance. Defaults to `as-engine`.  
+    Recommend `1 cpu / 2g mem`.
 
 ### Autoscaler-Related Params
 
