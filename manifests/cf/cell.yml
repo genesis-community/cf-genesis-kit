@@ -28,6 +28,8 @@ instance_groups:
           cleanup_process_dirs_on_wait: true
           deny_networks:
           - 0.0.0.0/0
+          network_plugin: /var/vcap/packages/runc-cni/bin/garden-external-networker
+          network_plugin_extra_args: [--configFile=/var/vcap/jobs/garden-cni/config/adapter.json]
         grootfs:
           reserved_space_for_other_jobs_in_mb: (( grab params.grootfs_reserved_space || 15360 ))
 
@@ -65,6 +67,9 @@ instance_groups:
 
     - name: garden-cni
       release: cf-networking
+      properties:
+        cni_config_dir: /var/vcap/jobs/silk-cni/config/cni
+        cni_plugin_dir: /var/vcap/packages/silk-cni/bin
 
     - name: netmon
       release: silk
@@ -85,3 +90,6 @@ instance_groups:
 
     - name: silk-cni
       release: silk
+      properties:
+        dns_servers:
+          - 169.254.0.2
