@@ -17,7 +17,8 @@ validate_features nfs-volume-services small-footprint \
                   container-routing-integrity \
                   native-garden-runc \
                   loggregator-forwarder-agent \
-                  cflinuxfs2
+                  cflinuxfs2 \
+                  app-bosh-dns
 
 merge=( manifests/cf/base.yml
         manifests/cf/releases.yml
@@ -152,7 +153,7 @@ fi
 
 for want in ${GENESIS_REQUESTED_FEATURES}; do
   case "$want" in
-  azure|nfs-volume-services|container-routing-integrity|native-garden-runc|loggregator-forwarder-agent|cflinuxfs2)
+  azure|nfs-volume-services|container-routing-integrity|native-garden-runc|loggregator-forwarder-agent|cflinuxfs2|app-bosh-dns)
     merge+=( manifests/addons/$want.yml )
     ;;
 
