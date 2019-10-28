@@ -5,11 +5,6 @@ meta:
       - (( replace ))
       - z1
 
-properties:
-  diego:
-    rep:
-      use_azure_fault_domains: true
-
 instance_groups:
   - name: nats
     vm_extensions:
@@ -55,3 +50,9 @@ instance_groups:
     vm_extensions:
       - (( append ))
       - cell_as
+    jobs:
+    - name: rep
+      properties:
+        diego:
+          rep:
+            use_azure_fault_domains: true
