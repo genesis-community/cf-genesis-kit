@@ -18,7 +18,7 @@ validate_features nfs-volume-services small-footprint \
                   native-garden-runc \
                   loggregator-forwarder-agent \
                   cflinuxfs2 \
-                  app-bosh-dns
+                  app-bosh-dns dns-service-discovery
 
 merge=( manifests/cf/base.yml
         manifests/cf/releases.yml
@@ -153,8 +153,13 @@ fi
 
 for want in ${GENESIS_REQUESTED_FEATURES}; do
   case "$want" in
-  azure|nfs-volume-services|container-routing-integrity|native-garden-runc|loggregator-forwarder-agent|cflinuxfs2|app-bosh-dns)
+  azure|nfs-volume-services|container-routing-integrity|native-garden-runc|loggregator-forwarder-agent|cflinuxfs2|dns-service-discovery)
     merge+=( manifests/addons/$want.yml )
+    ;;
+
+  app-bosh-dns)
+    echo >&2 "The 'app-bosh-dns' feature flag has been renamed to 'dns-service-discovery'"
+    merge+=( manifests/addons/dns-service-discovery.yml )
     ;;
 
   minimum-vms)

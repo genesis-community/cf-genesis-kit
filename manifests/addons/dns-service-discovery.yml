@@ -1,0 +1,100 @@
+params:
+  internal_domain: apps.internal
+
+instance_groups:
+    ################################################
+    #
+    # First we have to tell CAPI and friends about our new internal
+    # domain, so that internal routes can be mapped to our CF applications.
+    #
+  - name: api
+    jobs:
+      - name: cloud_controller_ng
+        properties:
+          app_domains:
+            - (( append ))
+            - name:     (( grab params.internal_domain ))
+              internal: true
+
+    ################################################
+    #
+    # Configure the cell with all of the bits and bobs it needs to
+    #   a) Resolve DNS via BOSH-DNS natively
+    #   b) Resolve the internal domain via the service discovery controller
+    #
+  - name: cell
+    jobs:
+        # Loopback the BOSH DNS address (169.x.x.x) into the container
+        # so that the processes running inside of garden CF Application
+        # containers can resolve names via BOSH DNS.
+        #
+        # This allows *ALL* names (including *.service.cf.internal) that
+        # BOSH knows about (from all of its deployments) to be resolved.
+        #
+        # It does *NOT*, by itself, resolve any CF-controlled "internal"
+        # domains (commonly called "app.internal", by convention).
+        # For that, you need service-discovery (see below).
+        #
+      - name: silk-cni
+        properties:
+          dns_servers:
+            - 169.254.0.2
+      - name: garden
+        properties:
+          garden:
+            network_plugin: /var/vcap/packages/runc-cni/bin/garden-external-networker
+            network_plugin_extra_args: [--configFile=/var/vcap/jobs/garden-cni/config/adapter.json]
+      - name: garden-cni
+        properties:
+          cni_config_dir: /var/vcap/jobs/silk-cni/config/cni
+          cni_plugin_dir: /var/vcap/packages/silk-cni/bin
+
+        # Wire up the internal application domains (normally 'app.internal')
+        # to BOSH DNS, by way of service-discovery.  This works by essentially
+        # delegating everything in the DNS zone for the internal domain to an
+        # http endpoint (under mutual TLS, of course) that keeps track of known
+        # application routes, from CAPI and friends.
+        #
+      - name: bosh-dns-adapter
+        release: cf-networking
+        properties:
+          internal_domains:
+            - (( concat params.internal_domain "." ))
+          dnshttps:
+            client:
+              tls:
+                certificate: (( vault meta.vault "/service-disco/client:certificate" ))
+                private_key: (( vault meta.vault "/service-disco/client:key" ))
+            server:
+              ca: (( vault meta.vault "/service-disco/ca:certificate" ))
+
+    ################################################
+    #
+    # Finally, run the cf-networking Service Discovery controller
+    # on the diego node  This will be responsible for sourcing
+    # mapped routes on the internal domain, and making them available
+    # to the cells as an internal BOSH-DNS dns-over-http zone.
+    #
+  - name: diego
+    jobs:
+        # Enable internal routes to be emitted.
+        # This is kind of important for internal routing...
+        #
+      - name: route_emitter
+        properties:
+          internal_routes:
+            enabled: true
+
+        # Add the Service Discovery controller, which provides
+        # the dns support for our BOSH-DNS contraption.
+        #
+      - name: service-discovery-controller
+        release: cf-networking
+        properties:
+          dnshttps:
+            client:
+              ca: (( vault meta.vault "/service-disco/ca:certificate" ))
+            server:
+              tls:
+                certificate: (( vault meta.vault "/service-disco/server:certificate" ))
+                private_key: (( vault meta.vault "/service-disco/server:key" ))
