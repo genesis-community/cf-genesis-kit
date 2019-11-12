@@ -411,12 +411,14 @@ subject alternate names for all of the domains (system and apps)
 that Cloud Foundry will use.
 
 
-## Container-to-Container Networking
+## DNS-Based Service Discovery
 
-If you want your Cloud Foundry applications to be able to
+If you want your Cloud Foundry applications to be able to find one
+another via DNS names (on internal routes), and thereby
 communicate directly with one another, without having to first
 transit the gorouter (and incur a roundtrip _outside_ the runtime),
-you can add the `c2c-networking` feature to your environment file.
+you can add the `dns-service-discovery` feature to your
+environment file.
 
 This enables BOSH-DNS resolution of names inside of CF application
 containers, allowing them to find other BOSH-deployed services in
@@ -427,10 +429,10 @@ allowed to the bits and pieces of Cloud Foundry that you want them
 to access.  By default, the ASGs deployed by this kit do _not_
 allow such communication.
 
-If you want to change the internal domain for
-container-to-container communication, you may set the
-`internal_domain` property, which defaults to "apps.internal".
-(Note that there should be **no** trailing `.`).
+If you want to change the internal domain used for service
+discovery, you may set the `internal_domain` property, which
+defaults to "apps.internal".  (Note that there should be **no**
+trailing `.`).
 
 
 ## Container Routing Integrity

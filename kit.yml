@@ -174,7 +174,7 @@ certificates:
         valid_for: 1y
         names: [ "api.bosh-dns" ]
 
-  c2c-networking:
+  dns-service-discovery:
     service-disco:
       ca: { valid_for: 1y }
       server:
