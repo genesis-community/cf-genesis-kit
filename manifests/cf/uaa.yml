@@ -145,6 +145,7 @@ instance_groups:
                   password: (( grab meta.admin.password ))
                   groups:
                     - cloud_controller.admin
+                    - network.admin
                     - doppler.firehose
                     - openid
                     - routing.router_groups.read
@@ -153,6 +154,10 @@ instance_groups:
                     - scim.read
                     - clients.read
                     - clients.write
+              groups:
+                cloud_controller.read_only_admin: 'Read only admin'
+                cloud_controller.global_auditor:  'Global auditor'
+                network.read:                     'Network read only'
             sslCertificate: (( grab meta.uaa.ssl_cert ))
             sslPrivateKey: (( grab meta.uaa.ssl_key ))
             url: (( grab meta.uaa.url ))
