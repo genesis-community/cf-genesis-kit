@@ -410,6 +410,29 @@ Certificates will then be automatically generated with the proper
 subject alternate names for all of the domains (system and apps)
 that Cloud Foundry will use.
 
+
+## Container-to-Container Networking
+
+If you want your Cloud Foundry applications to be able to
+communicate directly with one another, without having to first
+transit the gorouter (and incur a roundtrip _outside_ the runtime),
+you can add the `c2c-networking` feature to your environment file.
+
+This enables BOSH-DNS resolution of names inside of CF application
+containers, allowing them to find other BOSH-deployed services in
+the `*.bosh` DNS zone, as well as other Cloud Foundry components
+in the `*.cf.internal` domain -- you may need to review your
+application security groups to ensure that applications are only
+allowed to the bits and pieces of Cloud Foundry that you want them
+to access.  By default, the ASGs deployed by this kit do _not_
+allow such communication.
+
+If you want to change the internal domain for
+container-to-container communication, you may set the
+`internal_domain` property, which defaults to "apps.internal".
+(Note that there should be **no** trailing `.`).
+
+
 ## Container Routing Integrity
 
 The `container-routing-integrity` feature enables TLS Validation of the cells.
