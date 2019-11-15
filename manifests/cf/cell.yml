@@ -5,6 +5,7 @@ meta:
 
 params:
   trusted_cas: []
+  evacuation_timeout: 600
 
 instance_groups:
   - name: cell
@@ -53,7 +54,7 @@ instance_groups:
           rep:
             .: (( inject meta.certs.diego.rep.server ))
             enable_legacy_api_endpoints: false
-            evacuation_timeout_in_seconds: 60
+            evacuation_timeout_in_seconds: (( grab params.evacuation_timeout ))
             listen_addr_admin: ~
             preloaded_rootfses:
               - cflinuxfs3:/var/vcap/packages/cflinuxfs3/rootfs.tar
