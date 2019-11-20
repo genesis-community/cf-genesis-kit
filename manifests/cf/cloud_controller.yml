@@ -44,6 +44,9 @@ instance_groups:
                 secret: (( grab meta.uaa.cc_routing_secret ))
               cloud_controller_username_lookup:
                 secret: (( grab meta.uaa.cc_user_lookup_secret ))
+          
+          router:
+            route_services_secret: (( vault meta.vault "/gorouter/route_services:secret" ))
 
       - name: cloud_controller_worker
         release: capi
