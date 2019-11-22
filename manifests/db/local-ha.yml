@@ -7,6 +7,7 @@ params:
   policyserverdb_host: (( grab params.postgres_vip ))
   locketdb_host:       (( grab params.postgres_vip ))
   silkdb_host:         (( grab params.postgres_vip ))
+  routingapi_host:     (( grab params.postgres_vip ))
 
 instance_groups:
   - name: postgres

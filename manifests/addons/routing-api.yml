@@ -1,0 +1,55 @@
+meta:
+  cc:
+    routing_api:
+      routing_api:
+        enabled: true
+      uaa:
+        clients:
+          cc_routing:
+            secret: (( grab meta.uaa.cc_routing_secret ))
+
+instance_groups:
+- name: api
+  jobs:
+  - name: cloud_controller_ng
+    properties:
+      .: (( inject meta.cc.routing_api ))
+  - name: cloud_controller_worker
+    properties:
+      .: (( inject meta.cc.routing_api ))
+  - name: cloud_controller_clock
+    properties:
+      .: (( inject meta.cc.routing_api ))
+  - name: routing-api
+    release: routing
+    properties:
+      routing_api:
+        mtls_ca:          (( vault meta.vault "/routingapi/certs/ca:certificate" ))
+        mtls_server_cert: (( vault meta.vault "/routingapi/certs/server:certificate" ))
+        mtls_server_key:  (( vault meta.vault "/routingapi/certs/server:key" ))
+        mtls_client_cert: (( vault meta.vault "/routingapi/certs/client:certificate" ))
+        mtls_client_key:  (( vault meta.vault "/routingapi/certs/client:key" ))
+        skip_consul_lock: true
+        system_domain:    (( grab params.system_domain ))
+        sqldb: 
+          host:     (( grab params.routingapidb_host ))
+          type:     (( grab params.routingapidb_scheme )) 
+          port:     (( grab params.routingapidb_port ))
+          schema:   (( grab params.routingapidb_name ))
+          username: (( grab params.routingapidb_user ))
+          password: (( grab params.routingapidb_password ))
+        locket:
+          api_location: "locket.service.cf.internal:8891"
+          ca_cert:      (( vault meta.vault "/diego/certs/ca:certificate" ))
+          client_cert:  (( vault meta.vault "/diego/certs/routingapi_client:certificate" ))
+          client_key:   (( vault meta.vault "/diego/certs/routingapi_client:key" ))
+      uaa:
+        tls_port: (( grab instance_groups.uaa.jobs.uaa.properties.uaa.ssl.port ))
+        ca_cert:  (( grab meta.certs.uaa.ca ))
+
+- name: router
+  jobs:
+  - name: gorouter
+    properties:
+      routing_api:
+        enabled: true

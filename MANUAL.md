@@ -410,6 +410,14 @@ Certificates will then be automatically generated with the proper
 subject alternate names for all of the domains (system and apps)
 that Cloud Foundry will use.
 
+### Enabling the Routing API
+
+The routing API for Cloud Foundry allows router groups to be queried in the
+Cloud Foundry API. This may be necessary if you are using cf-mgmt. The routing
+API can be enabled by specifying the `routing-api` feature in the kit.
+
+If the routing API is enabled and you are using an external database, you will
+need to ensure that the `routingapidb` is created.
 
 ## DNS-Based Service Discovery
 

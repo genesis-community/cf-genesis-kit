@@ -115,6 +115,9 @@ certificates:
       ssh_proxy_backends_tls:
         valid_for: 1y
         names: [ "ssh_proxy_backends_tls", "ssh-proxy.service.cf.internal" ]
+      routingapi_client:
+        valid_for: 1y
+        names: ["routing-api locket client"]
 
     diego/certs/instance_identity:
       ca: { valid_for: 1y }
@@ -250,6 +253,16 @@ certificates:
         valid_for: 1y
         names: [ "eventgenerator client" ]
 
+  routing-api:
+    routingapi/certs:
+      ca: {valid_for: 1y}
+      server:
+        valid_for: 1y
+        names: ["routing-api.service.cf.internal"]
+      client:
+        valid_for: 1y
+        names: ["routing-api client"]
+
 credentials:
   base:
     consul/encryption_key:
@@ -324,6 +337,8 @@ credentials:
     cfnetworkingdb:
       password: random 64
     locketdb:
+      password: random 64
+    routingapidb:
       password: random 64
 
   autoscaler:

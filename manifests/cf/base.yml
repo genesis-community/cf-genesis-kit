@@ -96,22 +96,11 @@ params:
   locketdb_name: locketdb
   silkdb_name: silkdb
   policyserverdb_name:  policyserverdb
+  routingapidb_name:  routingapidb
 
   autoscaler_network: cf-autoscaler
 
 instance_groups:
-  - name: router
-    instances: (( grab params.router_instances ))
-    vm_type: (( grab params.router_vm_type ))
-    vm_extensions:
-      - cf-load-balanced
-    azs: (( grab params.availability_zones || meta.default.azs ))
-    stemcell: default
-    networks:
-      - name: (( grab params.cf_edge_network ))
-    update:
-      vm_strategry: create-swap-delete
-
   - name: nats
     instances: (( grab params.nats_instances ))
     vm_type: (( grab params.nats_vm_type ))
@@ -173,6 +162,18 @@ instance_groups:
       - name: (( grab params.cf_internal_network ))
     migrated_from:
       - name: diego-api
+
+  - name: router
+    instances: (( grab params.router_instances ))
+    vm_type: (( grab params.router_vm_type ))
+    vm_extensions:
+      - cf-load-balanced
+    azs: (( grab params.availability_zones || meta.default.azs ))
+    stemcell: default
+    networks:
+      - name: (( grab params.cf_edge_network ))
+    update:
+      vm_strategy: create-swap-delete
 
   - name: diego # metron, auctioneer, tps, cc_uploader, route_emitter
     instances: (( grab params.diego_instances ))

@@ -49,6 +49,13 @@ params:
   locketdb_password: (( vault meta.vault "/autoscalerdb:password" ))
   locketdb_port:     5432
 
+  routingapidb_name:     routingapidb
+  routingapidb_host:     (( grab instance_groups.postgres.networks[0].static_ips[0] ))
+  routingapidb_user:     routingapiadmin
+  routingapidb_scheme:   postgres
+  routingapidb_password: (( vault meta.vault "/routingapidb:password" ))
+  routingapidb_port:     5432
+
 releases:
   - name:    postgres
     version: "3.2.0"
@@ -102,6 +109,9 @@ instance_groups:
               - username: (( grab params.locketdb_user ))
                 password: (( grab params.locketdb_password ))
 
+              - username: (( grab params.routingapidb_user ))
+                password: (( grab params.routingapidb_password ))
+
               - username: shield
                 password: (( vault meta.vault "/shield:password" ))
                 admin: true
@@ -131,7 +141,10 @@ instance_groups:
                 users:      [(( grab params.locketdb_user ))]
                 extensions: [citext, pgcrypto]
 
-
               - name:        (( grab params.silkdb_name ))
                 users:      [(( grab params.silkdb_user ))]
+                extensions: [citext, pgcrypto]
+
+              - name:        (( grab params.routingapidb_name ))
+                users:      [(( grab params.routingapidb_user ))]
                 extensions: [citext, pgcrypto]
