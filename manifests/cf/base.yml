@@ -109,6 +109,14 @@ instance_groups:
     networks:
       - name: (( grab params.cf_internal_network ))
 
+  - name: uaa
+    instances: (( grab params.uaa_instances ))
+    vm_type: (( grab params.uaa_vm_type ))
+    azs: (( grab params.availability_zones || meta.default.azs ))
+    stemcell: default
+    networks:
+    - name: (( grab params.cf_internal_network ))
+
   - name: api
     instances: (( grab params.api_instances ))
     vm_type: (( grab params.api_vm_type ))
@@ -118,14 +126,6 @@ instance_groups:
     - name: (( grab params.cf_internal_network ))
     update:
       serial: true
-
-  - name: uaa
-    instances: (( grab params.uaa_instances ))
-    vm_type: (( grab params.uaa_vm_type ))
-    azs: (( grab params.availability_zones || meta.default.azs ))
-    stemcell: default
-    networks:
-    - name: (( grab params.cf_internal_network ))
 
   - name: doppler
     instances: (( grab params.doppler_instances ))
