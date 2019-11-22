@@ -117,6 +117,18 @@ instance_groups:
     networks:
     - name: (( grab params.cf_internal_network ))
 
+  - name: bbs
+    instances: (( grab params.bbs_instances ))
+    vm_type: (( grab params.bbs_vm_type ))
+    azs: (( grab params.availability_zones || meta.default.azs ))
+    stemcell: default
+    networks:
+      - name: (( grab params.cf_internal_network ))
+    migrated_from:
+      - name: diego-api
+    update:
+      serial: true
+
   - name: api
     instances: (( grab params.api_instances ))
     vm_type: (( grab params.api_vm_type ))
@@ -152,16 +164,6 @@ instance_groups:
     - name: (( grab params.cf_internal_network ))
     migrated_from:
     - name: log-api
-
-  - name: bbs
-    instances: (( grab params.bbs_instances ))
-    vm_type: (( grab params.bbs_vm_type ))
-    azs: (( grab params.availability_zones || meta.default.azs ))
-    stemcell: default
-    networks:
-      - name: (( grab params.cf_internal_network ))
-    migrated_from:
-      - name: diego-api
 
   - name: router
     instances: (( grab params.router_instances ))
