@@ -61,8 +61,8 @@ releases:
 
   - name:    routing
     version: "0.195.0"
-    url:     (( concat "https://bosh.io/d/github.com/cloudfoundry-incubator/cf-routing-release?v=" releases.routing.version ))
-    sha1:    c260724097795d7253f7d66e834921925b6aa454
+    url:     (( concat "https://bosh.io/d/github.com/cloudfoundry/routing-release?v=" releases.routing.version ))
+    sha1:    2b899d7bd6d35b9aacb410f0343989e82397d86d
 
   - name:    statsd-injector
     version: "1.11.4"
