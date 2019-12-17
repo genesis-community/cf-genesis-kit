@@ -146,6 +146,45 @@ meta:
         api:
           cert: (( vault meta.vault "/diego/certs/syslogger_scheduler:certificate" ))
           key:  (( vault meta.vault "/diego/certs/syslogger_scheduler:key" ))
+    
+    prometheus: 
+      ca: (( vault meta.vault "/prometheus/certs/ca:certificate" ))
+
+      log_cache_metrics:
+        cert: (( vault meta.vault "/prometheus/certs/log_cache_metrics:certificate" ))
+        key:  (( vault meta.vault "/prometheus/certs/log_cache_metrics:key" ))
+
+      log_cache_cf_auth_proxy_metrics:
+        cert: (( vault meta.vault "/prometheus/certs/log_cache_cf_auth_proxy_metrics:certificate" ))
+        key:  (( vault meta.vault "/prometheus/certs/log_cache_cf_auth_proxy_metrics:key" ))
+
+      log_cache_gateway_metrics:
+        cert: (( vault meta.vault "/prometheus/certs/log_cache_gateway_metrics:certificate" ))
+        key:  (( vault meta.vault "/prometheus/certs/log_cache_gateway_metrics:key" ))
+
+      forwarder_agent_metrics:
+        cert: (( vault meta.vault "/prometheus/certs/forwarder_agent_metrics:certificate" ))
+        key:  (( vault meta.vault "/prometheus/certs/forwarder_agent_metrics:key" ))
+
+      loggregator_agent_metrics:
+        cert: (( vault meta.vault "/prometheus/certs/loggregator_agent_metrics:certificate" ))
+        key:  (( vault meta.vault "/prometheus/certs/loggregator_agent_metrics:key" ))
+
+      loggr_udp_forwarder:
+        cert: (( vault meta.vault "/prometheus/certs/loggr_udp_forwarder:certificate" ))
+        key:  (( vault meta.vault "/prometheus/certs/loggr_udp_forwarder:key" ))
+
+      prom_scraper_scrape:
+        cert: (( vault meta.vault "/prometheus/certs/prom_scraper_scrape:certificate" ))
+        key:  (( vault meta.vault "/prometheus/certs/prom_scraper_scrape:key" ))
+
+      prom_scraper_metrics:
+        cert: (( vault meta.vault "/prometheus/certs/prom_scraper_metrics:certificate" ))
+        key:  (( vault meta.vault "/prometheus/certs/prom_scraper_metrics:key" ))
+
+      rlp_gateway_metrics:
+        cert: (( vault meta.vault "/prometheus/certs/rlp_gateway_metrics:certificate" ))
+        key:  (( vault meta.vault "/prometheus/certs/rlp_gateway_metrics:key" ))
 
     uaa:
       ca: (( vault meta.vault "/uaa/certs/ca:certificate" ))

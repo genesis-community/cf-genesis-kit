@@ -34,3 +34,8 @@ addons:
         properties:
           grpc_port:   3459
           disable_udp: true
+          # metrics:
+          #   server_name: loggregator_agent_metrics
+          #   ca_cert:     (( grab meta. ))
+          #   cert:        (( grab meta. ))
+          #   key:         (( grab meta. ))
