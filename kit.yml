@@ -157,8 +157,38 @@ certificates:
       forwarder_agent:
         valid-for: 1y
         names: [ "metron" ]
+      
+    prometheus/certs:
+      ca: {valid_for: 1y }
+      log_cache_metrics:
+        valid_for: 1y
+        names: [ "log_cache_metrics" ]
+      log_cache_cf_auth_proxy_metrics:
+        valid_for: 1y
+        names: [ "log_cache_cf_auth_proxy_metrics" ]
+      log_cache_gateway_metrics:
+        valid_for: 1y
+        names: [ "log_cache_gateway_metrics" ]
+      forwarder_agent_metrics:
+        valid_for: 1y
+        names: [ "forwarder_agent_metrics" ]
+      loggregator_agent_metrics:
+        valid_for: 1y
+        names: [ "loggregator_agent_metrics" ]
+      loggr_udp_forwarder:
+        valid_for: 1y
+        names: [ "loggr_udp_forwarder_metrics" ]
+      prom_scraper_scrape:
+        valid_for: 1y
+        names: [ "prom_scraper" ]
+      prom_scraper_metrics:
+        valid_for: 1y
+        names: [ "prom_scraper_metrics" ]
+      rlp_gateway_metrics:
+        valid_for: 1y
+        names: [ "rlp_gateway_metrics" ]
 
-
+      
     dns_healthcheck_tls:
       ca: { valid_for: 1y }
       server:
@@ -262,6 +292,7 @@ certificates:
       client:
         valid_for: 1y
         names: ["routing-api client"]
+  
 
 credentials:
   base:
