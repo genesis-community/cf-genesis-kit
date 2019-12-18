@@ -9,9 +9,14 @@ addons:
         release: loggregator-agent
         properties:
           tls:
-            ca_cert: (( grab meta.certs.loggregator.ca.certificate ))
-            cert:    (( vault meta.vault "loggregator.forwarder_agent:certificate" ))
-            key:     (( vault meta.vault "loggregator.forwarder_agent:key" ))
+            ca_cert: (( grab meta.certs.loggregator.ca ))
+            cert:    (( grab meta.certs.loggregator.forwarder_agent.cert ))
+            key:     (( grab meta.certs.loggregator.forwarder_agent.key ))
+          metrics:
+            server_name:  forwarder_agent_metrics
+            ca_cert: (( grab meta.certs.prometheus.ca ))
+            cert:    (( grab meta.certs.prometheus.forwarder_agent_metrics.cert ))
+            key:     (( grab meta.certs.prometheus.forwarder_agent_metrics.key ))
 
   - name: udp_forwarder
     include:
@@ -27,6 +32,11 @@ addons:
               ca_cert: (( grab meta.certs.loggregator.ca ))
               cert:    (( grab meta.certs.loggregator.metron.server.cert ))
               key:     (( grab meta.certs.loggregator.metron.server.key ))
+            metrics:
+              server_name:  loggr_udp_forwarder
+              ca_cert: (( grab meta.certs.prometheus.ca ))
+              cert:    (( grab meta.certs.prometheus.loggr_udp_forwarder.cert ))
+              key:     (( grab meta.certs.prometheus.loggr_udp_forwarder.key ))
 
   - name: loggregator_agent
     jobs:
@@ -34,8 +44,4 @@ addons:
         properties:
           grpc_port:   3459
           disable_udp: true
-          # metrics:
-          #   server_name: loggregator_agent_metrics
-          #   ca_cert:     (( grab meta. ))
-          #   cert:        (( grab meta. ))
-          #   key:         (( grab meta. ))
+          
