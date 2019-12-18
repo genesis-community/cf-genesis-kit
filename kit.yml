@@ -158,6 +158,12 @@ certificates:
         valid-for: 1y
         names: [ "metron" ]
       
+    log_cache/certs:
+      ca: {valid_for: 1y}
+      log_cache_proxy:
+        valid-for: 1y
+        names: [ "localhost" ]
+      
     prometheus/certs:
       ca: {valid_for: 1y }
       log_cache_metrics:

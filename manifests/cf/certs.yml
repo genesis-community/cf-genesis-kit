@@ -146,6 +146,13 @@ meta:
         api:
           cert: (( vault meta.vault "/diego/certs/syslogger_scheduler:certificate" ))
           key:  (( vault meta.vault "/diego/certs/syslogger_scheduler:key" ))
+      
+    log_cache:
+      ca:   (( vault meta.vault "/log_cache/certs/ca:certificate" ))
+
+      log_cache_proxy:
+        cert: (( vault meta.vault "/log_cache/certs/log_cache_proxy:certificate" ))
+        key:  (( vault meta.vault "/log_cache/certs/log_cache_proxy:key" ))
     
     prometheus: 
       ca: (( vault meta.vault "/prometheus/certs/ca:certificate" ))

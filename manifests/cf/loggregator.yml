@@ -107,6 +107,8 @@ instance_groups:
       release: log-cache
       properties:
         gateway_addr: localhost:8084
+        proxy_cert:    (( grab meta.certs.log_cache.log_cache_proxy.cert ))
+        proxy_key:     (( grab meta.certs.log_cache.log_cache_proxy.key ))
         metrics:
           server_name:  log_cache_gateway_metrics
           ca_cert: (( grab meta.certs.prometheus.ca ))
@@ -130,6 +132,7 @@ instance_groups:
         cc:
           common_name: cloud-controller-ng.service.cf.internal
           ca_cert: (( grab meta.certs.diego.ca ))
+        proxy_ca_cert: (( grab meta.certs.log_cache.ca ))
         proxy_port: 8083
         external_cert: (( vault meta.vault "/loggregator/certs/log_cache:certificate" ))
         external_key:  (( vault meta.vault "/loggregator/certs/log_cache:key" ))
