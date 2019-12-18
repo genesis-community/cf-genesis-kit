@@ -81,6 +81,11 @@ instance_groups:
           client_id: doppler
           client_secret: (( grab meta.uaa.doppler_secret ))
           internal_addr: https://uaa.service.cf.internal:8443
+        metrics:
+          server_name:  log_cache_metrics
+          ca_cert: (( grab meta.certs.prometheus.ca ))
+          cert:    (( grab meta.certs.prometheus.log_cache_metrics.cert ))
+          key:     (( grab meta.certs.prometheus.log_cache_metrics.key ))
 
     - name: log-cache
       release: log-cache
@@ -92,11 +97,21 @@ instance_groups:
           ca_cert: (( grab meta.certs.loggregator.ca ))
           cert:    (( grab meta.certs.loggregator.logcache.cert ))
           key:     (( grab meta.certs.loggregator.logcache.key ))
+        metrics:
+          server_name:  rlp_gateway_metrics
+          ca_cert: (( grab meta.certs.prometheus.ca ))
+          cert:    (( grab meta.certs.prometheus.rlp_gateway_metrics.cert ))
+          key:     (( grab meta.certs.prometheus.rlp_gateway_metrics.key ))
 
     - name: log-cache-gateway
       release: log-cache
       properties:
         gateway_addr: localhost:8084
+        metrics:
+          server_name:  log_cache_gateway_metrics
+          ca_cert: (( grab meta.certs.prometheus.ca ))
+          cert:    (( grab meta.certs.prometheus.log_cache_gateway_metrics.cert ))
+          key:     (( grab meta.certs.prometheus.log_cache_gateway_metrics.key ))
 
     - name: log-cache-nozzle
       release: log-cache
@@ -123,7 +138,12 @@ instance_groups:
           client_id: doppler
           client_secret: (( grab meta.uaa.doppler_secret ))
           internal_addr: https://uaa.service.cf.internal:8443
-
+        metrics:
+          server_name: log_cache_cf_auth_proxy_metrics
+          ca_cert: (( grab meta.certs.prometheus.ca ))
+          cert:    (( grab meta.certs.prometheus.log_cache_cf_auth_proxy_metrics.cert ))
+          key:     (( grab meta.certs.prometheus.log_cache_cf_auth_proxy_metrics.key ))
+          
     - name: route_registrar
       release: routing
       properties:
