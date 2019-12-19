@@ -206,7 +206,7 @@ instance_groups:
             routes:
               - name: uaa
                 tls_port: (( grab meta.uaa.ssl_port ))
-                servier_cert_domain_san: uaa.service.cf.internal
+                server_cert_domain_san: uaa.service.cf.internal
 
                 registration_interval: 10s
                 tags:
