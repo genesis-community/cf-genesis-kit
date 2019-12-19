@@ -1,22 +1,23 @@
-instance_groups: 
-- name: prom_scraper
-  include:
-    stemcell:
-      - os: ubuntu-xenial
-  exclude:
-    jobs:
-      - { release: cf-smoke-tests, name: smoke_tests }
-  jobs:
+addons: 
+  - (( append ))
   - name: prom_scraper
-    release:  loggregator-agent
-    properties:
-      scrape:
-        tls:
-          ca_cert: (( grab meta.certs.prometheus.ca ))
-          cert:    (( grab meta.certs.prometheus.prom_scraper_scrape.cert ))
-          key:     (( grab meta.certs.prometheus.prom_scraper_scrape.key ))
-        metrics:
-          server_name:  prom_scraper_metrics
-          ca_cert: (( grab meta.certs.prometheus.ca ))
-          cert:    (( grab meta.certs.prometheus.prom_scraper_metrics.cert ))
-          key:     (( grab meta.certs.prometheus.prom_scraper_metrics.key ))
+    include:
+      stemcell:
+        - os: ubuntu-xenial
+    exclude:
+      jobs:
+        - { release: cf-smoke-tests, name: smoke_tests }
+    jobs:
+      - name: prom_scraper
+        release:  loggregator-agent
+        properties:
+          scrape:
+            tls:
+              ca_cert: (( grab meta.certs.prometheus.ca ))
+              cert:    (( grab meta.certs.prometheus.prom_scraper_scrape.cert ))
+              key:     (( grab meta.certs.prometheus.prom_scraper_scrape.key ))
+          metrics:
+            server_name:  prom_scraper_metrics
+            ca_cert: (( grab meta.certs.prometheus.ca ))
+            cert:    (( grab meta.certs.prometheus.prom_scraper_metrics.cert ))
+            key:     (( grab meta.certs.prometheus.prom_scraper_metrics.key ))
