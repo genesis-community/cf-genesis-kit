@@ -161,7 +161,6 @@ instance_groups:
             sslCertificate: (( grab meta.uaa.ssl_cert ))
             sslPrivateKey: (( grab meta.uaa.ssl_key ))
             url: (( grab meta.uaa.url ))
-            port: 8080
             ssl:
               port: (( grab meta.uaa.ssl_port ))
             zones:
@@ -185,6 +184,8 @@ instance_groups:
                   certificate: (( grab meta.uaa.ssl_cert ))
                   passphrase: ""
           uaadb:
+            tls: disabled
+
             address:   (( grab params.uaadb_host ))
             db_scheme: (( grab params.uaadb_scheme ))
             port:      (( grab params.uaadb_port ))
