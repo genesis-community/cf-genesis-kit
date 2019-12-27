@@ -6,6 +6,8 @@ params:
   haproxy_instances: 2
   haproxy_vm_type:   haproxy
 
+  haproxy_ips: (( param "Please specify the IP addresses for your load balancer instances" ))
+
 instance_groups:
   - name: router
     vm_extensions: (( empty array ))
@@ -19,7 +21,7 @@ instance_groups:
     stemcell: default
     networks:
       - name: (( grab params.cf_edge_network ))
-        static_ips: (( static_ips 10 11 12 13 14 ))
+        static_ips: (( grab params.haproxy_ips ))
 
     vm_extensions:
       - cf-load-balanced
