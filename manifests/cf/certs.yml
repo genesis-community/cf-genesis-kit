@@ -1,200 +1,251 @@
 ---
 # This file should abstract out the cert paths in the vault
+#
+# The structure of the CA hierarchy is maintained, but where useful, a link to
+# the ca for each cert/key pairing is also provided, as either ca_cert or ca, 
+# determined by whichever is more used by the property specs.  This makes it
+# convenient to grab the entire tree when a property needs the ca_cert, cert
+# and key.  It also matches the cf-deployments use of referring to the ca
+# of the matching cert/key by name rather than by knowing what ca was used to
+# sign it.
 meta:
   certs:
-    network_policy:
-      ca:          (( vault meta.vault "/network_policy/certs/ca:certificate" ))
-      server_cert: (( vault meta.vault "/network_policy/certs/server:certificate" ))
-      server_key:  (( vault meta.vault "/network_policy/certs/server:key" ))
-      client_cert: (( vault meta.vault "/network_policy/certs/client:certificate" ))
-      client_key:  (( vault meta.vault "/network_policy/certs/client:key" ))
+    cf_internal:
+      ca: 
+        cert:  (( vault meta.vault "/cf_internal/certs/ca:certificate" ))
 
-    silk:
-      ca:          (( vault meta.vault "/silk/certs/ca:certificate" ))
-      server_cert: (( vault meta.vault "/silk/certs/server:certificate" ))
-      server_key:  (( vault meta.vault "/silk/certs/server:key" ))
-      client_cert: (( vault meta.vault "/silk/certs/client:certificate" ))
-      client_key:  (( vault meta.vault "/silk/certs/client:key" ))
+      cc_bridge_cc_uploader:
+        ca_cert:     (( grab meta.certs.cf_internal.ca.cert ))
+        client_cert: (( vault meta.vault "/cf_internal/certs/cc_bridge_tps:certificate" ))
+        client_key:  (( vault meta.vault "/cf_internal/certs/cc_bridge_tps:key" ))
+      cc_bridge_cc_uploader_server:
+        ca_cert:     (( grab meta.certs.cf_internal.ca.cert ))
+        server_cert: (( vault meta.vault "/cf_internal/certs/cc_bridge_tps:certificate" ))
+        server_key:  (( vault meta.vault "/cf_internal/certs/cc_bridge_tps:key" ))
+      cc_bridge_tps:
+        ca_cert:     (( grab meta.certs.cf_internal.ca.cert ))
+        client_cert: (( vault meta.vault "/cf_internal/certs/cc_bridge_tps:certificate" ))
+        client_key:  (( vault meta.vault "/cf_internal/certs/cc_bridge_tps:key" ))
+      cc_tls:
+        ca_cert:     (( grab meta.certs.cf_internal.ca.cert ))
+        public_cert: (( vault meta.vault "/cf_internal/certs/cc_tls:certificate" ))
+        private_key: (( vault meta.vault "/cf_internal/certs/cc_tls:key" ))
+      cc_public_tls:
+        ca_cert:     (( grab meta.certs.cf_internal.ca.cert ))
+        certificate: (( vault meta.vault "/cf_internal/certs/cc_public_tls:certificate" ))
+        private_key: (( vault meta.vault "/cf_internal/certs/cc_public_tls:key" ))
 
-    diego:
-      ca: (( vault meta.vault "/diego/certs/ca:certificate" ))
+      diego_auctioneer_server:
+        ca_cert:  (( grab meta.certs.cf_internal.ca.cert ))
+        cert:     (( vault meta.vault "/cf_internal/certs/diego_auctioneer_server:certificate" ))
+        key:      (( vault meta.vault "/cf_internal/certs/diego_auctioneer_server:key" ))
+      diego_auctioneer_client:
+        ca_cert:  (( grab meta.certs.cf_internal.ca.cert ))
+        cert:     (( vault meta.vault "/cf_internal/certs/diego_auctioneer_client:certificate" ))
+        key:      (( vault meta.vault "/cf_internal/certs/diego_auctioneer_client:key" ))
 
-      public_tls: 
-        certificate: (( vault meta.vault "/diego/certs/public_tls:certificate" ))
-        private_key: (( vault meta.vault "/diego/certs/public_tls:key" ))
+      diego_bbs_server:
+        ca_cert:  (( grab meta.certs.cf_internal.ca.cert ))
+        cert:     (( vault meta.vault "/cf_internal/certs/diego_bbs_server:certificate" ))
+        key:      (( vault meta.vault "/cf_internal/certs/diego_bbs_server:key" ))
+      diego_bbs_client:
+        ca_cert:  (( grab meta.certs.cf_internal.ca.cert ))
+        cert:     (( vault meta.vault "/cf_internal/certs/diego_bbs_client:certificate" ))
+        key:      (( vault meta.vault "/cf_internal/certs/diego_bbs_client:key" ))
 
-      executer:
-        ca:         (( vault meta.vault "/diego/certs/instance_identity/ca:certificate" ))
-        ca_private: (( vault meta.vault "/diego/certs/instance_identity/ca:key" ))
+      diego_locket_server:
+        ca_cert:  (( grab meta.certs.cf_internal.ca.cert ))
+        cert:     (( vault meta.vault "/cf_internal/certs/diego_locket_server:certificate" ))
+        key:      (( vault meta.vault "/cf_internal/certs/diego_locket_server:key" ))
+      diego_locket_client:
+        ca_cert:  (( grab meta.certs.cf_internal.ca.cert ))
+        cert:     (( vault meta.vault "/cf_internal/certs/diego_locket_client:certificate" ))
+        key:      (( vault meta.vault "/cf_internal/certs/diego_locket_client:key" ))
 
-      auctioneer:
-        server:
-          server_cert: (( vault meta.vault "/diego/certs/auctioneer:certificate" ))
-          server_key:  (( vault meta.vault "/diego/certs/auctioneer:key" ))
-        client:
-          client_cert: (( vault meta.vault "/diego/certs/auctioneer_client:certificate" ))
-          client_key:  (( vault meta.vault "/diego/certs/auctioneer_client:key" ))
+      diego_rep_agent_v2:
+        ca_cert:  (( grab meta.certs.cf_internal.ca.cert ))
+        cert:     (( vault meta.vault "/cf_internal/certs/diego_rep_agent_v2:certificate" ))
+        key:      (( vault meta.vault "/cf_internal/certs/diego_rep_agent_v2:key" ))
+      diego_rep_client:
+        ca_cert:  (( grab meta.certs.cf_internal.ca.cert ))
+        cert:     (( vault meta.vault "/cf_internal/certs/diego_rep_client:certificate" ))
+        key:      (( vault meta.vault "/cf_internal/certs/diego_rep_client:key" ))
 
-      bbs:
-        server:
-          server_cert: (( vault meta.vault "/diego/certs/bbs:certificate" ))
-          server_key:  (( vault meta.vault "/diego/certs/bbs:key" ))
-        client:
-          client_cert: (( vault meta.vault "/diego/certs/bbs_client:certificate" ))
-          client_key:  (( vault meta.vault "/diego/certs/bbs_client:key" ))
+      gorouter_backend_tls:
+        ca_cert:  (( grab meta.certs.cf_internal.ca.cert ))
+        cert:     (( vault meta.vault "/cf_internal/certs/gorouter_backend_tls:certificate" ))
+        key:      (( vault meta.vault "/cf_internal/certs/gorouter_backend_tls:key" ))
 
-      rlp_gateway:
-        cert: (( vault meta.vault "/diego/certs/loggregator_rlp_gateway:certificate" ))
-        key:  (( vault meta.vault "/diego/certs/loggregator_rlp_gateway:key" ))
+      logcache_ssl:
+        ca_cert:  (( grab meta.certs.cf_internal.ca.cert ))
+        cert:     (( vault meta.vault "/cf_internal/certs/logcache_ssl:certificate" ))
+        key:      (( vault meta.vault "/cf_internal/certs/logcache_ssl:key" ))
 
-      capi:
-        server:
-          public_cert: (( vault meta.vault "/diego/certs/capi:certificate" ))
-          private_key: (( vault meta.vault "/diego/certs/capi:key" ))
-        client:
-          cert: (( vault meta.vault "/diego/certs/capi_client:certificate" ))
-          key:  (( vault meta.vault "/diego/certs/capi_client:key" ))
+      loggregator_rlp_gateway_tls:
+        cert:     (( vault meta.vault "/cf_internal/certs/loggregator_rlp_gateway_tls:certificate" ))
+        key:      (( vault meta.vault "/cf_internal/certs/loggregator_rlp_gateway_tls:key" ))
+      loggregator_rlp_gateway_tls_cc:
+        ca_cert:  (( grab meta.certs.cf_internal.ca.cert ))
+        cert:     (( vault meta.vault "/cf_internal/certs/loggregator_rlp_gateway_tls_cc:certificate" ))
+        key:      (( vault meta.vault "/cf_internal/certs/loggregator_rlp_gateway_tls_cc:key" ))
+      loggregator_tls_cc_tc:
+        cert:     (( vault meta.vault "/cf_internal/certs/loggregator_tls_cc_tc:certificate" ))
+        key:      (( vault meta.vault "/cf_internal/certs/loggregator_tls_cc_tc:key" ))
+      loggregator_trafficcontroller_tls:
+        cert:     (( vault meta.vault "/cf_internal/certs/loggregator_trafficcontroller_tls:certificate" ))
+        key:      (( vault meta.vault "/cf_internal/certs/loggregator_trafficcontroller_tls:key" ))
 
-      cc_uploader:
-        server:
-          server_cert: (( vault meta.vault "/diego/certs/cc_uploader_server:certificate" ))
-          server_key:  (( vault meta.vault "/diego/certs/cc_uploader_server:key" ))
-        client:
-          client_cert: (( vault meta.vault "/diego/certs/cc_uploader:certificate" ))
-          client_key:  (( vault meta.vault "/diego/certs/cc_uploader:key" ))
+      scheduler_api_tls:
+        ca:       (( grab meta.certs.cf_internal.ca.cert ))
+        cert:     (( vault meta.vault "/cf_internal/certs/scheduler_api_tls:certificate" ))
+        key:      (( vault meta.vault "/cf_internal/certs/scheduler_api_tls:key" ))
 
-      cc_deployment_updater:
-        server:
-          server_cert: (( vault meta.vault "/diego/certs/cc_deployment_updater_server:certificate" ))
-          server_key:  (( vault meta.vault "/diego/certs/cc_deployment_updater_server:key" ))
-        client:
-          server_cert: (( vault meta.vault "/diego/certs/cc_deployment_updater:certificate" ))
-          server_key:  (( vault meta.vault "/diego/certs/cc_deployment_updater:key" ))
+      ssh_proxy_backends_tls:
+        ca_cert:  (( grab meta.certs.cf_internal.ca.cert ))
+        cert:     (( vault meta.vault "/cf_internal/certs/ssh_proxy_backends_tls:certificate" ))
+        key:      (( vault meta.vault "/cf_internal/certs/ssh_proxy_backends_tls:key" ))
 
-      rep:
-        server:
-          server_cert: (( vault meta.vault "/diego/certs/rep:certificate" ))
-          server_key:  (( vault meta.vault "/diego/certs/rep:key" ))
-        client:
-          client_cert: (( vault meta.vault "/diego/certs/rep_client:certificate" ))
-          client_key:  (( vault meta.vault "/diego/certs/rep_client:key" ))
-
-      syslogdrainbinder:
-        server:
-          cert: (( vault meta.vault "/diego/certs/syslogdrainbinder:certificate" ))
-          key:  (( vault meta.vault "/diego/certs/syslogdrainbinder:key" ))
-
-      tps:
-        client:
-          client_cert: (( vault meta.vault "/diego/certs/rep_client:certificate" ))
-          client_key:  (( vault meta.vault "/diego/certs/rep_client:key" ))
-
-      locket:
-        server_cert: (( vault meta.vault "/diego/certs/locket_server:certificate" ))
-        server_key:  (( vault meta.vault "/diego/certs/locket_server:key" ))
-
-        ssh_proxy_backends_tls:
-          client:
-            cert: (( vault meta.vault "/diego/certs/ssh_proxy_backends_tls:certificate" ))
-            key:  (( vault meta.vault "/diego/certs/ssh_proxy_backends_tls:key" ))
+    diego_instance_identity_ca:
+      ca_cert:    (( vault meta.vault "/application/certs/ca:certificate" ))
+      cert:       (( vault meta.vault "/diego_instance_identity/certs/ca:certificate" ))
+      key:        (( vault meta.vault "/diego_instance_identity/certs/ca:key" ))
 
     loggregator:
-      ca: (( vault meta.vault "/loggregator/certs/ca:certificate" ))
-
-      doppler:
-        server:
-          cert: (( vault meta.vault "/loggregator/certs/doppler:certificate" ))
-          key:  (( vault meta.vault "/loggregator/certs/doppler:key" ))
-
-      metron:
-        server:
-          cert: (( vault meta.vault "/loggregator/certs/metron:certificate" ))
-          key:  (( vault meta.vault "/loggregator/certs/metron:key" ))
-
-      forwarder_agent:
-        cert: (( vault meta.vault "/loggregator/certs/forwarder_agent:certificate" ))
-        key:  (( vault meta.vault "/loggregator/certs/forwarder_agent:key" ))
-
-      logcache:
-        cert: (( vault meta.vault "/loggregator/certs/log_cache:certificate" ))
-        key:  (( vault meta.vault "/loggregator/certs/log_cache:key" ))
-
-      rlp_gateway:
-        cert: (( vault meta.vault "/loggregator/certs/rlp_gateway:certificate" ))
-        key:  (( vault meta.vault "/loggregator/certs/rlp_gateway:key" ))
-
-      trafficcontroller:
-        server:
-          cert: (( vault meta.vault "/loggregator/certs/trafficcontroller:certificate" ))
-          key:  (( vault meta.vault "/loggregator/certs/trafficcontroller:key" ))
-
+      ca:
+        cert:     (( vault meta.vault "/loggregator/certs/ca:certificate" ))
       statsdinjector:
-        server:
-          cert: (( vault meta.vault "/loggregator/certs/statsdinjector:certificate" ))
-          key:  (( vault meta.vault "/loggregator/certs/statsdinjector:key" ))
+        ca_cert:  (( grab meta.certs.loggregator.ca.cert ))
+        cert:     (( vault meta.vault "/loggregator/certs/loggregator_tls_statsdinjector:certificate" ))
+        key:      (( vault meta.vault "/loggregator/certs/loggregator_tls_statsdinjector:key" ))
+      agent: # was metron.server
+        ca_cert:  (( grab meta.certs.loggregator.ca.cert ))
+        cert:     (( vault meta.vault "/loggregator/certs/loggregator_tls_agent:certificate" ))
+        key:      (( vault meta.vault "/loggregator/certs/loggregator_tls_agent:key" ))
+      doppler:
+        cert:     (( vault meta.vault "/loggregator/certs/loggregator_tls_doppler:certificate" ))
+        key:      (( vault meta.vault "/loggregator/certs/loggregator_tls_doppler:key" ))
+      tc:
+        cert:     (( vault meta.vault "/loggregator/certs/loggregator_tls_tc:certificate" ))
+        key:      (( vault meta.vault "/loggregator/certs/loggregator_tls_tc:key" ))
+      rlp:
+        cert:     (( vault meta.vault "/loggregator/certs/loggregator_tls_rlp:certificate" ))
+        key:      (( vault meta.vault "/loggregator/certs/loggregator_tls_rlp:key" ))
+      rlp_gateway:
+        ca_cert:  (( grab meta.certs.loggregator.ca.cert ))
+        cert:     (( vault meta.vault "/loggregator/certs/loggregator_tls_rlp_gateway:certificate" ))
+        key:      (( vault meta.vault "/loggregator/certs/loggregator_tls_rlp_gateway:key" ))
+      adapter_rlp_tls:
+        cert:     (( vault meta.vault "/loggregator/certs/adapter_rlp_tls:certificate" ))
+        key:      (( vault meta.vault "/loggregator/certs/adapter_rlp_tls:key" ))
+      adapter_tls:
+        cert:     (( vault meta.vault "/loggregator/certs/adapter_tls:certificate" ))
+        key:      (( vault meta.vault "/loggregator/certs/adapter_tls:key" ))
+      scheduler_client_tls:
+        ca:       (( grab meta.certs.loggregator.ca.cert ))
+        cert:     (( vault meta.vault "/loggregator/certs/scheduler_client_tls:certificate" ))
+        key:      (( vault meta.vault "/loggregator/certs/scheduler_client_tls:key" ))
+      logs_provider:
+        ca_cert:  (( grab meta.certs.loggregator.ca.cert ))
+        cert:     (( vault meta.vault "/loggregator/certs/logs_provider:certificate" ))
+        key:      (( vault meta.vault "/loggregator/certs/logs_provider:key" ))
 
-      syslogger:
-        server:
-          cert: (( vault meta.vault "/loggregator/certs/syslogger_server:certificate" ))
-          key:  (( vault meta.vault "/loggregator/certs/syslogger_server:key" ))
-        rlp:
-          cert: (( vault meta.vault "/loggregator/certs/syslogger_rlp:certificate" ))
-          key:  (( vault meta.vault "/loggregator/certs/syslogger_rlp:key" ))
-        client:
-          cert: (( vault meta.vault "/loggregator/certs/syslogger_client:certificate" ))
-          key:  (( vault meta.vault "/loggregator/certs/syslogger_client:key" ))
-        api:
-          cert: (( vault meta.vault "/diego/certs/syslogger_scheduler:certificate" ))
-          key:  (( vault meta.vault "/diego/certs/syslogger_scheduler:key" ))
-      
     log_cache:
-      ca:   (( vault meta.vault "/log_cache/certs/ca:certificate" ))
+      ca:
+        cert:     (( vault meta.vault "/log_cache/certs/ca:certificate" ))
+      server:
+        ca_cert:  (( grab meta.certs.log_cache.ca.cert ))
+        cert:     (( vault meta.vault "/log_cache/certs/server:certificate" ))
+        key:      (( vault meta.vault "/log_cache/certs/server:key" ))
+      cc_logcache_tls:
+        cert:     (( vault meta.vault "/log_cache/certs/cc_logcache_tls:certificate" ))
+        key:      (( vault meta.vault "/log_cache/certs/cc_logcache_tls:key" ))
+      proxy_tls:
+        cert:     (( vault meta.vault "/log_cache/certs/proxy_tls:certificate" ))
+        key:      (( vault meta.vault "/log_cache/certs/proxy_tls:key" ))
 
-      log_cache_proxy:
-        cert: (( vault meta.vault "/log_cache/certs/log_cache_proxy:certificate" ))
-        key:  (( vault meta.vault "/log_cache/certs/log_cache_proxy:key" ))
-    
-    prometheus: 
-      ca: (( vault meta.vault "/prometheus/certs/ca:certificate" ))
+    metrics:
+      ca:
+        cert:     (( vault meta.vault "/metrics/certs/ca:certificate" ))
+      forwarder_agent_metrics_tls:
+        ca_cert:  (( grab meta.certs.metrics.ca.cert ))
+        cert:     (( vault meta.vault "/metrics/certs/forwarder_agent_metrics_tls:certificate" ))
+        key:      (( vault meta.vault "/metrics/certs/forwarder_agent_metrics_tls:key" ))
+      log_cache_metrics_tls:
+        ca_cert:  (( grab meta.certs.metrics.ca.cert ))
+        cert:     (( vault meta.vault "/metrics/certs/log_cache_metrics_tls:certificate" ))
+        key:      (( vault meta.vault "/metrics/certs/log_cache_metrics_tls:key" ))
+      log_cache_cf_auth_proxy_metrics_tls:
+        ca_cert:  (( grab meta.certs.metrics.ca.cert ))
+        cert:     (( vault meta.vault "/metrics/certs/log_cache_cf_auth_proxy_metrics_tls:certificate" ))
+        key:      (( vault meta.vault "/metrics/certs/log_cache_cf_auth_proxy_metrics_tls:key" ))
+      log_cache_gateway_metrics_tls:
+        ca_cert:  (( grab meta.certs.metrics.ca.cert ))
+        cert:     (( vault meta.vault "/metrics/certs/log_cache_gateway_metrics_tls:certificate" ))
+        key:      (( vault meta.vault "/metrics/certs/log_cache_gateway_metrics_tls:key" ))
+      loggregator_agent_metrics_tls:
+        ca_cert:  (( grab meta.certs.metrics.ca.cert ))
+        cert:     (( vault meta.vault "/metrics/certs/loggregator_agent_metrics_tls:certificate" ))
+        key:      (( vault meta.vault "/metrics/certs/loggregator_agent_metrics_tls:key" ))
+      loggr_udp_forwarder_tls:
+        ca_cert:  (( grab meta.certs.metrics.ca.cert ))
+        cert:     (( vault meta.vault "/metrics/certs/loggr_udp_forwarder_tls:certificate" ))
+        key:      (( vault meta.vault "/metrics/certs/loggr_udp_forwarder_tls:key" ))
+      prom_scraper_scrape_tls:
+        ca_cert:  (( grab meta.certs.metrics.ca.cert ))
+        cert:     (( vault meta.vault "/metrics/certs/prom_scraper_scrape_tls:certificate" ))
+        key:      (( vault meta.vault "/metrics/certs/prom_scraper_scrape_tls:key" ))
+      prom_scraper_metrics_tls:
+        ca_cert:  (( grab meta.certs.metrics.ca.cert ))
+        cert:     (( vault meta.vault "/metrics/certs/prom_scraper_metrics_tls:certificate" ))
+        key:      (( vault meta.vault "/metrics/certs/prom_scraper_metrics_tls:key" ))
+      rlp_gateway_metrics_tls:
+        ca_cert:  (( grab meta.certs.metrics.ca.cert ))
+        cert:     (( vault meta.vault "/metrics/certs/rlp_gateway_metrics_tls:certificate" ))
+        key:      (( vault meta.vault "/metrics/certs/rlp_gateway_metrics_tls:key" ))
 
-      log_cache_metrics:
-        cert: (( vault meta.vault "/prometheus/certs/log_cache_metrics:certificate" ))
-        key:  (( vault meta.vault "/prometheus/certs/log_cache_metrics:key" ))
+    network_policy:
+      ca:
+        cert:     (( vault meta.vault "/network_policy/certs/ca:certificate" ))
+      server:
+        ca_cert:  (( grab meta.certs.network_policy.ca.cert ))
+        cert:     (( vault meta.vault "/network_policy/certs/server:certificate" ))
+        key:      (( vault meta.vault "/network_policy/certs/server:key" ))
+      client:
+        ca_cert:  (( grab meta.certs.network_policy.ca.cert ))
+        cert:     (( vault meta.vault "/network_policy/certs/client:certificate" ))
+        key:      (( vault meta.vault "/network_policy/certs/client:key" ))
+      external:
+        ca_cert:  (( grab meta.certs.network_policy.ca.cert ))
+        cert:     (( vault meta.vault "/network_policy/certs/server_external:certificate" ))
+        key:      (( vault meta.vault "/network_policy/certs/server_external:key" ))
 
-      log_cache_cf_auth_proxy_metrics:
-        cert: (( vault meta.vault "/prometheus/certs/log_cache_cf_auth_proxy_metrics:certificate" ))
-        key:  (( vault meta.vault "/prometheus/certs/log_cache_cf_auth_proxy_metrics:key" ))
+    router:
+      ca:
+        cert:     (( vault meta.vault "/router/certs/ca:certificate" ))
+      ssl:
+        cert:     (( vault meta.vault "/router/certs/ssl:certificate" ))
+        key:      (( vault meta.vault "/router/certs/ssl:key" ))
 
-      log_cache_gateway_metrics:
-        cert: (( vault meta.vault "/prometheus/certs/log_cache_gateway_metrics:certificate" ))
-        key:  (( vault meta.vault "/prometheus/certs/log_cache_gateway_metrics:key" ))
-
-      forwarder_agent_metrics:
-        cert: (( vault meta.vault "/prometheus/certs/forwarder_agent_metrics:certificate" ))
-        key:  (( vault meta.vault "/prometheus/certs/forwarder_agent_metrics:key" ))
-
-      loggregator_agent_metrics:
-        cert: (( vault meta.vault "/prometheus/certs/loggregator_agent_metrics:certificate" ))
-        key:  (( vault meta.vault "/prometheus/certs/loggregator_agent_metrics:key" ))
-
-      loggr_udp_forwarder:
-        cert: (( vault meta.vault "/prometheus/certs/loggr_udp_forwarder:certificate" ))
-        key:  (( vault meta.vault "/prometheus/certs/loggr_udp_forwarder:key" ))
-
-      prom_scraper_scrape:
-        cert: (( vault meta.vault "/prometheus/certs/prom_scraper_scrape:certificate" ))
-        key:  (( vault meta.vault "/prometheus/certs/prom_scraper_scrape:key" ))
-
-      prom_scraper_metrics:
-        cert: (( vault meta.vault "/prometheus/certs/prom_scraper_metrics:certificate" ))
-        key:  (( vault meta.vault "/prometheus/certs/prom_scraper_metrics:key" ))
-
-      rlp_gateway_metrics:
-        cert: (( vault meta.vault "/prometheus/certs/rlp_gateway_metrics:certificate" ))
-        key:  (( vault meta.vault "/prometheus/certs/rlp_gateway_metrics:key" ))
+    silk:
+      ca:
+        cert:     (( vault meta.vault "/silk/certs/ca:certificate" ))
+      controller:
+        ca_cert:  (( grab meta.certs.silk.ca.cert ))
+        cert:     (( vault meta.vault "/silk/certs/controller:certificate" ))
+        key:      (( vault meta.vault "/silk/certs/controller:key" ))
+      daemon:
+        ca_cert:  (( grab meta.certs.silk.ca.cert ))
+        cert:     (( vault meta.vault "/silk/certs/daemon:certificate" ))
+        key:      (( vault meta.vault "/silk/certs/daemon:key" ))
 
     uaa:
-      ca: (( vault meta.vault "/uaa/certs/ca:certificate" ))
-      server:
-        cert: (( vault meta.vault "/uaa/certs/server:certificate" ))
-        key:  (( vault meta.vault "/uaa/certs/server:key" ))
+      ca:
+        cert:     (( vault meta.vault "/uaa/certs/ca:certificate" ))
+      login_saml:
+        ca_cert:  (( grab meta.certs.uaa.ca.cert ))
+        cert:     (( vault meta.vault "/uaa/certs/login_saml:certificate" ))
+        key:      (( vault meta.vault "/uaa/certs/login_saml:key" ))
+      ssl:
+        ca_cert:  (( grab meta.certs.uaa.ca.cert ))
+        cert:     (( vault meta.vault "/uaa/certs/ssl:certificate" ))
+        key:      (( vault meta.vault "/uaa/certs/ssl:key" ))

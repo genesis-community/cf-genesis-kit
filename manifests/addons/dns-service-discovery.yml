@@ -63,10 +63,10 @@ instance_groups:
           dnshttps:
             client:
               tls:
-                certificate: (( vault meta.vault "/service-disco/client:certificate" ))
-                private_key: (( vault meta.vault "/service-disco/client:key" ))
+                certificate: (( vault meta.vault "/cf_app_sd/certs/client:certificate" ))
+                private_key: (( vault meta.vault "/cf_app_sd/certs/client:key" ))
             server:
-              ca: (( vault meta.vault "/service-disco/ca:certificate" ))
+              ca: (( vault meta.vault "/cf_app_sd/certs/ca:certificate" ))
 
     ################################################
     #
@@ -93,8 +93,8 @@ instance_groups:
         properties:
           dnshttps:
             client:
-              ca: (( vault meta.vault "/service-disco/ca:certificate" ))
+              ca: (( vault meta.vault "/cf_app_sd/certs/ca:certificate" ))
             server:
               tls:
-                certificate: (( vault meta.vault "/service-disco/server:certificate" ))
-                private_key: (( vault meta.vault "/service-disco/server:key" ))
+                certificate: (( vault meta.vault "/cf_app_sd/certs/server:certificate" ))
+                private_key: (( vault meta.vault "/cf_app_sd/certs/server:key" ))

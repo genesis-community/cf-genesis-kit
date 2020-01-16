@@ -1,5 +1,14 @@
 ---
 meta:
+  diego_rep_client_tls:
+    ca_cert:     (( grab meta.certs.cf_internal.diego_rep_client.ca_cert ))
+    client_cert: (( grab meta.certs.cf_internal.diego_rep_client.cert ))
+    client_key:  (( grab meta.certs.cf_internal.diego_rep_client.key ))
+    require_tls: true
+  diego_loggregator_client_tls:
+    .: (( inject meta.certs.loggregator.agent )) # .ca_cert, .cert & .key
+    use_v2_api: true
+
   cc:
     diego:
       # These are here to ensure that we can augment them if cflinuxfs2
@@ -15,47 +24,27 @@ meta:
 instance_groups:
   - name: diego
     jobs:
-      - name: cfdot
-        release: diego
-        properties:
-          tls:
-            ca_certificate: (( grab meta.certs.diego.ca ))
-            certificate: (( grab meta.certs.diego.rep.server.server_cert ))
-            private_key: (( grab meta.certs.diego.rep.server.server_key ))
-
       - name: auctioneer
         release: diego
         properties:
           enable_consul_service_registration: false
           diego:
-            loggregator:
-              use_v2_api: true
-              ca_cert: (( grab meta.certs.loggregator.ca ))
-              cert: (( grab meta.certs.loggregator.metron.server.cert ))
-              key: (( grab meta.certs.loggregator.metron.server.key ))
             auctioneer:
-              .: (( inject meta.certs.diego.auctioneer.server ))
               skip_consul_lock: true
-              ca_cert: (( grab meta.certs.diego.ca ))
-
-              bbs:
-                .: (( inject meta.certs.diego.bbs.client ))
-                ca_cert: (( grab meta.certs.diego.ca ))
-              rep:
-                .: (( inject meta.certs.diego.rep.client ))
-                ca_cert: (( grab meta.certs.diego.ca ))
+              ca_cert:     (( grab meta.certs.cf_internal.diego_auctioneer_server.ca_cert ))
+              server_cert: (( grab meta.certs.cf_internal.diego_auctioneer_server.cert ))
+              server_key:  (( grab meta.certs.cf_internal.diego_auctioneer_server.key ))
+              bbs:         (( grab meta.diego_bbs_client_tls ))
+              rep:         (( grab meta.diego_rep_client_tls ))
+          loggregator: (( grab meta.diego_loggregator_client_tls ))
 
       - name: tps
         release: capi
         properties:
           capi:
             tps:
-              bbs:
-                .: (( inject meta.certs.diego.bbs.client ))
-                ca_cert: (( grab meta.certs.diego.ca ))
-              cc:
-                .: (( inject meta.certs.diego.tps.client ))
-                ca_cert: (( grab meta.certs.diego.ca ))
+              bbs: (( grab meta.diego_bbs_client_tls ))
+              cc:  (( grab meta.certs.cf_internal.cc_bridge_tps ))
               watcher:
                 skip_consul_lock: true
                 locket:
@@ -66,29 +55,25 @@ instance_groups:
         properties:
           capi:
             cc_uploader:
-              cc:
-                .: (( inject meta.certs.diego.cc_uploader.client ))
-                ca_cert: (( grab meta.certs.diego.ca ))
-
-              mutual_tls:
-                .: (( inject meta.certs.diego.cc_uploader.server ))
-                ca_cert: (( grab meta.certs.diego.ca ))
+              cc:         (( grab meta.certs.cf_internal.cc_bridge_cc_uploader ))
+              mutual_tls: (( grab meta.certs.cf_internal.cc_bridge_cc_uploader_server ))
 
       - name: route_emitter
         release: diego
         properties:
+          bpm:
+            enabled: true
           locks:
             consul:
               enabled: false
+          loggregator: (( grab meta.diego_loggregator_client_tls ))
           diego:
             route_emitter:
               healthcheck_address: 127.0.0.1:17012 # to avoid conflict colocating with stager
-              bbs:
-                .: (( inject meta.certs.diego.bbs.client ))
-                ca_cert: (( grab meta.certs.diego.ca ))
-              uaa:
-                ca_cert: (( grab meta.certs.uaa.ca ))
-                client_secret: (( grab meta.uaa.tcp_emitter_secret ))
+              bbs: (( grab meta.diego_bbs_client_tls ))
+          uaa:
+            ca_cert: (( grab meta.certs.uaa.ca.cert ))
+            client_secret: (( grab meta.uaa.tcp_emitter_secret ))
 
       - name: scheduler
         release: cf-syslog-drain
@@ -98,14 +83,9 @@ instance_groups:
               api:
                 url: https://cloud-controller-ng.service.cf.internal:9023
               tls:
+                api:
+                  cn:         "cloud-controller-ng.service.cf.internal"
+                  .:          (( inject meta.certs.cf_internal.scheduler_api_tls )) # .ca, .cert & .key
                 client:
                   adapter_cn: "ss-adapter"
-                  ca:   (( grab meta.certs.loggregator.ca ))
-                  cert: (( grab meta.certs.loggregator.syslogger.client.cert ))
-                  key:  (( grab meta.certs.loggregator.syslogger.client.key ))
-
-                api:
-                  cn: "cloud-controller-ng.service.cf.internal"
-                  ca:   (( grab meta.certs.diego.ca ))
-                  cert: (( grab meta.certs.loggregator.syslogger.api.cert ))
-                  key:  (( grab meta.certs.loggregator.syslogger.api.key ))
+                  .:          (( inject meta.certs.loggregator.scheduler_client_tls )) # .ca, .cert & .key

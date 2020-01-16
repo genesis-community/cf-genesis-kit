@@ -4,7 +4,11 @@ meta:
     user: blobstore
     password: (( vault meta.vault "/blobstore/creds:password" ))
     secret:   (( vault meta.vault "/blobstore/creds:secret" ))
-    ca_cert:  (( vault meta.vault "/blobstore/certs/ca:certificate" ))
+  certs:
+    blobstore:
+      ca_cert:  (( vault meta.vault "/cf_internal/certs/ca:certificate" ))
+      cert:     (( vault meta.vault "/cf_internal/certs/blobstore_tls:certificate" ))
+      key:      (( vault meta.vault "/cf_internal/certs/blobstore_tls:key" ))
 
   blobstore_config:
     blobstore_type: webdav
@@ -13,7 +17,7 @@ meta:
       private_endpoint: https://blobstore.service.cf.internal:4443
       username: (( grab meta.blobstore.user ))
       password: (( grab meta.blobstore.password ))
-      ca_cert:  (( grab meta.blobstore.ca_cert ))
+      ca_cert:  (( grab meta.certs.blobstore.ca_cert ))
 
 params:
   blobstore_vm_type:   blobstore
@@ -42,10 +46,10 @@ instance_groups:
             secure_link:
               secret: (( grab meta.blobstore.secret ))
             tls:
-              cert: (( vault meta.vault "/blobstore/certs/server:certificate" ))
               port: 4443
-              private_key: (( vault meta.vault "/blobstore/certs/server:key" ))
-              ca_cert: (( grab meta.blobstore.ca_cert ))
+              ca_cert:     (( grab meta.certs.blobstore.ca_cert ))
+              cert:        (( grab meta.certs.blobstore.cert ))
+              private_key: (( grab meta.certs.blobstore.key ))
 
       - name: route_registrar
         release: routing

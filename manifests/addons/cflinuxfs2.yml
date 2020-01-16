@@ -46,4 +46,4 @@ instance_groups:
         release: cflinuxfs2
         properties:
           cflinuxfs2-rootfs:
-            trusted_certs: (( join "\n" meta.trusted_cas params.trusted_cas ))
+            trusted_certs: (( join "\n" meta.cell.trusted_cas params.trusted_cas ))

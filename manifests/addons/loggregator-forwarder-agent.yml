@@ -8,15 +8,10 @@ addons:
       - name: loggr-forwarder-agent
         release: loggregator-agent
         properties:
-          tls:
-            ca_cert: (( grab meta.certs.loggregator.ca ))
-            cert:    (( grab meta.certs.loggregator.forwarder_agent.cert ))
-            key:     (( grab meta.certs.loggregator.forwarder_agent.key ))
+          tls:           (( grab meta.certs.loggregator.agent ))
           metrics:
-            server_name:  forwarder_agent_metrics
-            ca_cert: (( grab meta.certs.prometheus.ca ))
-            cert:    (( grab meta.certs.prometheus.forwarder_agent_metrics.cert ))
-            key:     (( grab meta.certs.prometheus.forwarder_agent_metrics.key ))
+            server_name: forwarder_agent_metrics
+            .:           (( inject meta.certs.metrics.forwarder_agent_metrics_tls ))
 
   - name: udp_forwarder
     include:
@@ -29,14 +24,12 @@ addons:
           loggregator:
             ingress_port: 3459
             tls:
-              ca:   (( grab meta.certs.loggregator.ca ))
-              cert: (( grab meta.certs.loggregator.metron.server.cert ))
-              key:  (( grab meta.certs.loggregator.metron.server.key ))
+              ca:         (( grab meta.certs.loggregator.agent.ca_cert ))
+              cert:       (( grab meta.certs.loggregator.agent.cert ))
+              key:        (( grab meta.certs.loggregator.agent.key ))
           metrics:
-            server_name:  loggr_udp_forwarder
-            ca_cert: (( grab meta.certs.prometheus.ca ))
-            cert:    (( grab meta.certs.prometheus.loggr_udp_forwarder.cert ))
-            key:     (( grab meta.certs.prometheus.loggr_udp_forwarder.key ))
+            server_name:  loggr_udp_forwarder_metrics
+            .:            (( inject meta.certs.metrics.loggr_udp_forwarder_tls ))
 
   - name: loggregator_agent
     jobs:

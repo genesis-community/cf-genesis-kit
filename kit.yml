@@ -1,7 +1,8 @@
 ---
 name:    Cloud Foundry
-version: 1.0.0
-author:  James Hunt <jhunt@starkandwayne.com>
+version: 1.8.0
+authors: [ James Hunt <jhunt@starkandwayne.com>,
+           Dennis Bell <dbell@starkandwayne.com> ]
 docs:    https://github.com/genesis-community/cf-genesis-kit
 code:    https://github.com/genesis-community/cf-genesis-kit
 
@@ -14,291 +15,377 @@ description: |
 
 certificates:
   base:
-    consul/certs:
-      ca: { valid_for: 1y }
+    application/certs:
+      ca:
+        valid_for: 1y
+        names:     [ "appRootCA" ]
+
+    diego_instance_identity/certs:
+      ca:
+        valid_for: 1y
+        names:     [ "instanceIdentityCA" ]
+        signed_by: "base.application/certs.ca"
+        # This is suppose to be signed by application/certs/ca, but that is not
+        # supported at this time. Instead, it is done as a in-situ update handled
+        # by the blueprint hook if it detects that it is incorrectly signed.
+
+    cf_internal/certs:
+      ca:  # this is known as 'service_cf_internal_ca' in cf-deployment
+        valid_for: 1y
+        names:     [ "internalCA" ]
+
+      # This was under separate features blobstore-webdav.blobstore.certs.server
+      # and  local-blobstore.blobstore.certs.server, but is suppose to be signed
+      # by the cf_internal cert, so had to be moved here
+      blobstore_tls:
+        valid_for: 1y
+        names:     [ "blobstore.service.cf.internal" ]
+
+      cc_bridge_cc_uploader:
+        valid_for: 1y
+        names:     [ "cc_uploader" ]
+        usage:     [ client_auth ]
+      cc_bridge_cc_uploader_server:
+        valid_for: 1y
+        names:     [ "cc-uploader.service.cf.internal" ]
+        usage:     [ server_auth ]
+      cc_bridge_tps:
+        valid_for: 1y
+        names:     [ "tps_watcher" ]
+        usage:     [ client_auth ]
+      cc_tls:
+        valid_for: 1y
+        names:     [ "cloud-controller-ng.service.cf.internal" ]
+        usage:     [ server_auth, client_auth ]
+      cc_public_tls:
+        valid_for: 1y
+        names:     [ "api.system.${params.base_domain}",
+                     "cloud-controller-ng.service.cf.internal" ]
+
+      diego_auctioneer_client: #was diego/certs/auctioneer_client
+        valid_for: 1y
+        names:     [ "auctioneer client" ]
+        usage:     [ client_auth ]
+      diego_auctioneer_server: #was diego/certs/auctioneer
+        valid_for: 1y
+        names:     [ "auctioneer.service.cf.internal",
+                     "*.auctioneer.service.cf.internal"]
+        usage:     [ server_auth ]
+
+      diego_bbs_client: #was diego/certs/bbs_client
+        valid_for: 1y
+        names:     [ "bbs client" ]
+        usage:     [ client_auth ]
+      diego_bbs_server: #was diego/certs/bbs
+        valid_for: 1y
+        names:     [ "bbs.service.cf.internal",
+                     "*.bbs.service.cf.internal" ]
+        usage:     [ server_auth, client_auth ]
+
+      diego_locket_client: #was diego/certs/bbs_client
+        valid_for: 1y
+        names:     [ "locket client" ]
+        usage:     [ client_auth ]
+      diego_locket_server: #was diego/certs/bbs
+        valid_for: 1y
+        names:     [ "locket.service.cf.internal",
+                     "*.locket.service.cf.internal" ]
+        usage:     [ server_auth ]
+
+      diego_rep_client: #was diego/certs/rep_client
+        valid_for: 1y
+        names:     [ "rep client" ]
+        usage:     [ client_auth ]
+      diego_rep_agent_v2: #was diego/certs/rep
+        valid_for: 1y
+        names:     [ "cell.service.cf.internal",
+                     "*.cell.service.cf.internal",
+                     "127.0.0.1",
+                     "localhost" ]
+        usage:     [ server_auth, client_auth ]
+
+      gorouter_backend_tls:
+        valid_for: 1y
+        names:     [ "gorouter_backend_tls",
+                    "gorouter.service.cf.internal" ]
+        usage:     [ client_auth ]
+
+      logcache_ssl:
+        valid_for: 1y
+        names:     [ "log-cache",
+                      "log-cache.system.${params.base_domain}",
+                     "*.log-cache.system.${params.base_domain}" ]
+      loggregator_rlp_gateway_tls:
+        valid_for: 1y
+        names:     [ "log-stream.system.${params.base_domain}",
+                     "log-api.service.cf.internal" ]
+      loggregator_rlp_gateway_tls_cc:
+        valid_for: 1y
+        names:     [ "rlp-gateway" ]
+        usage:     [ client_auth ]
+      loggregator_tls_cc_tc:
+        valid_for: 1y
+        names:     [ "trafficcontroller" ]
+        usage:     [ client_auth ]
+      loggregator_trafficcontroller_tls:
+        valid_for: 1y
+        names:     [ "doppler.system.${params.base_domain}",
+                     "log-api.service.cf.internal" ]
+      scheduler_api_tls:
+        valid_for: 1y
+        names:     [ "ss-scheduler" ]
+        usage:     [ server_auth, client_auth ]
+
+      ssh_proxy_backends_tls: #was diego/certs/ssh_proxy_backend_tls
+        valid_for: 1y
+        names:     [ "ssh_proxy_backend_tls",
+                    "ssh_proxy.service.cf.internal" ]
+        usage:     [ client_auth ]
+
+    log_cache/certs:
+      ca:
+        valid_for: 1y
+        names:     [ "log-cache" ]
       server:
         valid_for: 1y
-        names: [ "server.dc1.cf.internal" ]
-      agent:
+        names:     [ "log-cache",
+                     "log_cache",
+                     "logcache" ]
+        usage:     [ server_auth, client_auth ]
+      cc_logcache_tls:
         valid_for: 1y
-        names: [ "consul_agent" ]
-
-    consul/certs/application_ca:
-      ca: { valid_for: 1y }
-
-    uaa/certs:
-      ca: { valid_for: 1y }
-      server:
+        names:     [ "cloud-controller-ng.service.cf.internal",
+                     "api.system.${params.base_domain}" ]
+      proxy_tls:
         valid_for: 1y
-        names:
-        - "uaa.service.cf.internal"
-        - "*.uaa.service.cf.internal"
-        - "*.uaa.system.${params.base_domain}"
-        - "uaa.system.${params.base_domain}"
-        - "login.system.${params.base_domain}"
-        - "*.login.system.${params.base_domain}"
-
-    network_policy/certs:
-      ca: { valid_for: 1y }
-      server:
-        valid_for: 1y
-        names: [ "policy-server.service.cf.internal" ]
-      client:
-        valid_for: 1y
-        names: [ "clientName" ]
-
-    silk/certs:
-      ca: { valid_for: 1y }
-      server:
-        valid_for: 1y
-        names: [ "silk-controller.service.cf.internal" ]
-      client:
-        valid_for: 1y
-        names: [ "clientName" ]
-
-    diego/certs:
-      ca: { valid_for: 1y }
-      capi:
-        valid_for: 1y
-        names: [ "cloud-controller-ng.service.cf.internal" ]
-      capi_client:
-        valid_for: 1y
-        names: [ "cloud controller client" ]
-      cc_uploader:
-        valid_for: 1y
-        names: [ "cc_uploader" ]
-      cc_uploader_server:
-        valid_for: 1y
-        names: ["cc-uploader.service.cf.internal"]
-      cc_deployment_updater:
-        valid_for: 1y
-        names: [ "cc_deployment_updater" ]
-      cc_deployment_updater_server:
-        valid_for: 1y
-        names: ["cc-uploader.service.cf.internal"]
-      syslogdrainbinder:
-        valid_for: 1y
-        names: [ "syslogdrainbinder" ]
-      bbs:
-        valid_for: 1y
-        names: [ "bbs.service.cf.internal", "*.bbs.service.cf.internal" ]
-      bbs_client:
-        valid_for: 1y
-        names: [ "bbs client" ]
-      tps_client:
-        valid_for: 1y
-        names: [ "tps client" ]
-      rep:
-        valid_for: 1y
-        names: [ "cell.service.cf.internal", "*.cell.service.cf.internal", "127.0.0.1" ]
-      rep_client:
-        valid_for: 1y
-        names: [ "rep client" ]
-      auctioneer:
-        valid_for: 1y
-        names: [ "auctioneer.service.cf.internal" ]
-      auctioneer_client:
-        valid_for: 1y
-        names: [ "auctioneer client" ]
-      locket_server:
-        valid_for: 1y
-        names: [ "locket.service.cf.internal" ]
-      syslogger_scheduler:
-        valid_for: 1y
-        names: [ "ss-scheduler" ]
-      public_tls:
-        valid_for: 1y
-        names: [ "api.${params.base_domain}", "cloud-controller-ng.service.cf.internal" ]
-      loggregator_rlp_gateway:
-        valid_for: 1y
-        names: [ "rlp-gateway", "log-api.service.cf.internal" ]
-      ssh_proxy_backends_tls:
-        valid_for: 1y
-        names: [ "ssh_proxy_backends_tls", "ssh-proxy.service.cf.internal" ]
-      routingapi_client:
-        valid_for: 1y
-        names: ["routing-api locket client"]
-
-    diego/certs/instance_identity:
-      ca: { valid_for: 1y }
+        names:     [ "localhost" ]
 
     loggregator/certs:
-      ca: { valid_for: 1y }
-      doppler:
+      ca:
         valid_for: 1y
-        names: [ "doppler", "doppler.service.cf.internal" ]
-      metron:
+        names:     [ "loggregatorCA" ]
+      loggregator_tls_statsdinjector:
         valid_for: 1y
-        names: [ "metron" ]
-      trafficcontroller:
+        names:     [ "statsdinjector" ]
+        usage:     [ client_auth ]
+      loggregator_tls_agent:
         valid_for: 1y
-        names: [ "trafficcontroller", "log-api.service.cf.internal" ]
-      statsdinjector:
+        names:     [ "metron" ]
+        usage:     [ server_auth, client_auth ]
+      loggregator_tls_doppler:
         valid_for: 1y
-        names: [ "statsdinjector", "uaa.service.cf.internal" ]
-      syslogger_server:
+        names:     [ "doppler" ]
+        usage:     [ server_auth, client_auth ]
+      loggregator_tls_tc:
         valid_for: 1y
-        names: [ "ss-adapter", "adapter.service.cf.internal" ]
-      syslogger_rlp:
+        names:     [ "trafficcontroller" ]
+        usage:     [ server_auth, client_auth ]
+      loggregator_tls_rlp:
         valid_for: 1y
-        names: [ "ss-adapter-rlp", "reverselogproxy", "adapter.service.cf.internal" ]
-      syslogger_client:
+        names:     [ "reverselogproxy" ]
+        usage:     [ server_auth, client_auth ]
+      loggregator_tls_rlp_gateway:
         valid_for: 1y
-        names: [ "ss-scheduler", "scheduler.service.cf.internal" ]
-      log_cache:
+        names:     [ "rlp_gateway" ]
+        usage:     [ client_auth ]
+      adapter_rlp_tls:
         valid_for: 1y
-        names: ["log-cache", "log_cache", "logcache", "doppler.service.cf.internal" ]
-      rlp_gateway:
+        names:     [ "ss-adapter-rlp" ]
+        usage:     [ server_auth, client_auth ]
+      adapter_tls:
         valid_for: 1y
-        names: ["rlp_gateway", "log-api.service.cf.internal" ]
-      expvar_forwarder:
-        valid-for: 1y
-        names: ["extvar_forwarder"]
-      forwarder_agent:
-        valid-for: 1y
-        names: [ "metron" ]
-      
-    log_cache/certs:
-      ca: {valid_for: 1y}
-      log_cache_proxy:
-        valid-for: 1y
-        names: [ "localhost" ]
-      
-    prometheus/certs:
-      ca: {valid_for: 1y }
-      log_cache_metrics:
+        names:     [ "ss-adapter" ]
+        usage:     [ server_auth, client_auth ]
+      scheduler_client_tls:
         valid_for: 1y
-        names: [ "log_cache_metrics" ]
-      log_cache_cf_auth_proxy_metrics:
+        names:     [ "ss-scheduler" ]
+        usage:     [ client_auth ]
+      logs_provider:
         valid_for: 1y
-        names: [ "log_cache_cf_auth_proxy_metrics" ]
-      log_cache_gateway_metrics:
-        valid_for: 1y
-        names: [ "log_cache_gateway_metrics" ]
-      forwarder_agent_metrics:
-        valid_for: 1y
-        names: [ "forwarder_agent_metrics" ]
-      loggregator_agent_metrics:
-        valid_for: 1y
-        names: [ "loggregator_agent_metrics" ]
-      loggr_udp_forwarder:
-        valid_for: 1y
-        names: [ "loggr_udp_forwarder_metrics" ]
-      prom_scraper_scrape:
-        valid_for: 1y
-        names: [ "prom_scraper" ]
-      prom_scraper_metrics:
-        valid_for: 1y
-        names: [ "prom_scraper_metrics" ]
-      rlp_gateway_metrics:
-        valid_for: 1y
-        names: [ "rlp_gateway_metrics" ]
+        names:     [ "log-cache" ]
+        usage:     [ server_auth, client_auth ]
 
-      
-    dns_healthcheck_tls:
-      ca: { valid_for: 1y }
-      server:
+    metrics/certs: #was prometheus/certs/...
+      ca:
         valid_for: 1y
-        names: [ "health.bosh-dns" ]
+        names:     [ "metricScraperCA" ]
+      forwarder_agent_metrics_tls:
+        valid_for: 1y
+        names:     [ "forwarder_agent_metrics" ]
+        usage:     [ server_auth ]
+      log_cache_metrics_tls:
+        valid_for: 1y
+        names:     [ "log_cache_metrics" ]
+        usage:     [ server_auth ]
+      log_cache_cf_auth_proxy_metrics_tls:
+        valid_for: 1y
+        names:     [ "log_cache_cf_auth_proxy_metrics" ]
+        usage:     [ server_auth ]
+      log_cache_gateway_metrics_tls:
+        valid_for: 1y
+        names:     [ "log_cache_gateway_metrics" ]
+        usage:     [ server_auth ]
+      loggregator_agent_metrics_tls:
+        valid_for: 1y
+        names:     [ "loggregator_agent_metrics" ]
+        usage:     [ server_auth ]
+      loggr_udp_forwarder_tls:
+        valid_for: 1y
+        names:     [ "loggr_udp_forwarder_metrics" ]
+        usage:     [ server_auth ]
+      prom_scraper_scrape_tls:
+        valid_for: 1y
+        names:     [ "prom_scraper" ]
+        usage:     [ client_auth ]
+      prom_scraper_metrics_tls:
+        valid_for: 1y
+        names:     [ "prom_scraper_metrics" ]
+        usage:     [ server_auth ]
+      rlp_gateway_metrics_tls:
+        valid_for: 1y
+        names:     [ "rlp_gateway_metrics" ]
+        usage:     [ server_auth ]
+
+    network_policy/certs:
+      ca:
+        valid_for: 1y
+        names:     [ "networkPolicyCA" ]
       client:
         valid_for: 1y
-        names: [ "health.bosh-dns" ]
-
-    dns_api_tls:
-      ca: { valid_for: 1y }
+        names:     [ "clientName" ]
+        usage:     [ client_auth ]
       server:
         valid_for: 1y
-        names: [ "api.bosh-dns" ]
-      client:
+        names:     [ "policy-server.service.cf.internal" ]
+        usage:     [ server_auth ]
+      server_external:  #new
         valid_for: 1y
-        names: [ "api.bosh-dns" ]
+        names:     [ "api.system.${params.base_domain}" ]
+        usage:     [ server_auth ]
+
+    router/certs:
+      ca:
+        valid_for: 1y
+        names:     [ "routerCA" ]
+      ssl:
+        valid_for: 1y
+        names:     [ "routerSSL",
+                      "system.${params.base_domain}",
+                      "*.system.${params.base_domain}" ]
+        usage:     [ server_auth ]
+
+    silk/certs:
+      ca:
+        valid_for: 1y
+        names:     [ "silk-ca" ]
+      controller:  #was server
+        valid_for: 1y
+        names:     [ "silk-controller.service.cf.internal" ]
+        usage:     [ server_auth ]
+      daemon:      #was client
+        valid_for: 1y
+        names:     [ "silk-daemon" ]
+        usage:     [ client_auth ]
+
+    uaa/certs:
+      ca:
+        valid_for: 1y
+        names:     [ "uaaCA" ]
+      login_saml:
+        valid_for: 1y
+        names:     [ "uaa_login_saml" ]
+      ssl:
+        valid_for: 1y
+        names:     [ "uaa.service.cf.internal" ]
 
   dns-service-discovery:
-    service-disco:
-      ca: { valid_for: 1y }
+    cf_app_sd: # was service-disco
+      ca:
+        valid_for: 1y
+        names:     [ "service-discovery-controller.service.cf.internal" ]
       server:
         valid_for: 1y
-        names: [ "service-discovery-controller.service.cf.internal" ]
+        names:     [ "service-discovery-controller.service.cf.internal" ]
+        usage:     [ server_auth ]
       client:
         valid_for: 1y
-        names: [ "client.service-disco" ]
-
-  blobstore-webdav: *local-blobstore-certs
-  local-blobstore: &local-blobstore-certs
-    blobstore/certs:
-      ca: { valid_for: 1y }
-      server:
-        valid_for: 1y
-        names: [ "blobstore.service.cf.internal" ]
+        names:     [ "service-discovery-controller.service.cf.internal" ]
+        usage:     [ client_auth ]
 
   self-signed:
     haproxy:
-      ca: { valid_for: 1y }
+      ca:
+        valid_for: 1y
+        names:     [ "haProxyCA" ]
       ssl:
         valid_for: 1y
-        names:
-        - "*.${params.base_domain}"
-        - "*.system.${params.base_domain}"
-        - "*.run.${params.base_domain}"
-        - "*.uaa.system.${params.base_domain}"
-        - "*.login.system.${params.base_domain}"
+        names:     [ "*.${params.base_domain}",
+                     "*.system.${params.base_domain}",
+                     "*.run.${params.base_domain}",
+                     "*.uaa.system.${params.base_domain}",
+                     "*.login.system.${params.base_domain}" ]
 
   autoscaler:
     autoscaler/certs:
-      ca: {valid_for: 1y }
+      ca:
+        valid_for: 1y
+        names:     [ "autoscalerCA" ]
       scheduler_client:
         valid_for: 1y
-        names: [ "scheduler client" ]
+        names:     [ "scheduler client" ]
       scheduler_server:
         valid_for: 1y
-        names: [ "autoscalerscheduler.service.cf.internal" ]
+        names:     [ "autoscalerscheduler.service.cf.internal" ]
       servicebroker_client:
         valid_for: 1y
-        names: [ "servicebroker client" ]
+        names:     [ "servicebroker client" ]
       servicebroker_public:
         valid_for: 1y
-        names: [ "autoscalerservicebroker.system.${params.base_domain}" ]
+        names:     [ "autoscalerservicebroker.system.${params.base_domain}" ]
       servicebroker_server:
         valid_for: 1y
-        names: [ "servicebroker.service.cf.internal" ]
+        names:     [ "servicebroker.service.cf.internal" ]
       apiserver_client:
         valid_for: 1y
-        names: [ "apiserver client" ]
+        names:     [ "apiserver client" ]
       apiserver_public:
         valid_for: 1y
-        names: [ "autoscaler.system.${params.base_domain}" ]
+        names:     [ "autoscaler.system.${params.base_domain}" ]
       apiserver_server:
         valid_for: 1y
-        names: [ "apiserver.service.cf.internal" ]
+        names:     [ "apiserver.service.cf.internal" ]
       metricscollector_client:
         valid_for: 1y
-        names: [ "metricscollector client" ]
+        names:     [ "metricscollector client" ]
       metricscollector_server:
         valid_for: 1y
-        names: [ "metricscollector.service.cf.internal" ]
+        names:     [ "metricscollector.service.cf.internal" ]
       scalingengine_client:
         valid_for: 1y
-        names: [ "scalingengine client" ]
+        names:     [ "scalingengine client" ]
       scalingengine_server:
         valid_for: 1y
-        names: [ "scalingengine.service.cf.internal" ]
+        names:     [ "scalingengine.service.cf.internal" ]
       eventgenerator_server:
         valid_for: 1y
-        names: [ "eventgenerator.service.cf.internal" ]
+        names:     [ "eventgenerator.service.cf.internal" ]
       eventgenerator_client:
         valid_for: 1y
-        names: [ "eventgenerator client" ]
+        names:     [ "eventgenerator client" ]
 
   routing-api:
-    routingapi/certs:
-      ca: {valid_for: 1y}
-      server:
+    routing_api/certs:
+      ca:
         valid_for: 1y
-        names: ["routing-api.service.cf.internal"]
+        names:     [ "routing_api" ]
       client:
         valid_for: 1y
-        names: ["routing-api client"]
-  
+        names:     [ "routing-api-client" ]
+        usage:     [ client_auth ]
+      server:
+        valid_for: 1y
+        names:     [ "routing-api.service.cf.internal" ]
+        usage:     [ server_auth ]
 
 credentials:
   base:

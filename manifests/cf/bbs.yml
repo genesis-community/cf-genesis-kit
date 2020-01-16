@@ -1,16 +1,20 @@
 ---
+
+meta:
+  diego_bbs_client_tls:
+    ca_cert:     (( grab meta.certs.cf_internal.diego_bbs_client.ca_cert ))
+    client_cert: (( grab meta.certs.cf_internal.diego_bbs_client.cert ))
+    client_key:  (( grab meta.certs.cf_internal.diego_bbs_client.key ))
+    require_tls: true
+
 instance_groups:
   - name: bbs
     jobs:
       - name: bbs
         release: diego
         properties:
-          enable_consul_service_registration: false
-          loggregator:
-            use_v2_api: true
-            ca_cert: (( grab meta.certs.loggregator.ca ))
-            cert: (( grab meta.certs.loggregator.metron.server.cert ))
-            key: (( grab meta.certs.loggregator.metron.server.key ))
+          bpm:
+            enabled: true
           diego:
             bbs:
               skip_consul_lock: true
@@ -19,18 +23,19 @@ instance_groups:
               encryption_keys:
                 - label: key1
                   passphrase: (( vault meta.vault "/diego/encryption_key:value" ))
+              ca_cert:     (( grab meta.certs.cf_internal.diego_bbs_server.ca_cert ))
+              server_cert: (( grab meta.certs.cf_internal.diego_bbs_server.cert ))
+              server_key:  (( grab meta.certs.cf_internal.diego_bbs_server.key ))
+
               auctioneer:
-                ca_cert: (( grab meta.certs.diego.ca ))
-                .: (( inject meta.certs.diego.auctioneer.client ))
+                ca_cert:     (( grab meta.certs.cf_internal.diego_auctioneer_client.ca_cert ))
+                client_cert: (( grab meta.certs.cf_internal.diego_auctioneer_client.cert ))
+                client_key:  (( grab meta.certs.cf_internal.diego_auctioneer_client.key ))
                 require_tls: true
-              ca_cert: (( grab meta.certs.diego.ca ))
-              .: (( inject meta.certs.diego.bbs.server ))
-              rep:
-                ca_cert: (( grab meta.certs.diego.ca ))
-                .: (( inject meta.certs.diego.rep.client ))
-                require_tls: true
+              rep: (( grab meta.diego_rep_client_tls ))
               sql:
                 #no ssl to the sql backend
+                require_ssl: false
                 db_driver: (( grab params.diegodb_scheme ))
                 max_open_connections: 500
                 db_port: (( grab params.diegodb_port ))
@@ -38,33 +43,32 @@ instance_groups:
                 db_host: (( grab params.diegodb_host ))
                 db_password: (( grab params.diegodb_password ))
                 db_username: (( grab params.diegodb_user ))
+          enable_consul_service_registration: false
+          loggregator: (( grab meta.diego_loggregator_client_tls ))
 
       - name: silk-controller
         release: silk
         properties:
-          ca_cert: (( grab meta.certs.silk.ca ))
-          server_cert: (( grab meta.certs.silk.server_cert ))
-          server_key: (( grab meta.certs.silk.server_key ))
+          ca_cert:     (( grab meta.certs.silk.controller.ca_cert ))
+          server_cert: (( grab meta.certs.silk.controller.cert ))
+          server_key:  (( grab meta.certs.silk.controller.key ))
           database:
-            type: (( grab params.silkdb_scheme ))
+            type:     (( grab params.silkdb_scheme ))
             username: (( grab params.silkdb_user ))
             password: (( grab params.silkdb_password ))
-            host: (( grab params.silkdb_host ))
-            port: (( grab params.silkdb_port ))
-            name: (( grab params.silkdb_name ))
+            host:     (( grab params.silkdb_host ))
+            port:     (( grab params.silkdb_port ))
+            name:     (( grab params.silkdb_name ))
           silk_daemon:
-            ca_cert: (( grab meta.certs.silk.ca ))
-            server_cert: (( grab meta.certs.silk.client_cert ))
-            server_key: (( grab meta.certs.silk.client_key ))
+            ca_cert:     (( grab meta.certs.silk.daemon.ca_cert ))
+            server_cert: (( grab meta.certs.silk.daemon.cert ))
+            server_key:  (( grab meta.certs.silk.daemon.key ))
 
       - name: locket
         release: diego
         properties:
           enable_consul_service_registration: false
-          tls:
-            ca_cert: (( grab meta.certs.diego.ca ))
-            cert: (( grab meta.certs.diego.locket.server_cert ))
-            key: (( grab meta.certs.diego.locket.server_key ))
+          tls: (( grab meta.certs.cf_internal.diego_locket_server ))
           diego:
             locket:
               sql:
@@ -74,8 +78,4 @@ instance_groups:
                 db_username:  (( grab params.locketdb_user ))
                 db_password:  (( grab params.locketdb_password ))
                 db_driver:  (( grab params.locketdb_scheme ))
-          loggregator:
-            use_v2_api: true
-            ca_cert: (( grab meta.certs.loggregator.ca ))
-            cert: (( grab meta.certs.loggregator.metron.server.cert ))
-            key: (( grab meta.certs.loggregator.metron.server.key ))
+          loggregator: (( grab meta.diego_loggregator_client_tls ))

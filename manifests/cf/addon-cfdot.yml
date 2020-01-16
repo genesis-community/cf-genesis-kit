@@ -1,0 +1,21 @@
+---
+# cfdot: A command-line tool to interact with a Cloud Foundry Diego deployment.
+
+addons:
+  - (( append ))
+  - name: cfdot
+    include:
+      stemcell:
+        - os: ubuntu-xenial
+      instance_groups:
+        - diego
+        - bbs
+        - cell
+    jobs:
+      - name: cfdot
+        release: diego
+        properties:
+          tls:
+            ca_certificate: (( grab meta.certs.cf_internal.diego_rep_client.ca_cert ))
+            certificate:    (( grab meta.certs.cf_internal.diego_rep_client.cert ))
+            private_key:    (( grab meta.certs.cf_internal.diego_rep_client.key ))

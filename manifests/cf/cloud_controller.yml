@@ -33,7 +33,7 @@ instance_groups:
 
           uaa:
             url:     (( grab meta.uaa.url ))
-            ca_cert: (( grab meta.certs.uaa.ca ))
+            ca_cert: (( grab meta.certs.uaa.ca.cert ))
             clients:
               cc-service-dashboards:
                 scope: openid,cloud_controller_service_permissions.read
@@ -44,7 +44,7 @@ instance_groups:
                 secret: (( grab meta.uaa.cc_routing_secret ))
               cloud_controller_username_lookup:
                 secret: (( grab meta.uaa.cc_user_lookup_secret ))
-          
+
           router:
             route_services_secret: (( vault meta.vault "/gorouter/route_services:secret" ))
 
@@ -62,7 +62,7 @@ instance_groups:
 
           uaa:
             url:     (( grab meta.uaa.url ))
-            ca_cert: (( grab meta.certs.uaa.ca ))
+            ca_cert: (( grab meta.certs.uaa.ca.cert ))
             clients:
               cc-service-dashboards:
                 scope: openid,cloud_controller_service_permissions.read
@@ -83,6 +83,7 @@ instance_groups:
             port: (( grab params.logger_port ))
 
           uaa:
+            ca_cert: (( grab meta.certs.uaa.ca.cert ))
             clients:
               cc-service-dashboards:
                 scope: openid,cloud_controller_service_permissions.read
@@ -93,12 +94,9 @@ instance_groups:
         properties:
           ccdb: (( grab meta.ccdb ))
           cc:
-            db_encryption_key: (( vault meta.vault "/cc:db_encryption_key" ))
+            db_encryption_key:             (( vault meta.vault "/cc:db_encryption_key" ))
             temporary_disable_deployments: (( grab meta.cc.temporary_disable_deployments ))
-            mutual_tls:
-              ca_cert: (( grab meta.certs.diego.ca ))
-              private_key: (( vault meta.vault "/diego/certs/cc_deployment_updater_server:key" ))
-              public_cert: (( vault meta.vault "/diego/certs/cc_deployment_updater:certificate" ))
+            mutual_tls:                    (( grab meta.certs.cf_internal.cc_tls ))
 
       - name: statsd_injector
         release: statsd-injector
@@ -112,11 +110,7 @@ instance_groups:
           logging:
             format:
               timestamp: "rfc3339"
-          loggregator:
-            use_v2_api: true
-            ca_cert: (( grab meta.certs.loggregator.ca ))
-            cert:    (( grab meta.certs.loggregator.metron.server.cert ))
-            key:     (( grab meta.certs.loggregator.metron.server.key ))
+          loggregator: (( grab meta.diego_loggregator_client_tls ))
 
       - name: route_registrar
         release: routing
@@ -140,9 +134,10 @@ instance_groups:
         release: cf-networking
         properties:
           uaa_client_secret: (( vault meta.vault "/uaa/client_secrets:network_policy" ))
-          uaa_ca: (( grab meta.certs.uaa.ca ))
+          uaa_ca: (( grab meta.certs.uaa.ca.cert ))
 
           enable_space_developer_self_service: true
+          enable_tls: true
 
           database:
             type:     (( grab params.policyserverdb_scheme ))
@@ -152,12 +147,15 @@ instance_groups:
             port:     (( grab params.policyserverdb_port ))
             name:     (( grab params.policyserverdb_name ))
 
+          server_cert: (( grab meta.certs.network_policy.external.cert ))
+          server_key:  (( grab meta.certs.network_policy.external.key ))
+
       - name: policy-server-internal
         release: cf-networking
         properties:
-          ca_cert:     (( grab meta.certs.network_policy.ca ))
-          server_cert: (( grab meta.certs.network_policy.server_cert ))
-          server_key:  (( grab meta.certs.network_policy.server_key ))
+          ca_cert:     (( grab meta.certs.network_policy.server.ca_cert ))
+          server_cert: (( grab meta.certs.network_policy.server.cert ))
+          server_key:  (( grab meta.certs.network_policy.server.key ))
 
 meta:
   api_hostname: (( concat "api." params.system_domain ))
@@ -191,20 +189,16 @@ meta:
     # we put log-cache on the LTC, not on the dopplers, so the
     # default from the capi-release is insufficient
     logcache:
-      host: loggregator-trafficcontroller.service.cf.internal
-      port: 8080
-
+      host:           loggregator-trafficcontroller.service.cf.internal
+      port:           8080
     logcache_tls:
-      certificate: (( vault meta.vault "/loggregator/certs/log_cache:certificate" ))
-      private_key: (( vault meta.vault "/loggregator/certs/log_cache:key" ))
-    public_tls:
-      ca_cert: (( grab meta.certs.diego.public_tls.certificate ))
-      .: (( inject meta.certs.diego.public_tls ))
-    mutual_tls:
-      ca_cert: (( grab meta.certs.diego.ca ))
-      .: (( inject meta.certs.diego.capi.server ))
+      certificate:    (( grab meta.certs.log_cache.cc_logcache_tls.cert ))
+      private_key:    (( grab meta.certs.log_cache.cc_logcache_tls.key ))
+
+    public_tls:       (( grab meta.certs.cf_internal.cc_public_tls ))
+    mutual_tls:       (( grab meta.certs.cf_internal.cc_tls ))
     db_logging_level: debug2 # Sets the log level of the DB log messages, doesn't filter. if set at or above the logging_level, DB query logs will appear
-    logging_level: (( grab params.log_level )) # Filters log messages output to info or higher
+    logging_level:    (( grab params.log_level )) # Filters log messages output to info or higher
 
     default_app_memory: (( grab params.default_app_memory ))
     default_app_disk_in_mb: (( grab params.default_app_disk_in_mb ))
@@ -286,9 +280,9 @@ meta:
     enable_consul_service_registration: false
     loggregator:
       tls:
-        ca_cert: (( grab meta.certs.loggregator.ca ))
+        ca_cert: (( grab meta.certs.loggregator.statsdinjector.ca_cert ))
         statsd_injector:
-          cert: (( grab meta.certs.loggregator.statsdinjector.server.cert ))
-          key:  (( grab meta.certs.loggregator.statsdinjector.server.key ))
+          cert: (( grab meta.certs.loggregator.statsdinjector.cert ))
+          key:  (( grab meta.certs.loggregator.statsdinjector.key ))
     statsd_injector:
       deployment: (( grab params.system_domain ))

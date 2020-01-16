@@ -8,14 +8,18 @@ instance_groups:
           scalablesyslog:
             adapter:
               tls:
-                cn: ss-adapter
-                ca:   (( grab meta.certs.loggregator.ca ))
-                cert: (( grab meta.certs.loggregator.syslogger.server.cert ))
-                key:  (( grab meta.certs.loggregator.syslogger.server.key ))
+                ca:   (( grab meta.certs.loggregator.ca.cert ))
+                cert: (( grab meta.certs.loggregator.adapter_tls.cert ))
+                key:  (( grab meta.certs.loggregator.adapter_tls.key ))
+                cn:   ss-adapter
 
             adapter_rlp:
               tls:
-                cn: ss-adapter-rlp
-                ca:   (( grab meta.certs.loggregator.ca ))
-                cert: (( grab meta.certs.loggregator.syslogger.rlp.cert ))
-                key:  (( grab meta.certs.loggregator.syslogger.rlp.key ))
+                # Note:  cf-deployment has the ca wrong -- it is suppose to be,
+                # according to the spec, the ca for the rlp, not the adapter's
+                # ca.
+                # https://github.com/cloudfoundry/cf-syslog-drain-release/blob/develop/jobs/adapter/spec#L98
+                ca:   (( grab meta.certs.loggregator.ca.cert ))
+                cert: (( grab meta.certs.loggregator.adapter_rlp_tls.cert ))
+                key:  (( grab meta.certs.loggregator.adapter_rlp_tls.key ))
+                cn:   reverselogproxy # cn of the rlp, not the adapter-rlp

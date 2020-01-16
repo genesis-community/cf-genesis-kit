@@ -30,8 +30,6 @@ core:
   notes: https://github.com/cloudfoundry/cf-networking-release/releases/tag/${version}
 - name: cf-smoke-tests
   notes: https://github.com/cloudfoundry/cf-smoke-tests-release/releases/tag/${version}
-- name: cflinuxfs2
-  notes: https://github.com/cloudfoundry/cflinuxfs2-release/releases/tag/${version}
 - name: cflinuxfs3
   notes: https://github.com/cloudfoundry/cflinuxfs3-release/releases/tag/${version}
 - name: cf-cli
@@ -49,7 +47,7 @@ core:
 - name: nats
   notes: https://github.com/cloudfoundry/nats-release/releases/tag/${version}
 - name: routing
-  notes: https://github.com/cloudfoundry-incubator/cf-routing-release/releases/tag/${version}
+  notes: https://github.com/cloudfoundry/routing-release/releases/tag/${version}
 - name: statsd-injector
   notes: https://github.com/cloudfoundry/statsd-injector-release/releases/tag/${version}
 - name: cf-syslog-drain
@@ -60,6 +58,8 @@ core:
   notes: https://github.com/cloudfoundry/silk-release/releases/tag/${version}
 - name: bosh-dns-aliases
   notes: https://github.com/cloudfoundry/bosh-dns-aliases-release/releases/tag/${version}
+- name: cflinuxfs2
+  notes: https://github.com/cloudfoundry/cflinuxfs2-release/releases/tag/${version}
 - name: app-autoscaler
   notes: https://github.com/cloudfoundry-incubator/app-autoscaler-release/releases/tag/${version}
 - name: nfs-volume

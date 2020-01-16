@@ -37,8 +37,6 @@ meta:
     cf_smoke_tests:        (( vault meta.vault "/uaa/client_secrets:cf_smoke_tests" ))
 
     jwt_private_key:  (( vault meta.vault "/uaa/jwt_signing_key:private" ))
-    ssl_cert:         (( grab meta.certs.uaa.server.cert ))
-    ssl_key:          (( grab meta.certs.uaa.server.key ))
 
 instance_groups:
   - name: uaa
@@ -158,8 +156,8 @@ instance_groups:
                 cloud_controller.read_only_admin: Read-only Administrative Access
                 cloud_controller.global_auditor:  Global Auditor Access
                 network.read:                     Read-only Network Policy Access
-            sslCertificate: (( grab meta.uaa.ssl_cert ))
-            sslPrivateKey: (( grab meta.uaa.ssl_key ))
+            sslCertificate: (( grab meta.certs.uaa.ssl.cert ))
+            sslPrivateKey: (( grab meta.certs.uaa.ssl.key ))
             url: (( grab meta.uaa.url ))
             ssl:
               port: (( grab meta.uaa.ssl_port ))
@@ -180,9 +178,9 @@ instance_groups:
               activeKeyId: default_key
               keys:
                 default_key:
-                  key: (( grab meta.uaa.ssl_key ))
-                  certificate: (( grab meta.uaa.ssl_cert ))
-                  passphrase: ""
+                  certificate: (( grab meta.certs.uaa.login_saml.cert ))
+                  key:         (( grab meta.certs.uaa.login_saml.key ))
+                  passphrase:  ""
           uaadb:
             tls: disabled
 

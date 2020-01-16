@@ -37,7 +37,10 @@ params:
   app_services_networks: []
   cf_public_ips: []
 
-  skip_ssl_validation: false
+  skip_ssl_validation:  false
+
+  ca_validity_period:   1y
+  cert_validity_period: 1y
 
   log_level: info
 

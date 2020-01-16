@@ -1,7 +1,10 @@
 ---
 meta:
-  trusted_cas:
-    - (( vault meta.vault "/diego/certs/ca:certificate" ))
+  cell:
+    trusted_cas:
+      - (( grab meta.certs.diego_instance_identity_ca.ca_cert ))
+      # - ((credhub_tls.ca)) #FIXME - will be added once credhub is added
+      - (( grab meta.certs.uaa.ca.cert ))
 
 params:
   trusted_cas: []
@@ -15,7 +18,7 @@ instance_groups:
       release: cflinuxfs3
       properties:
         cflinuxfs3-rootfs:
-          trusted_certs: (( join "\n" meta.trusted_cas params.trusted_cas ))
+          trusted_certs: (( join "\n" meta.cell.trusted_cas params.trusted_cas ))
 
     - name: containerd
       release: garden-runc
@@ -37,32 +40,21 @@ instance_groups:
       properties:
         bpm:
           enabled: true
-        enable_consul_service_registration: false
-        loggregator:
-          use_v2_api: true
-          ca_cert: (( grab meta.certs.loggregator.ca ))
-          cert:    (( grab meta.certs.loggregator.metron.server.cert ))
-          key:     (( grab meta.certs.loggregator.metron.server.key ))
-        tls:
-          ca_cert: (( grab meta.certs.diego.ca ))
-          cert:    (( grab meta.certs.diego.rep.server.server_cert ))
-          key:     (( grab meta.certs.diego.rep.server.server_key ))
-        enable_declarative_healthcheck: true
         diego:
-          ssl:
-            skip_cert_verify: (( grab params.skip_ssl_validation ))
+          executor:
+            instance_identity_ca_cert: (( grab meta.certs.diego_instance_identity_ca.cert )) # this seems weird
+            instance_identity_key:     (( grab meta.certs.diego_instance_identity_ca.key ))
           rep:
-            .: (( inject meta.certs.diego.rep.server ))
-            enable_legacy_api_endpoints: false
             evacuation_timeout_in_seconds: (( grab params.evacuation_timeout ))
             listen_addr_admin: ~
             preloaded_rootfses:
               - cflinuxfs3:/var/vcap/packages/cflinuxfs3/rootfs.tar
-            require_tls: true
-            ca_cert: (( grab meta.certs.diego.ca ))
-          executor:
-            instance_identity_ca_cert: (( grab meta.certs.diego.executer.ca ))
-            instance_identity_key:     (( grab meta.certs.diego.executer.ca_private ))
+          ssl:
+            skip_cert_verify: (( grab params.skip_ssl_validation ))
+        enable_consul_service_registration: false
+        enable_declarative_healthcheck: true
+        loggregator: (( grab meta.diego_loggregator_client_tls ))
+        tls:         (( grab meta.certs.cf_internal.diego_rep_agent_v2 )) # .ca_cert, .cert & .key
 
     - name: garden-cni
       release: cf-networking
@@ -73,16 +65,16 @@ instance_groups:
     - name: vxlan-policy-agent
       release: silk
       properties:
-          ca_cert:     (( grab meta.certs.network_policy.ca ))
-          client_cert: (( grab meta.certs.network_policy.client_cert ))
-          client_key:  (( grab meta.certs.network_policy.client_key ))
+          ca_cert:     (( grab meta.certs.network_policy.client.ca_cert ))
+          client_cert: (( grab meta.certs.network_policy.client.cert ))
+          client_key:  (( grab meta.certs.network_policy.client.key ))
 
     - name: silk-daemon
       release: silk
       properties:
-        ca_cert:     (( grab meta.certs.silk.ca ))
-        client_cert: (( grab meta.certs.silk.client_cert ))
-        client_key:  (( grab meta.certs.silk.client_key ))
+        ca_cert:     (( grab meta.certs.silk.daemon.ca_cert ))
+        client_cert: (( grab meta.certs.silk.daemon.cert ))
+        client_key:  (( grab meta.certs.silk.daemon.key ))
 
     - name: silk-cni
       release: silk
