@@ -213,7 +213,7 @@ instance_groups:
 
                 health_check:
                   name: uaa-healthcheck
-                  script_path: /var/vcap/jobs/uaa/bin/health_check
+                  script_path: /var/vcap/jobs/uaa/bin/dns/healthy
 
                 uris:
                   - (( concat "uaa." params.system_domain ))
