@@ -7,6 +7,10 @@ kit:
     - tls
     - self-signed
     - small-footprint
+    - dns-service-discovery
+    - container-routing-integrity
+    - autoscaler
+    - routing-api
 
 params:
   env:   ci-baseline
