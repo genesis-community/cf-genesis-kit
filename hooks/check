@@ -63,32 +63,77 @@ env_ok=yes
 if want_feature 'tls'; then
   vault="secret/$GENESIS_VAULT_PREFIX"
 
-  describe "  checking if our Cloud Foundry certificate matches the system domains..."
-  base=$(lookup params.base_domain)
-  sys=$(lookup params.system_domain "system.$base")
-  for domain in api.$sys login.$sys uaa.$sys something.uaa.$sys; do
-    if safe --quiet x509 validate "$vault/haproxy/ssl" --for "$domain" >/dev/null 2>&1; then
-      describe "    - $domain [#G{OK}]"
+  # Check if haproxy certs are in the right location - they moved in v1.9.0 to
+  # conform to the contract of where generated certificates are placed
+  if ! safe --quiet exists "$vault/haproxy/certs/ca" >/dev/null 2>&1 ; then
+    if safe --quiet exists "$vault/haproxy/ca" >/dev/null 2>&1 ; then
+      safe --quiet mv "$vault/haproxy/ca"  "$vault/haproxy/certs/ca" >/dev/null 2>&1
     else
-      describe "    - $domain [#R{INVALID}]"
-      safe x509 validate "$vault/haproxy/ssl" --for "$domain" 2>&1 | sed -e 's/^/      /';
+      describe "Cannot find HAProxy CA Certificates - please run \`genesis add-secrets $GENESIS_ENVIRONMENT\`"
       env_ok=no
-      echo
     fi
-  done
+  fi
+  if ! safe --quiet exists "$vault/haproxy/certs/ssl" >/dev/null 2>&1 ; then
+    if safe --quiet exists "$vault/haproxy/ssl" >/dev/null 2>&1 ; then
+      safe --quiet mv "$vault/haproxy/ssl"  "$vault/haproxy/certs/ssl" >/dev/null 2>&1
+    elif [[ $env_ok == "yes" ]] ; then
+      describe "Cannot find HAProxy SSL Certificates - please run \`genesis add-secrets $GENESIS_ENVIRONMENT\`"
+      env_ok=no
+    fi
+  fi
 
-  describe "  checking if our Cloud Foundry certificate matches the app domains..."
-  for domain in $(lookup params.apps_domains "[\"run.$base\"]" | jq -r '.[]'); do
-    if safe --quiet x509 validate "$vault/haproxy/ssl" --for "something.$domain" >/dev/null 2>&1; then
-      describe "    - *.$domain [#G{OK}]"
-    else
-      describe "    - *.$domain [#R{INVALID}]"
-      safe x509 validate "$vault/haproxy/ssl" --for "something.$domain" 2>&1 | sed -e 's/^/      /';
-      env_ok=no
-      echo
+  if [[ $env_ok == "yes" ]] ; then
+    describe "  checking if our Cloud Foundry certificate matches the system domains..."
+    base=$(lookup params.base_domain)
+    sys=$(lookup params.system_domain "system.$base")
+    for domain in api.$sys login.$sys uaa.$sys something.uaa.$sys; do
+      if safe --quiet x509 validate "$vault/haproxy/certs/ssl" --for "$domain" >/dev/null 2>&1; then
+        describe "    - $domain [#G{OK}]"
+      else
+        describe "    - $domain [#R{INVALID}]"
+        safe x509 validate "$vault/haproxy/certs/ssl" --for "$domain" 2>&1 | sed -e 's/^/      /';
+        env_ok=no
+        echo
+      fi
+    done
+
+    describe "  checking if our Cloud Foundry certificate matches the app domains..."
+    for domain in $(lookup params.apps_domains "[\"run.$base\"]" | jq -r '.[]'); do
+      if safe --quiet x509 validate "$vault/haproxy/certs/ssl" --for "something.$domain" >/dev/null 2>&1; then
+        describe "    - *.$domain [#G{OK}]"
+      else
+        describe "    - *.$domain [#R{INVALID}]"
+        safe x509 validate "$vault/haproxy/certs/ssl" --for "something.$domain" 2>&1 | sed -e 's/^/      /';
+        env_ok=no
+        echo
+      fi
+    done
     fi
-  done
 fi
+
+# Fix erroneous location of certs for dns-service-discovery introduced in 1.8.0
+if safe --quiet exists "$vault/cf_app_sd/ca" >/dev/null 2>&1 ; then
+  if ! safe --quiet exists "$vault/cf_app_sd/certs/ca" >/dev/null 2>&1 ; then
+    safe --quiet mv "$vault/cf_app_sd/ca"  "$vault/cf_app_sd/certs/ca" >/dev/null 2>&1
+  else
+    safe --quiet rm "$vault/cf_app_sd/ca" >/dev/null 2>&1
+  fi
+fi
+if safe --quiet exists "$vault/cf_app_sd/client" >/dev/null 2>&1 ; then
+  if ! safe --quiet exists "$vault/cf_app_sd/certs/client" >/dev/null 2>&1 ; then
+    safe --quiet mv "$vault/cf_app_sd/client"  "$vault/cf_app_sd/certs/client" >/dev/null 2>&1
+  else
+    safe --quiet rm "$vault/cf_app_sd/server" >/dev/null 2>&1
+  fi
+fi
+if safe --quiet exists "$vault/cf_app_sd/server" >/dev/null 2>&1 ; then
+  if ! safe --quiet exists "$vault/cf_app_sd/certs/server" >/dev/null 2>&1 ; then
+    safe --quiet mv "$vault/cf_app_sd/server"  "$vault/cf_app_sd/certs/server" >/dev/null 2>&1
+  else
+    safe --quiet rm "$vault/cf_app_sd/server" >/dev/null 2>&1
+  fi
+fi
+
 
 if [[ "$env_ok" == "yes" ]]; then
   describe "  environment files [#G{OK}]"

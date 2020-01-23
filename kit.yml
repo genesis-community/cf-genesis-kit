@@ -299,7 +299,7 @@ certificates:
         names:     [ "uaa.service.cf.internal" ]
 
   dns-service-discovery:
-    cf_app_sd: # was service-disco
+    cf_app_sd/certs: # was service-disco
       ca:
         valid_for: 1y
         names:     [ "service-discovery-controller.service.cf.internal" ]
@@ -313,7 +313,7 @@ certificates:
         usage:     [ client_auth ]
 
   self-signed:
-    haproxy:
+    haproxy/certs:
       ca:
         valid_for: 1y
         names:     [ "haProxyCA" ]
