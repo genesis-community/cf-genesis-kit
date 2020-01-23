@@ -201,15 +201,6 @@ instance_groups:
     migrated_from:
       - name: diego-cell
 
-  - name: smoke-tests
-    instances: 1
-    vm_type: (( grab params.errand_vm_type ))
-    azs: (( grab params.availability_zones || meta.default.azs ))
-    stemcell: default
-    networks:
-      - name: (( grab params.cf_internal_network ))
-    lifecycle: errand
-
 update:
   canaries: 1
   max_in_flight: 50

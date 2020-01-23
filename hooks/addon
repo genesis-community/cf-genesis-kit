@@ -22,6 +22,8 @@ list() {
   echo "  asg               Generates application security group definitions,"
   echo "                    in JSON, which can then be fed into Cloud Foundry."
   echo
+  echo "  smoketest         Run the smoke tests errand on the first vm in the"
+  echo "                    api instance group."
 }
 
 
@@ -65,11 +67,11 @@ login)
 
 setup-cli)
   if ! cf list-plugin-repos | grep -q CF-Community; then
-    describe "Adding #G{Cloud Foundry Community} plugins repository..."
+    describe 'Adding #G{Cloud Foundry Community} plugins repository...'
     cf add-plugin-repo CF-Community http://plugins.cloudfoundry.org
   fi
   if ! cf plugins | grep -q '^cf-targets'; then
-    describe "Installing the #C{cf-targets} plugin..."
+    describe 'Installing the #C{cf-targets} plugin...'
     cf install-plugin -r CF-Community Targets
   fi
   cf plugins
@@ -91,7 +93,7 @@ asg)
 bind-autoscaler)
   if [[ $(exodus autoscaler_enabled) != "1" ]]; then
     echo "This Genesis deployment does not have the Autoscaler feature."
-    exit -1
+    exit 1
   fi
   login
   username=$(safe read $vault/autoscaler/servicebroker_account:username)
@@ -108,7 +110,9 @@ bind-autoscaler)
   exit 0
   ;;
 
-
+smoketest)
+  $GENESIS_BOSH_COMMAND -e $BOSH_ENVIRONMENT -d $BOSH_DEPLOYMENT run-errand smoke_tests --instance api/first
+  ;;
 *)
   echo "Unrecognized Cloud Foundry Genesis Kit addon."
   list
