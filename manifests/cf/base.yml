@@ -198,6 +198,8 @@ instance_groups:
     update:
       serial: true
       max_in_flight: 1
+      canary_watch_time: 30000-240000
+      update_watch_time: 30000-240000
     migrated_from:
       - name: diego-cell
 
