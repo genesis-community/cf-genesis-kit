@@ -39,6 +39,6 @@ genesis deploy -y ci-baseline
 $BOSH -d ci-baseline-${KIT} instances --ps
 
 header "Validating BASELINE environment..."
-$BOSH -d ci-baseline-${KIT} run-errand smoke_tests --instance=api/first
+$BOSH -d ci-baseline-${KIT} run-errand smoke_tests --instance=uaa/first
 
 cleanup ci-baseline-${KIT}

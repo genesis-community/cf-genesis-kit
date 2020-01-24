@@ -111,7 +111,7 @@ bind-autoscaler)
   ;;
 
 smoketest)
-  $GENESIS_BOSH_COMMAND -e $BOSH_ENVIRONMENT -d $BOSH_DEPLOYMENT run-errand smoke_tests --instance api/first
+  $GENESIS_BOSH_COMMAND -e $BOSH_ENVIRONMENT -d $BOSH_DEPLOYMENT run-errand smoke_tests --instance uaa/first
   ;;
 *)
   echo "Unrecognized Cloud Foundry Genesis Kit addon."

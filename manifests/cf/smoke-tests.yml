@@ -1,6 +1,6 @@
 ---
 instance_groups:
-  - name: api
+  - name: uaa
     jobs:
       - name: smoke_tests
         release: cf-smoke-tests
