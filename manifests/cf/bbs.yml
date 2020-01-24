@@ -33,6 +33,8 @@ instance_groups:
                 client_key:  (( grab meta.certs.cf_internal.diego_auctioneer_client.key ))
                 require_tls: true
               rep: (( grab meta.diego_rep_client_tls ))
+              locket:
+                api_location: 127.0.0.1:8891
               sql:
                 #no ssl to the sql backend
                 require_ssl: false

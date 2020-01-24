@@ -89,7 +89,8 @@ certificates:
       diego_locket_server: #was diego/certs/bbs
         valid_for: 1y
         names:     [ "locket.service.cf.internal",
-                     "*.locket.service.cf.internal" ]
+                     "*.locket.service.cf.internal",
+                     "127.0.0.1" ]
         usage:     [ server_auth ]
 
       diego_rep_client: #was diego/certs/rep_client
