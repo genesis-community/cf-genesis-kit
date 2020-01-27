@@ -387,6 +387,11 @@ The `haproxy` feature activates a pair of software load balancers,
 running haproxy, that sit in front of the Cloud Foundry gorouter
 layer.
 
+You must specify the IP addressese to be used by the haproxy instances, using
+the `haproxy_ips` parameter in list format.  These IPs must be in the
+range used by the network specified in `cf_lb_network`, which defaults to the
+same network as the `cf_edge_network`
+
 If you also activate the `tls` feature, these haproxy instances
 will terminate your SSL/TLS sessions, and present your
 certificates to connecting clients.
