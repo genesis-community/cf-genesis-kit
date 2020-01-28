@@ -58,29 +58,34 @@ else
   describe "  runtime config [#R{FAILED}]"
 fi
 
-# Environment Parameter checks
 env_ok=yes
+vault="secret/$GENESIS_VAULT_PREFIX"
+secret_exists() {
+  safe --quiet exists "$vault/$1" >/dev/null 2>&1
+}
+relocate_secret() {
+  src="$1"; dst="$2";
+  if ! secret_exists "$dst" ; then
+    if secret_exists "$src" ; then
+      safe --quiet mv "$vault/$src" "$vault/$dst" >/dev/null 2>&1
+    else
+      env_ok=no
+      return 1
+    fi
+  elif secret_exists "$src" ; then
+    # Remove outdated location
+    safe --quiet rm "$vault/$src" >/dev/null 2>&1:
+  fi
+  return 0
+}
+
+# Environment Parameter checks
 if want_feature 'tls'; then
-  vault="secret/$GENESIS_VAULT_PREFIX"
 
   # Check if haproxy certs are in the right location - they moved in v1.9.0 to
   # conform to the contract of where generated certificates are placed
-  if ! safe --quiet exists "$vault/haproxy/certs/ca" >/dev/null 2>&1 ; then
-    if safe --quiet exists "$vault/haproxy/ca" >/dev/null 2>&1 ; then
-      safe --quiet mv "$vault/haproxy/ca"  "$vault/haproxy/certs/ca" >/dev/null 2>&1
-    else
-      describe "Cannot find HAProxy CA Certificates - please run \`genesis add-secrets $GENESIS_ENVIRONMENT\`"
-      env_ok=no
-    fi
-  fi
-  if ! safe --quiet exists "$vault/haproxy/certs/ssl" >/dev/null 2>&1 ; then
-    if safe --quiet exists "$vault/haproxy/ssl" >/dev/null 2>&1 ; then
-      safe --quiet mv "$vault/haproxy/ssl"  "$vault/haproxy/certs/ssl" >/dev/null 2>&1
-    elif [[ $env_ok == "yes" ]] ; then
-      describe "Cannot find HAProxy SSL Certificates - please run \`genesis add-secrets $GENESIS_ENVIRONMENT\`"
-      env_ok=no
-    fi
-  fi
+  relocate_secret "haproxy/ca"  "haproxy/certs/ca"  || describe "Cannot find HAProxy CA Certificates - please run \`genesis add-secrets $GENESIS_ENVIRONMENT\`"
+  relocate_secret "haproxy/ssl" "haproxy/certs/ssl" || describe "Cannot find HAProxy SSL Certificates - please run \`genesis add-secrets $GENESIS_ENVIRONMENT\`"
 
   if [[ $env_ok == "yes" ]] ; then
     describe "  checking if our Cloud Foundry certificate matches the system domains..."
@@ -108,32 +113,13 @@ if want_feature 'tls'; then
         echo
       fi
     done
-    fi
+  fi
 fi
 
 # Fix erroneous location of certs for dns-service-discovery introduced in 1.8.0
-if safe --quiet exists "$vault/cf_app_sd/ca" >/dev/null 2>&1 ; then
-  if ! safe --quiet exists "$vault/cf_app_sd/certs/ca" >/dev/null 2>&1 ; then
-    safe --quiet mv "$vault/cf_app_sd/ca"  "$vault/cf_app_sd/certs/ca" >/dev/null 2>&1
-  else
-    safe --quiet rm "$vault/cf_app_sd/ca" >/dev/null 2>&1
-  fi
-fi
-if safe --quiet exists "$vault/cf_app_sd/client" >/dev/null 2>&1 ; then
-  if ! safe --quiet exists "$vault/cf_app_sd/certs/client" >/dev/null 2>&1 ; then
-    safe --quiet mv "$vault/cf_app_sd/client"  "$vault/cf_app_sd/certs/client" >/dev/null 2>&1
-  else
-    safe --quiet rm "$vault/cf_app_sd/server" >/dev/null 2>&1
-  fi
-fi
-if safe --quiet exists "$vault/cf_app_sd/server" >/dev/null 2>&1 ; then
-  if ! safe --quiet exists "$vault/cf_app_sd/certs/server" >/dev/null 2>&1 ; then
-    safe --quiet mv "$vault/cf_app_sd/server"  "$vault/cf_app_sd/certs/server" >/dev/null 2>&1
-  else
-    safe --quiet rm "$vault/cf_app_sd/server" >/dev/null 2>&1
-  fi
-fi
-
+relocate_secret "cf_app_sd/ca"     "cf_app_sd/certs/ca"
+relocate_secret "cf_app_sd/client" "cf_app_sd/certs/client"
+relocate_secret "cf_app_sd/server" "cf_app_sd/certs/server"
 
 if [[ "$env_ok" == "yes" ]]; then
   describe "  environment files [#G{OK}]"
