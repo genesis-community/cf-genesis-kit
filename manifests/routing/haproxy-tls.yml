@@ -12,4 +12,4 @@ instance_groups:
             disable_tls_10: (( grab params.disable_tls_10 ))
             disable_tls_11: (( grab params.disable_tls_11 ))
 
-            ssl_pem: (( vault meta.vault "/haproxy/certs/ssl:combined" ))
+            ssl_pem: (( vault meta.vault "/haproxy/ssl:combined" ))

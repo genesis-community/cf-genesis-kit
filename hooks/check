@@ -82,21 +82,16 @@ relocate_secret() {
 # Environment Parameter checks
 if want_feature 'tls'; then
 
-  # Check if haproxy certs are in the right location - they moved in v1.9.0 to
-  # conform to the contract of where generated certificates are placed
-  relocate_secret "haproxy/ca"  "haproxy/certs/ca"  || describe "Cannot find HAProxy CA Certificates - please run \`genesis add-secrets $GENESIS_ENVIRONMENT\`"
-  relocate_secret "haproxy/ssl" "haproxy/certs/ssl" || describe "Cannot find HAProxy SSL Certificates - please run \`genesis add-secrets $GENESIS_ENVIRONMENT\`"
-
   if [[ $env_ok == "yes" ]] ; then
     describe "  checking if our Cloud Foundry certificate matches the system domains..."
     base=$(lookup params.base_domain)
     sys=$(lookup params.system_domain "system.$base")
     for domain in api.$sys login.$sys uaa.$sys something.uaa.$sys; do
-      if safe --quiet x509 validate "$vault/haproxy/certs/ssl" --for "$domain" >/dev/null 2>&1; then
+      if safe --quiet x509 validate "$vault/haproxy/ssl" --for "$domain" >/dev/null 2>&1; then
         describe "    - $domain [#G{OK}]"
       else
         describe "    - $domain [#R{INVALID}]"
-        safe x509 validate "$vault/haproxy/certs/ssl" --for "$domain" 2>&1 | sed -e 's/^/      /';
+        safe x509 validate "$vault/haproxy/ssl" --for "$domain" 2>&1 | sed -e 's/^/      /';
         env_ok=no
         echo
       fi
@@ -104,11 +99,11 @@ if want_feature 'tls'; then
 
     describe "  checking if our Cloud Foundry certificate matches the app domains..."
     for domain in $(lookup params.apps_domains "[\"run.$base\"]" | jq -r '.[]'); do
-      if safe --quiet x509 validate "$vault/haproxy/certs/ssl" --for "something.$domain" >/dev/null 2>&1; then
+      if safe --quiet x509 validate "$vault/haproxy/ssl" --for "something.$domain" >/dev/null 2>&1; then
         describe "    - *.$domain [#G{OK}]"
       else
         describe "    - *.$domain [#R{INVALID}]"
-        safe x509 validate "$vault/haproxy/certs/ssl" --for "something.$domain" 2>&1 | sed -e 's/^/      /';
+        safe x509 validate "$vault/haproxy/ssl" --for "something.$domain" 2>&1 | sed -e 's/^/      /';
         env_ok=no
         echo
       fi
