@@ -267,6 +267,14 @@ if [[ $database -gt 1 ]]; then
   echo >&2 "You have enabled more than one Database feature flag."
   exit 1
 fi
+# An in-situ upgrade of CF required $GENESIS_VAULT_PREFIX/locket/certs/server to include 127.0.0.1
+# as a SAN. Rather than bothering the operator for an internal cert with no impact on external
+# performance, it's better to just delete and regen the cert automatically.
+if safe exists "$vault/locket/certs/server" >/dev/null 2>&1 && ! safe --quiet x509 validate "$vault/locket/certs/server" --for "127.0.0.1" >/dev/null 2>&1; then
+  echo >&2 "  performing one-time update of Locket Server certificate"
+  safe rm "$vault/locket/certs/server" >/dev/null 2>&1
+  genesis -C $GENESIS_ROOT add-secrets $GENESIS_ENVIRONMENT >/dev/null 2>&1
+fi
 
 # An in-situ fix to ensure the diego_instance_identity_ca is signed by the appRootCA
 vault="secret/$GENESIS_VAULT_PREFIX"
