@@ -69,7 +69,6 @@ relocate_secret() {
     if secret_exists "$src" ; then
       safe --quiet mv "$vault/$src" "$vault/$dst" >/dev/null 2>&1
     else
-      env_ok=no
       return 1
     fi
   elif secret_exists "$src" ; then
