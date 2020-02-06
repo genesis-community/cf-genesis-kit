@@ -1,0 +1,30 @@
+#!/bin/bash
+
+upstream_releases=$(spruce json ../cf-deployment/cf-deployment.yml)
+releases=$(spruce json manifests/cf/releases.yml)
+buildpacks=$(spruce json manifests/cf/buildpacks.yml)
+
+get() {
+      echo ${upstream_releases} \
+      | jq -r --arg name ${1} --arg field ${2} '.releases | map(select(.name == $name))[0][$field]'
+
+}
+
+echo "releases:" > manifests/cf/releases.yml
+for name in $(echo ${releases} | jq -r '.releases[].name'); do
+  url=$(get ${name} url | cut -d= -f1)
+  echo -e "  - name:    ${name}
+    version: \"$(get ${name} version)\"
+    url:     (( concat \"${url}=\" releases.${name}.version ))
+    sha1:    $(get ${name} sha1)\n"
+done >> manifests/cf/releases.yml
+
+
+echo "releases:" > manifests/cf/buildpacks.yml
+for name in $(echo ${buildpacks} | jq -r '.releases[].name'); do
+  url=$(get ${name} url | cut -d= -f1)
+  echo -e "  - name:    ${name}
+    version: \"$(get ${name} version)\"
+    url:     (( concat \"${url}=\" releases.${name}.version ))
+    sha1:    $(get ${name} sha1)\n"
+done >> manifests/cf/buildpacks.yml

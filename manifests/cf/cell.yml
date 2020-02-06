@@ -9,6 +9,7 @@ meta:
 params:
   trusted_cas: []
   evacuation_timeout: 600
+  max_log_lines_per_second: 0 # 0=disabled minimum recommended: 100
 
 instance_groups:
   - name: cell
@@ -44,6 +45,7 @@ instance_groups:
           executor:
             instance_identity_ca_cert: (( grab meta.certs.diego_instance_identity_ca.cert )) # this seems weird
             instance_identity_key:     (( grab meta.certs.diego_instance_identity_ca.key ))
+            max_log_lines_per_second:  (( grab params.max_log_lines_per_second ))
           rep:
             evacuation_timeout_in_seconds: (( grab params.evacuation_timeout ))
             listen_addr_admin: ~

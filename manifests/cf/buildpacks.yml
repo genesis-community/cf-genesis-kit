@@ -1,18 +1,18 @@
 releases:
   - name:    binary-buildpack
-    version: "1.0.35"
+    version: "1.0.36"
     url:     (( concat "https://bosh.io/d/github.com/cloudfoundry/binary-buildpack-release?v=" releases.binary-buildpack.version ))
-    sha1:    d735bedac8a9c7346b4c0f41edeabc779223928c
+    sha1:    0269a613be68f988682bbf56504b78477965b1c4
 
   - name:    dotnet-core-buildpack
-    version: "2.3.2"
+    version: "2.3.3"
     url:     (( concat "https://bosh.io/d/github.com/cloudfoundry/dotnet-core-buildpack-release?v=" releases.dotnet-core-buildpack.version ))
-    sha1:    82baada4dc48cb499abb49ca5aff91e59e7e7b48
+    sha1:    51ca401e07b5d7b5c0753af169930c6c0a68b731
 
   - name:    go-buildpack
-    version: "1.9.3"
+    version: "1.9.4"
     url:     (( concat "https://bosh.io/d/github.com/cloudfoundry/go-buildpack-release?v=" releases.go-buildpack.version ))
-    sha1:    0c86b47463b72709d0c070308ddf691d29f45f55
+    sha1:    5c7a46f9fcf71a0cc7aab460269f6e54cfc51fd9
 
   - name:    java-buildpack
     version: "4.26"
@@ -20,36 +20,37 @@ releases:
     sha1:    24e8c51cbf364fc38f40d0e261dd3bb663e145e3
 
   - name:    nginx-buildpack
-    version: "1.1.1"
+    version: "1.1.3"
     url:     (( concat "https://bosh.io/d/github.com/cloudfoundry/nginx-buildpack-release?v=" releases.nginx-buildpack.version ))
-    sha1:    7730085576fbccf84e8a01b3180e2e021151449d
+    sha1:    afe94181ae98b737331e015246f4e5ea3a991d8e
 
   - name:    nodejs-buildpack
-    version: "1.7.4"
+    version: "1.7.8"
     url:     (( concat "https://bosh.io/d/github.com/cloudfoundry/nodejs-buildpack-release?v=" releases.nodejs-buildpack.version ))
-    sha1:    31635640d0e52b899386dbcd3911c8c92b92f112
+    sha1:    5150b184ddeb36532d48a9caa9889b6a89a55636
 
   - name:    php-buildpack
-    version: "4.4.2"
+    version: "4.4.5"
     url:     (( concat "https://bosh.io/d/github.com/cloudfoundry/php-buildpack-release?v=" releases.php-buildpack.version ))
-    sha1:    90c5eff395300cef53a2817aede7ef869e06853c
+    sha1:    31e2bba32906d4e6ae8081a69c5922e3979ac682
 
   - name:    python-buildpack
-    version: "1.7.2"
+    version: "1.7.5"
     url:     (( concat "https://bosh.io/d/github.com/cloudfoundry/python-buildpack-release?v=" releases.python-buildpack.version ))
-    sha1:    be453857ec5e054f41539eda19bdc28d458583a4
+    sha1:    a48bdaa36bfe8f73c8a31d6d81608df7b3706c75
 
   - name:    r-buildpack
-    version: "1.1.0"
+    version: "1.1.1"
     url:     (( concat "https://bosh.io/d/github.com/cloudfoundry/r-buildpack-release?v=" releases.r-buildpack.version ))
-    sha1:    786f2407c86666d0ace54bf3040b5c6558a61b4f
+    sha1:    eb406b09e0cafb176c8ab52752da41e736b81cea
 
   - name:    ruby-buildpack
-    version: "1.8.2"
+    version: "1.8.6"
     url:     (( concat "https://bosh.io/d/github.com/cloudfoundry/ruby-buildpack-release?v=" releases.ruby-buildpack.version ))
-    sha1:    af14339b39d0d22db2fe2fc7c3abde57eb2b59e5
+    sha1:    0c0dd929dbc454e1b2d07dcb662e5623082bc689
 
   - name:    staticfile-buildpack
-    version: "1.5.1"
+    version: "1.5.3"
     url:     (( concat "https://bosh.io/d/github.com/cloudfoundry/staticfile-buildpack-release?v=" releases.staticfile-buildpack.version ))
-    sha1:    3e73d59a9e0210a36ca2ac8db74a9a263b85fbb4
+    sha1:    950427d4f8556d26ccc457fd8dabbeb93d14a16c
+
