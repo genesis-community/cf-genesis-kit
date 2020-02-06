@@ -150,3 +150,10 @@ instance_groups:
               uris:
                 - (( concat "log-cache."   params.system_domain ))
                 - (( concat "*.log-cache." params.system_domain ))
+            - name: rlp-gateway
+              tls_port: 8088
+              registration_interval: 20s
+              server_cert_domain_san: (( concat "log-stream." params.system_domain ))
+              uris:
+                - (( concat "log-stream."   params.system_domain ))
+                - (( concat "*.log-stream." params.system_domain ))
