@@ -51,7 +51,7 @@
 |*dotnet-core*| [2.3.3](https://github.com/cloudfoundry/dotnet-core-buildpack-release/releases/tag/2.3.3) | 08 January 2020  |
 |*go*         | [1.9.4](https://github.com/cloudfoundry/go-buildpack-release/releases/tag/1.9.4)          | 08 January 2020  |
 | java        | [4.26](https://github.com/cloudfoundry/java-buildpack-release/releases/tag/4.26)          | 21 November 2019 |
-|_nginx_      | [1.1.3](https://github.com/cloudfoundry/nginx-buildpack-release/releases/tag/1.1.3)       | 08 January 2020  |
+|*nginx*      | [1.1.3](https://github.com/cloudfoundry/nginx-buildpack-release/releases/tag/1.1.3)       | 08 January 2020  |
 |*nodejs*     | [1.7.8](https://github.com/cloudfoundry/nodejs-buildpack-release/releases/tag/1.7.8)      | 08 January 2020  |
 |*php*        | [4.4.5](https://github.com/cloudfoundry/php-buildpack-release/releases/tag/4.4.5)         | 08 January 2020  |
 |*python*     | [1.7.5](https://github.com/cloudfoundry/python-buildpack-release/releases/tag/1.7.5)      | 08 January 2020  |

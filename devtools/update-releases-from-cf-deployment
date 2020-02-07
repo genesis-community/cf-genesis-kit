@@ -1,5 +1,12 @@
 #!/bin/bash
 
+# Assumes you have cf-deployment repo checked out and located as a peer to this
+# repo
+if [[ -f ../cf-deployment/cf-deployment.yml ]] ; then
+  echo "Missing cf-deployment repo in parent directory"
+  exit 1
+fi
+
 upstream_releases=$(spruce json ../cf-deployment/cf-deployment.yml)
 releases=$(spruce json manifests/cf/releases.yml)
 buildpacks=$(spruce json manifests/cf/buildpacks.yml)
