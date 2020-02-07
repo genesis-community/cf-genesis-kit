@@ -1,0 +1,36 @@
+---
+- type: replace
+  path: /instance_groups/name=api/jobs/name=cloud_controller_ng/properties/cc/diego?/enable_declarative_asset_downloads
+  value: true
+
+- type: replace
+  path: /instance_groups/name=cc-worker/jobs/name=cloud_controller_worker/properties/cc/diego?/enable_declarative_asset_downloads
+  value: true
+
+- type: replace
+  path: /instance_groups/name=scheduler/jobs/name=cloud_controller_clock/properties/cc/diego?/enable_declarative_asset_downloads
+  value: true
+
+- type: replace
+  path: /instance_groups/name=diego-cell/jobs/name=rep/properties/containers/layering_mode?
+  value: "two-layer"
+
+- type: replace
+  path: /instance_groups/name=diego-cell/jobs/name=garden/properties/grootfs?/tls
+  value:
+    cert: ((grootfs_remote_layer_tls.certificate))
+    key: ((grootfs_remote_layer_tls.private_key))
+    ca_cert: ((grootfs_remote_layer_tls.ca))
+
+- type: replace
+  path: /variables/-
+  value:
+    name: grootfs_remote_layer_tls
+    type: certificate
+    options:
+      ca: service_cf_internal_ca
+      common_name: cell.service.cf.internal
+      extended_key_usage:
+      - client_auth
+      - server_auth
+      alternative_names: ["*.cell.service.cf.internal"]

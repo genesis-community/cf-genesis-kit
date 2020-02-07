@@ -1,9 +1,0 @@
----
-addons:
-  - (( append ))
-  - name: bpm
-    include:
-      stemcell:
-        - os: ubuntu-xenial
-    jobs:
-      - { release: bpm, name: bpm }

@@ -1,0 +1,3 @@
+---
+# No-op, BPM enablement for garden is an implementation detail of rootless
+# containers support. See rootless-containers.yml

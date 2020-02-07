@@ -3,32 +3,14 @@
 cc_ok=yes
 # Cloud Config checks
 if [[ -n "$GENESIS_CLOUD_CONFIG" ]] ; then
-  if ! want_feature proto; then
-    for t in api bbs cell diego doppler errand loggregator nats router syslogger uaa; do
-      cloud_config_needs vm_type $(lookup params.${t}_vm_type $t)
-    done
-    if want_feature local-blobstore || want_feature blobstore-webdav; then
-      cloud_config_needs vm_type   $(lookup params.blobstore_vm_type   blobstore)
-      cloud_config_needs disk_type $(lookup params.blobstore_disk_pool blobstore)
-    fi
-    if want_feature local-db || want_feature db-internal-postgres || want_feature local-ha-db; then
-      cloud_config_needs vm_type   $(lookup params.postgres_vm_type   postgres)
-      cloud_config_needs disk_type $(lookup params.postgres_disk_pool postgres)
-      cloud_config_needs network   $(lookup params.cf_db_network      cf-db)
-    fi
+  for t in minimal small small-highmem; do
+    cloud_config_needs vm_type "$t"
+  done
+  for t in 5GB 10GB 100GB ; do 
+    cloud_config_needs disk_type "$t"
+  done
+  cloud_config_needs network "$(lookup params.network default)"
 
-    cloud_config_needs network $(lookup params.cf_internal_network cf-core)
-    cloud_config_needs network $(lookup params.cf_edge_network     cf-edge)
-    cloud_config_needs network $(lookup params.cf_runtime_network  cf-runtime)
-
-    if want_feature autoscaler; then
-      cloud_config_needs network   $(lookup params.autoscaler_network cf-autoscaler)
-      for t in api broker scheduler collector scaler engine operator; do
-        cloud_config_needs vm_type $(lookup params.autoscaler_${t}_vm_type as-${t})
-      done
-    fi
-
-  fi
   # Check if there were any errors reported from the above checks.
   if check_cloud_config ; then
     describe "  cloud config [#G{OK}]"
@@ -59,63 +41,7 @@ else
 fi
 
 env_ok=yes
-vault="secret/$GENESIS_VAULT_PREFIX"
-secret_exists() {
-  safe --quiet exists "$vault/$1" >/dev/null 2>&1
-}
-relocate_secret() {
-  src="$1"; dst="$2";
-  if ! secret_exists "$dst" ; then
-    if secret_exists "$src" ; then
-      safe --quiet mv "$vault/$src" "$vault/$dst" >/dev/null 2>&1
-    else
-      return 1
-    fi
-  elif secret_exists "$src" ; then
-    # Remove outdated location
-    safe --quiet rm "$vault/$src" >/dev/null 2>&1:
-  fi
-  return 0
-}
-
-# Environment Parameter checks
-if want_feature 'tls'; then
-
-  if [[ $env_ok == "yes" ]] ; then
-    describe "  checking if our Cloud Foundry certificate matches the system domains..."
-    base=$(lookup params.base_domain)
-    sys=$(lookup params.system_domain "system.$base")
-    for domain in api.$sys login.$sys uaa.$sys something.uaa.$sys; do
-      if safe --quiet x509 validate "$vault/haproxy/ssl" --for "$domain" >/dev/null 2>&1; then
-        describe "    - $domain [#G{OK}]"
-      else
-        describe "    - $domain [#R{INVALID}]"
-        safe x509 validate "$vault/haproxy/ssl" --for "$domain" 2>&1 | sed -e 's/^/      /';
-        env_ok=no
-        echo
-      fi
-    done
-
-    describe "  checking if our Cloud Foundry certificate matches the app domains..."
-    for domain in $(lookup params.apps_domains "[\"run.$base\"]" | jq -r '.[]'); do
-      if safe --quiet x509 validate "$vault/haproxy/ssl" --for "something.$domain" >/dev/null 2>&1; then
-        describe "    - *.$domain [#G{OK}]"
-      else
-        describe "    - *.$domain [#R{INVALID}]"
-        safe x509 validate "$vault/haproxy/ssl" --for "something.$domain" 2>&1 | sed -e 's/^/      /';
-        env_ok=no
-        echo
-      fi
-    done
-  fi
-fi
-
-# Fix erroneous location of certs for dns-service-discovery introduced in 1.8.0
-if want_feature 'dns-service-discovery' ; then
-  relocate_secret "cf_app_sd/ca"     "cf_app_sd/certs/ca"
-  relocate_secret "cf_app_sd/client" "cf_app_sd/certs/client"
-  relocate_secret "cf_app_sd/server" "cf_app_sd/certs/server"
-fi
+# Environment Parameter checks - none yet!
 
 if [[ "$env_ok" == "yes" ]]; then
   describe "  environment files [#G{OK}]"
@@ -126,3 +52,4 @@ fi
 if [[ "$env_ok" == "no" || "$cc_ok" == "no" || "$runtime_ok" == no ]] ; then
   exit 1
 fi
+

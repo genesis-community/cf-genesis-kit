@@ -1,0 +1,28 @@
+--- # overrides: basic overrides for genesis compatibility
+exodus:
+  #api_url:        (( concat "https://" meta.api_hostname ))
+  admin_username: admin
+  #admin_password: (( vault meta.vault "/admin_user:password" ))
+  system_domain:  (( grab params.system_domain ))
+  app_domain:     (( grab params.apps_domains[0] ))
+  app_domains:    (( grab params.apps_domains ))
+
+  vaulted_uaa_clients: (( concat meta.vault "/uaa/client_secrets:firehose" ))
+
+  system_org:   system
+  system_space: system
+
+params:
+  network: default
+
+  base_domain: (( param "What is the base domain for this Cloud Foundry?" ))
+  system_domain: (( concat "system." params.base_domain ))
+  apps_domains: [ (( concat "run." params.base_domain )) ]
+
+  # BOSH Variables - used to populate ((variables))
+  bosh-variables:
+    system_domain:   (( grab params.system_domain ))
+    deployment_name: (( grab name ))
+    network_name:    (( grab params.network ))
+
+name: (( grab params.name ))

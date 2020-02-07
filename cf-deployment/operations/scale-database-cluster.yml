@@ -1,0 +1,11 @@
+---
+- type: replace
+  path: /instance_groups/name=database/instances
+  value: 3
+- type: replace
+  path: /instance_groups/name=database/azs
+  value: [z1, z2, z3]
+
+- type: replace
+  path: /instance_groups/name=database/jobs/name=proxy/properties/shutdown_delay?
+  value: 30

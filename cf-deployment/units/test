@@ -1,0 +1,22 @@
+#!/bin/bash -eu
+
+function suites() {
+  local suites
+  suites="
+    ./tests/addons_test
+    ./tests/backup_and_restore_test
+    ./tests/bits_service_test
+    ./tests/experimental_test
+    ./tests/iaas_test
+    ./tests/inline_test
+    ./tests/standard_test
+    ./tests/test_test
+    ./tests/semantic_test
+    "
+
+  echo "${suites}"
+}
+
+pushd "$(dirname "$0")" > /dev/null
+  go test "$@" $(suites) -mod=vendor
+popd > /dev/null

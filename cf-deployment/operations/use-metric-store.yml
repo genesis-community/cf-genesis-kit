@@ -1,0 +1,144 @@
+- type: replace
+  path: /addons/name=prom_scraper/exclude?/instance_groups/-
+  value: metric-store
+- type: replace
+  path: /releases/-
+  value:
+    name: metric-store
+    sha1: 0c67ab7b06095771d4f9e460b83dde2b499b38b0
+    url: https://bosh.io/d/github.com/cloudfoundry/metric-store-release?v=1.2.2
+    version: 1.2.2
+- type: replace
+  path: /instance_groups/-
+  value:
+    azs:
+    - z1
+    instances: 1
+    jobs:
+    - name: metric-store
+      properties:
+        metric_store_server:
+          tls:
+            ca_cert: ((metric_store_server.ca))
+            cert: ((metric_store_server.certificate))
+            key: ((metric_store_server.private_key))
+        tls:
+          ca_cert: ((metric_store.ca))
+          cert: ((metric_store.certificate))
+          key: ((metric_store.private_key))
+      release: metric-store
+    - name: metric-store-nozzle
+      properties:
+        logs_provider:
+          tls:
+            ca_cert: ((metric_store_to_logs_provider.ca))
+            cert: ((metric_store_to_logs_provider.certificate))
+            key: ((metric_store_to_logs_provider.private_key))
+        metric_store_client:
+          tls:
+            ca_cert: ((nozzle_to_metric_store_client.ca))
+            cert: ((nozzle_to_metric_store_client.certificate))
+            key: ((nozzle_to_metric_store_client.private_key))
+      release: metric-store
+    - name: route_registrar
+      properties:
+        route_registrar:
+          routes:
+          - name: metric-store-reverse-proxy
+            port: 8083
+            registration_interval: 20s
+            server_cert_domain_san: metric-store.((system_domain))
+            tls_port: 8083
+            uris:
+            - metric-store.((system_domain))
+            - '*.metric-store.((system_domain))'
+      release: routing
+    - name: metric-store-cf-auth-proxy
+      properties:
+        cc:
+          ca_cert: ((cc_tls.ca))
+          common_name: cloud-controller-ng.service.cf.internal
+        external_cert: ((metricstore_ssl.certificate))
+        external_key: ((metricstore_ssl.private_key))
+        proxy_ca_cert: ((metric_store.ca))
+        proxy_port: 8083
+        uaa:
+          ca_cert: ((uaa_ssl.ca))
+          client_id: doppler
+          client_secret: ((uaa_clients_doppler_secret))
+          internal_addr: https://uaa.service.cf.internal:8443
+      release: metric-store
+    name: metric-store
+    networks:
+    - name: default
+    persistent_disk_type: 5GB
+    stemcell: default
+    vm_type: minimal
+- type: replace
+  path: /variables/-
+  value:
+    name: metric_store_to_logs_provider
+    options:
+      ca: loggregator_ca
+      common_name: metric-store
+      extended_key_usage:
+      - client_auth
+      - server_auth
+    type: certificate
+- type: replace
+  path: /variables/-
+  value:
+    name: metric_store_ca
+    options:
+      common_name: metric-store
+      is_ca: true
+    type: certificate
+- type: replace
+  path: /variables/-
+  value:
+    name: metric_store
+    options:
+      alternative_names:
+      - metric-store
+      - localhost
+      ca: metric_store_ca
+      common_name: metric-store
+      extended_key_usage:
+      - client_auth
+      - server_auth
+    type: certificate
+- type: replace
+  path: /variables/-
+  value:
+    name: metric_store_server
+    options:
+      alternative_names:
+      - metric-store
+      ca: metric_store_ca
+      common_name: metric-store
+      extended_key_usage:
+      - server_auth
+    type: certificate
+- type: replace
+  path: /variables/-
+  value:
+    name: nozzle_to_metric_store_client
+    options:
+      alternative_names:
+      - metric-store
+      ca: metric_store_ca
+      common_name: metric-store
+      extended_key_usage:
+      - client_auth
+    type: certificate
+- type: replace
+  path: /variables/-
+  value:
+    name: metricstore_ssl
+    options:
+      alternative_names:
+      - metric-store.((system_domain))
+      - '*.metric-store.((system_domain))'
+      ca: service_cf_internal_ca
+      common_name: metric-store
+    type: certificate

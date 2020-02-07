@@ -1,0 +1,28 @@
+- type: replace
+  path: /addons?/-
+  value:
+    include:
+      stemcell:
+      - os: ubuntu-xenial
+    jobs:
+    - name: syslog_forwarder
+      properties:
+        syslog:
+          address: ((syslog_address))
+          custom_rule: |
+            ((syslog_custom_rule))
+            if ($programname startswith "vcap.") then stop
+          fallback_servers: ((syslog_fallback_servers))
+          permitted_peer: ((syslog_permitted_peer))
+          port: ((syslog_port))
+          tls_enabled: true
+          transport: tcp
+      release: syslog
+    name: syslog_forwarder
+- type: replace
+  path: /releases/-
+  value:
+    name: syslog
+    sha1: e2649e48c49aedcbd0ff96b00f56b028682f1dd6
+    url: https://bosh.io/d/github.com/cloudfoundry/syslog-release?v=11.6.1
+    version: 11.6.1
