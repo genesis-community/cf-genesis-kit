@@ -123,7 +123,8 @@ instance_groups:
                 uris:
                   - (( grab meta.api_hostname ))
               - name: policy-server
-                port: 4002
+                tls_port: 4002
+                server_cert_domain_san: (( grab meta.api_hostname ))
                 registration_interval: 20s
                 uris:
                   - (( concat meta.api_hostname "/networking" ))
