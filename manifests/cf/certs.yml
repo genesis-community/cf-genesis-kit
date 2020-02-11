@@ -2,7 +2,7 @@
 # This file should abstract out the cert paths in the vault
 #
 # The structure of the CA hierarchy is maintained, but where useful, a link to
-# the ca for each cert/key pairing is also provided, as either ca_cert or ca, 
+# the ca for each cert/key pairing is also provided, as either ca_cert or ca,
 # determined by whichever is more used by the property specs.  This makes it
 # convenient to grab the entire tree when a property needs the ca_cert, cert
 # and key.  It also matches the cf-deployments use of referring to the ca
@@ -11,17 +11,17 @@
 meta:
   certs:
     cf_internal:
-      ca: 
+      ca:
         cert:  (( vault meta.vault "/cf_internal/certs/ca:certificate" ))
 
       cc_bridge_cc_uploader:
         ca_cert:     (( grab meta.certs.cf_internal.ca.cert ))
-        client_cert: (( vault meta.vault "/cf_internal/certs/cc_bridge_tps:certificate" ))
-        client_key:  (( vault meta.vault "/cf_internal/certs/cc_bridge_tps:key" ))
+        client_cert: (( vault meta.vault "/cf_internal/certs/cc_bridge_cc_uploader:certificate" ))
+        client_key:  (( vault meta.vault "/cf_internal/certs/cc_bridge_cc_uploader:key" ))
       cc_bridge_cc_uploader_server:
         ca_cert:     (( grab meta.certs.cf_internal.ca.cert ))
-        server_cert: (( vault meta.vault "/cf_internal/certs/cc_bridge_tps:certificate" ))
-        server_key:  (( vault meta.vault "/cf_internal/certs/cc_bridge_tps:key" ))
+        server_cert: (( vault meta.vault "/cf_internal/certs/cc_bridge_cc_uploader_server:certificate" ))
+        server_key:  (( vault meta.vault "/cf_internal/certs/cc_bridge_cc_uploader_server:key" ))
       cc_bridge_tps:
         ca_cert:     (( grab meta.certs.cf_internal.ca.cert ))
         client_cert: (( vault meta.vault "/cf_internal/certs/cc_bridge_tps:certificate" ))
