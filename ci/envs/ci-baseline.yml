@@ -3,7 +3,7 @@ kit:
   features:
     - local-ha-db
     - local-blobstore
-    # - haproxy
+    - haproxy
     - tls
     - self-signed
     - small-footprint
@@ -94,6 +94,8 @@ params:
 
   base_domain: 10.135.0.27.netip.cc
   skip_ssl_validation: true
+
+  haproxy_ips: (( empty array ))
 
   postgres_vip: q-s0.postgres.default.ci-baseline-cf.bosh
 
