@@ -13,6 +13,7 @@ instance_groups:
       - name: bbs
         release: diego
         properties:
+          set_kernel_parameters: (( params.set_kernel_parameters ))
           bpm:
             enabled: true
           diego:
@@ -69,6 +70,7 @@ instance_groups:
       - name: locket
         release: diego
         properties:
+          set_kernel_parameters: (( params.set_kernel_parameters ))
           enable_consul_service_registration: false
           tls: (( grab meta.certs.cf_internal.diego_locket_server ))
           diego:
