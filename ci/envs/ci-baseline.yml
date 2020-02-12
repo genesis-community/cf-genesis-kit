@@ -3,7 +3,7 @@ kit:
   features:
     - local-db
     - local-blobstore
-    - haproxy
+    # - haproxy
     - tls
     - self-signed
     - small-footprint
