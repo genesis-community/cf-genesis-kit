@@ -1,5 +1,5 @@
 #!/bin/bash
-set -eux
+set -eu
 KIT=cf
 
 header() {
@@ -27,7 +27,7 @@ $BOSH deployments
 
 header "Cleaning up from any previous deployments (if necessary)..."
 cleanup ci-baseline-${KIT}
-safe rm -rf secret/ci/baseline/${KIT}
+# safe rm -rf secret/ci/baseline/${KIT}
 
 header "Deploying BASELINE environment to verify functionality..."
 cd dev
