@@ -95,7 +95,7 @@ params:
   base_domain: 10.135.0.27.netip.cc
   skip_ssl_validation: true
 
-  postgres_vip: "*.postgres.default.ci-baseline-cf.bosh"
+  postgres_vip: q-s0.postgres.default.ci-baseline-cf.bosh
 
   set_kernel_parameters: false
   apparmor_profile: ""
