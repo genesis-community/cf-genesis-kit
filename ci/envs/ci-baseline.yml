@@ -103,6 +103,11 @@ params:
   apparmor_profile: ""
 
 instance_groups:
+- name: haproxy
+  networks:
+  - (( replace ))
+  - name: default
+
 - name: postgres
   jobs:
   - name: vip
