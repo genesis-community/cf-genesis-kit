@@ -1,7 +1,7 @@
 ---
 kit:
   features:
-    - local-db
+    - local-ha-db
     - local-blobstore
     # - haproxy
     - tls
@@ -10,7 +10,6 @@ kit:
     - dns-service-discovery
     - container-routing-integrity
     - routing-api
-    # - local-ha-db
     # - autoscaler
 
 meta:
@@ -87,14 +86,24 @@ params:
   autoscaler_engine_vm_type:    default
   autoscaler_operator_vm_type:  default
 
-  availability_zones: ((moltencore.scaling.all.x1.azs))
+  availability_zones: [z1, z2]
 
   disk_type: default
   postgres_disk_pool: default
   blobstore_disk_pool: default
 
-  base_domain:  ((moltencore.public_ips.z0)).netip.cc
+  base_domain: 10.135.0.27.netip.cc
   skip_ssl_validation: true
+
+  postgres_vip: "*.postgres.default.ci-baseline-cf.bosh"
 
   set_kernel_parameters: false
   apparmor_profile: ""
+
+instance_groups:
+- name: postgres
+  jobs:
+  - name: vip
+    properties:
+      keepalived:
+        enabled: false # use bosh dns instead
