@@ -4,6 +4,10 @@
   `log-stream.SYSTEM_DOMAIN`. This route is required to hook up applications to the Loggregator
   v2 API firehose.
 
+- Fixes misconfigured certificates for cc_bridge components (#112)
+
+- Fixes tls/non-tls misconfiguration for network-policy server (#113)
+
 # Core Components
 
 | Release           | Version                                                                                       | Release Date      |
