@@ -97,7 +97,7 @@ params:
 
   haproxy_ips: (( empty array ))
 
-  postgres_vip: q-s0.postgres.default.ci-baseline-cf.bosh
+  postgres_vip: sql-db.service.cf.internal
 
   set_kernel_parameters: false
   apparmor_profile: ""
