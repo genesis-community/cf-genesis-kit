@@ -109,6 +109,9 @@ instance_groups:
   - name: default
 
 - name: postgres
+  # using address (with bosh dns) based auth in pg_hba.conf does not work across zones
+  # this is a limitation of the flannel network used by MoltenCore
+  azs: [z0]
   jobs:
   - name: vip
     properties:
