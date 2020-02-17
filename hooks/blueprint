@@ -26,7 +26,10 @@ for __feature in $GENESIS_REQUESTED_FEATURES; do
   fi
 done
 
-merge+=( overrides/base.yml )
+merge+=( \
+  overlay/base.yml \
+  overlay/uaa-clients.yml \
+)
 
 echo "${merge[@]}"
 
