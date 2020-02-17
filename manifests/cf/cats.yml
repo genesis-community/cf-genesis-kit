@@ -1,0 +1,40 @@
+cats_version:   v5.6.0
+api:            (( grab $API_URL ))
+admin_user:     admin
+admin_password: (( grab $ADMIN_PASSWORD ))
+apps_domain:    (( grab $APP_DOMAINS_0 ))
+artifacts_directory: logs
+credhub_client: credhub_admin_client
+credhub_secret: no_credhub_yet_tests_are_skipped_but_config_required
+credhub_mode: assisted
+include_apps: true
+include_backend_compatibility: true
+include_capi_no_bridge: true
+include_container_networking: true
+include_credhub: false
+include_detect: true
+include_docker: true
+include_internet_dependent: true
+include_internetless: false
+include_isolation_segments: false
+include_private_docker_registry: false
+include_route_services: true
+include_routing: true
+include_routing_isolation_segments: false
+include_security_groups: true
+include_service_discovery: false
+include_service_instance_sharing: true
+include_services: true
+include_ssh: true
+include_sso: true
+include_tasks: true
+include_tcp_routing: true
+include_v3: true
+include_volume_services: false
+include_zipkin: true
+skip_ssl_validation: true
+stacks:
+- cflinuxfs3
+timeout_scale: 1
+use_http: true
+use_log_cache: false

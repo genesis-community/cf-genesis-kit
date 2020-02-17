@@ -41,4 +41,6 @@ $BOSH -d ci-baseline-${KIT} instances --ps
 header "Validating BASELINE environment..."
 $BOSH -d ci-baseline-${KIT} run-errand smoke_tests --instance=uaa/first
 
+genesis do ci-baseline cats
+
 cleanup ci-baseline-${KIT}

@@ -53,6 +53,24 @@ login() {
   cf target
 }
 
+cats() {
+    base=$(lookup params.base_domain)
+    system_domain=$(lookup params.system_domain system.$base)
+    export API_URL=https://api.$system_domain
+    export ADMIN_PASSWORD=$(safe read $vault/admin_user:password)
+    export APP_DOMAINS_0=run.$base
+
+    tmpdir=$(mktemp -d -t cats.XXXXXXXXXX)
+    export CONFIG=${tmpdir}/config.json
+    git clone https://github.com/cloudfoundry/cf-acceptance-tests ${tmpdir}
+    spruce merge manifests/cf/cats.yml | spruce json | jq '.' > ${CONFIG}
+    VERSION=$(spruce json manifests/cf/cats.yml | jq -r '.cats_version')
+
+    pushd ${tmpdir}
+    git checkout ${VERSION}
+    ./bin/test -v -nodes=12
+}
+
 case $GENESIS_ADDON_SCRIPT in
 list)
   list
@@ -112,6 +130,10 @@ bind-autoscaler)
 
 smoketest)
   $GENESIS_BOSH_COMMAND -e $BOSH_ENVIRONMENT -d $BOSH_DEPLOYMENT run-errand smoke_tests --instance uaa/first
+  ;;
+cats)
+  cats
+  exit 0
   ;;
 *)
   echo "Unrecognized Cloud Foundry Genesis Kit addon."
