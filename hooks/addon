@@ -1,0 +1,76 @@
+#!/bin/bash
+set -eu
+
+target=$GENESIS_ENVIRONMENT
+
+
+list() {
+  echo "The following addons are defined:"
+  echo
+  echo "  login             Log into the Cloud Foundry instance as the"
+  echo "                    admin user account.  This will overwrite local"
+  echo "                    cf CLI configuration!"
+  echo
+  echo "  setup-cli         Installs cf CLI plugins like 'Targets', which"
+  echo "                    helps to manage multiple Cloud Foundries from a"
+  echo "                    single jumpbox."
+  echo
+  echo "  smoketest         Run the smoke tests errand on the first vm in the"
+  echo "                    api instance group."
+}
+
+
+login() {
+  if ! cf plugins | grep -q '^cf-targets'; then
+    describe "#Y{The cf-targets plugin does not seem to be installed}"
+        echo "Install it first, via 'genesis do $GENESIS_ENVIRONMENT -- setup-cli'"
+    exit 1
+  fi
+
+  base=$(lookup params.base_domain)
+  system_domain=$(lookup params.system_domain system.$base)
+  api_url=https://api.$system_domain
+  password=$(credhub get -q -n $GENESIS_CREDHUB_ROOT/cf_admin_password)
+
+  #TODO enfoce ssl validation
+  cf api $api_url --skip-ssl-validation
+  cf auth admin "$password"
+  cf save-target -f $target
+  echo ; echo
+  cf target
+}
+
+case $GENESIS_ADDON_SCRIPT in
+list)
+  list
+  exit 0
+  ;;
+
+login)
+  login
+  exit 0
+  ;;
+
+
+setup-cli)
+  if ! cf list-plugin-repos | grep -q CF-Community; then
+    describe 'Adding #G{Cloud Foundry Community} plugins repository...'
+    cf add-plugin-repo CF-Community http://plugins.cloudfoundry.org
+  fi
+  if ! cf plugins | grep -q '^cf-targets'; then
+    describe 'Installing the #C{cf-targets} plugin...'
+    cf install-plugin -r CF-Community Targets
+  fi
+  cf plugins
+  ;;
+
+smoketest)
+  $GENESIS_BOSH_COMMAND -e $BOSH_ENVIRONMENT -d $BOSH_DEPLOYMENT run-errand smoke_tests
+  ;;
+
+*)
+  echo "Unrecognized Cloud Foundry Genesis Kit addon."
+  list
+  exit 1
+  ;;
+esac

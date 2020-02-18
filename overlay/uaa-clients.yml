@@ -9,4 +9,9 @@ instance_groups:
           app_autoscaler_client:
             authorized-grant-types: client_credentials
             authorities: cloud_controller.read,cloud_controller.admin,uaa.resource
-            secret:  "((uaa_clients_app_autoscaler_client))"
+            secret:  "((uaa_clients_app_autoscaler_client_secret))"
+
+variables:
+- name: uaa_clients_app_autoscaler_client_secret
+  type: password
+  

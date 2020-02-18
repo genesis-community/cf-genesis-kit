@@ -6,13 +6,11 @@ docs:    https://github.com/genesis-community/cf-genesis-kit
 code:    https://github.com/genesis-community/cf-genesis-kit
 
 description: |
-  This kit will deploy OSS Cloud Foundry to BOSH. It contains
-  subkits to help identify where your databases and blobstore are,
-  customizations for Azure environments, and to enable an appropriate
-  HA Proxy configuration if desired. It is loosely based off of the
-  [cf-deployment](https://github.com/cloudfoundry/cf-deployment) repo.
+  This kit will deploy OSS Cloud Foundry to BOSH. It is a wrapper around the
+  de-facto community standard [cf-deployment](https://github.com/cloudfoundry/cf-deployment) repository.
+
+  It also contains convenience functions for inter-kit communication and add-on
+  routines for common activities.
 
 genesis_version_min: 2.8.0-rc2
-
-certificates: {base: {}}
-credentials:  {base: {}}
+secrets_store: credhub
