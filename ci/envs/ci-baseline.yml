@@ -45,7 +45,7 @@ params:
   autoscaler_engine_vm_type:    default
   autoscaler_operator_vm_type:  default
 
-  cell_instances: 6
+  cell_instances: 4
 
   availability_zones: [z1, z2]
 
@@ -78,6 +78,3 @@ instance_groups:
     properties:
       keepalived:
         enabled: false # use bosh dns instead
-
-- name: cell
-  azs: [z0, z1, z2]
