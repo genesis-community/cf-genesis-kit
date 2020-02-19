@@ -59,8 +59,8 @@ if [[ "$SKIP_CATS" == "false" ]]; then
     GOLANG_SHA256=40558d2781509e3619d9cbf37f0d9430ce1fa50684196f66612cc3a48cbe87b6
     mkdir -p /goroot /gopath  && \
         curl $GOLANG_URL | \
-            tar xvzf - -C /goroot --strip-components=1 && \
-        chown -R worker /goroot /gopath
+            tar xzf - -C /goroot --strip-components=1 && \
+        chown -R root /goroot /gopath
 
     export GOROOT=/goroot
     export GOPATH=/gopath
