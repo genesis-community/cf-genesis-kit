@@ -2,7 +2,7 @@
 meta:
   kit:     cf
   release: CF Genesis Kit
-  target:  genesis@pipes
+  target:  mc-genesis
   url:     https://pipes.starkandwayne.com
   exposed: yes
 
@@ -21,7 +21,7 @@ meta:
     secret_key: ((aws.secret_access_key))
 
   github:
-    owner:        genesis-community
+    owner:        rkoster
     repo:         cf-genesis-kit
     branch:       master
     private_key:  ((github.private_key))

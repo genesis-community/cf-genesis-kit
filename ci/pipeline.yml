@@ -116,6 +116,7 @@ jobs:
                   BOSH_CA_CERT:         (( grab meta.bosh.cacert ))
                   BOSH_CLIENT:          (( grab meta.bosh.username ))
                   BOSH_CLIENT_SECRET:   (( grab meta.bosh.password ))
+                  SKIP_CLEANUP:         true
       on_success:
         put: notify
         params:

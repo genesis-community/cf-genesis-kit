@@ -1,25 +1,30 @@
 #!/bin/bash
 set -eu
 KIT=cf
+SKIP_CLEANUP=${SKIP_CLEANUP:-"false"}
 
 header() {
-	echo
-	echo "###############################################"
-	echo
-	echo $*
-	echo
+    echo
+    echo "###############################################"
+    echo
+    echo $*
+    echo
 }
 
 cleanup() {
+    if [[ "$SKIP_CLEANUP" == "false" ]]; then
 	for deployment in "$@"; do
-		echo "> deleting ${deployment}"
-		$BOSH -n -d "${deployment}" delete-deployment
+	    echo "> deleting ${deployment}"
+	    $BOSH -n -d "${deployment}" delete-deployment
 
-		for disk in $($BOSH disks --orphaned | grep "${deployment}" | awk '{print $1}'); do
-			echo "  - removing disk $disk"
-			$BOSH -n delete-disk "$disk"
-		done
+	    for disk in $($BOSH disks --orphaned | grep "${deployment}" | awk '{print $1}'); do
+		echo "  - removing disk $disk"
+		$BOSH -n delete-disk "$disk"
+	    done
 	done
+    else
+        echo "Skipping cleanup"
+    fi
 }
 
 header "Checking previous deployments on ${BOSH_ENVIRONMENT}..."
@@ -40,6 +45,19 @@ $BOSH -d ci-baseline-${KIT} instances --ps
 
 header "Validating BASELINE environment..."
 $BOSH -d ci-baseline-${KIT} run-errand smoke_tests --instance=uaa/first
+
+header "Running CATs against BASELINE environment..."
+
+GOLANG_URL=https://buildpacks.cloudfoundry.org/dependencies/go/go1.13.8.linux-amd64-cflinuxfs3-40558d27.tgz
+GOLANG_SHA256=40558d2781509e3619d9cbf37f0d9430ce1fa50684196f66612cc3a48cbe87b6
+mkdir -p /goroot /gopath  && \
+    curl $GOLANG_URL | \
+        tar xvzf - -C /goroot --strip-components=1 && \
+    chown -R worker /goroot /gopath
+
+export GOROOT=/goroot
+export GOPATH=/gopath
+export PATH=/goroot/bin:/gopath/bin:$PATH
 
 genesis do ci-baseline cats
 
