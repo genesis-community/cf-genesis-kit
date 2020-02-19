@@ -117,6 +117,7 @@ jobs:
                   BOSH_CLIENT:          (( grab meta.bosh.username ))
                   BOSH_CLIENT_SECRET:   (( grab meta.bosh.password ))
                   SKIP_CLEANUP:         true
+                  SKIP_SMOKE_TESTS:     true
       on_success:
         put: notify
         params:
