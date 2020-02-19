@@ -66,6 +66,10 @@ if [[ "$SKIP_CATS" == "false" ]]; then
     export GOPATH=/gopath
     export PATH=/goroot/bin:/gopath/bin:$PATH
 
+    curl -L 'https://packages.cloudfoundry.org/stable?release=linux64-binary&version=6.49.0&source=github-rel' | \
+        tar xzf - -C /tmp
+    mv /tmp/cf /usr/local/bin/cf
+
     genesis do ci-baseline cats
 else
     echo "Skipping CATs"
