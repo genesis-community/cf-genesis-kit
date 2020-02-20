@@ -56,7 +56,7 @@ login() {
 cats() {
     base=$(lookup params.base_domain)
     system_domain=$(lookup params.system_domain system.$base)
-    export API_URL=https://api.$system_domain
+    export API_URL=api.$system_domain
     export ADMIN_PASSWORD=$(safe read $vault/admin_user:password)
     export APP_DOMAINS_0=run.$base
 
