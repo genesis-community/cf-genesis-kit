@@ -66,6 +66,12 @@ meta:
       pipeline: (( concat meta.url "/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME" ))
       build:    (( concat meta.shout.links.pipeline "/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME" ))
 
+  jobs:
+    testflight:
+      SKIP_CLEANUP:         false
+      SKIP_SMOKE_TESTS:     false
+      SKIP_CATS_TESTS:      false
+
 groups:
   - name: (( grab meta.pipeline ))
     jobs:
@@ -116,8 +122,7 @@ jobs:
                   BOSH_CA_CERT:         (( grab meta.bosh.cacert ))
                   BOSH_CLIENT:          (( grab meta.bosh.username ))
                   BOSH_CLIENT_SECRET:   (( grab meta.bosh.password ))
-                  SKIP_CLEANUP:         true
-                  SKIP_SMOKE_TESTS:     true
+                  .: (( inject meta.jobs.testflight ))
       on_success:
         put: notify
         params:
