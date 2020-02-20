@@ -4,7 +4,11 @@ admin_user:     admin
 admin_password: (( grab $ADMIN_PASSWORD ))
 apps_domain:    (( grab $APP_DOMAINS_0 ))
 artifacts_directory: logs
-credhub_mode: skip # No Credhub yet in cf-genesis-kit
+
+# Not yet? supported by cf-genesis-kit
+credhub_mode: skip
+include_tcp_routing: false
+
 include_apps: true
 include_backend_compatibility: true
 include_capi_no_bridge: true
@@ -25,13 +29,12 @@ include_services: true
 include_ssh: true
 include_sso: true
 include_tasks: true
-include_tcp_routing: true
 include_v3: true
 include_volume_services: false
 include_zipkin: true
 skip_ssl_validation: true
 stacks:
 - cflinuxfs3
-timeout_scale: 1
+timeout_scale: 2
 use_http: true
 use_log_cache: false

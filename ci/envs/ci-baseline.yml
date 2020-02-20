@@ -9,6 +9,7 @@ kit:
     - small-footprint
     - dns-service-discovery
     - container-routing-integrity
+    - loggregator-forwarder-agent
     - routing-api
     # - autoscaler
 
