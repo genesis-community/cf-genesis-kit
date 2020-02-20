@@ -68,7 +68,7 @@ cats() {
 
     pushd ${tmpdir}
     git checkout ${VERSION}
-    ./bin/test -v -nodes=12
+    ./bin/test -v -nodes=8
 }
 
 case $GENESIS_ADDON_SCRIPT in

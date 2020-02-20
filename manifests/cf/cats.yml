@@ -4,14 +4,11 @@ admin_user:     admin
 admin_password: (( grab $ADMIN_PASSWORD ))
 apps_domain:    (( grab $APP_DOMAINS_0 ))
 artifacts_directory: logs
-credhub_client: credhub_admin_client
-credhub_secret: no_credhub_yet_tests_are_skipped_but_config_required
-credhub_mode: assisted
+credhub_mode: skip # No Credhub yet in cf-genesis-kit
 include_apps: true
 include_backend_compatibility: true
 include_capi_no_bridge: true
-include_container_networking: true
-include_credhub: false
+include_container_networking: false # TODO fix on MoltenCore
 include_detect: true
 include_docker: true
 include_internet_dependent: true
