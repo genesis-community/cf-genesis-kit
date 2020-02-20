@@ -68,6 +68,7 @@ cats() {
 
     pushd ${tmpdir}
     git checkout ${VERSION}
+    git submodule update --init
     ./bin/test -v -nodes=8
 }
 
