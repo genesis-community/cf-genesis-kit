@@ -5,7 +5,7 @@ declare -a merge
 
 merge=( \
   cf-deployment/cf-deployment.yml \
-  cf-deployment/operations/rename-network-and-deployment.yml
+  # cf-deployment/operations/rename-network-and-deployment.yml
 )
 
 # Do features => opsfiles stuff here
@@ -29,6 +29,7 @@ done
 merge+=( \
   overlay/base.yml \
   overlay/uaa-clients.yml \
+  overlay/operations/rename-network-and-deployment.yml \
 )
 
 echo "${merge[@]}"
