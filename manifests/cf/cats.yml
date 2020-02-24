@@ -25,7 +25,7 @@ include_routing: true
 
 # GA Features
 include_backend_compatibility: true
-include_docker: true
+include_docker: false # feature flag: diego_docker
 include_internet_dependent: true
 include_private_docker_registry: false # TODO setup private registry to enable this suite
 include_route_services: true
@@ -41,7 +41,7 @@ include_deployments: true
 include_tcp_routing: false # Not in kit
 # enable-service-discovery.yml is being tested by cf-deployment ci
 include_service_discovery: true
-include_service_instance_sharing: true
+include_service_instance_sharing: false # feature flag: service_instance_sharing
 # https://github.com/cloudfoundry/cf-deployment/commit/8ab94e7a36b197ada2a6992a6e5780b710eb07bd
 include_capi_no_bridge: true
 
