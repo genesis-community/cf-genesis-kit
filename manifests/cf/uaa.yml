@@ -115,7 +115,7 @@ instance_groups:
                 authorized-grant-types: authorization_code
                 autoapprove: true
                 override: true
-                redirect-uri: (( concat "https://uaa.system." params.system_domain "/login" ))
+                redirect-uri: (( concat "https://uaa." params.system_domain "/login" ))
                 scope: openid,cloud_controller.read,cloud_controller.write,cloud_controller.admin
                 secret: (( grab meta.uaa.ssh_proxy_secret ))
               tcp_emitter:
