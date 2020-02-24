@@ -5,7 +5,6 @@ meta:
     ca_cert:     (( grab meta.certs.cf_internal.diego_bbs_client.ca_cert ))
     client_cert: (( grab meta.certs.cf_internal.diego_bbs_client.cert ))
     client_key:  (( grab meta.certs.cf_internal.diego_bbs_client.key ))
-    require_tls: true
 
 instance_groups:
   - name: bbs
