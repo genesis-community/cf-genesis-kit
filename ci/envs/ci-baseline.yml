@@ -59,9 +59,9 @@ params:
 
   postgres_vip: sql-db.service.cf.internal
   cf_public_ips:
-  - { "destination": "10.135.0.27", "protocol": "all" 
-  - { "destination": "10.135.0.26", "protocol": "all" 
-  - { "destination": "10.135.0.28", "protocol": "all" 
+  - { "destination": "10.135.0.27", "protocol": "all" }
+  - { "destination": "10.135.0.26", "protocol": "all" }
+  - { "destination": "10.135.0.28", "protocol": "all" }
 
   set_kernel_parameters: false
   apparmor_profile: ""
