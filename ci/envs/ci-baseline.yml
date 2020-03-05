@@ -58,6 +58,11 @@ params:
   haproxy_ips: (( empty array ))
 
   postgres_vip: sql-db.service.cf.internal
+  public_ips:
+  - 10.135.0.27
+  - 10.135.0.26
+  - 10.135.0.28
+
 
   set_kernel_parameters: false
   apparmor_profile: ""
