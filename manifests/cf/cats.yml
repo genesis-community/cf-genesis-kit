@@ -1,4 +1,4 @@
-cats_version:   v5.6.0
+cats_version:   v5.7.0
 api:            (( grab $API_URL ))
 admin_user:     admin
 admin_password: (( grab $ADMIN_PASSWORD ))
