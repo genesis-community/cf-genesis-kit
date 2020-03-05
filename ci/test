@@ -44,7 +44,6 @@ cd ..
 genesis add-secrets ci-baseline
 genesis deploy -y ci-baseline
 $BOSH -d ci-baseline-${KIT} instances --ps
-genesis do ci-baseline asg
 
 header "Validating BASELINE environment..."
 if [[ "$SKIP_SMOKE_TESTS" == "false" ]]; then
