@@ -42,6 +42,7 @@ instance_groups:
 
             # haproxy is using links now for the ssh proxies
             tcp_link_port: 2222
+            enable_4443: true #required for wss
 
 releases:
   - name:    haproxy
