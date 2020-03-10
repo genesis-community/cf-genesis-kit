@@ -4,6 +4,7 @@ KIT=cf
 SKIP_CLEANUP=${SKIP_CLEANUP:-"false"}
 SKIP_SMOKE_TESTS=${SKIP_SMOKE_TESTS:-"false"}
 SKIP_CATS=${SKIP_CATS:-"false"}
+SKIP_DEPLOY=${SKIP_DEPLOY:-"false"}
 
 header() {
     echo
@@ -36,14 +37,16 @@ header "Cleaning up from any previous deployments (if necessary)..."
 cleanup ci-baseline-${KIT}
 # safe rm -rf secret/ci/baseline/${KIT}
 
-header "Deploying BASELINE environment to verify functionality..."
-cd dev
-# make sure hooks are executable before screaming at shipit for failing.
-genesis compile-kit --name $KIT -v 9.9.9 --force
-cd ..
-genesis add-secrets ci-baseline
-genesis deploy -y ci-baseline
-$BOSH -d ci-baseline-${KIT} instances --ps
+if [[ "$SKIP_CLEANUP" == "false" ]]; then
+  header "Deploying BASELINE environment to verify functionality..."
+  cd dev
+  # make sure hooks are executable before screaming at shipit for failing.
+  genesis compile-kit --name $KIT -v 9.9.9 --force
+  cd ..
+  genesis add-secrets ci-baseline
+  genesis deploy -y ci-baseline
+  $BOSH -d ci-baseline-${KIT} instances --ps
+fi
 
 header "Validating BASELINE environment..."
 if [[ "$SKIP_SMOKE_TESTS" == "false" ]]; then
