@@ -63,6 +63,28 @@ cats() {
     tmpdir=$(mktemp -d -t cats.XXXXXXXXXX)
     export CONFIG=${tmpdir}/config.json
     git clone https://github.com/cloudfoundry/cf-acceptance-tests ${tmpdir}
+    case $RUN_CATS in
+      include_container_networking)
+        sed -i "s#include_security_groups:.*#include_security_groups: true#g"
+        ;;
+
+      include_deployments)
+        sed -i "s#include_v3:.*#include_v3: true#g"
+        ;;
+      include_service_instance_sharing)
+        sed -i "s#include_services:.*#include_services: true#g"
+        ;;
+      include_sso)
+        sed -i "s#include_services:.*#include_services: true#g"
+        ;;
+      include_tasks)
+        sed -i "s#include_v3:.*#include_v3: true#g"
+        ;;
+      include_zipkin)
+        sed -i "s#include_routing:.*#include_routing: true#g"
+        ;;
+    esac
+    sed -i "s#${RUN_CATS}:.*#${RUN_CATS}: true#g" manifests/cf/cats.yml
     spruce merge manifests/cf/cats.yml | spruce json | jq '.' > ${CONFIG}
     VERSION=$(spruce json manifests/cf/cats.yml | jq -r '.cats_version')
 

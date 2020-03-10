@@ -19,31 +19,31 @@ skip_ssl_validation: true
 # https://github.com/cloudfoundry/cf-acceptance-tests/blob/master/helpers/config/config_struct.go#L69-L93
 
 # Default
-include_apps: true
-include_detect: true
-include_routing: true
+include_apps: false
+include_detect: false
+include_routing: false
 
 # GA Features
-include_backend_compatibility: true
+include_backend_compatibility: false
 include_docker: false # feature flag: diego_docker
-include_internet_dependent: true
+include_internet_dependent: false
 include_private_docker_registry: false # TODO setup private registry to enable this suite
-include_route_services: true
-include_security_groups: true
-include_services: true #no service brokers deployed
-include_ssh: true
-include_sso: true
-include_tasks: true
-include_v3: true
+include_route_services: false
+include_security_groups: false
+include_services: false #no service brokers deployed
+include_ssh: false
+include_sso: false
+include_tasks: false
+include_v3: false
 # Could be disabled with cc.temporary_disable_deployments
 # but default to false: https://github.com/cloudfoundry/capi-release/blob/master/jobs/cloud_controller_ng/spec#L364
-include_deployments: true
+include_deployments: false
 include_tcp_routing: false # Not in kit
 # enable-service-discovery.yml is being tested by cf-deployment ci
-include_service_discovery: true
+include_service_discovery: false
 include_service_instance_sharing: false # feature flag: service_instance_sharing
 # https://github.com/cloudfoundry/cf-deployment/commit/8ab94e7a36b197ada2a6992a6e5780b710eb07bd
-include_capi_no_bridge: true
+include_capi_no_bridge: false
 
 # Special Deployment
 include_isolation_segments: false
