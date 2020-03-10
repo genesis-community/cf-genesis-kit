@@ -91,7 +91,7 @@ cats() {
     pushd ${tmpdir}
     git checkout ${VERSION}
     git submodule update --init
-    ./bin/test -v -nodes=8
+    ./bin/test -v -nodes=8 --failFast
 }
 
 case $GENESIS_ADDON_SCRIPT in
