@@ -15,7 +15,7 @@ header() {
 }
 
 cleanup() {
-    if [[ "$SKIP_CLEANUP" == "false" ]]; then
+if [[ "$SKIP_CLEANUP" == "false" ]]; then
 	for deployment in "$@"; do
 	    echo "> deleting ${deployment}"
 	    $BOSH -n -d "${deployment}" delete-deployment --force
@@ -37,7 +37,7 @@ header "Cleaning up from any previous deployments (if necessary)..."
 cleanup ci-baseline-${KIT}
 # safe rm -rf secret/ci/baseline/${KIT}
 
-if [[ "$SKIP_CLEANUP" == "false" ]]; then
+if [[ "$SKIP_DEPLOY" == "false" ]]; then
   header "Deploying BASELINE environment to verify functionality..."
   cd dev
   # make sure hooks are executable before screaming at shipit for failing.
