@@ -18,7 +18,7 @@ cleanup() {
     if [[ "$SKIP_CLEANUP" == "false" ]]; then
 	for deployment in "$@"; do
 	    echo "> deleting ${deployment}"
-	    $BOSH -n -d "${deployment}" delete-deployment
+	    $BOSH -n -d "${deployment}" delete-deployment --force
 
 	    for disk in $($BOSH disks --orphaned | grep "${deployment}" | awk '{print $1}'); do
 		echo "  - removing disk $disk"
