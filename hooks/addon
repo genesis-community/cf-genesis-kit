@@ -91,7 +91,18 @@ cats() {
     pushd ${tmpdir}
     git checkout ${VERSION}
     git submodule update --init
-    ./bin/test -v -nodes=4 --failFast
+
+    FAILFAST_FLAG=""
+    VERBOSE_FLAG=""
+
+    if [[ ${FAILFAST}=="true" ]];then
+      FAILFAST_FLAG="--failFast"
+    fi
+    if [[ ${VERBOSE}=="true" ]];then
+      VERBOSE_FLAG="-v"
+    fi
+
+    ./bin/test -nodes=${CATS_NODES:-4} ${VERBOSE_FLAG} 
 }
 
 case $GENESIS_ADDON_SCRIPT in

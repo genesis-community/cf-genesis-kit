@@ -95,6 +95,9 @@ meta:
           SKIP_SMOKE_TESTS:     true
           SKIP_DEPLOY:          true
           SKIP_CATS:            false
+          FAILFAST:             true
+          VERBOSE:              false
+          CATS_NODES:           2
           RUN_CATS:             null
 
     testflight:
