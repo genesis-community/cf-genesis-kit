@@ -35,22 +35,22 @@ function run_cats(){
   export APP_DOMAINS_0=run.$base
   case $RUN_CATS in
     "include_container_networking")
-      sed -i "s#include_security_groups:.*#include_security_groups: true#g"
+      sed -i "s#include_security_groups:.*#include_security_groups: true#g" manifests/cf/cats.yml
     ;;
     "include_deployments")
-      sed -i "s#include_v3:.*#include_v3: true#g"
+      sed -i "s#include_v3:.*#include_v3: true#g" manifests/cf/cats.yml
     ;;
     "include_service_instance_sharing")
-      sed -i "s#include_services:.*#include_services: true#g"
+      sed -i "s#include_services:.*#include_services: true#g" manifests/cf/cats.yml
     ;;
     "include_sso")
-      sed -i "s#include_services:.*#include_services: true#g"
+      sed -i "s#include_services:.*#include_services: true#g" manifests/cf/cats.yml
     ;;
     "include_tasks")
-      sed -i "s#include_v3:.*#include_v3: true#g"
+      sed -i "s#include_v3:.*#include_v3: true#g" manifests/cf/cats.yml
     ;;
     "include_zipkin")
-      sed -i "s#include_routing:.*#include_routing: true#g"
+      sed -i "s#include_routing:.*#include_routing: true#g" manifests/cf/cats.yml
     ;;
   esac
   if [[ ${RUN_LOCAL} ]]; then
