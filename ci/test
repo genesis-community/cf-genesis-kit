@@ -54,4 +54,4 @@ else
     echo "Skipping smoke_tests"
 fi
 
-#cleanup ci-baseline-${KIT}
+cleanup ci-baseline-${KIT}
