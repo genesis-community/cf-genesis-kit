@@ -6,13 +6,13 @@ apps_domain:    (( grab $APP_DOMAINS_0 ))
 artifacts_directory: logs
 
 #INCREASE TIMEOUTS AS NEEDED.
-default_timeout: 300
-cf_push_timeout: 300
-detect_timeout: 300
-sleep_timeout: 300
-broker_start_timeout: 300
-long_curl_timeout: 300
-async_service_operation_timeout: 300
+default_timeout: 90
+cf_push_timeout: 90
+detect_timeout: 90
+sleep_timeout: 90
+broker_start_timeout: 90
+long_curl_timeout: 90
+async_service_operation_timeout: 90
 timeout_scale: 2
 
 stacks:
