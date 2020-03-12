@@ -31,3 +31,7 @@ meta:
     url:      ((shout.url)
     username: ((shout.username))
     password: ((shout.password))
+
+  cats:
+    tag: v5.7.0
+    git_ssh_url: https://github.com/cloudfoundry/cf-acceptance-tests
