@@ -1,7 +1,8 @@
 #!/bin/bash
 set -eu
 KIT=cf
-SKIP_CLEANUP=${SKIP_CLEANUP:-"false"}
+SKIP_CLEAN=${SKIP_CLEAN:-"true"}
+SKIP_CLEAN=${SKIP_FRESH:-"false"}
 SKIP_SMOKE_TESTS=${SKIP_SMOKE_TESTS:-"false"}
 SKIP_DEPLOY=${SKIP_DEPLOY:-"false"}
 
@@ -60,5 +61,5 @@ fi
 if [[ "$SKIP_CLEAN" == "false" ]]; then
   cleanup ci-baseline-${KIT}
 else
-  echo "Skipping FRESH"
+  echo "Skipping CLEANUP"
 fi
