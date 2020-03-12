@@ -14,7 +14,7 @@ header() {
 }
 
 cleanup() {
-if [[ "$SKIP_CLEANUP" == "false" ]]; then
+
 	for deployment in "$@"; do
 	    echo "> deleting ${deployment}"
 	    $BOSH -n -d "${deployment}" delete-deployment --force
@@ -24,16 +24,19 @@ if [[ "$SKIP_CLEANUP" == "false" ]]; then
 		$BOSH -n delete-disk "$disk"
 	    done
 	done
-    else
-        echo "Skipping cleanup"
-    fi
+
 }
 
 header "Checking previous deployments on ${BOSH_ENVIRONMENT}..."
 $BOSH deployments
 
-header "Cleaning up from any previous deployments (if necessary)..."
-cleanup ci-baseline-${KIT}
+header "Cleaning up from any previous deployments (if necessary)..."a
+
+if [[ "$SKIP_FRESH" == "false" ]]; then
+  cleanup ci-baseline-${KIT}
+else
+  echo "Skipping FRESH"
+fi
 # safe rm -rf secret/ci/baseline/${KIT}
 
 if [[ "$SKIP_DEPLOY" == "false" ]]; then
@@ -54,4 +57,8 @@ else
     echo "Skipping smoke_tests"
 fi
 
-cleanup ci-baseline-${KIT}
+if [[ "$SKIP_CLEAN" == "false" ]]; then
+  cleanup ci-baseline-${KIT}
+else
+  echo "Skipping FRESH"
+fi
