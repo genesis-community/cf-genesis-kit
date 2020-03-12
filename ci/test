@@ -3,7 +3,6 @@ set -eu
 KIT=cf
 SKIP_CLEANUP=${SKIP_CLEANUP:-"false"}
 SKIP_SMOKE_TESTS=${SKIP_SMOKE_TESTS:-"false"}
-SKIP_CATS=${SKIP_CATS:-"false"}
 SKIP_DEPLOY=${SKIP_DEPLOY:-"false"}
 
 header() {
@@ -55,27 +54,4 @@ else
     echo "Skipping smoke_tests"
 fi
 
-header "Running CATs against BASELINE environment..."
-
-if [[ "$SKIP_CATS" == "false" ]]; then
-    GOLANG_URL=https://buildpacks.cloudfoundry.org/dependencies/go/go1.13.8.linux-amd64-cflinuxfs3-40558d27.tgz
-    GOLANG_SHA256=40558d2781509e3619d9cbf37f0d9430ce1fa50684196f66612cc3a48cbe87b6
-    mkdir -p /goroot /gopath  && \
-        curl $GOLANG_URL | \
-            tar xzf - -C /goroot --strip-components=1 && \
-        chown -R root /goroot /gopath
-
-    export GOROOT=/goroot
-    export GOPATH=/gopath
-    export PATH=/goroot/bin:/gopath/bin:$PATH
-
-    curl -L 'https://packages.cloudfoundry.org/stable?release=linux64-binary&version=6.49.0&source=github-rel' | \
-        tar xzf - -C /tmp
-    mv /tmp/cf /usr/local/bin/cf
-
-    genesis do ci-baseline cats
-else
-    echo "Skipping CATs"
-fi
-
-cleanup ci-baseline-${KIT}
+#cleanup ci-baseline-${KIT}
