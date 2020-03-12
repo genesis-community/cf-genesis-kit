@@ -50,12 +50,15 @@ meta:
     cacert:     (( param "Please specify the Genesis CI BOSH Director Root CA cert" ))
     username:   admin
     password:   (( param "Please specify the Genesis CI BOSH Director admin password" ))
-
+  cats:
+    tag:         (( param "Please specify the CATS REPO Version TAG "))
+    git_ssh_url: (( param "Please specify the CATS REPO SSH URL "))
   shout:
     topic:    (( concat meta.name "-pipeline" ))
     url:      (( param "Please specify the Shout! endpoint" ))
     username: (( param "Please specify the Shout! operations username" ))
     password: (( param "Please specify the Shout! operations password" ))
+
 
     metadata:
       build-team-name:     $BUILD_TEAM_NAME
@@ -77,9 +80,38 @@ meta:
             tag:        (( grab meta.image.tag ))
         inputs:
           - { name: git, path: kit }
+          - { name: cats-git, path: cats }
+          - { name: go-release, path: go }
+          - { name: cf-cli-release, path: cf-cli }
+          - { name: work }
         run:
-          path: ./kit/ci/scripts/testflight
-          args: []
+          path: sh
+          args:
+          - -ce
+          - |
+            #!/bin/bash
+            pushd go
+              mkdir -p /goroot /gopath
+              tar xzf go.*.tar.gz -C /goroot --strip-components=1
+              chown -R root /goroot /gopath
+            popd
+            export GOROOT=/goroot
+            export GOPATH=/gopath
+            export PATH=/goroot/bin:/gopath/bin:$PATH
+
+            pushd cf-cli
+              tar xzf *.tgz -C /tmp
+              mv cf /usr/local/bin/cf
+            popd
+
+            source kit/ci/scripts/cats.sh
+            git config --global user.name  "$GIT_NAME"
+            git config --global user.email "$GIT_EMAIL"
+            safe target da-vault "$VAULT_URI" -k
+            echo "$VAULT_TOKEN" | safe auth token
+            safe read secret/handshake
+
+            run_cats 
         params:
           GENESIS_HONOR_ENV:    1
           GIT_NAME:             (( grab meta.git.name ))
@@ -97,7 +129,7 @@ meta:
           SKIP_CATS:            false
           FAILFAST:             true
           VERBOSE:              false
-          CATS_NODES:           2
+          CATS_NODES:           1
           RUN_CATS:             null
 
     testflight:
@@ -142,6 +174,9 @@ jobs:
         in_parallel:
           steps:
             - { get: git, trigger: true }
+            - { get: go-release, params: { globs: "*.tar.gz" } }
+            - { get: cf-cli-release, params: { globs: "cf-cli.*_linux_x86-64.tgz" } }
+            - { get: cats-git, params: { submodule_recursive: true } }
       - name: testflights
         in_parallel: 
           steps:
@@ -156,6 +191,8 @@ jobs:
                     tag:        (( grab meta.image.tag ))
                 inputs:
                   - { name: git, path: kit }
+                outputs:
+                  - { name: work }
                 run:
                   path: ./kit/ci/scripts/testflight
                   args: []
@@ -465,6 +502,13 @@ resources:
       branch:      (( grab meta.github.branch ))
       private_key: (( grab meta.github.private_key ))
 
+  - name: cats-git
+    type: git
+    source:
+      uri:         (( grab meta.cats.git_ssh_url ))
+      branch:      (( grab meta.cats.tag ))
+
+
   - name: version
     type: semver
     source :
@@ -489,4 +533,16 @@ resources:
     source:
       user:         (( grab meta.github.owner ))
       repository:   (( grab meta.github.repo ))
+      access_token: (( grab meta.github.access_token ))
+  - name: go-release
+    type: github-release
+    source:
+      owner: golang
+      repository: go
+      access_token: (( grab meta.github.access_token ))
+  - name: cf-cli-release
+    type: github-release
+    source:
+      owner: cloudfoundry
+      repository: cli
       access_token: (( grab meta.github.access_token ))
