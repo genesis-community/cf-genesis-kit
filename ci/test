@@ -48,12 +48,18 @@ if [[ "$SKIP_DEPLOY" == "false" ]]; then
   cd ..
   genesis add-secrets ci-baseline
   genesis deploy -y ci-baseline
-  $BOSH -d ci-baseline-${KIT} instances --ps
+  #BOSH LITE WORKAROUND
+  set +e
+  $BOSH -d ci-baseline-${KIT} ssh -c "sudo monit restart bosh-dns"
+  $BOSH -d ci-baseline-${KIT} ssh loggregator_trafficcontroller -c "sudo monit restart log-cache"
+  set -e
 fi
 
 header "Validating BASELINE environment..."
 if [[ "$SKIP_SMOKE_TESTS" == "false" ]]; then
     $BOSH -d ci-baseline-${KIT} run-errand smoke_tests --instance=uaa/first
+
+
 else
     echo "Skipping smoke_tests"
 fi
