@@ -2,7 +2,7 @@
 set -eu
 KIT=cf
 SKIP_CLEAN=${SKIP_CLEAN:-"true"}
-SKIP_CLEAN=${SKIP_FRESH:-"false"}
+SKIP_FRESH=${SKIP_FRESH:-"false"}
 SKIP_SMOKE_TESTS=${SKIP_SMOKE_TESTS:-"false"}
 SKIP_DEPLOY=${SKIP_DEPLOY:-"false"}
 
@@ -58,8 +58,6 @@ fi
 header "Validating BASELINE environment..."
 if [[ "$SKIP_SMOKE_TESTS" == "false" ]]; then
     $BOSH -d ci-baseline-${KIT} run-errand smoke_tests --instance=uaa/first
-
-
 else
     echo "Skipping smoke_tests"
 fi
