@@ -71,6 +71,6 @@ function run_cats(){
   if [[ ${VERBOSE}=="true" ]];then
     VERBOSE_FLAG="-v"
   fi
-  echo "RUNNING CATS WITH NODES: $NODES ${VERBOSE_FLAG} $FAILFAST_FLAG"
+  echo "RUNNING CATS WITH NODES: ${CATS_NODES:-4} ${VERBOSE_FLAG} ${FAILFAST_FLAG}"
   ./bin/test -nodes=${CATS_NODES:-4} ${VERBOSE_FLAG} $FAILFAST_FLAG
 }
