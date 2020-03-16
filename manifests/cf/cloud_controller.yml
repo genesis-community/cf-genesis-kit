@@ -273,7 +273,7 @@ meta:
         rules: (( grab params.cf_public_ips ))
 
     volume_services_enabled: true
-    temporary_disable_deployments: (( grab params.temporary_disable_cc_deployments || "false" ))
+    temporary_disable_deployments: (( grab params.temporary_disable_cc_deployments || false ))
 
   statsd_injector:
     enable_consul_service_registration: false
