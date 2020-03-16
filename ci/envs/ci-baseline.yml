@@ -51,7 +51,6 @@ params:
   autoscaler_operator_vm_type:  default
 
   cell_instances: 2
-  loggregator_instances: 1
   availability_zones: [z1, z2]
 
   disk_type: default
