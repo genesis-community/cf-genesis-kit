@@ -19,6 +19,7 @@ stacks:
 
 use_http: true
 skip_ssl_validation: true
+use_logcache: false
 
 # Categorization based on
 # https://www.cloudfoundry.org/trainings/demystifying-cf-acceptance-tests/
@@ -37,7 +38,7 @@ include_docker: false # feature flag: diego_docker
 include_internet_dependent: false
 include_private_docker_registry: false # TODO setup private registry to enable this suite
 include_route_services: false
-include_security_groups: false
+include_security_groups: true
 include_services: false #no service brokers deployed
 include_ssh: false
 include_sso: false
