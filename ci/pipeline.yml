@@ -103,14 +103,14 @@ meta:
  
     testflight-config:
       params:
-        SKIP_FRESH:           false
-        SKIP_CLEANUP:         true
+        SKIP_FRESH:           true
+        SKIP_CLEAN:           true
         SKIP_SMOKE_TESTS:     true
         SKIP_CATS:            true
     cleanup-config:
       params:
         SKIP_FRESH:           true
-        SKIP_CLEANUP:         false
+        SKIP_CLEAN:           true
         SKIP_SMOKE_TESTS:     true
         SKIP_CATS:            true
     cats:
@@ -162,7 +162,7 @@ meta:
           SKIP_CATS:            false
           FAILFAST:             true
           VERBOSE:              false
-          CATS_NODES:           1
+          CATS_NODES:           2
           RUN_CATS:             null
 groups:
   - name: (( grab meta.pipeline ))
@@ -201,8 +201,8 @@ jobs:
           steps:
             - { get: git, trigger: true }
             - { get: cats-git, params: { submodule_recursive: true } }
-      - name: deploy
-        .: (( inject meta.jobs.testflight ))
+      - .: (( inject meta.jobs.testflight ))
+        task: deploy
         config:
           .: (( inject meta.jobs.testflight-config ))
                   
@@ -287,7 +287,7 @@ jobs:
                 RUN_CATS: include_capi_no_bridge
 
     - .: (( inject meta.jobs.testflight ))
-      name: clean
+      task: clean
       config:
         .: (( inject meta.jobs.cleanup-config ))
 
