@@ -1,5 +1,4 @@
 #!/bin/bash
-exit 0
 
 cc_ok=yes
 # Cloud Config checks
