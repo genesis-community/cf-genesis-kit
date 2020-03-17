@@ -6,10 +6,10 @@ artifacts_directory: logs
 
 #INCREASE TIMEOUTS AS NEEDED.
 default_timeout: 90
-cf_push_timeout: 90
+cf_push_timeout: 120
 detect_timeout: 90
 sleep_timeout: 90
-broker_start_timeout: 90
+broker_start_timeout: 120
 long_curl_timeout: 90
 async_service_operation_timeout: 90
 timeout_scale: 2
