@@ -103,7 +103,7 @@ meta:
  
     testflight-config:
       params:
-        SKIP_FRESH:           true
+        SKIP_FRESH:           false
         SKIP_CLEAN:           true
         SKIP_SMOKE_TESTS:     true
         SKIP_CATS:            true
@@ -208,7 +208,8 @@ jobs:
                   
     - name: cats
       in_parallel:
-        limit: 4
+        fail_fast: true
+        limit: 3
         steps:
           - .: (( inject meta.jobs.cats ))
             task: cats-apps
