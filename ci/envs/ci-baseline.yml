@@ -49,8 +49,9 @@ params:
   autoscaler_scaler_vm_type:    default
   autoscaler_engine_vm_type:    default
   autoscaler_operator_vm_type:  default
-
+  #cell instances set to one because of molten core networking setup with flannel in flannel. can be scaled out in non mc deployments
   cell_instances: 1
+  #loggregator, log-cache specifically seems to be flaky when running in containers. scale 1 for safety.
   loggregator_instances: 1
   availability_zones: [z1, z2]
 
