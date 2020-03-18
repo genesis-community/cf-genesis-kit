@@ -36,7 +36,7 @@ params:
   diego_vm_type:       large
   doppler_vm_type:     default
   errand_vm_type:      default
-  loggregator_vm_type: default
+  loggregator_vm_type: large
   nats_vm_type:        default
   router_vm_type:      default
   syslogger_vm_type:   default
@@ -51,6 +51,7 @@ params:
   autoscaler_operator_vm_type:  default
 
   cell_instances: 2
+  loggregator_instances: 1
   availability_zones: [z1, z2]
 
   disk_type: default
