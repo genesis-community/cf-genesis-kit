@@ -50,7 +50,7 @@ params:
   autoscaler_engine_vm_type:    default
   autoscaler_operator_vm_type:  default
 
-  cell_instances: 2
+  cell_instances: 1
   loggregator_instances: 1
   availability_zones: [z1, z2]
 
