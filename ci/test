@@ -15,17 +15,14 @@ header() {
 }
 
 cleanup() {
-
 	for deployment in "$@"; do
 	    echo "> deleting ${deployment}"
 	    $BOSH -n -d "${deployment}" delete-deployment --force
-
 	    for disk in $($BOSH disks --orphaned | grep "${deployment}" | awk '{print $1}'); do
-		echo "  - removing disk $disk"
-		$BOSH -n delete-disk "$disk"
+        echo "  - removing disk $disk"
+        $BOSH -n delete-disk "$disk"
 	    done
 	done
-
 }
 
 header "Checking previous deployments on ${BOSH_ENVIRONMENT}..."
@@ -48,11 +45,6 @@ if [[ "$SKIP_DEPLOY" == "false" ]]; then
   cd ..
   genesis add-secrets ci-baseline
   genesis deploy -y ci-baseline
-  #BOSH LITE WORKAROUND
-  set +e
-  $BOSH -d ci-baseline-${KIT} ssh -c "sudo monit restart bosh-dns"
-  $BOSH -d ci-baseline-${KIT} ssh loggregator_trafficcontroller -c "sudo monit restart log-cache"
-  set -e
 fi
 
 header "Validating BASELINE environment..."
