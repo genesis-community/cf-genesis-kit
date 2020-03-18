@@ -19,7 +19,7 @@ stacks:
 
 use_http: true
 skip_ssl_validation: true
-use_logcache: false
+use_log_cache: false
 
 # Categorization based on
 # https://www.cloudfoundry.org/trainings/demystifying-cf-acceptance-tests/
