@@ -32,10 +32,10 @@ header "Cleaning up from any previous deployments (if necessary)..."a
 
 if [[ "$SKIP_FRESH" == "false" ]]; then
   cleanup ci-baseline-${KIT}
+  safe rm -rf secret/ci/baseline/${KIT}
 else
   echo "Skipping FRESH"
 fi
-# safe rm -rf secret/ci/baseline/${KIT}
 
 if [[ "$SKIP_DEPLOY" == "false" ]]; then
   header "Deploying BASELINE environment to verify functionality..."
@@ -47,9 +47,9 @@ if [[ "$SKIP_DEPLOY" == "false" ]]; then
   genesis deploy -y ci-baseline
 fi
 
-header "Validating BASELINE environment..."
 if [[ "$SKIP_SMOKE_TESTS" == "false" ]]; then
-    $BOSH -d ci-baseline-${KIT} run-errand smoke_tests --instance=uaa/first
+  header "Validating BASELINE environment..."
+  $BOSH -d ci-baseline-${KIT} run-errand smoke_tests --instance=uaa/first
 else
     echo "Skipping smoke_tests"
 fi

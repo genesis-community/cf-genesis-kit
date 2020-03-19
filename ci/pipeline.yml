@@ -72,47 +72,6 @@ meta:
       pipeline: (( concat meta.url "/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME" ))
       build:    (( concat meta.shout.links.pipeline "/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME" ))
   jobs:
-    testflight:
-      name: testflight
-      task: testflight
-      config:
-        platform: linux
-        image_resource:
-          type: docker-image
-          source:
-            repository: (( grab meta.image.name ))
-            tag:        (( grab meta.image.tag ))
-        inputs:
-          - { name: git, path: kit }
-        outputs:
-          - { name: work }
-        run:
-          path: ./kit/ci/scripts/testflight
-          args: []
-        params:
-          GENESIS_HONOR_ENV:    1
-          GIT_NAME:             (( grab meta.git.name ))
-          GIT_EMAIL:            (( grab meta.git.email ))
-          VAULT_URI:            (( grab meta.vault.url ))
-          VAULT_TOKEN:          (( grab meta.vault.token ))
-          KIT_SHORTNAME:        (( grab meta.kit ))
-          BOSH_ENVIRONMENT:     (( grab meta.bosh.uri ))
-          BOSH_CA_CERT:         (( grab meta.bosh.cacert ))
-          BOSH_CLIENT:          (( grab meta.bosh.username ))
-          BOSH_CLIENT_SECRET:   (( grab meta.bosh.password ))
- 
-    testflight-config:
-      params:
-        SKIP_FRESH:           false
-        SKIP_CLEAN:           true
-        SKIP_SMOKE_TESTS:     true
-        SKIP_CATS:            true
-    cleanup-config:
-      params:
-        SKIP_FRESH:           true
-        SKIP_CLEAN:           true
-        SKIP_SMOKE_TESTS:     true
-        SKIP_CATS:            true
     cats:
       attempts: 5
       config:
@@ -156,14 +115,52 @@ meta:
           BOSH_CA_CERT:         (( grab meta.bosh.cacert ))
           BOSH_CLIENT:          (( grab meta.bosh.username ))
           BOSH_CLIENT_SECRET:   (( grab meta.bosh.password ))
-          SKIP_CLEANUP:         true
-          SKIP_SMOKE_TESTS:     true
-          SKIP_DEPLOY:          true
           SKIP_CATS:            false
           FAILFAST:             true
           VERBOSE:              false
           CATS_NODES:           2
           RUN_CATS:             null
+    testflight:
+      name: testflight
+      task: testflight
+      config:
+        platform: linux
+        image_resource:
+          type: docker-image
+          source:
+            repository: (( grab meta.image.name ))
+            tag:        (( grab meta.image.tag ))
+        inputs:
+          - { name: git, path: kit }
+        outputs:
+          - { name: work }
+        run:
+          path: ./kit/ci/scripts/testflight
+          args: []
+        params:
+          GENESIS_HONOR_ENV:    1
+          GIT_NAME:             (( grab meta.git.name ))
+          GIT_EMAIL:            (( grab meta.git.email ))
+          VAULT_URI:            (( grab meta.vault.url ))
+          VAULT_TOKEN:          (( grab meta.vault.token ))
+          KIT_SHORTNAME:        (( grab meta.kit ))
+          BOSH_ENVIRONMENT:     (( grab meta.bosh.uri ))
+          BOSH_CA_CERT:         (( grab meta.bosh.cacert ))
+          BOSH_CLIENT:          (( grab meta.bosh.username ))
+          BOSH_CLIENT_SECRET:   (( grab meta.bosh.password ))
+    
+    testflight-config:
+      params:
+        SKIP_FRESH:           false
+        SKIP_CLEAN:           true
+        SKIP_SMOKE_TESTS:     true
+    cleanup-config:
+       params:
+         SKIP_FRESH:           true
+         SKIP_CLEAN:           true
+         SKIP_SMOKE_TESTS:     true
+
+
 groups:
   - name: (( grab meta.pipeline ))
     jobs:
@@ -286,12 +283,10 @@ jobs:
             config:
               params:
                 RUN_CATS: include_capi_no_bridge
-
     - .: (( inject meta.jobs.testflight ))
       task: clean
       config:
         .: (( inject meta.jobs.cleanup-config ))
-
   - name: pre
     public: true
     serial: true
@@ -540,11 +535,3 @@ resources:
       repository:   (( grab meta.github.repo ))
       access_token: (( grab meta.github.access_token ))
       
-# - name: go-release
-#   type: github-release
-#   source:
-#     owner: golang
-#     repository: go
-#     tag_filter: "go*"
-#     access_token: (( grab meta.github.access_token ))
-

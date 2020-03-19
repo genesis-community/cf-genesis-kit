@@ -56,7 +56,7 @@ login() {
 }
 
 cats() {
-    #header "This is a release engineering feature. This is not supposed to be run on existing envs. Use at your own risk."
+    #"This is a release engineering feature. This is not supposed to be run on existing envs. Use at your own risk."
     source ci/scripts/cats.sh
     run_cats --local
 }
