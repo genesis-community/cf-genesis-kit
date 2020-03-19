@@ -18,6 +18,13 @@ addons:
         release: bosh-dns-aliases
         properties:
           aliases:
+            - domain: 'cell.service.cf.internal'
+              targets:
+                - .: (( inject meta.dns.query ))
+                  query: '*'
+                  instance_group: cell
+                  network: (( grab params.cf_runtime_network ))
+
             - domain: '_.cell.service.cf.internal'
               targets:
                 - .: (( inject meta.dns.query ))
