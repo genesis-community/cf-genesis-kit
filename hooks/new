@@ -9,21 +9,21 @@ use_provided_cert=
 move_secrets_to_credhub() {
   local value src="$1" dst="$2"
   value="$(safe get "${GENESIS_SECRETS_BASE}$src")"
-  credhub_path="${GENESIS_BOSH_ALIAS}
+  credhub set -n "/$GENESIS_CREDHUB_ROOT/$dst" -t value -v "$value"
+  safe rm "${GENESIS_SECRETS_BASE}$src"
 }
-
-
 
 ask_for_haproxy() {
   use_lb=haproxy
+  cert= # Assigned below
   prompt_for cert select \
     'Cloud Foundry requires a TLS certificate to support HTTPS traffic.' \
     -o '[provide]  I have a signed X.509 certificate for Cloud Foundry' \
     -o '[generate] Please generate a new, self-signed certificate for Cloud Foundry'
 
-  case $cert in
+  case "$cert" in
   generate)
-    # the kit.yml will generate the cert
+    ## TODO: add the haproxy-generate-cert ops file that adds the appropriate variables block
     ;;
 
   provide)
@@ -48,10 +48,18 @@ ask_for_haproxy() {
       safe read secret/$GENESIS_VAULT_PREFIX/haproxy/ssl:certificate | sed -e '/^$/d'
       safe read secret/$GENESIS_VAULT_PREFIX/haproxy/ssl:key         | sed -e '/^$/d'
     )
+    ## TODO: extract from safe and populate the correct values in credhub
+    ##       See move_secrets_to_credhub for pattern
     ;;
   esac
 }
 
+## TODO: Convert to genesis v2.7.7 and credhub below {{{
+
+## TODO: figure out how to map these features to cf-deployment ops files, and 
+##       add any glue files to populate variables as overlay or operations
+##       files.  See sample for azure blobstore on line 132 of hooks/blueprint
+##       for example of how they are consumed
 ask_for_database() {
   inst=database
   case "${1:-}" in
@@ -123,6 +131,8 @@ ask_for_database() {
     ;;
   esac
 }
+# }}}
+
 ### ----------------------------------------------------------------------------
 ### Main
 ### ----------------------------------------------------------------------------
@@ -151,6 +161,7 @@ azure)
 
   ask_for_database
 
+  ## This block has been updated with pattern for credhub/cf-deployment ops files
   use_azure_storage= # Assigned below
   prompt_for use_azure_storage boolean \
     'Would you like to use Azure Storage to store droplets and application bits?'
@@ -309,3 +320,5 @@ prompt_for edit boolean \
 if [[ $edit = 'true' ]]; then
 	exec ${EDITOR:-vim} $GENESIS_ROOT/$GENESIS_ENVIRONMENT.yml
 fi
+
+# vim:foldmethod=marker

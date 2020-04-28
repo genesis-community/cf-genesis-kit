@@ -20,11 +20,11 @@ if [[ -n "$GENESIS_CLOUD_CONFIG" ]] ; then
   done
 
   if want_feature 'partitioned-network' ; then
-    cloud_config_needs network "$(lookup params.network default)"
-  else
     cloud_config_needs network "$(lookup params.cf_core_network cf-core)"
     cloud_config_needs network "$(lookup params.cf_edge_network cf-edge)"
     cloud_config_needs network "$(lookup params.cf_runtime_network cf-runtime)"
+  else
+    cloud_config_needs network "$(lookup params.network default)"
   fi
 
   # Check if there were any errors reported from the above checks.

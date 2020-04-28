@@ -9,7 +9,7 @@ if ! [[ "$genesis_version" =~ -dev$ ]] && ! new_enough "$genesis_version" "$min_
 fi
 set -e
 
-switch_version() {
+switch_cf_version() {
   describe >&2 "" \
     "- #y{Experimental Feature Enabled:} Custom cf-deployment version: $version"
   cfd_file="$GENESIS_ROOT/.genesis/kits/addons/cf-deployment-${version}.tar.gz"
@@ -46,9 +46,9 @@ process_feature() {
   :
 }
 
-### ----------------------------------------------------------------------------
+### ============================================================================
 ### Main
-### ----------------------------------------------------------------------------
+### ============================================================================
 
 declare -a manifest
 
@@ -102,8 +102,8 @@ validate_features nfs-volume-services small-footprint \
                   native-garden-runc \
                   loggregator-forwarder-agent \
                   app-bosh-dns dns-service-discovery \
-                  routing-api
-                  partitioned-network
+                  routing-api \
+                  partitioned-network \
                   \
                   shield-dbs shield-blobstore \
                   omit-haproxy
@@ -119,10 +119,9 @@ if want_feature omit-haproxy; then
   echo >&2 "If you remove it, everything will still work as expected."
 fi
 
-# Blobstore
-
-
-
+###-----------------------------------------------------------------------------
+## Blobstore
+#
 blobstore=0
 for want in ${GENESIS_REQUESTED_FEATURES}; do
   case "$want" in
@@ -162,7 +161,6 @@ fi
 manifest+=( \
   overlay/base.yml \
   overlay/uaa-clients.yml \
-  overlay/operations/rename-network-and-deployment.yml \
 )
 
 echo "${manifest[@]}"
