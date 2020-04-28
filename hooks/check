@@ -1,4 +1,13 @@
 #!/bin/bash
+set -u
+#Version check
+min_version="2.7.0"
+genesis_version="$(genesis -v 2>&1 | grep '^Genesis v' | sed -e 's/Genesis v\(.*\) (.*$/\1/')"
+if ! [[ "$genesis_version" =~ -dev$ ]] && ! new_enough "$genesis_version" "$min_version" ; then
+  describe >&2 "" "#R{[ERROR]} This kit needs Genesis $min_version.  Please upgrade before continuing" ""
+  exit 1
+fi
+set -e
 
 cc_ok=yes
 # Cloud Config checks
@@ -9,7 +18,14 @@ if [[ -n "$GENESIS_CLOUD_CONFIG" ]] ; then
   for t in 5GB 10GB 100GB ; do 
     cloud_config_needs disk_type "$t"
   done
-  cloud_config_needs network "$(lookup params.network default)"
+
+  if want_feature 'partitioned-network' ; then
+    cloud_config_needs network "$(lookup params.network default)"
+  else
+    cloud_config_needs network "$(lookup params.cf_core_network cf-core)"
+    cloud_config_needs network "$(lookup params.cf_edge_network cf-edge)"
+    cloud_config_needs network "$(lookup params.cf_runtime_network cf-runtime)"
+  fi
 
   # Check if there were any errors reported from the above checks.
   if check_cloud_config ; then

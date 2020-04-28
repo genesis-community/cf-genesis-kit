@@ -1,5 +1,5 @@
 ---
-name:    Cloud Foundry
+name:    cf
 version: 2.0.0
 authors: [ Dennis Bell <dbell@starkandwayne.com> ]
 docs:    https://github.com/genesis-community/cf-genesis-kit
@@ -12,5 +12,5 @@ description: |
   It also contains convenience functions for inter-kit communication and add-on
   routines for common activities.
 
-genesis_version_min: 2.8.0-rc2
+genesis_version_min: 2.7.0
 secrets_store: credhub

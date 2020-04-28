@@ -1,5 +1,20 @@
 ---
-# Network name
+# Network names (split out by exposure)
+
+- type:  replace
+  path:  /bosh-variables/cf_core_network?
+  value: (( grab params.cf_core_network || bosh-variables.network_name ))
+
+- type:  replace
+  path:  /bosh-variables/cf_edge_network?
+  value: (( grab params.cf_edge_network || bosh-variables.network_name ))
+
+- type:  replace
+  path:  /bosh-variables/cf_runtime_network?
+  value: (( grab params.cf_runtime_network || bosh-variables.network_name ))
+
+# Split networks
+
 - type: replace
   path: /instance_groups/name=smoke-tests/networks/name=default/name
   value: ((cf_runtime_network))

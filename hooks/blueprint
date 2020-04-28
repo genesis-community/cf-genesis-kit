@@ -1,36 +1,169 @@
 #!/bin/bash
-set -eu
+set -u
+#Version check
+min_version="2.7.0"
+genesis_version="$(genesis -v 2>&1 | grep '^Genesis v' | sed -e 's/Genesis v\(.*\) (.*$/\1/')"
+if ! [[ "$genesis_version" =~ -dev$ ]] && ! new_enough "$genesis_version" "$min_version" ; then
+  describe >&2 "" "#R{[ERROR]} This kit needs Genesis $min_version.  Please upgrade before continuing" ""
+  exit 1
+fi
+set -e
 
-declare -a merge
+switch_version() {
+  describe >&2 "" \
+    "- #y{Experimental Feature Enabled:} Custom cf-deployment version: $version"
+  cfd_file="$GENESIS_ROOT/.genesis/kits/addons/cf-deployment-${version}.tar.gz"
+  if ! [[ -f "$cfd_file" ]] ; then
+    # Download
+    describe >&2 \
+      "  #i{Fetching cf-deployment-${version} release from cloudfoundry/cf-deployment}" \
+      "  #i{on github.com}"
+    mkdir -p "$GENESIS_ROOT/.genesis/kits/addons/"
+    curl -sSL -o "$cfd_file" "https://github.com/cloudfoundry/cf-deployment/archive/v${version}.tar.gz" > /dev/null
+    if ! [[ -f "$cfd_file" ]] ; then
+      describe >&2 "" \
+        "  #R{[ERROR]} Failed to download cf-deployment v$version -- cannot continue" ""
+      exit 1
+    fi
+    topdir="$(tar -ztf "$cfd_file" | awk '{print $NF}' | cut -d'/' -f1 | uniq)"
+    if [[ $topdir != "cf-deployment-$version" ]] ; then
+      describe >&2 "" \
+        "  #R{[ERROR]} Downloaded cf-deployment v$version doesn't look like a valid release  -- cannot continue" ""
+      exit 1
+    fi
+  else
+    describe >&2 \
+      "  #i{Using cached copy of cf-deployment-${version} release}"
+  fi
 
-merge=( \
+  rm -rf "./cf-deployment"
+  mkdir "./cf-deployment"
+  tar -xz -C "./cf-deployment/" --strip-components 1 -f "$cfd_file" > /dev/null
+  echo >&2
+}
+
+process_feature() {
+  :
+}
+
+### ----------------------------------------------------------------------------
+### Main
+### ----------------------------------------------------------------------------
+
+declare -a manifest
+
+manifest=( \
   cf-deployment/cf-deployment.yml \
-  # cf-deployment/operations/rename-network-and-deployment.yml
 )
 
-# Do features => opsfiles stuff here
+# Check if explicit verison of cf-deployment is requested
+version=""
+for feature in $GENESIS_REQUESTED_FEATURES; do
+  if [[ "$feature" =~ ^cf-deployment-version- ]] ; then
+    [[ -z "$version" ]] || bail "#R{[ERROR]} You cannot specify more than one cf-deployment-version-* feature"
+    version="${feature#"cf-deployment-version-"}"
+  fi
+done
+if [[ -n $version ]] ; then
+  switch_cf_version "$version"
+fi
 
-for __feature in $GENESIS_REQUESTED_FEATURES; do
-  if [[ $__feature =~ cf-deployment/.* ]] ; then
-    if [[ -f "$__feature.yml" ]] ; then
-      merge+=( "$__feature.yml" )
+# Check for ops features
+declare -a features
+features=()
+
+for feature in $GENESIS_REQUESTED_FEATURES; do
+  if [[ "$feature" =~ ^cf-deployment-version- ]] ; then
+    : # Dealt with above - skip here
+  elif [[ $feature =~ cf-deployment/.* ]] ; then
+    if [[ -f "$feature.yml" ]] ; then
+      manifest+=( "$feature.yml" )
     else
-      __bail "GENESIS_KIT_NAME/$GENESIS_KIT_VERSION does not support the $__feature feature"
+      bail "#R[ERROR]} Kit $GENESIS_KIT_NAME/$GENESIS_KIT_VERSION does not support the $feature feature" ""
     fi
-  elif [[ -f $GENESIS_ROOT/ops/$__feature.yml ]] ; then
-    mkdir -p "$(dirname "local_ops/$__feature.yml")"
-    cp "$GENESIS_ROOT/ops/$__feature.yml" "local_ops/$__feature.yml"
-    merge+=( "local_ops/$__feature.yml" )
+  elif [[ -f "$GENESIS_ROOT/ops/$feature.yml" ]] ; then
+    manifest+=( "$GENESIS_ROOT/ops/$feature.yml" )
   else
-    __bail "GENESIS_KIT_NAME/$GENESIS_KIT_VERSION does not support the $__feature feature"
+    features+=( "$feature" )
   fi
 done
 
-merge+=( \
+GENESIS_REQUESTED_FEATURES="${features[*]}"
+validate_features nfs-volume-services small-footprint \
+                  local-db local-ha-db mysql-db postgres-db \
+                  db-internal-postgres db-external-mysql db-external-postgres \
+                  aws-blobstore azure-blobstore gcp-blobstore local-blobstore \
+                  blobstore-aws blobstore-azure blobstore-gcp blobstore-webdav \
+                  haproxy tls self-signed \
+                  minimum-vms \
+                  autoscaler autoscaler-postgres \
+                  haproxy-tls haproxy-notls \
+                  container-routing-integrity \
+                  native-garden-runc \
+                  loggregator-forwarder-agent \
+                  app-bosh-dns dns-service-discovery \
+                  routing-api
+                  partitioned-network
+                  \
+                  shield-dbs shield-blobstore \
+                  omit-haproxy
+
+# Deprecated features
+for want in shield-dbs shield-blobstore; do
+  if want_feature $want; then
+    echo >&2 "The '$want' feature has been deprecated, in favor of BOSH add-ons"
+  fi
+done
+if want_feature omit-haproxy; then
+  echo >&2 "You no longer need to explicitly specify the 'omit-haproxy' feature."
+  echo >&2 "If you remove it, everything will still work as expected."
+fi
+
+# Blobstore
+
+
+
+blobstore=0
+for want in ${GENESIS_REQUESTED_FEATURES}; do
+  case "$want" in
+  azure-blobstore)
+  # Blobstore selector feature flags
+    blobstore=$(( blobstore + 1 ))
+    manifests+=( \
+      "overlay/blobstore/${want%-blobstore}.yml" \
+      "cf-deployment/operations/use-external-blobstore.yml" \
+      "cf-deployment/operations/use-azure-storage-blobstore.yml" \
+    )
+    ;;
+
+  aws-blobstore|gcp-blobstore|local-blobstore)
+    ;;
+  blobstore-webdav)
+    blobstore=$(( blobstore + 1 ))
+    echo >&2 "The $want feature has been renamed to local-blobstore"
+    merge+=( manifests/blobstore/local.yml )
+    ;;
+
+  blobstore-aws|blobstore-azure|blobstore-gcp)
+    blobstore=$(( blobstore + 1 ))
+    echo >&2 "The $want feature has been renamed to ${want#blobstore-}-blobstore"
+    merge+=( manifests/blobstore/${want#blobstore-}.yml )
+    ;;
+  esac
+done
+
+if want_feature "partitioned-network" ; then
+  manifest+=( "overlay/operations/rename-network-and-deployment.yml" )
+else
+  manifest+=( "cf-deployment/operation/rename-network-and-deployment.yml" )
+fi
+
+
+manifest+=( \
   overlay/base.yml \
   overlay/uaa-clients.yml \
   overlay/operations/rename-network-and-deployment.yml \
 )
 
-echo "${merge[@]}"
+echo "${manifest[@]}"
 

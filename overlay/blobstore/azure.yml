@@ -1,0 +1,12 @@
+
+bosh-variables:
+  environment: (( grab params.blobstore.environment || params.azure_environment || "AzureCloud" ))
+  app_package_directory_key: (( grab params.blobstore.app_package_directory || "app-packages" ))
+  buildpack_directory_key:   (( grab params.blobstore.buildpack_directory   || "buildpacks" ))
+  droplet_directory_key:     (( grab params.blobstore.droplets_directory    || "droplets" ))
+  resource_directory_key:    (( grab params.blobstore.resources_directory   || "resources" ))
+
+# Credhub Secrets
+#   blobstore_storage_account_name
+#   blobstore_storage_access_key
+
