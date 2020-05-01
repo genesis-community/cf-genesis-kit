@@ -248,14 +248,32 @@ The following secrets will be pulled from the vault:
 The `azure-blobstore` feature will configure Cloud Foundry to use
 Microsoft Azure Cloud's object storage offering.
 
-There are currently no parameters defined for this type of
-blobstore.
+The following parameters are defined:
 
-The following secrets will be pulled from the vault:
+  - `blobstore_environment` - The name of the Azure environment to use.  This
+    will default to whatever is set in `azure_environment` param, or
+    "AzureCloud" if that is not set.  Other valid values are:
+    "AzureChinaCloud", "AzureUSGovernment", and "AzureGermanCloud"
 
-  - **Storage Account** - The Storage Account Name and Access Key,
-    for use when dealing with the Microsoft Azure API.
-    These are stored in the vault, at `secret/$env/blobstore`.
+  - `blobstore_app_packages_directory` - directory in the Azure Store that
+    contains the app packages.  Defaults to "app-packages"
+
+  - `blobstore_buildpacks_directory` - directory in the Azure Store that
+    contains the buildpacks.  Defaults to "buildpacks"
+
+  - `blobstore_droplets_directory` - directory in the Azure Store that
+    contains the droplets.  Defaults to "droplets"
+
+  - `blobstore_resources_directory` - directory in the Azure Store that
+    contains the resources.  Defaults to "resources"
+
+The following secrets will be pulled from the Credhub:
+
+  - The Storage Account Name and Access Key, for use when dealing with the
+    Microsoft Azure API.  These are stored in Credhub, under the deployment
+    base path of `/<bosh_director_deployment_name>/<cf_deployment_name>/`:
+    - `blobstore_storage_account_name`
+    - `blobstore_storage_access_key`
 
 ### Using Google Cloud Platform's Blobstore
 

@@ -1,12 +1,14 @@
+params:
+  blobstore_s3_region: (( param "Specify the AWS region for your Cloud Controller blobstore" ))
 
 bosh-variables:
-  environment: (( grab params.blobstore_environment || params.azure_environment || "AzureCloud" ))
+  aws_region: (( grab params.blobstore_s3_region ))
   app_package_directory_key: (( grab params.blobstore_app_packages_directory || "app-packages" ))
   buildpack_directory_key:   (( grab params.blobstore_buildpacks_directory   || "buildpacks" ))
   droplet_directory_key:     (( grab params.blobstore_droplets_directory     || "droplets" ))
   resource_directory_key:    (( grab params.blobstore_resources_directory    || "resources" ))
 
 # Credhub Secrets
-#   blobstore_storage_account_name
-#   blobstore_storage_access_key
+#   blobstore_access_key_id
+#   blobstore_secret_access_key
 

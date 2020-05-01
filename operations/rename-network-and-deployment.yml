@@ -2,16 +2,28 @@
 # Network names (split out by exposure)
 
 - type:  replace
+  path:  /params?/cf_core_network?
+  value: cf-core
+
+- type:  replace
+  path:  /params/cf_edge_network?
+  value: cf-edge
+
+- type:  replace
+  path:  /params/cf_runtime_network?
+  value: cf-runtime
+
+- type:  replace
   path:  /bosh-variables?/cf_core_network?
-  value: (( grab params.cf_core_network || "cf-core" ))
+  value: (( grab params.cf_core_network ))
 
 - type:  replace
   path:  /bosh-variables/cf_edge_network?
-  value: (( grab params.cf_edge_network || "cf-edge" ))
+  value: (( grab params.cf_edge_network ))
 
 - type:  replace
   path:  /bosh-variables/cf_runtime_network?
-  value: (( grab params.cf_runtime_network || "cf-runtime" ))
+  value: (( grab params.cf_runtime_network ))
 
 # Split networks
 

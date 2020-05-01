@@ -1,0 +1,48 @@
+---
+
+# HAProxy base overlay.
+
+params:
+  internal_only_domains: []
+  trusted_domain_cidrs: ~
+
+  haproxy_instances: 2
+  haproxy_vm_type:   haproxy
+
+  cf_lb_network: (( grab params.cf_edge_network || default))
+  haproxy_ips:   (( param "Please specify the IP addresses for your load balancer instances" ))
+
+instance_groups:
+  - name: router
+    vm_extensions: (( empty array ))
+
+  - (( insert before "router" ))
+  - name: haproxy
+    instances: (( grab params.haproxy_instances ))
+    vm_type:   (( grab params.haproxy_vm_type ))
+    azs:       (( grab params.availability_zones || meta.default.azs ))
+
+    stemcell: default
+    networks:
+      - name:       (( grab params.cf_lb_network ))
+        static_ips: (( grab params.haproxy_ips ))
+
+    vm_extensions:
+      - cf-load-balanced
+
+    jobs:
+      - name: haproxy
+        release: haproxy
+
+        properties:
+          ha_proxy:
+            tcp_link_port: 2222
+            internal_only_domains: (( grab params.internal_only_domains ))
+            trusted_domain_cidrs:  (( grab params.trusted_domain_cidrs ))
+            ssl_pem: ~
+
+releases:
+  - name:    haproxy
+    version: "9.8.0"
+    url:     (( concat "https://bosh.io/d/github.com/cloudfoundry-incubator/haproxy-boshrelease?v=" releases.haproxy.version ))
+    sha1:    "71959d17235a1ce8c9ee58da136b7c04c74e3b31"

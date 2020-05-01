@@ -27,5 +27,7 @@ params:
   system_domain: (( concat "system." params.base_domain ))
   apps_domains: [ (( concat "run." params.base_domain )) ]
 
+meta:
+  default_azs: [z1, z2, z3]
 
 name: (( grab params.name ))

@@ -6,6 +6,9 @@ use_lb=
 use_blobstore=
 use_provided_cert=
 
+declare -a features
+features=()
+
 move_secrets_to_credhub() {
   local value src="$1" dst="$2"
   value="$(safe get "${GENESIS_SECRETS_BASE}$src")"
@@ -13,45 +16,45 @@ move_secrets_to_credhub() {
   safe rm "${GENESIS_SECRETS_BASE}$src"
 }
 
-ask_for_haproxy() {
-  use_lb=haproxy
+ask_for_loadbalancer() {
+  load_balancer= # Assigned below
+  prompt_for load_balancer "select" \
+    'What load balancer would you like to use in front of this Cloud Foundry?' \
+    -o "[external] An existing ${1:-"external Load Balancer"}" \
+    -o '[haproxy] An internal HAProxy Load Balancer' \
+    -d 'external'
+  if [[ $load_balancer == 'external' ]]; then
+    return
+  fi
+
+  features+=( "cf-deployment/operations/haproxy" );
   cert= # Assigned below
-  prompt_for cert select \
+  prompt_for cert "select" \
     'Cloud Foundry requires a TLS certificate to support HTTPS traffic.' \
     -o '[provide]  I have a signed X.509 certificate for Cloud Foundry' \
     -o '[generate] Please generate a new, self-signed certificate for Cloud Foundry'
 
-  case "$cert" in
-  generate)
-    ## TODO: add the haproxy-generate-cert ops file that adds the appropriate variables block
-    ;;
-
-  provide)
+  if [[ "$cert" == "provide" ]] ; then
     use_provided_cert=yes
     while true; do
-      prompt_for $GENESIS_VAULT_PREFIX/haproxy/ssl:certificate secret-block \
+      prompt_for haproxy/ssl:certificate secret-block \
         'Please provide the X.509 Certificate (and CA chain, if any), in PEM format'
-
-      prompt_for $GENESIS_VAULT_PREFIX/haproxy/ssl:key secret-block \
+      prompt_for haproxy/ssl:key secret-block \
         'Please provide the private key for that certificate'
-      safe x509 validate secret/$GENESIS_VAULT_PREFIX/haproxy/ssl
 
-      safe x509 show secret/$GENESIS_VAULT_PREFIX/haproxy/ssl
+      safe x509 validate "${GENESIS_SECRETS_BASE}haproxy/ssl"
+      safe x509 show "${GENESIS_SECRETS_BASE}haproxy/ssl"
       prompt_for ok boolean 'Is this the correct certificate?'
-      if [[ $ok == 'true' ]]; then
-        break
-      fi
+      [[ $ok == 'true' ]] && break
     done
     echo
 
-    safe set secret/$GENESIS_VAULT_PREFIX/haproxy/ssl combined@<(
-      safe read secret/$GENESIS_VAULT_PREFIX/haproxy/ssl:certificate | sed -e '/^$/d'
-      safe read secret/$GENESIS_VAULT_PREFIX/haproxy/ssl:key         | sed -e '/^$/d'
-    )
-    ## TODO: extract from safe and populate the correct values in credhub
-    ##       See move_secrets_to_credhub for pattern
-    ;;
-  esac
+    credhub set -n "${GENESIS_CREDHUB_ROOT}/router_ssl" -t certificate -r /dev/null \
+      -c <(safe read "${GENESIS_SECRETS_BASE}haproxy/ssl:certificate" | sed -e '/^$/d') \
+      -p <(safe read "${GENESIS_SECRETS_BASE}haproxy/ssl:key"         | sed -e '/^$/d')
+
+    safe rm "${GENESIS_SECRETS_BASE}haproxy/ssl"
+  fi
 }
 
 ## TODO: Convert to genesis v2.7.7 and credhub below {{{
@@ -138,6 +141,7 @@ ask_for_database() {
 ### ----------------------------------------------------------------------------
 
 # IaaS selection
+params=''
 iaas= # Assigned below
 prompt_for iaas "select" \
   'What IaaS are you deploying to?' \
@@ -149,16 +153,7 @@ prompt_for iaas "select" \
 # Iaas: Azure
 case "$iaas" in
 azure)
-  load_balancer= # Assigned below
-  prompt_for load_balancer "select" \
-    'What load balancer would you like to use in front of this Cloud Foundry?' \
-    -o '[azure] An existing Azure Load Balancer' \
-    -o '[haproxy] An internal HAProxy Load Balancer' \
-    -d 'azure'
-  if [[ $load_balancer == 'haproxy' ]]; then
-    ask_for_haproxy
-  fi
-
+  ask_for_loadbalancer "Azure Load Balancer"
   ask_for_database
 
   ## This block has been updated with pattern for credhub/cf-deployment ops files
@@ -176,50 +171,67 @@ azure)
     # Workaround until kits can prompt into Credhub
     move_secrets_to_credhub blobstore:storage_account_name blobstore_storage_account_name
     move_secrets_to_credhub blobstore:storage_access_key   blobstore_storage_access_key
-
   fi
   ;;
 
 aws)
-  prompt_for use_aws_stuff boolean \
-    'Would you like to use an Elastic Load Balancer to front this Cloud Foundry?'
-  if [[ $use_aws_stuff != 'true' ]]; then
-    ask_for_haproxy
-  fi
-
+  ask_for_loadbalancer "Elastic Load Balancer"
   ask_for_database rds
 
   prompt_for use_aws_stuff boolean \
     'Would you like to use Amazon S3 to store droplets and application bits?'
   if [[ $use_aws_stuff == 'true' ]]; then
     use_blobstore=aws
-    prompt_for $GENESIS_VAULT_PREFIX/blobstore:aws_access_key secret-line \
+    prompt_for blobstore:aws_access_key secret-line \
       'What is your Amazon S3 Access Key ID?'
-    prompt_for $GENESIS_VAULT_PREFIX/blobstore:aws_access_secret secret-line \
+    prompt_for blobstore:aws_access_secret secret-line \
       'What is your Amazon S3 Secret Access Key?'
+    prompt_for aws_blobstore_region "line" \
+      'What region contains the your Amazon S3 blobstore?'
+
+    move_secrets_to_credhub blobstore:aws_access_key    blobstore_access_key_id
+    move_secrets_to_credhub blobstore:aws_access_secret blobstore_secret_access_key
   fi
   ;;
 
 google)
-  prompt_for use_gcp_stuff boolean \
-    'Would you like to use a Google Cloud Load Balancer to front this Cloud Foundry?'
-  if [[ $use_gcp_stuff != 'true' ]]; then
-    ask_for_haproxy
-  fi
-
+  ask_for_loadbalancer "Google Cloud Load Balancer"
   ask_for_database gcp
 
-  prompt_for use_gcp_stuff boolean \
-    'Would you like to use Google Cloud Storage to store droplets and application bits?'
-  if [[ $use_gcp_stuff == 'true' ]]; then
+  use_gcp_blobstore= # Assigned below
+  prompt_for use_gcp_blobstore "select" \
+    'What would you like to use to store droplets, buildpacks and application bits?' \
+    -o '[gcp] Existing Google Cloud Storage accessed via project and json key' \
+    -o '[gcpaccess] Existing Google Cloud Storage accessed via access and secret keys' \
+    -o '[builtin] Local singleton blobstore that will be deployed in this deployment' \
+    -d 'gcp'
+
+  case "$use_gcp_blobstore" in
+  gcp)
     use_blobstore=gcp
-    prompt_for $GENESIS_VAULT_PREFIX/blobstore:gcp_project_name secret-line \
+    prompt_for blobstore:gcp_project_name secret-line \
       'What is your Google Cloud Project Name?'
-    prompt_for $GENESIS_VAULT_PREFIX/blobstore:gcp_client_email secret-line \
+    prompt_for blobstore:gcp_client_email secret-line \
       'What is the Cloud Storage Service Account ID (@<project>.iam.gserviceaccount.com)?'
-    prompt_for $GENESIS_VAULT_PREFIX/blobstore:gcp_json_key secret-block \
+    prompt_for blobstore:gcp_json_key secret-block \
       'What is the Cloud Storage Service Account (JSON) Key?'
-  fi
+
+    move_secrets_to_credhub blobstore:gcp_project_name gcs_project
+    move_secrets_to_credhub blobstore:gcp_client_email gcs_service_account_email
+    move_secrets_to_credhub blobstore:gcp_json_key     gcs_service_account_json_key
+    ;;
+  gcpaccess)
+    use_blobstore=gcp
+    prompt_for blobstore:gcp_access_key secret-line \
+      'What is your Google Cloud Storage access key?'
+    prompt_for blobstore:gcp_secret_key secret-line \
+      'What is your Google Cloud Storage secret access key?'
+
+    move_secrets_to_credhub blobstore:gcp_access_key blobstore_access_key_id
+    move_secrets_to_credhub blobstore:gcp_secret_key blobstore_secret_access_key
+    ;;
+  esac
+
   ;;
 
 *)
@@ -265,23 +277,9 @@ echo "kit:"
 echo "  name:    $GENESIS_KIT_NAME"
 echo "  version: $GENESIS_KIT_VERSION"
 echo "  features:"
-echo "    - $use_db"
-echo "    - $use_blobstore-blobstore"
-
-if [[ $use_lb == 'haproxy' ]]; then
-  echo "    - haproxy"
-  echo "    - tls"
-  if [[ -z $use_provided_cert ]]; then
-    echo "    - self-signed"
-  fi
-fi
-
-if [[ $use_autoscaler == 'true' ]]; then
-  echo "    - autoscaler"
-  if [[ $use_db == 'mysql-db' ]]; then
-    echo "    - autoscaler-postgres"
-  fi
-fi
+for feature in "${features[@]}" ; do
+  echo "    - $feature"
+done
 
 echo
 echo "params:"

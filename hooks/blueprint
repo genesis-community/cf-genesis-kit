@@ -42,10 +42,6 @@ switch_cf_version() {
   echo >&2
 }
 
-process_feature() {
-  :
-}
-
 ### ============================================================================
 ### Main
 ### ============================================================================
@@ -88,68 +84,117 @@ for feature in $GENESIS_REQUESTED_FEATURES; do
   fi
 done
 
-GENESIS_REQUESTED_FEATURES="${features[*]}"
-validate_features nfs-volume-services small-footprint \
-                  local-db local-ha-db mysql-db postgres-db \
-                  db-internal-postgres db-external-mysql db-external-postgres \
-                  aws-blobstore azure-blobstore gcp-blobstore local-blobstore \
-                  blobstore-aws blobstore-azure blobstore-gcp blobstore-webdav \
-                  haproxy tls self-signed \
-                  minimum-vms \
-                  autoscaler autoscaler-postgres \
-                  haproxy-tls haproxy-notls \
-                  container-routing-integrity \
-                  native-garden-runc \
-                  loggregator-forwarder-agent \
-                  app-bosh-dns dns-service-discovery \
-                  routing-api \
-                  partitioned-network \
-                  \
-                  shield-dbs shield-blobstore \
-                  omit-haproxy
-
 # Deprecated features
-for want in shield-dbs shield-blobstore; do
-  if want_feature $want; then
-    echo >&2 "The '$want' feature has been deprecated, in favor of BOSH add-ons"
-  fi
-done
-if want_feature omit-haproxy; then
-  echo >&2 "You no longer need to explicitly specify the 'omit-haproxy' feature."
-  echo >&2 "If you remove it, everything will still work as expected."
-fi
-
-###-----------------------------------------------------------------------------
-## Blobstore
-#
-blobstore=0
-for want in ${GENESIS_REQUESTED_FEATURES}; do
+abort=
+warn=
+declare -a renamed_features
+renamed_features=()
+for want in "${features[@]}"; do
   case "$want" in
-  azure-blobstore)
-  # Blobstore selector feature flags
-    blobstore=$(( blobstore + 1 ))
-    manifests+=( \
-      "overlay/blobstore/${want%-blobstore}.yml" \
-      "cf-deployment/operations/use-external-blobstore.yml" \
-      "cf-deployment/operations/use-azure-storage-blobstore.yml" \
-    )
+  shield-dbs|shield-blobstores)
+    warn=1
+    describe >&2 \
+      "#Y{[WARNING]} The #c{$want} feature has been deprecated, in favor of BOSH add-ons"
     ;;
-
-  aws-blobstore|gcp-blobstore|local-blobstore)
+  omit-haproxy|local-blobstore|blobstore-webdav)
+    warn=1
+    describe >&2 \
+      "#Y{[WARNING]} The #c{$want} feature is the default behaviour and shouldn't be" \
+      "          specified in the environment file"
     ;;
-  blobstore-webdav)
-    blobstore=$(( blobstore + 1 ))
-    echo >&2 "The $want feature has been renamed to local-blobstore"
-    merge+=( manifests/blobstore/local.yml )
-    ;;
-
   blobstore-aws|blobstore-azure|blobstore-gcp)
-    blobstore=$(( blobstore + 1 ))
-    echo >&2 "The $want feature has been renamed to ${want#blobstore-}-blobstore"
-    merge+=( manifests/blobstore/${want#blobstore-}.yml )
+    warn=1
+    describe >&2 \
+      "#Y{[WARNING]} The #c{$want} feature has been renamed to #c{${want#blobstore-}-blobstore}"
+    renamed_features+=( "${want#blobstore-}-blobstore" )
+    ;;
+  db-external-mysql|db-external-postgres)
+    warn=1
+    describe >&2 \
+      "#Y{[WARNING]} The #c{$want} flag has been renamed to #c{${want#db-external-}-db}"
+    renamed_features+=( "${want#db-external-}-db" )
+    ;;
+  db-internal-postgres|local-db)
+    warn=1
+    describe >&2 \
+      "#Y{[WARNING]} The #c{$want} flag has been renamed to #c{local-postgres-db}"
+    renamed_features+=( "local-posgres-db" )
+    ;;
+  haproxy-tls)
+    warn=1
+    describe >&2 \
+      "#Y{[WARNING]} The #c{haproxy-tls} feature flag has been deprecated." \
+      "          Please replace it with the #c{haproxy} and #c{tls} flags."
+    renamed_features+=( "haproxy" "tls" )
+    ;;
+  haproxy-notls)
+    warn=1
+    describe >&2 \
+      "#Y{[WARNING]} The #c{haproxy-notls} feature flag has been deprecated." \
+      "          Please replace it with the #c{haproxy} feature flag." \
+      "          You are HIGHLY ENCOURAGED to also add the #c{tls} flag."
+    renamed_features+=( "haproxy" )
+    ;;
+  app-bosh-dns)
+    warn=1
+    describe >&2 \
+      "#Y{[WARNING]} The #c{app-bosh-dns} feature flag has been renamed to #c{dns-service-discovery}"
+    renamed_features+=( "dns-service-discovery" )
+    ;;
+
+  minimum-vms)
+    warn=1
+    describe >&2 \
+      "#Y{[WARNING]} The 'minimum-vms' feature flag has been renamed to 'small-footprint'"
+    renamed_features+=( "small-footprint" )
+    ;;
+  azure)
+    warn=1
+    describe >&2 \
+      "#Y{[WARNING]} The #c{azure} feature does not have to be specified, as it will" \
+      "          automatically be applied when deploying via an Azure CPI"
+    ;;
+  cflinuxfs2)
+    abort=1
+    describe >&2 \
+      "#Y{[ERROR]} The #c{cflinuxfs2} feature is no longer able to be supported."
+    ;;
+  local-ha-db)
+    abort=1
+    describe >&2 \
+      "#Y{[ERROR]} The #c{local-ha-db} feature is no longer able to be supported.  Consider using" \
+      "        external database for high-availability."
+    ;;
+  autoscaler|autoscaler-postgres)
+    abort=1
+    describe >&2 \
+      "#Y{[ERROR]} The #c{$want} feature is no longer embedded in the #c{cf} kit.  Please see the" \
+      "        cf-app-autoscaler genesis kit."
+    ;;
+  *)
+    renamed_features+=( "$want" )
     ;;
   esac
 done
+
+[[ "$abort" == "1" ]] && bail "#R{Cannot continue.}"
+[[ "$warn"  == "1" ]] && describe >&2 "" "Update your #C{$GENESIS_ENVIRONMENT.yml} file to remove these warnings" ""
+
+
+GENESIS_REQUESTED_FEATURES="${renamed_features[*]}"
+validate_features container-routing-integrity \
+                  native-garden-runc \
+                  loggregator-forwarder-agent \
+                  dns-service-discovery \
+                  routing-api \
+                  \
+                  partitioned-network \
+                  bare \
+                  haproxy tls self-signed \
+                  aws-blobstore azure-blobstore gcp-blobstore gcp-use-access-key \
+                  local-postgres-db local-mysql-db mysql-db posgtres-db \
+                  nfs-volume-services small-footprint \
+                  haproxy tls self-signed
 
 if want_feature "partitioned-network" ; then
   manifest+=( "overlay/operations/rename-network-and-deployment.yml" )
@@ -157,11 +202,150 @@ else
   manifest+=( "cf-deployment/operation/rename-network-and-deployment.yml" )
 fi
 
-
 manifest+=( \
   overlay/base.yml \
   overlay/uaa-clients.yml \
 )
+
+cpi="$(bosh_cpi)"
+
+###-----------------------------------------------------------------------------
+## Blobstore
+#
+
+blobstore=0
+for want in ${GENESIS_REQUESTED_FEATURES}; do
+  case "$want" in
+  azure-blobstore)
+  # Blobstore selector feature flags
+    blobstore=$(( blobstore + 1 ))
+    manifest+=( \
+      "overlay/blobstore/azure.yml" \
+      "cf-deployment/operations/use-external-blobstore.yml" \
+      "cf-deployment/operations/use-azure-storage-blobstore.yml" \
+    )
+    ;;
+  aws-blobstore)
+    blobstore=$(( blobstore + 1 ))
+    manifest+=( \
+      "overlay/blobstore/aws.yml" \
+      "cf-deployment/operations/use-external-blobstore.yml" \
+      "cf-deployment/operations/use-s3-blobstore.yml" \
+    )
+    ;;
+  gcp-blobstore)
+    blobstore=$(( blobstore + 1 ))
+    if want_feature gcp-use-access-key ; then
+      manifest+=( \
+        "overlay/blobstore/gcp-via-access-key.yml" \
+        "cf-deployment/operations/use-external-blobstore.yml" \
+        "use-gcs-blobstore-access-key.yml" \
+      )
+    else
+      manifest+=( \
+        "overlay/blobstore/gcp-via-project.yml" \
+        "cf-deployment/operations/use-external-blobstore.yml" \
+        "use-gcs-blobstore-service-account.yml" \
+      )
+    fi
+    ;;
+  esac
+done
+
+###-----------------------------------------------------------------------------
+## Database
+#
+
+database=0
+for want in ${GENESIS_REQUESTED_FEATURES}; do
+  case "$want" in
+  # Database selector feature flags
+  mysql-db|postgres-db)
+    database=$(( database + 1 ))
+    manifest+=( \
+      "cf-deployment/operations/use-external-db.yml" \
+      "operations/use-external-db-ports.yml" \
+      "overlay/db/external.yml" \
+      "overlay/db/external-${want%-db}.yml" \
+    )
+    ;;
+
+  local-postgres-db)
+    database=$(( database + 1 ))
+    manifest+=( \
+      "cf-deployment/operations/use-postgres.yml" \
+    )
+    ;;
+
+  local-mysql-db)
+    database=$(( database + 1 ))
+    # Default - no modifications needed
+    ;;
+
+  esac
+done
+# If we haven't chosen a database, use local
+if ! want_feature "bare" && [[ $database == 0 ]]; then
+  manifest+=( \
+    "cf-deployment/operations/use-postgres.yml" \
+  )
+fi
+
+###-----------------------------------------------------------------------------
+## HAProxy
+#
+
+if want_feature haproxy; then
+  manifest+=( "overlay/routing/haproxy.yml" )
+  if [[ -n "$(lookup 'params.cf_lb_network' "")" ]]; then
+    manifest+=( "overlay/routing/haproxy-public-network.yml" )
+  fi
+  if want_feature "tls"; then
+    manifest+=( "overlay/routing/haproxy-tls.yml" )
+    if ! want_feature "self-signed"; then
+      manifest+=( "overlay/routing/haproxy-provided-cert.yml" )
+    fi
+  fi
+fi
+
+###-----------------------------------------------------------------------------
+## Addons
+#
+for want in ${GENESIS_REQUESTED_FEATURES}; do
+  case "$want" in
+    small-footprint)
+      manifest+=( "operations/small-footprint.yml" ) ;;
+    nfs-volume-services)
+      manifest+=( "cf-deployment/operations/enable-nfs-volume-service.yml" );;
+    container-routing-integrity) ;;
+    native-garden-runc) ;;
+    loggregator-forwarder-agent) ;;
+    cflinuxfs2) ;;
+    dns-service-discovery) ;;
+    routing-api) ;;
+  esac
+done
+
+###-----------------------------------------------------------------------------
+## Networking
+#
+
+# Deal with IaaS peculiarities
+case "$cpi" in
+aws)
+  manifest+=( "cf-deployment/operations/aws.yml" )
+  ;;
+azure)
+  manifest+=( \
+    "cf-deployment/operations/azure.yml"
+    "operations/scale-to-one-az.yml" \
+    "operations/azure-availability_sets.yml" \
+  )
+  ;;
+warden)
+  manifest+=( "cf-deployment/operations/bosh-lite.yml" )
+  ;;
+esac
 
 echo "${manifest[@]}"
 

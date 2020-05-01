@@ -1,0 +1,13 @@
+---
+
+# This overlay removes the cert variables added in the haproxy-tls overlay, as
+# they will not use the same CA cert.
+#
+# Relies on overlay/routing/haproxy-tls.yml to be applied first.
+
+variables:
+  - (( delete "haproxy_ca" ))
+  - (( delete "haproxy_ssl" ))
+
+exodus:
+  self-signed: false
