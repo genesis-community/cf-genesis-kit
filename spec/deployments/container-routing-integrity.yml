@@ -2,8 +2,6 @@
 kit:
   name:    dev
   features:
-    - partitioned-network
-    - bare
     - container-routing-integrity
 
 genesis:

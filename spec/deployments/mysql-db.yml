@@ -2,8 +2,6 @@
 kit:
   name:    dev
   features:
-    - partitioned-network
-    - bare
     - mysql-db
 
 genesis:
