@@ -1,14 +1,14 @@
 ---
 kit:
   name:    dev
-  version: latest
   features:
     - partitioned-network
     - bare
+    - aws-blobstore
 
 genesis:
-  env:         baseline
+  env:         blobstore-aws
 
 params:
   base_domain: cf.testing.examle
-
+  blobstore_s3_region: blobstore-s3-region

@@ -1,0 +1,14 @@
+---
+kit:
+  name:    dev
+  features:
+    - partitioned-network
+    - bare
+    - native-garden-runc
+
+genesis:
+  env:         native-garden-runc
+
+params:
+  base_domain: cf.testing.examle
+

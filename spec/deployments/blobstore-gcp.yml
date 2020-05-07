@@ -1,0 +1,13 @@
+---
+kit:
+  name:    dev
+  features:
+    - partitioned-network
+    - bare
+    - gcp-blobstore
+
+genesis:
+  env:         blobstore-gcp
+
+params:
+  base_domain: cf.testing.examle
