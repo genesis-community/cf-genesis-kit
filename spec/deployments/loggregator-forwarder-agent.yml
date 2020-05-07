@@ -1,0 +1,14 @@
+---
+kit:
+  name:    dev
+  features:
+    - partitioned-network
+    - bare
+    - loggregator-forwarder-agent
+
+genesis:
+  env:         loggregator-forwarder-agent
+
+params:
+  base_domain: cf.testing.examle
+

@@ -1,0 +1,13 @@
+---
+kit:
+  name:    dev
+  features:
+    - partitioned-network
+    - bare
+    - azure-blobstore
+
+genesis:
+  env:         blobstore-azure
+
+params:
+  base_domain: cf.testing.examle

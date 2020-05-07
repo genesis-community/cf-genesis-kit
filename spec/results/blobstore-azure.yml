@@ -692,49 +692,6 @@ instance_groups:
   vm_type: minimal
 - azs:
   - z1
-  instances: 1
-  jobs:
-  - name: blobstore
-    properties:
-      blobstore:
-        admin_users:
-        - password: ((blobstore_admin_users_password))
-          username: blobstore-user
-        secure_link:
-          secret: ((blobstore_secure_link_secret))
-        tls:
-          cert: ((blobstore_tls.certificate))
-          private_key: ((blobstore_tls.private_key))
-      select_directories_to_backup:
-      - buildpacks
-      - packages
-      - droplets
-      system_domain: ((system_domain))
-    release: capi
-  - name: route_registrar
-    properties:
-      route_registrar:
-        routes:
-        - name: blobstore
-          port: 8080
-          registration_interval: 20s
-          tags:
-            component: blobstore
-          uris:
-          - blobstore.((system_domain))
-    release: routing
-  migrated_from:
-  - name: blobstore
-  name: singleton-blobstore
-  networks:
-  - name: ((cf_core_network))
-  persistent_disk_type: 100GB
-  stemcell: default
-  update:
-    serial: true
-  vm_type: small
-- azs:
-  - z1
   - z2
   instances: 2
   jobs:
@@ -746,14 +703,12 @@ instance_groups:
         host_key_fingerprint: ((diego_ssh_proxy_host_key.public_key_fingerprint))
       cc:
         buildpacks:
-          blobstore_type: webdav
-          webdav_config:
-            blobstore_timeout: 5
-            ca_cert: ((blobstore_tls.ca))
-            password: ((blobstore_admin_users_password))
-            private_endpoint: https://blobstore.service.cf.internal:4443
-            public_endpoint: https://blobstore.((system_domain))
-            username: blobstore-user
+          buildpack_directory_key: ((buildpack_directory_key))
+          fog_connection:
+            azure_storage_access_key: ((blobstore_storage_access_key))
+            azure_storage_account_name: ((blobstore_storage_account_name))
+            environment: ((environment))
+            provider: AzureRM
         bulk_api_password: ((cc_bulk_api_password))
         database_encryption:
           current_key_label: encryption_key_0
@@ -769,14 +724,12 @@ instance_groups:
         diego:
           docker_staging_stack: cflinuxfs3
         droplets:
-          blobstore_type: webdav
-          webdav_config:
-            blobstore_timeout: 5
-            ca_cert: ((blobstore_tls.ca))
-            password: ((blobstore_admin_users_password))
-            private_endpoint: https://blobstore.service.cf.internal:4443
-            public_endpoint: https://blobstore.((system_domain))
-            username: blobstore-user
+          droplet_directory_key: ((droplet_directory_key))
+          fog_connection:
+            azure_storage_access_key: ((blobstore_storage_access_key))
+            azure_storage_account_name: ((blobstore_storage_account_name))
+            environment: ((environment))
+            provider: AzureRM
         install_buildpacks:
         - name: staticfile_buildpack
           package: staticfile-buildpack-cflinuxfs3
@@ -809,27 +762,23 @@ instance_groups:
           private_key: ((cc_tls.private_key))
           public_cert: ((cc_tls.certificate))
         packages:
-          blobstore_type: webdav
-          webdav_config:
-            blobstore_timeout: 5
-            ca_cert: ((blobstore_tls.ca))
-            password: ((blobstore_admin_users_password))
-            private_endpoint: https://blobstore.service.cf.internal:4443
-            public_endpoint: https://blobstore.((system_domain))
-            username: blobstore-user
+          app_package_directory_key: ((app_package_directory_key))
+          fog_connection:
+            azure_storage_access_key: ((blobstore_storage_access_key))
+            azure_storage_account_name: ((blobstore_storage_account_name))
+            environment: ((environment))
+            provider: AzureRM
         public_tls:
           ca_cert: ((cc_public_tls.ca))
           certificate: ((cc_public_tls.certificate))
           private_key: ((cc_public_tls.private_key))
         resource_pool:
-          blobstore_type: webdav
-          webdav_config:
-            blobstore_timeout: 5
-            ca_cert: ((blobstore_tls.ca))
-            password: ((blobstore_admin_users_password))
-            private_endpoint: https://blobstore.service.cf.internal:4443
-            public_endpoint: https://blobstore.((system_domain))
-            username: blobstore-user
+          fog_connection:
+            azure_storage_access_key: ((blobstore_storage_access_key))
+            azure_storage_account_name: ((blobstore_storage_account_name))
+            environment: ((environment))
+            provider: AzureRM
+          resource_directory_key: ((resource_directory_key))
         security_group_definitions:
         - name: public_networks
           rules:
@@ -1066,51 +1015,43 @@ instance_groups:
     properties:
       cc:
         buildpacks:
-          blobstore_type: webdav
-          webdav_config:
-            blobstore_timeout: 5
-            ca_cert: ((blobstore_tls.ca))
-            password: ((blobstore_admin_users_password))
-            private_endpoint: https://blobstore.service.cf.internal:4443
-            public_endpoint: https://blobstore.((system_domain))
-            username: blobstore-user
+          buildpack_directory_key: ((buildpack_directory_key))
+          fog_connection:
+            azure_storage_access_key: ((blobstore_storage_access_key))
+            azure_storage_account_name: ((blobstore_storage_account_name))
+            environment: ((environment))
+            provider: AzureRM
         database_encryption:
           current_key_label: encryption_key_0
           keys:
             encryption_key_0: ((cc_db_encryption_key))
         db_encryption_key: ((cc_db_encryption_key))
         droplets:
-          blobstore_type: webdav
-          webdav_config:
-            blobstore_timeout: 5
-            ca_cert: ((blobstore_tls.ca))
-            password: ((blobstore_admin_users_password))
-            private_endpoint: https://blobstore.service.cf.internal:4443
-            public_endpoint: https://blobstore.((system_domain))
-            username: blobstore-user
+          droplet_directory_key: ((droplet_directory_key))
+          fog_connection:
+            azure_storage_access_key: ((blobstore_storage_access_key))
+            azure_storage_account_name: ((blobstore_storage_account_name))
+            environment: ((environment))
+            provider: AzureRM
         internal_api_password: ((cc_internal_api_password))
         mutual_tls:
           ca_cert: ((cc_tls.ca))
           private_key: ((cc_tls.private_key))
           public_cert: ((cc_tls.certificate))
         packages:
-          blobstore_type: webdav
-          webdav_config:
-            blobstore_timeout: 5
-            ca_cert: ((blobstore_tls.ca))
-            password: ((blobstore_admin_users_password))
-            private_endpoint: https://blobstore.service.cf.internal:4443
-            public_endpoint: https://blobstore.((system_domain))
-            username: blobstore-user
+          app_package_directory_key: ((app_package_directory_key))
+          fog_connection:
+            azure_storage_access_key: ((blobstore_storage_access_key))
+            azure_storage_account_name: ((blobstore_storage_account_name))
+            environment: ((environment))
+            provider: AzureRM
         resource_pool:
-          blobstore_type: webdav
-          webdav_config:
-            blobstore_timeout: 5
-            ca_cert: ((blobstore_tls.ca))
-            password: ((blobstore_admin_users_password))
-            private_endpoint: https://blobstore.service.cf.internal:4443
-            public_endpoint: https://blobstore.((system_domain))
-            username: blobstore-user
+          fog_connection:
+            azure_storage_access_key: ((blobstore_storage_access_key))
+            azure_storage_account_name: ((blobstore_storage_account_name))
+            environment: ((environment))
+            provider: AzureRM
+          resource_directory_key: ((resource_directory_key))
         staging_upload_password: ((cc_staging_upload_password))
         staging_upload_user: staging_user
       ccdb:
@@ -1188,51 +1129,43 @@ instance_groups:
     properties:
       cc:
         buildpacks:
-          blobstore_type: webdav
-          webdav_config:
-            blobstore_timeout: 5
-            ca_cert: ((blobstore_tls.ca))
-            password: ((blobstore_admin_users_password))
-            private_endpoint: https://blobstore.service.cf.internal:4443
-            public_endpoint: https://blobstore.((system_domain))
-            username: blobstore-user
+          buildpack_directory_key: ((buildpack_directory_key))
+          fog_connection:
+            azure_storage_access_key: ((blobstore_storage_access_key))
+            azure_storage_account_name: ((blobstore_storage_account_name))
+            environment: ((environment))
+            provider: AzureRM
         database_encryption:
           current_key_label: encryption_key_0
           keys:
             encryption_key_0: ((cc_db_encryption_key))
         db_encryption_key: ((cc_db_encryption_key))
         droplets:
-          blobstore_type: webdav
-          webdav_config:
-            blobstore_timeout: 5
-            ca_cert: ((blobstore_tls.ca))
-            password: ((blobstore_admin_users_password))
-            private_endpoint: https://blobstore.service.cf.internal:4443
-            public_endpoint: https://blobstore.((system_domain))
-            username: blobstore-user
+          droplet_directory_key: ((droplet_directory_key))
+          fog_connection:
+            azure_storage_access_key: ((blobstore_storage_access_key))
+            azure_storage_account_name: ((blobstore_storage_account_name))
+            environment: ((environment))
+            provider: AzureRM
         internal_api_password: ((cc_internal_api_password))
         mutual_tls:
           ca_cert: ((cc_tls.ca))
           private_key: ((cc_tls.private_key))
           public_cert: ((cc_tls.certificate))
         packages:
-          blobstore_type: webdav
-          webdav_config:
-            blobstore_timeout: 5
-            ca_cert: ((blobstore_tls.ca))
-            password: ((blobstore_admin_users_password))
-            private_endpoint: https://blobstore.service.cf.internal:4443
-            public_endpoint: https://blobstore.((system_domain))
-            username: blobstore-user
+          app_package_directory_key: ((app_package_directory_key))
+          fog_connection:
+            azure_storage_access_key: ((blobstore_storage_access_key))
+            azure_storage_account_name: ((blobstore_storage_account_name))
+            environment: ((environment))
+            provider: AzureRM
         resource_pool:
-          blobstore_type: webdav
-          webdav_config:
-            blobstore_timeout: 5
-            ca_cert: ((blobstore_tls.ca))
-            password: ((blobstore_admin_users_password))
-            private_endpoint: https://blobstore.service.cf.internal:4443
-            public_endpoint: https://blobstore.((system_domain))
-            username: blobstore-user
+          fog_connection:
+            azure_storage_access_key: ((blobstore_storage_access_key))
+            azure_storage_account_name: ((blobstore_storage_account_name))
+            environment: ((environment))
+            provider: AzureRM
+          resource_directory_key: ((resource_directory_key))
         staging_upload_password: ((cc_staging_upload_password))
         staging_upload_user: staging_user
       ccdb:
@@ -1893,7 +1826,7 @@ instance_groups:
   stemcell: default
   vm_type: minimal
 manifest_version: v12.29.0
-name: baseline-cf-genesis-kit
+name: blobstore-azure-cf-genesis-kit
 releases:
 - name: binary-buildpack
   sha1: 0269a613be68f988682bbf56504b78477965b1c4
@@ -2030,10 +1963,6 @@ update:
   serial: false
   update_watch_time: 5000-1200000
 variables:
-- name: blobstore_admin_users_password
-  type: password
-- name: blobstore_secure_link_secret
-  type: password
 - name: cc_bulk_api_password
   type: password
 - name: cc_db_encryption_key
@@ -2165,11 +2094,6 @@ variables:
   options:
     common_name: internalCA
     is_ca: true
-  type: certificate
-- name: blobstore_tls
-  options:
-    ca: service_cf_internal_ca
-    common_name: blobstore.service.cf.internal
   type: certificate
 - name: diego_auctioneer_client
   options:

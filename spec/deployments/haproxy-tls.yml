@@ -1,0 +1,16 @@
+---
+kit:
+  name:    dev
+  features:
+    - partitioned-network
+    - bare
+    - haproxy
+    - tls
+
+genesis:
+  env:         haproxy-tls
+
+params:
+  base_domain: cf.testing.examle
+  haproxy_ips: test-ha-proxy-ips
+
