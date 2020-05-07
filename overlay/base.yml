@@ -4,7 +4,7 @@ exodus:
 
   #api_url:        (( concat "https://" meta.api_hostname ))
   admin_username: admin
-  #admin_password: (( vault meta.vault "/admin_user:password" ))
+  admin_password: ((cf_admin_password))
   system_domain:  (( grab params.system_domain ))
   app_domain:     (( grab params.apps_domains[0] ))
   app_domains:    (( grab params.apps_domains ))

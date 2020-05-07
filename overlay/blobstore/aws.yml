@@ -3,10 +3,6 @@ params:
 
 bosh-variables:
   aws_region: (( grab params.blobstore_s3_region ))
-  app_package_directory_key: (( grab params.blobstore_app_packages_directory || "app-packages" ))
-  buildpack_directory_key:   (( grab params.blobstore_buildpacks_directory   || "buildpacks" ))
-  droplet_directory_key:     (( grab params.blobstore_droplets_directory     || "droplets" ))
-  resource_directory_key:    (( grab params.blobstore_resources_directory    || "resources" ))
 
 # Credhub Secrets
 #   blobstore_access_key_id

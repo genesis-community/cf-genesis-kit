@@ -27,15 +27,16 @@ login() {
     exit 1
   fi
 
-  base=$(lookup params.base_domain)
-  system_domain=$(lookup params.system_domain system.$base)
+  base="$(lookup params.base_domain)"
+  system_domain="$(lookup --exodus system_domain "system.$base")"
   api_url=https://api.$system_domain
-  password=$(credhub get -q -n $GENESIS_CREDHUB_ROOT/cf_admin_password)
+  username="$(exodus admin_username)"
+  password="$(exodus admin_password)"
 
   #TODO enfoce ssl validation
-  cf api $api_url --skip-ssl-validation
-  cf auth admin "$password"
-  cf save-target -f $target
+  cf api "$api_url" --skip-ssl-validation
+  cf auth "$username" "$password"
+  cf save-target -f "$target"
   echo ; echo
   cf target
 }
@@ -65,7 +66,7 @@ setup-cli)
   ;;
 
 smoketest)
-  $GENESIS_BOSH_COMMAND -e $BOSH_ENVIRONMENT -d $BOSH_DEPLOYMENT run-errand smoke_tests
+  "$GENESIS_BOSH_COMMAND" -e "$BOSH_ENVIRONMENT" -d "$BOSH_DEPLOYMENT" run-errand smoke_tests
   ;;
 
 *)

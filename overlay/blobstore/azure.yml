@@ -1,10 +1,6 @@
 
 bosh-variables:
   environment: (( grab params.blobstore_environment || params.azure_environment || "AzureCloud" ))
-  app_package_directory_key: (( grab params.blobstore_app_packages_directory || "app-packages" ))
-  buildpack_directory_key:   (( grab params.blobstore_buildpacks_directory   || "buildpacks" ))
-  droplet_directory_key:     (( grab params.blobstore_droplets_directory     || "droplets" ))
-  resource_directory_key:    (( grab params.blobstore_resources_directory    || "resources" ))
 
 # Credhub Secrets
 #   blobstore_storage_account_name

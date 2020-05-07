@@ -1,0 +1,25 @@
+---
+exodus:
+  app_autoscaler_client:      app_autoscaler_client
+  app_autoscaler_secret:      (( grab instance_groups.uaa.jobs.uaa.properties.uaa.clients.app_autoscaler_client.secret ))
+  loggregator_ca:             ((loggregator_ca.certificate))
+  loggregator_tls_rlp_cert:   ((loggregator_tls_rlp.certificate))
+  loggregator_tls_rlp_key:    ((loggregator_tls_rlp.private_key))
+  loggregator_tls_agent_cert: ((loggregator_tls_agent.certificate))
+  loggregator_tls_agent_key:  ((loggregator_tls_agent.private_key))
+
+instance_groups:
+- name: uaa
+  jobs:
+  - name: uaa
+    properties:
+      uaa:
+        clients:
+          app_autoscaler_client:
+            authorized-grant-types: client_credentials
+            authorities: cloud_controller.read,cloud_controller.admin,uaa.resource
+            secret:  "((uaa_clients_app_autoscaler_secret))"
+
+variables:
+- name: uaa_clients_app_autoscaler_secret
+  type: password
