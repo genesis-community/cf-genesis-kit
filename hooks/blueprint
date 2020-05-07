@@ -127,6 +127,13 @@ for want in "${features[@]}"; do
       "          Please replace it with the #c{haproxy} and #c{tls} flags."
     renamed_features+=( "haproxy" "tls" )
     ;;
+  haproxy-self-signed)
+    warn=1
+    describe >&2 \
+      "#Y{[WARNING]} The #c{haproxy-self-signed} feature flag has been deprecated." \
+      "          Please replace it with the #c{haproxy} and #c{self-signed} flags."
+    renamed_features+=( "haproxy" "self-signed" )
+    ;;    
   haproxy-notls)
     warn=1
     describe >&2 \
@@ -192,7 +199,7 @@ validate_features container-routing-integrity \
                   bare \
                   haproxy tls self-signed \
                   aws-blobstore azure-blobstore gcp-blobstore gcp-use-access-key \
-                  local-postgres-db local-mysql-db mysql-db posgtres-db \
+                  local-postgres-db local-mysql-db mysql-db postgres-db \
                   nfs-volume-services small-footprint \
                   app-autoscaler-integration
 
@@ -241,13 +248,13 @@ for want in ${GENESIS_REQUESTED_FEATURES}; do
       manifest+=( \
         "overlay/blobstore/external.yml" \
         "cf-deployment/operations/use-external-blobstore.yml" \
-        "use-gcs-blobstore-access-key.yml" \
+        "cf-deployment/operations/use-gcs-blobstore-access-key.yml" \
       )
     else
       manifest+=( \
         "overlay/blobstore/external.yml" \
         "cf-deployment/operations/use-external-blobstore.yml" \
-        "use-gcs-blobstore-service-account.yml" \
+        "cf-deployment/operations/use-gcs-blobstore-service-account.yml" \
       )
     fi
     ;;
@@ -265,8 +272,8 @@ for want in ${GENESIS_REQUESTED_FEATURES}; do
   mysql-db|postgres-db)
     database=$(( database + 1 ))
     manifest+=( \
-      "cf-deployment/operations/use-external-db.yml" \
-      "operations/use-external-db-ports.yml" \
+      "cf-deployment/operations/use-external-dbs.yml" \
+      "operations/use-external-dbs-ports.yml" \
       "overlay/db/external.yml" \
       "overlay/db/external-${want%-db}.yml" \
     )
@@ -299,7 +306,7 @@ fi
 
 if want_feature haproxy; then
   manifest+=( "overlay/routing/haproxy.yml" )
-  if [[ -n "$(lookup 'params.cf_lb_network' "")" ]]; then
+  if [[ -n "$(lookup 'params.cf_lb_network' "")" ]]; then #TODO: ??
     manifest+=( "overlay/routing/haproxy-public-network.yml" )
   fi
   if want_feature "tls"; then

@@ -20,7 +20,7 @@ instance_groups:
   - name: haproxy
     instances: (( grab params.haproxy_instances ))
     vm_type:   (( grab params.haproxy_vm_type ))
-    azs:       (( grab params.availability_zones || meta.default.azs ))
+    azs:       (( grab params.availability_zones || meta.default_azs ))
 
     stemcell: default
     networks:
