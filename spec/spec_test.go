@@ -98,9 +98,10 @@ var _ = Describe("Interal Kit", func() {
 		CloudConfig: "aws",
 		CPI:         "aws",
 	})
-	Test(Environment{
-		Name:        "nfs-volume-services",
-		CloudConfig: "aws",
-		CPI:         "aws",
-	})
+	// Test(Environment{
+	// 	Focus:       true,
+	// 	Name:        "nfs-volume-services",
+	// 	CloudConfig: "aws",
+	// 	CPI:         "aws",
+	// })
 })

@@ -317,81 +317,64 @@ instance_groups:
   - z1
   instances: 1
   jobs:
-  - name: pxc-mysql
+  - name: postgres
     properties:
-      admin_password: ((cf_mysql_mysql_admin_password))
-      engine_config:
-        binlog:
-          enabled: false
-        galera:
-          enabled: true
-      port: 13306
-      seeded_databases:
-      - name: cloud_controller
-        password: ((cc_database_password))
-        username: cloud_controller
-      - name: diego
-        password: ((diego_database_password))
-        username: diego
-      - name: network_connectivity
-        password: ((network_connectivity_database_password))
-        username: network_connectivity
-      - name: network_policy
-        password: ((network_policy_database_password))
-        username: network_policy
-      - name: routing-api
-        password: ((routing_api_database_password))
-        username: routing-api
-      - name: uaa
-        password: ((uaa_database_password))
-        username: uaa
-      - name: locket
-        password: ((locket_database_password))
-        username: locket
-      - name: credhub
-        password: ((credhub_database_password))
-        username: credhub
-      tls:
-        galera: ((galera_server_certificate))
-        server: ((mysql_server_certificate))
-    release: pxc
-  - name: proxy
-    properties:
-      api_password: ((cf_mysql_proxy_api_password))
-      api_port: 8083
-      api_uri: proxy.((system_domain))
-    release: pxc
-  - name: galera-agent
-    properties:
-      db_password: ((cf_mysql_mysql_galera_healthcheck_password))
-      endpoint_password: ((cf_mysql_mysql_galera_healthcheck_endpoint_password))
-    release: pxc
-  - name: gra-log-purger
-    release: pxc
-  - name: cluster-health-logger
-    properties:
-      db_password: ((cf_mysql_mysql_cluster_health_password))
-    release: pxc
-  - name: route_registrar
-    properties:
-      route_registrar:
-        routes:
-        - name: cf-mysql-proxy
-          port: 8083
-          prepend_instance_index: true
-          registration_interval: 10s
-          uris:
-          - proxy.((system_domain))
-        - name: cf-mysql-proxy-aggregator
-          port: 8082
-          registration_interval: 10s
-          uris:
-          - proxy.((system_domain))
-    release: routing
-  - name: bootstrap
-    release: pxc
+      databases:
+        databases:
+        - citext: true
+          name: cloud_controller
+          tag: cc
+        - citext: true
+          name: uaa
+          tag: uaa
+        - citext: true
+          name: diego
+          tag: diego
+        - citext: true
+          name: routing-api
+          tag: routing-api
+        - citext: false
+          name: network_policy
+          tag: networkpolicy
+        - citext: false
+          name: network_connectivity
+          tag: networkconnectivity
+        - citext: true
+          name: locket
+          tag: locket
+        - citext: true
+          name: credhub
+          tag: credhub
+        db_scheme: postgres
+        port: 5524
+        roles:
+        - name: cloud_controller
+          password: ((cc_database_password))
+          tag: admin
+        - name: uaa
+          password: ((uaa_database_password))
+          tag: admin
+        - name: diego
+          password: ((diego_database_password))
+          tag: admin
+        - name: routing-api
+          password: ((routing_api_database_password))
+          tag: admin
+        - name: network_policy
+          password: ((network_policy_database_password))
+          tag: admin
+        - name: network_connectivity
+          password: ((network_connectivity_database_password))
+          tag: admin
+        - name: locket
+          password: ((locket_database_password))
+          tag: locket
+        - name: credhub
+          password: ((credhub_database_password))
+          tag: admin
+    release: postgres
   migrated_from:
-  - name: mysql
+  - name: postgres
   - name: singleton-database
   name: database
   networks:
@@ -438,14 +421,12 @@ instance_groups:
           server_key: ((diego_bbs_server.private_key))
           skip_consul_lock: true
           sql:
-            ca_cert: ((mysql_server_certificate.ca))
-            db_driver: mysql
+            db_driver: postgres
             db_host: sql-db.service.cf.internal
             db_password: ((diego_database_password))
-            db_port: 3306
+            db_port: 5524
             db_schema: diego
             db_username: diego
-            require_ssl: true
       enable_consul_service_registration: false
       logging:
         format:
@@ -460,13 +441,11 @@ instance_groups:
     properties:
       ca_cert: ((silk_controller.ca))
       database:
-        ca_cert: ((mysql_server_certificate.ca))
         host: sql-db.service.cf.internal
         name: network_connectivity
         password: ((network_connectivity_database_password))
-        port: 3306
-        require_ssl: true
-        type: mysql
+        port: 5524
+        type: postgres
         username: network_connectivity
       server_cert: ((silk_controller.certificate))
       server_key: ((silk_controller.private_key))
@@ -482,14 +461,12 @@ instance_groups:
       diego:
         locket:
           sql:
-            ca_cert: ((mysql_server_certificate.ca))
-            db_driver: mysql
+            db_driver: postgres
             db_host: sql-db.service.cf.internal
             db_password: ((locket_database_password))
-            db_port: 3306
+            db_port: 5524
             db_schema: locket
             db_username: locket
-            require_ssl: true
       enable_consul_service_registration: false
       logging:
         format:
@@ -549,8 +526,6 @@ instance_groups:
       uaa:
         admin:
           client_secret: ((uaa_admin_client_secret))
-        ca_certs:
-        - ((mysql_server_certificate.ca))
         clients:
           cc-service-dashboards:
             authorities: clients.read,clients.write,clients.admin
@@ -646,16 +621,16 @@ instance_groups:
             hostnames:
             - uaa.service.cf.internal
       uaadb:
-        address: sql-db.service.cf.internal
         databases:
         - name: uaa
           tag: uaa
-        db_scheme: mysql
-        port: 3306
+        db_scheme: postgresql
+        port: 5524
         roles:
         - name: uaa
           password: ((uaa_database_password))
           tag: admin
+        tls: disabled
     release: uaa
   - name: route_registrar
     properties:
@@ -858,13 +833,11 @@ instance_groups:
         staging_upload_user: staging_user
         temporary_use_logcache: true
       ccdb:
-        address: sql-db.service.cf.internal
-        ca_cert: ((mysql_server_certificate.ca))
         databases:
         - name: cloud_controller
           tag: cc
-        db_scheme: mysql
-        port: 3306
+        db_scheme: postgres
+        port: 5524
         roles:
         - name: cloud_controller
           password: ((cc_database_password))
@@ -986,12 +959,11 @@ instance_groups:
           type: tcp
         skip_consul_lock: true
         sqldb:
-          ca_cert: ((mysql_server_certificate.ca))
           host: sql-db.service.cf.internal
           password: ((routing_api_database_password))
-          port: 3306
+          port: 5524
           schema: routing-api
-          type: mysql
+          type: postgres
           username: routing-api
         system_domain: ((system_domain))
       uaa:
@@ -1001,13 +973,11 @@ instance_groups:
   - name: policy-server
     properties:
       database:
-        ca_cert: ((mysql_server_certificate.ca))
         host: sql-db.service.cf.internal
         name: network_policy
         password: ((network_policy_database_password))
-        port: 3306
-        require_ssl: true
-        type: mysql
+        port: 5524
+        type: postgres
         username: network_policy
       enable_space_developer_self_service: true
       enable_tls: true
@@ -1114,13 +1084,11 @@ instance_groups:
         staging_upload_password: ((cc_staging_upload_password))
         staging_upload_user: staging_user
       ccdb:
-        address: sql-db.service.cf.internal
-        ca_cert: ((mysql_server_certificate.ca))
         databases:
         - name: cloud_controller
           tag: cc
-        db_scheme: mysql
-        port: 3306
+        db_scheme: postgres
+        port: 5524
         roles:
         - name: cloud_controller
           password: ((cc_database_password))
@@ -1236,13 +1204,11 @@ instance_groups:
         staging_upload_password: ((cc_staging_upload_password))
         staging_upload_user: staging_user
       ccdb:
-        address: sql-db.service.cf.internal
-        ca_cert: ((mysql_server_certificate.ca))
         databases:
         - name: cloud_controller
           tag: cc
-        db_scheme: mysql
-        port: 3306
+        db_scheme: postgres
+        port: 5524
         roles:
         - name: cloud_controller
           password: ((cc_database_password))
@@ -1274,8 +1240,8 @@ instance_groups:
         databases:
         - name: cloud_controller
           tag: cc
-        db_scheme: mysql
-        port: 3306
+        db_scheme: postgres
+        port: 5524
         roles:
         - name: cloud_controller
           password: ((cc_database_password))
@@ -1858,9 +1824,9 @@ instance_groups:
           database: credhub
           host: sql-db.service.cf.internal
           password: ((credhub_database_password))
-          port: 3306
-          tls_ca: ((mysql_server_certificate.ca))
-          type: mysql
+          port: 5524
+          require_tls: false
+          type: postgres
           username: credhub
         encryption:
           keys:
@@ -2019,6 +1985,10 @@ releases:
   sha1: 2abe6917b9f576a700418522f1bf452af5768819
   url: https://bosh.io/d/github.com/bosh-packages/cf-cli-release?v=1.24.0
   version: 1.24.0
+- name: postgres
+  sha1: 343f04f1594c57ecea65638802e94e311cd72688
+  url: https://bosh.io/d/github.com/cloudfoundry/postgres-release?v=40
+  version: "40"
 stemcells:
 - alias: default
   os: ubuntu-xenial
@@ -2521,29 +2491,6 @@ variables:
     common_name: ssh_proxy_backends_tls
     extended_key_usage:
     - client_auth
-  type: certificate
-- name: pxc_galera_ca
-  options:
-    common_name: pxc_galera_ca
-    is_ca: true
-  type: certificate
-- name: pxc_server_ca
-  options:
-    common_name: pxc_server_ca
-    is_ca: true
-  type: certificate
-- name: galera_server_certificate
-  options:
-    ca: pxc_galera_ca
-    common_name: galera_server_certificate
-    extended_key_usage:
-    - server_auth
-    - client_auth
-  type: certificate
-- name: mysql_server_certificate
-  options:
-    ca: pxc_server_ca
-    common_name: sql-db.service.cf.internal
   type: certificate
 - name: loggregator_rlp_gateway_tls
   options:
