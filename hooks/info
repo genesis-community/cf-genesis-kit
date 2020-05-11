@@ -1,0 +1,16 @@
+#!/bin/bash
+set -eu
+base=$(exodus base_domain)
+system_domain=$(lookup --exodus params.system_domain "system.$base")
+
+api_url=https://api.$system_domain
+admin=$(exodus admin_username)
+password=$(exodus admin_password)
+
+      echo "cloud foundry api"
+  describe "       url: #C{$api_url}"
+  describe "  username: #M{$admin}"
+  describe "  password: #G{$password}"
+
+      echo
+      curl -m5 -Lsk $api_url/v2/info | jq -Cr . | sed -e 's/^/  /'

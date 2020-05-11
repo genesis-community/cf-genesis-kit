@@ -2,12 +2,16 @@
 exodus:
   cf_deployment_version: manifest_version
 
-  #api_url:        (( concat "https://" meta.api_hostname ))
   admin_username: admin
   admin_password: ((cf_admin_password))
+  base_domain:    (( grab params.base_domain ))
   system_domain:  (( grab params.system_domain ))
   app_domain:     (( grab params.apps_domains[0] ))
   app_domains:    (( grab params.apps_domains ))
+
+  edge_network:    (( grab params.cf_edge_network || params.network ))
+  core_network:    (( grab params.cf_core_network || params.network ))
+  runtime_network: (( grab params.cf_runtime_network || params.network ))
 
   vaulted_uaa_clients: (( concat meta.vault "/uaa/client_secrets:firehose" ))
 
@@ -19,6 +23,8 @@ bosh-variables:
   system_domain:   (( grab params.system_domain ))
   deployment_name: (( grab name ))
   network_name:    (( grab params.network ))
+  app_domains:     (( grab params.apps_domains ))
+  smoke_test_app_domain: (( grab params.apps_domains[0] ))
 
 params:
   network: default

@@ -96,11 +96,11 @@ for want in "${features[@]}"; do
     describe >&2 \
       "#Y{[WARNING]} The #c{$want} feature has been deprecated, in favor of BOSH add-ons"
     ;;
-  omit-haproxy|local-blobstore|blobstore-webdav)
+  omit-haproxy|local-blobstore|blobstore-webdav|container-routing-integrity|routing-api|loggregator-forwarder-agent)
     warn=1
     describe >&2 \
-      "#Y{[WARNING]} The #c{$want} feature is the default behaviour and shouldn't be" \
-      "          specified in the environment file"
+      "#Y{[WARNING]} The #c{$want} feature is now the default behaviour and doesn't need" \
+      "          to be specified in the environment file"
     ;;
   blobstore-aws|blobstore-azure|blobstore-gcp)
     warn=1
@@ -178,6 +178,21 @@ for want in "${features[@]}"; do
       "#Y{[ERROR]} The #c{$want} feature is no longer embedded in the #c{cf} kit.  Please see the" \
       "        cf-app-autoscaler genesis kit."
     ;;
+  native-garden-runc)
+    warn=1
+    describe >&2 \
+      "#Y{[WARNING]} The #c{$want} feature is no longer supported; it has been replaced by the" \
+               "upstream #c{cf-deployment/operations/experimental/use-native-garden-runc-runner}" \
+               "feature."
+    manifest+=( "cf-deployment/operations/experimental/use-native-garden-runc-runner.yml" )
+    ;;
+  dns-service-discovery)
+    warn=1
+    describe >&2 \
+      "#Y{[WARNING]} The #c{$want} feature is no longer supported; it has been replaced by the" \
+               "upstream #c{cf-deployment/operations/enable-service-discovery} feature."
+    manifest+=( "cf-deployment/operations/enable-service-discovery.yml" )
+    ;;
   *)
     renamed_features+=( "$want" )
     ;;
@@ -189,14 +204,7 @@ done
 
 
 GENESIS_REQUESTED_FEATURES="${renamed_features[*]}"
-validate_features container-routing-integrity \
-                  native-garden-runc \
-                  loggregator-forwarder-agent \
-                  dns-service-discovery \
-                  routing-api \
-                  \
-                  partitioned-network \
-                  bare \
+validate_features bare partitioned-network \
                   haproxy tls self-signed \
                   aws-blobstore azure-blobstore gcp-blobstore gcp-use-access-key \
                   local-postgres-db local-mysql-db mysql-db postgres-db \
@@ -212,6 +220,7 @@ fi
 # FIXME: Check everything below is necessary or if some need/can be omitted in "bare" mode
 manifest+=( \
   overlay/base.yml \
+  cf-deployment/operations/override-app-domains.yml \
 )
 
 cpi="$(bosh_cpi)"
@@ -306,7 +315,7 @@ fi
 
 if want_feature haproxy; then
   manifest+=( "overlay/routing/haproxy.yml" )
-  if [[ -n "$(lookup 'params.cf_lb_network' "")" ]]; then #TODO: ??
+  if [[ -n "$(lookup 'params.cf_lb_network' "")" ]]; then
     manifest+=( "overlay/routing/haproxy-public-network.yml" )
   fi
   if want_feature "tls"; then
@@ -328,17 +337,11 @@ for want in ${GENESIS_REQUESTED_FEATURES}; do
       manifest+=( "cf-deployment/operations/enable-nfs-volume-service.yml" );;
     app-autoscaler-integration)
       manifest+=( "overlay/addons/autoscaler.yml" ) ;;
-    container-routing-integrity) ;;
-    native-garden-runc) ;;
-    loggregator-forwarder-agent) ;;
-    cflinuxfs2) ;;
-    dns-service-discovery) ;;
-    routing-api) ;;
   esac
 done
 
 ###-----------------------------------------------------------------------------
-## Networking
+## IaaS
 #
 
 # Deal with IaaS peculiarities

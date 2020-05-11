@@ -49,7 +49,7 @@ ask_for_loadbalancer() {
     done
     echo
 
-    credhub set -n "${GENESIS_CREDHUB_ROOT}/router_ssl" -t certificate -r /dev/null \
+    credhub "set" -n "${GENESIS_CREDHUB_ROOT}/router_ssl" -t certificate -r /dev/null \
       -c <(safe read "${GENESIS_SECRETS_BASE}haproxy/ssl:certificate" | sed -e '/^$/d') \
       -p <(safe read "${GENESIS_SECRETS_BASE}haproxy/ssl:key"         | sed -e '/^$/d')
 
@@ -64,30 +64,31 @@ ask_for_loadbalancer() {
 ##       files.  See sample for azure blobstore on line 132 of hooks/blueprint
 ##       for example of how they are consumed
 ask_for_database() {
-  inst=database
+  inst="database"
+  database=
   case "${1:-}" in
   rds)
-    prompt_for database select \
+    prompt_for database "select" \
       'Where would you like to house Cloud Foundry configuration and metadata?' \
-      -o '[postgres-db]  PostgreSQL Amazon RDS' \
-      -o '[mysql-db]     MySQL Amazon RDS' \
-      -o '[local-db]     an internal database node (not HA)' \
-      -o '[local-ha-db]  internal HA database cluster'
+      -o '[postgres-db]       PostgreSQL Amazon RDS' \
+      -o '[mysql-db]          MySQL Amazon RDS' \
+      -o '[local-postgres-db] an internal PostgreSQL database node' \
+      -o '[local-mysql-db]    internal MySQL database node'
 
-    case $database in
+    case "$database" in
     postgres-db) inst="Amazon RDS PostgreSQL instance" ;;
     mysql-db)    inst="Amazon RDS MySQL instance" ;;
     esac
-    use_db=$database
+    use_db="$database"
     ;;
 
   gcp)
-    prompt_for database select \
+    prompt_for database "select" \
       'Where would you like to house Cloud Foundry configuration and metadata?' \
       -o '[postgres-db]  PostgreSQL Google Cloud SQL' \
       -o '[mysql-db]     MySQL Google Cloud SQL' \
-      -o '[local-db]     an internal database node (not HA)' \
-      -o '[local-ha-db]  internal HA database cluster'
+      -o '[local-postgres-db] an internal PostgreSQL database node' \
+      -o '[local-mysql-db]    internal MySQL database node'
 
     case $database in
     postgres-db) inst="Google Cloud SQL PostgreSQL instance" ;;
@@ -97,12 +98,12 @@ ask_for_database() {
     ;;
 
   '')
-    prompt_for database select \
+    prompt_for database "select" \
       'Where would you like to house Cloud Foundry configuration and metadata?' \
-      -o '[postgres-db]  External PostgreSQL Database' \
-      -o '[mysql-db]     External MySQL Database' \
-      -o '[local-db]     an internal database node (not HA)' \
-      -o '[local-ha-db]  internal HA database cluster'
+      -o '[postgres-db]       Existing external PostgreSQL Database' \
+      -o '[mysql-db]          Existing external MySQL Database' \
+      -o '[local-postgres-db] Internal PostgreSQL database node' \
+      -o '[local-mysql-db]    Internal MySQL database node'
 
     case $database in
     postgres-db) inst="external PostgreSQL instance" ;;
@@ -120,17 +121,16 @@ ask_for_database() {
 
   case $database in
   mysql-db|postgres-db)
+    db_host=
     prompt_for db_host line \
       "What is the hostname or IP of your $inst?"
+    db_user=
     prompt_for db_user line \
       "What is your $inst database username?"
-    prompt_for $GENESIS_VAULT_PREFIX/external_db:password secret-line \
+    credhub set -n "/$GENESIS_CREDHUB_ROOT/external_db_username" -t value -v "$db_user"
+    prompt_for external_db:password secret-line \
       "What is the password for the $inst $db_user user?"
-    safe --quiet set secret/$GENESIS_VAULT_PREFIX/external_db username="$db_user"
-    ;;
-  local-ha-db)
-    prompt_for postgres_vip line \
-      "What VIP would you like to use?"
+    move_secrets_to_credhub external_db:password external_db_password
     ;;
   esac
 }
@@ -141,7 +141,6 @@ ask_for_database() {
 ### ----------------------------------------------------------------------------
 
 # IaaS selection
-params=''
 iaas= # Assigned below
 prompt_for iaas "select" \
   'What IaaS are you deploying to?' \
@@ -313,10 +312,6 @@ if [[ -z $use_provided_cert ]]; then
 fi
 ) >$GENESIS_ROOT/$GENESIS_ENVIRONMENT.yml
 
-prompt_for edit boolean \
-	'Would you like to edit the environment file?'
-if [[ $edit = 'true' ]]; then
-	exec ${EDITOR:-vim} $GENESIS_ROOT/$GENESIS_ENVIRONMENT.yml
-fi
+offer_environment_editor
 
 # vim:foldmethod=marker

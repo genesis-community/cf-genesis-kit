@@ -1,9 +1,6 @@
 #!/bin/bash
 set -eu
 
-target=$GENESIS_ENVIRONMENT
-
-
 list() {
   echo "The following addons are defined:"
   echo
@@ -36,7 +33,7 @@ login() {
   #TODO enfoce ssl validation
   cf api "$api_url" --skip-ssl-validation
   cf auth "$username" "$password"
-  cf save-target -f "$target"
+  cf save-target -f "$GENESIS_ENVIRONMENT"
   echo ; echo
   cf target
 }

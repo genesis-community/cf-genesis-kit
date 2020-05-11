@@ -28,7 +28,9 @@ instance_groups:
         static_ips: (( grab params.haproxy_ips ))
 
     vm_extensions:
-      - cf-load-balanced
+      - cf-router-network-properties
+      - cf-tcp-router-network-properties
+      - diego-ssh-proxy-network-properties
 
     jobs:
       - name: haproxy
