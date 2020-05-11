@@ -36,6 +36,7 @@ variables:
     - '*.((system_domain))'
     ca: haproxy_ca
     common_name: haproxySSL
+    extended_key_usage: [server_auth,client_auth]
   type: certificate
 
 exodus:
