@@ -118,7 +118,7 @@ for want in "${features[@]}"; do
     warn=1
     describe >&2 \
       "#Y{[WARNING]} The #c{$want} flag has been renamed to #c{local-postgres-db}"
-    renamed_features+=( "local-posgres-db" )
+    renamed_features+=( "local-postgres-db" )
     ;;
   haproxy-tls)
     warn=1
