@@ -3,5 +3,5 @@
 # cannot be guaranteed to run after the overlay base and therefore clean up
 # these keys for us.
 variables:
-- { name: pxc_galera_ca, options: { duration: 3652 } }
-- { name: pxc_server_ca, options: { duration: 3652 } }
+- { name: pxc_galera_ca, options: { duration: 3650 } }
+- { name: pxc_server_ca, options: { duration: 3650 } }

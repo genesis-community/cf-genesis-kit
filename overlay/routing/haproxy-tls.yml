@@ -28,7 +28,7 @@ variables:
   options:
     common_name: haproxyCA
     is_ca: true
-    duration: 3652
+    duration: 3650
   type: certificate
 - name: haproxy_ssl
   options:
