@@ -21,6 +21,9 @@ meta:
       droplet_destinations:
         cflinuxfs3: /home/vcap
 
+params:
+  starting_container_count_maximum: 0
+
 instance_groups:
   - name: diego
     jobs:
@@ -31,6 +34,7 @@ instance_groups:
           diego:
             auctioneer:
               skip_consul_lock: true
+              starting_container_count_maximum: (( grab params.starting_container_count_maximum ))
               ca_cert:     (( grab meta.certs.cf_internal.diego_auctioneer_server.ca_cert ))
               server_cert: (( grab meta.certs.cf_internal.diego_auctioneer_server.cert ))
               server_key:  (( grab meta.certs.cf_internal.diego_auctioneer_server.key ))
