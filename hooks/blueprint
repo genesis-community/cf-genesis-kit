@@ -297,7 +297,9 @@ for want in ${GENESIS_REQUESTED_FEATURES}; do
 
   local-mysql-db)
     database=$(( database + 1 ))
-    # Default - no modifications needed
+    manifest+=( \
+      "overlay/db/local-mysql-db.yml"
+    )
     ;;
 
   esac
