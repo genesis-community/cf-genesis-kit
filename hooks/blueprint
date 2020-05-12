@@ -67,18 +67,20 @@ fi
 # Check for ops features
 declare -a features
 features=()
+declare -a ops_files
+ops_files=()
 
 for feature in $GENESIS_REQUESTED_FEATURES; do
   if [[ "$feature" =~ ^cf-deployment-version- ]] ; then
     : # Dealt with above - skip here
   elif [[ $feature =~ cf-deployment/.* ]] ; then
     if [[ -f "$feature.yml" ]] ; then
-      manifest+=( "$feature.yml" )
+      ops_files+=( "$feature.yml" )
     else
       bail "#R[ERROR]} Kit $GENESIS_KIT_NAME/$GENESIS_KIT_VERSION does not support the $feature feature" ""
     fi
   elif [[ -f "$GENESIS_ROOT/ops/$feature.yml" ]] ; then
-    manifest+=( "$GENESIS_ROOT/ops/$feature.yml" )
+    ops_files+=( "$GENESIS_ROOT/ops/$feature.yml" )
   else
     features+=( "$feature" )
   fi
@@ -360,6 +362,8 @@ warden)
   manifest+=( "cf-deployment/operations/bosh-lite.yml" )
   ;;
 esac
+
+manifest=( "${manifest[@]}" "${ops_files[@]}" )
 
 echo "${manifest[@]}"
 
