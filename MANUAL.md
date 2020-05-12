@@ -47,6 +47,10 @@ runtime config.
     when pushing apps.  The options are currently `cflinuxfs2` and
     `cflinuxfs3`.  Defaults to `cflinuxfs3`
 
+  - `starting_container_count_maximum` - Maximum number of inflight 
+     container starts allowed globally. Value of 0 or less indicates
+     no limit. Default is 0.
+
   - `availability_zones` - Which AZs to deploy to. Defaults to 
     `[z1, z2, z3]`
 
