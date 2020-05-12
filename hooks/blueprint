@@ -133,7 +133,7 @@ for want in "${features[@]}"; do
       "#Y{[WARNING]} The #c{haproxy-self-signed} feature flag has been deprecated." \
       "          Please replace it with the #c{haproxy} and #c{self-signed} flags."
     renamed_features+=( "haproxy" "self-signed" )
-    ;;    
+    ;;
   haproxy-notls)
     warn=1
     describe >&2 \
@@ -214,7 +214,7 @@ validate_features bare partitioned-network \
 if ! want_feature "bare" || want_feature "partitioned-network" ; then
   manifest+=( "operations/rename-network-and-deployment.yml" )
 else
-  manifest+=( "cf-deployment/operation/rename-network-and-deployment.yml" )
+  manifest+=( "cf-deployment/operations/rename-network-and-deployment.yml" )
 fi
 
 # FIXME: Check everything below is necessary or if some need/can be omitted in "bare" mode
