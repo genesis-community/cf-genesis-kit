@@ -345,21 +345,23 @@ done
 #
 
 # Deal with IaaS peculiarities
-case "$cpi" in
-aws)
-  manifest+=( "cf-deployment/operations/aws.yml" )
-  ;;
-azure)
-  manifest+=( \
-    "cf-deployment/operations/azure.yml"
-    "operations/scale-to-one-az.yml" \
-    "operations/azure-availability_sets.yml" \
-  )
-  ;;
-warden)
-  manifest+=( "cf-deployment/operations/bosh-lite.yml" )
-  ;;
-esac
+if ! want_feature  "bare" ; then
+  case "$cpi" in
+  aws)
+    manifest+=( "cf-deployment/operations/aws.yml" )
+    ;;
+  azure)
+    manifest+=( \
+      "cf-deployment/operations/azure.yml"
+      "operations/scale-to-one-az.yml" \
+      "operations/azure-availability_sets.yml" \
+    )
+    ;;
+  warden)
+    manifest+=( "cf-deployment/operations/bosh-lite.yml" )
+    ;;
+  esac
+fi
 
 echo "${manifest[@]}"
 
