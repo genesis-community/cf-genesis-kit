@@ -23,15 +23,14 @@ bosh-variables:
   system_domain:   (( grab params.system_domain ))
   deployment_name: (( grab name ))
   network_name:    (( grab params.network ))
-  app_domains:     (( grab params.apps_domains ))
-  smoke_test_app_domain: (( grab params.apps_domains[0] ))
 
 params:
   network: default
 
   base_domain: (( param "What is the base domain for this Cloud Foundry?" ))
   system_domain: (( concat "system." params.base_domain ))
-  apps_domains: [ (( concat "run." params.base_domain )) ]
+  apps_domains:
+    - (( grab bosh-variables.system_domain ))
 
 meta:
   default_azs: [z1, z2, z3]
