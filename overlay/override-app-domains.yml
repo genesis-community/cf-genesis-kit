@@ -1,0 +1,17 @@
+params:
+  apps_domains: [ (( concat "run." params.base_domain )) ]
+  app_domains: (( grab params.apps_domains ))
+  apps_domain: (( grab params.app_domains[0] ))
+
+instance_groups:
+- name: api
+  jobs:
+  - name: cloud_controller_ng
+    properties:
+      app_domains: (( grab params.app_domains ))
+- name: smoke-tests
+  jobs:
+  - name: smoke_tests
+    properties:
+      smoke_tests:
+        apps_domain: (( grab params.apps_domain ))

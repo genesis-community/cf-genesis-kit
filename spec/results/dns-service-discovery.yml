@@ -249,7 +249,7 @@ instance_groups:
         enabled: true
       smoke_tests:
         api: https://api.((system_domain))
-        apps_domain: ((system_domain))
+        apps_domain: run.cf.testing.examle
         cf_dial_timeout_in_seconds: 300
         client: cf_smoke_tests
         client_secret: ((uaa_clients_cf_smoke_tests_secret))
@@ -716,7 +716,8 @@ instance_groups:
   - name: cloud_controller_ng
     properties:
       app_domains:
-      - ((system_domain))
+      - internal: true
+        name: apps.internal
       app_ssh:
         host_key_fingerprint: ((diego_ssh_proxy_host_key.public_key_fingerprint))
       cc:
@@ -844,8 +845,6 @@ instance_groups:
           tag: admin
       credhub_api:
         ca_cert: ((credhub_tls.ca))
-      doppler:
-        port: 4443
       router:
         route_services_secret: ((router_route_services_secret))
       routing_api:
@@ -1337,6 +1336,14 @@ instance_groups:
         key: ((loggr_udp_forwarder_tls.private_key))
         server_name: loggr_udp_forwarder_metrics
     release: loggregator-agent
+  - name: service-discovery-controller
+    properties:
+      dnshttps:
+        client:
+          ca: ((cf_app_sd_server_tls.ca))
+        server:
+          tls: ((cf_app_sd_server_tls))
+    release: cf-networking
   migrated_from:
   - name: cc-bridge
   - name: cc-clock
@@ -1367,7 +1374,6 @@ instance_groups:
           ((uaa_ssl.ca))
           ((network_policy_server_external.ca))
         enable_ssl: true
-        load_balancer_healthy_threshold: 60
         route_services_secret: ((router_route_services_secret))
         status:
           password: ((router_status_password))
@@ -1625,6 +1631,8 @@ instance_groups:
             client_cert: ((diego_bbs_client.certificate))
             client_key: ((diego_bbs_client.private_key))
           local_mode: true
+      internal_routes:
+        enabled: true
       logging:
         format:
           timestamp: rfc3339
@@ -1676,6 +1684,16 @@ instance_groups:
         key: ((loggr_udp_forwarder_tls.private_key))
         server_name: loggr_udp_forwarder_metrics
     release: loggregator-agent
+  - name: bosh-dns-adapter
+    properties:
+      dnshttps:
+        client:
+          tls: ((cf_app_sd_client_tls))
+        server:
+          ca: ((cf_app_sd_client_tls.ca))
+      internal_domains:
+      - apps.internal.
+    release: cf-networking
   name: diego-cell
   networks:
   - name: ((cf_runtime_network))
@@ -2575,4 +2593,23 @@ variables:
     common_name: rlp_gateway_metrics
     extended_key_usage:
     - server_auth
+  type: certificate
+- name: cf_app_sd_ca
+  options:
+    common_name: service-discovery-controller.service.cf.internal
+    is_ca: true
+  type: certificate
+- name: cf_app_sd_server_tls
+  options:
+    ca: cf_app_sd_ca
+    common_name: service-discovery-controller.service.cf.internal
+    extended_key_usage:
+    - server_auth
+  type: certificate
+- name: cf_app_sd_client_tls
+  options:
+    ca: cf_app_sd_ca
+    common_name: service-discovery-controller.service.cf.internal
+    extended_key_usage:
+    - client_auth
   type: certificate
