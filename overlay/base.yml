@@ -7,7 +7,7 @@ exodus:
   base_domain:    (( grab params.base_domain ))
   system_domain:  (( grab params.system_domain ))
   app_domains:    (( grab params.app_domains ))
-  app_domain:     (( grab params.app_domain ))
+  apps_domain:    (( grab params.apps_domain ))
 
   edge_network:    (( grab params.cf_edge_network || params.network ))
   core_network:    (( grab params.cf_core_network || params.network ))
