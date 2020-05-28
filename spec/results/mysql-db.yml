@@ -249,7 +249,7 @@ instance_groups:
         enabled: true
       smoke_tests:
         api: https://api.((system_domain))
-        apps_domain: ((system_domain))
+        apps_domain: run.cf.testing.examle
         cf_dial_timeout_in_seconds: 300
         client: cf_smoke_tests
         client_secret: ((uaa_clients_cf_smoke_tests_secret))
@@ -652,7 +652,7 @@ instance_groups:
     name: cloud_controller_ng
     properties:
       app_domains:
-      - ((system_domain))
+      - run.cf.testing.examle
       app_ssh:
         host_key_fingerprint: ((diego_ssh_proxy_host_key.public_key_fingerprint))
       cc:
@@ -781,8 +781,6 @@ instance_groups:
           tag: admin
       credhub_api:
         ca_cert: ((credhub_tls.ca))
-      doppler:
-        port: 4443
       router:
         route_services_secret: ((router_route_services_secret))
       routing_api:
@@ -1313,7 +1311,6 @@ instance_groups:
           ((uaa_ssl.ca))
           ((network_policy_server_external.ca))
         enable_ssl: true
-        load_balancer_healthy_threshold: 60
         route_services_secret: ((router_route_services_secret))
         status:
           password: ((router_status_password))

@@ -6,8 +6,8 @@ exodus:
   admin_password: ((cf_admin_password))
   base_domain:    (( grab params.base_domain ))
   system_domain:  (( grab params.system_domain ))
-  app_domain:     (( grab params.apps_domains[0] ))
-  app_domains:    (( grab params.apps_domains ))
+  app_domains:    (( grab params.app_domains ))
+  app_domain:     (( grab params.app_domain ))
 
   edge_network:    (( grab params.cf_edge_network || params.network ))
   core_network:    (( grab params.cf_core_network || params.network ))
@@ -23,18 +23,22 @@ bosh-variables:
   system_domain:   (( grab params.system_domain ))
   deployment_name: (( grab name ))
   network_name:    (( grab params.network ))
-  app_domains:     (( grab params.apps_domains ))
-  smoke_test_app_domain: (( grab params.apps_domains[0] ))
+
+meta:
+  app_domains:
+    - ((system_domain))
+  default_apps_domains: (( grab params.apps_domains || meta.app_domains ))
+  internal_app_domains: []
+  default_azs: [z1, z2, z3]
 
 params:
   network: default
 
   base_domain: (( param "What is the base domain for this Cloud Foundry?" ))
   system_domain: (( concat "system." params.base_domain ))
-  apps_domains: [ (( concat "run." params.base_domain )) ]
+  app_domains: (( grab meta.default_apps_domains meta.internal_app_domains ))
+  apps_domain: (( grab params.app_domains[0] ))
 
-meta:
-  default_azs: [z1, z2, z3]
 
 name: (( grab params.name ))
 

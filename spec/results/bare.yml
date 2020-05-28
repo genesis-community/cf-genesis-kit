@@ -871,8 +871,6 @@ instance_groups:
           tag: admin
       credhub_api:
         ca_cert: ((credhub_tls.ca))
-      doppler:
-        port: 4443
       router:
         route_services_secret: ((router_route_services_secret))
       routing_api:
@@ -1401,7 +1399,6 @@ instance_groups:
           ((uaa_ssl.ca))
           ((network_policy_server_external.ca))
         enable_ssl: true
-        load_balancer_healthy_threshold: 60
         route_services_secret: ((router_route_services_secret))
         status:
           password: ((router_status_password))
