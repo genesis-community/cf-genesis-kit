@@ -41,3 +41,18 @@ params:
 
 
 name: (( grab params.name ))
+
+# CAs should last 10 years instead of the default Credhub 1y
+variables:
+- { name: silk_ca,                    options: { duration: 3650 } }
+- { name: network_policy_ca,          options: { duration: 3650 } }
+- { name: service_cf_internal_ca,     options: { duration: 3650 } }
+- { name: loggregator_ca,             options: { duration: 3650 } }
+- { name: log_cache_ca,               options: { duration: 3650 } }
+- { name: router_ca,                  options: { duration: 3650 } }
+- { name: routing_api_ca,             options: { duration: 3650 } }
+- { name: uaa_ca,                     options: { duration: 3650 } }
+- { name: application_ca,             options: { duration: 3650 } }
+- { name: diego_instance_identity_ca, options: { duration: 3650 } }
+- { name: credhub_ca,                 options: { duration: 3650 } }
+- { name: metric_scraper_ca,          options: { duration: 3650 } }
