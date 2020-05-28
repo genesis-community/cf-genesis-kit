@@ -1,3 +1,8 @@
+meta:
+  internal_app_domains:
+  - name: apps.internal
+    internal: true
+
 instance_groups:
 - name: diego-cell
   jobs:
@@ -25,13 +30,6 @@ instance_groups:
         server:
           tls: ((cf_app_sd_server_tls))
     release: cf-networking
-- name: api
-  jobs:
-  - name: cloud_controller_ng
-    properties:
-      app_domains:
-      - name: apps.internal
-        internal: true
 
 variables:
 - name: cf_app_sd_ca

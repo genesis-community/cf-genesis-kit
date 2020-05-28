@@ -1,7 +1,6 @@
-params:
-  apps_domains: [ (( concat "run." params.base_domain )) ]
-  app_domains: (( grab params.apps_domains ))
-  apps_domain: (( grab params.app_domains[0] ))
+meta:
+  app_domains:
+    - (( concat "run." params.base_domain ))
 
 instance_groups:
 - name: api
