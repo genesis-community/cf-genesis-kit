@@ -63,8 +63,13 @@ fi
 ### Minimal injections required for Genesis compliance
 manifest+=( overlay/base.yml )
 
-### Overlay apps-domains/app_domains/apps_domain if not bare
-want_feature "bare" || manifest+=( "overlay/override-app-domains.yml" )
+### Set up some best practices if not bare
+if ! want_feature "bare" ; then
+  manifest+=( \
+    "overlay/override-app-domains.yml" \
+    "overlay/ten-year-ca-expiry.yml" \
+  )
+fi
 
 version=""
 abort=
@@ -287,14 +292,12 @@ for want in $GENESIS_REQUESTED_FEATURES; do
 
     local-postgres-db)
       databases+=( "$want" )
-      manifest+=( \
-        "cf-deployment/operations/use-postgres.yml" \
-      )
+      manifest+=( "cf-deployment/operations/use-postgres.yml" )
       ;;
 
     local-mysql-db)
       databases+=( "$want" )
-      # Default - no modifications needed
+      manifest+=( "overlay/local-mysql-db.yml" )
       ;;
 
     ###-----------------------------------------------------------------------------
