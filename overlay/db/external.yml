@@ -2,7 +2,7 @@
 params:
   uaadb_host:       (( grab params.external_db_host ))
   uaadb_port:       (( grab params.external_db_port ))
-  uaadb_user:       (( grab params.external_db_username "uaa" ))
+  uaadb_user:       (( grab params.external_db_username || "uaa" ))
   uaadb_password:   (( grab params.external_db_password ))
 
   ccdb_host:        (( grab params.external_db_host ))

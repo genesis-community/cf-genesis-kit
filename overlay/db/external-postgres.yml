@@ -3,7 +3,6 @@ params:
   external_db_host:     (( param "Please provide the hostname / IP of your external MySQL database instance" ))
   external_db_scheme:   postgres
   external_db_port:     5432
-  external_db_username: ((external_db_username))
   external_db_password: ((external_db_password))
 
   # UAA is not a team player, wants to go its own way...
