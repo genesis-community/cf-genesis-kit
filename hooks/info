@@ -1,9 +1,9 @@
 #!/bin/bash
 set -eu
-base=$(exodus base_domain)
-system_domain=$(lookup --exodus params.system_domain "system.$base")
-
-api_url=https://api.$system_domain
+exodus_data="$(lookup --exodus .)"
+system_domain="$(echo "$exodus_data" | jq -r '.system_domain // "system.\(.base_domain)"')"
+api_domain="$(echo "$exodus_data" | jq -r '.api_domain // "api.\($system_domain)"' --arg system_domain "$system_domain")"
+api_url=https://$api_domain
 admin=$(exodus admin_username)
 password=$(exodus admin_password)
 
