@@ -12,5 +12,5 @@ description: |
   It also contains convenience functions for inter-kit communication and add-on
   routines for common activities.
 
-genesis_version_min: 2.7.8-rc1
+genesis_version_min: 2.7.9-rc3
 secrets_store: credhub
