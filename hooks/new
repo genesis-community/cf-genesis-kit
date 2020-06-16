@@ -22,7 +22,7 @@ ask_for_loadbalancer() {
     'What load balancer would you like to use in front of this Cloud Foundry?' \
     -o "[external] An existing ${1:-"external Load Balancer"}" \
     -o '[haproxy] An internal HAProxy Load Balancer' \
-    -d 'external'
+    --default 'external'
   if [[ $load_balancer == 'external' ]]; then
     return
   fi
@@ -203,7 +203,7 @@ google)
     -o '[gcp] Existing Google Cloud Storage accessed via project and json key' \
     -o '[gcpaccess] Existing Google Cloud Storage accessed via access and secret keys' \
     -o '[builtin] Local singleton blobstore that will be deployed in this deployment' \
-    -d 'gcp'
+    --default 'gcp'
 
   case "$use_gcp_blobstore" in
   gcp)
@@ -280,10 +280,9 @@ for feature in "${features[@]}" ; do
   echo "    - $feature"
 done
 
-echo
+genesis_config_block
+
 echo "params:"
-echo "  env:   $GENESIS_ENVIRONMENT"
-echo
 echo "  # Cloud Foundry base domain"
 echo "  base_domain: $base_domain"
 

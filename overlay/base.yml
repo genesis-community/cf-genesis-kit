@@ -8,6 +8,7 @@ exodus:
   system_domain:  (( grab params.system_domain ))
   app_domains:    (( grab params.app_domains ))
   apps_domain:    (( grab params.apps_domain ))
+  api_domain:     (( grab params.api_domain ))
 
   edge_network:    (( grab params.cf_edge_network || params.network ))
   core_network:    (( grab params.cf_core_network || params.network ))
@@ -38,3 +39,4 @@ params:
   system_domain: (( concat "system." params.base_domain ))
   app_domains: (( grab meta.default_apps_domains meta.internal_app_domains ))
   apps_domain: (( grab params.app_domains[0] ))
+  api_domain:  (( concat "api." params.system_domain ))

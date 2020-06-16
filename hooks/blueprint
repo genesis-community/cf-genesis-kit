@@ -297,7 +297,7 @@ for want in $GENESIS_REQUESTED_FEATURES; do
 
     local-mysql-db)
       databases+=( "$want" )
-      manifest+=( "overlay/local-mysql-db.yml" )
+      manifest+=( "overlay/db/local-mysql-db.yml" )
       ;;
 
     ###-----------------------------------------------------------------------------
