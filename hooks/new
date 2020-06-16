@@ -9,13 +9,6 @@ use_provided_cert=
 declare -a features
 features=()
 
-move_secrets_to_credhub() {
-  local value src="$1" dst="$2"
-  value="$(safe get "${GENESIS_SECRETS_BASE}$src")"
-  credhub set -n "/$GENESIS_CREDHUB_ROOT/$dst" -t value -v "$value"
-  safe rm "${GENESIS_SECRETS_BASE}$src"
-}
-
 ask_for_loadbalancer() {
   load_balancer= # Assigned below
   prompt_for load_balancer "select" \
