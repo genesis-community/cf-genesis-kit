@@ -103,6 +103,10 @@ params:
 
   autoscaler_network: cf-autoscaler
 
+  # Disable when running on bosh-lite, or docker_cpi
+  set_kernel_parameters: true
+  apparmor_profile: ~ # set to "" on bosh-lite
+
 instance_groups:
   - name: nats
     instances: (( grab params.nats_instances ))

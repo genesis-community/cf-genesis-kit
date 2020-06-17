@@ -24,6 +24,7 @@ instance_groups:
             backends:
               cert_chain:  (( grab meta.certs.cf_internal.gorouter_backend_tls.cert ))
               private_key: (( grab meta.certs.cf_internal.gorouter_backend_tls.key ))
+            route_services_secret: (( vault meta.vault "/gorouter/route_services:secret" ))
             logging_level: (( grab params.log_level ))
             ssl_skip_validation: (( grab params.skip_ssl_validation ))
             status:

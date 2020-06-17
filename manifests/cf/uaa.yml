@@ -19,6 +19,7 @@ meta:
     time_between_failures: (( grab params.uaa_lockout_time_between_failures  || 1200 ))
 
     refresh_token_validity: (( grab params.uaa_refresh_token_validity        || 2592000 ))
+    access_token_validity: (( grab params.uaa_access_token_validity        || 600 ))
 
     admin_client_secret:   (( vault meta.vault "/uaa/client_secrets:admin_client" ))
     app_autoscaler:        (( vault meta.vault "/uaa/client_secrets:app_autoscaler" ))
@@ -77,7 +78,7 @@ instance_groups:
                 authorized-grant-types: client_credentials
                 secret: (( grab meta.uaa.cc_routing_secret ))
               cf:
-                access-token-validity: 600
+                access-token-validity: (( grab  meta.uaa.access_token_validity ))
                 authorities: uaa.none
                 authorized-grant-types: password,refresh_token
                 override: true
@@ -114,7 +115,7 @@ instance_groups:
                 authorized-grant-types: authorization_code
                 autoapprove: true
                 override: true
-                redirect-uri: (( concat "https://uaa.system." params.system_domain "/login" ))
+                redirect-uri: (( concat "https://uaa." params.system_domain "/login" ))
                 scope: openid,cloud_controller.read,cloud_controller.write,cloud_controller.admin
                 secret: (( grab meta.uaa.ssh_proxy_secret ))
               tcp_emitter:

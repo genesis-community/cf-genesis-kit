@@ -27,6 +27,7 @@ instance_groups:
       release: garden-runc
       properties:
         garden:
+          apparmor_profile: (( grab params.apparmor_profile ))
           containerd_mode: true
           default_container_grace_time: 0
           destroy_containers_on_start: true
@@ -39,6 +40,7 @@ instance_groups:
     - name: rep
       release: diego
       properties:
+        set_kernel_parameters: (( grab params.set_kernel_parameters ))
         bpm:
           enabled: true
         diego:

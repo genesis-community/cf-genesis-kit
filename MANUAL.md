@@ -47,6 +47,10 @@ runtime config.
     when pushing apps.  The options are currently `cflinuxfs2` and
     `cflinuxfs3`.  Defaults to `cflinuxfs3`
 
+  - `starting_container_count_maximum` - Maximum number of inflight 
+     container starts allowed globally. Value of 0 or less indicates
+     no limit. Default is 0.
+
   - `availability_zones` - Which AZs to deploy to. Defaults to 
     `[z1, z2, z3]`
 
@@ -61,8 +65,11 @@ runtime config.
     is locked out for violating `uaa_lockout_failure_count` within 
     `uaa_lockout_failure_time_between_failures`. Defaults to `300`.
 
-  - `uaa_refresh_token_validity` - How long (in seconds) a CF refresh
+  - `uaa_refresh_token_validity` - How long (in seconds) a CF refresh token
     is valid for. Defaults to `2592000`.
+
+  - `uaa_access_token_validity` - How long (in seconds) a CF access token
+    is valid for. Defaults to `600`.
 
   - `cf_branding_product_logo` - A base64 encoded image to display on
     the web UI login prompt. Defaults to `nil`. Read more in the

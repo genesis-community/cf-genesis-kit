@@ -140,7 +140,7 @@ certificates:
       ssh_proxy_backends_tls: #was diego/certs/ssh_proxy_backend_tls
         valid_for: 1y
         names:     [ "ssh_proxy_backend_tls",
-                    "ssh_proxy.service.cf.internal" ]
+                    "ssh-proxy.service.cf.internal" ]
         usage:     [ client_auth ]
 
     log_cache/certs:
