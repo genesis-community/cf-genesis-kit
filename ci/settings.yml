@@ -2,7 +2,7 @@
 meta:
   kit:     cf
   release: CF Genesis Kit
-  target:  genesis@pipes
+  target:  mc-genesis
   url:     https://pipes.starkandwayne.com
   exposed: yes
 
@@ -21,7 +21,7 @@ meta:
     secret_key: ((aws.secret_access_key))
 
   github:
-    owner:        genesis-community
+    owner:        rkoster
     repo:         cf-genesis-kit
     branch:       master
     private_key:  ((github.private_key))
@@ -31,3 +31,7 @@ meta:
     url:      ((shout.url)
     username: ((shout.username))
     password: ((shout.password))
+
+  cats:
+    tag: v5.7.0
+    git_ssh_url: https://github.com/cloudfoundry/cf-acceptance-tests

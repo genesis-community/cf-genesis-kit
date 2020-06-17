@@ -31,6 +31,7 @@ instance_groups:
               user: health
               password: (( vault meta.vault "/gorouter/status:password" ))
             route_services_secret: (( vault meta.vault "/gorouter/route_services:secret" ))
+            route_services_internal_lookup: true #required for CATS to work. See https://www.pivotaltracker.com/n/projects/1382120/stories/165842649
             tracing:
               enable_zipkin: true
           uaa:

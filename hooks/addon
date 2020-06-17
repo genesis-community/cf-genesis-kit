@@ -24,6 +24,8 @@ list() {
   echo
   echo "  smoketest         Run the smoke tests errand on the first vm in the"
   echo "                    api instance group."
+  echo "  cats              Run the CATS tests."
+  echo "                    This is a release engineering feature and should not be run against existing environments. Use with caution"
 }
 
 
@@ -51,6 +53,12 @@ login() {
   cf save-target -f $target
   echo ; echo
   cf target
+}
+
+cats() {
+    #"This is a release engineering feature. This is not supposed to be run on existing envs. Use at your own risk."
+    source ci/scripts/cats.sh
+    run_cats --local
 }
 
 case $GENESIS_ADDON_SCRIPT in
@@ -112,6 +120,10 @@ bind-autoscaler)
 
 smoketest)
   $GENESIS_BOSH_COMMAND -e $BOSH_ENVIRONMENT -d $BOSH_DEPLOYMENT run-errand smoke_tests --instance uaa/first
+  ;;
+cats)
+  cats
+  exit 0
   ;;
 *)
   echo "Unrecognized Cloud Foundry Genesis Kit addon."

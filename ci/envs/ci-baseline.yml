@@ -6,24 +6,81 @@ kit:
     - haproxy
     - tls
     - self-signed
-    - small-footprint
     - dns-service-discovery
     - container-routing-integrity
-    - autoscaler
+    - loggregator-forwarder-agent
     - routing-api
+    # - autoscaler
 
 params:
+  cf_public_ips:
+  - { "destination": "10.135.0.27", "protocol": "all" }
+  - { "destination": "10.135.0.26", "protocol": "all" }
+  - { "destination": "10.135.0.28", "protocol": "all" }
+
   env:   ci-baseline
   bosh:  snw-genesis-ci
 
-  availability_zones: [z1]
+  autoscaler_network: default
+  cf_db_network: default
+  cf_edge_network: default
+  cf_internal_network: default
+  cf_runtime_network: default
+
+  haproxy_vm_type:     default
+  postgres_vm_type:    default
+  blobstore_vm_type:   default
+  api_vm_type:         default
+  bbs_vm_type:         default
+  cell_vm_type:        large
+  diego_vm_type:       large
+  doppler_vm_type:     default
+  errand_vm_type:      default
+  loggregator_vm_type: large
+  nats_vm_type:        default
+  router_vm_type:      default
+  syslogger_vm_type:   default
+  uaa_vm_type:         default
+
+  autoscaler_api_vm_type:       default
+  autoscaler_broker_vm_type:    default
+  autoscaler_scheduler_vm_type: default
+  autoscaler_collector_vm_type: default
+  autoscaler_scaler_vm_type:    default
+  autoscaler_engine_vm_type:    default
+  autoscaler_operator_vm_type:  default
+  #cell instances set to one because of molten core networking setup with flannel in flannel. can be scaled out in non mc deployments
+  cell_instances: 1
+  #loggregator, log-cache specifically seems to be flaky when running in containers. scale 1 for safety.
+  loggregator_instances: 1
+  
+  availability_zones: [z1, z2]
 
   disk_type: default
-  base_domain:  10.128.9.10.netip.cc
-  postgres_vip: 10.128.9.9
+  postgres_disk_pool: default
+  blobstore_disk_pool: default
+  base_domain: 10.135.0.27.netip.cc
   skip_ssl_validation: true
+  haproxy_ips: (( empty array ))
+  postgres_vip: sql-db.service.cf.internal
+  set_kernel_parameters: false
+  apparmor_profile: ""
 
-  autoscaler_network: cf-core
+instance_groups:
+- name: haproxy
+  networks:
+  - (( replace ))
+  - name: default
 
-  haproxy_ips:
-    - 10.128.9.10
+- name: postgres
+  # using address (with bosh dns) based auth in pg_hba.conf does not work across zones
+  # this is a limitation of the flannel network used by MoltenCore
+  azs: [z0]
+  jobs:
+  - name: vip
+    properties:
+      keepalived:
+        enabled: false # use bosh dns instead
+
+- name: cell
+  azs: [z1, z2]
