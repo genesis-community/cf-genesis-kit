@@ -30,6 +30,7 @@ params:
 
   autoscaler_network: cf-core
 
+  haproxy_instances: 1
   haproxy_ips:
   - 10.128.9.10
 
