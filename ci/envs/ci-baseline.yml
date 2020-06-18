@@ -10,7 +10,7 @@ kit:
     - container-routing-integrity
     - loggregator-forwarder-agent
     - routing-api
-    # - autoscaler
+    - autoscaler
 
 params:
   # cf_public_ips:
@@ -20,6 +20,18 @@ params:
 
   env:   ci-baseline
   bosh:  snw-genesis-ci
+
+  availability_zones: [z1]
+
+  disk_type: default
+  base_domain:  10.128.9.10.netip.cc
+  postgres_vip: 10.128.9.9
+  skip_ssl_validation: true
+
+  autoscaler_network: cf-core
+
+  haproxy_ips:
+  - 10.128.9.10
 
 #   autoscaler_network: default
 #   cf_db_network: default
