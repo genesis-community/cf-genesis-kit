@@ -31,6 +31,8 @@ instance_groups:
     vm_type: (( grab params.blobstore_vm_type ))
     azs: (( grab params.availability_zones || meta.default.azs ))
     stemcell: default
+    update:
+      serial: true # route register depends on nats
     networks:
       - name: (( grab params.cf_internal_network ))
     jobs:
