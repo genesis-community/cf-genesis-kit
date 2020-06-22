@@ -13,10 +13,8 @@ kit:
     - autoscaler
 
 params:
-  # cf_public_ips:
-  # - { "destination": "10.135.0.27", "protocol": "all" }
-  # - { "destination": "10.135.0.26", "protocol": "all" }
-  # - { "destination": "10.135.0.28", "protocol": "all" }
+  cf_public_ips:
+  - { "destination": "10.128.9.10", "protocol": "all" }
 
   env:   ci-baseline
   bosh:  snw-genesis-ci
