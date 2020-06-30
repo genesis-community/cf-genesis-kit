@@ -37,7 +37,7 @@ credentials:
   value:
     certificate: ((vault "((vault_prefix))/silk/certs/ca:certificate"))
     private_key: ((vault "((vault_prefix))/silk/certs/ca:key"))
-    ca: ((vault "((vault_prefix))/silk/certs/ca:certificate
+    ca: ((vault "((vault_prefix))/silk/certs/ca:certificate" ))
 - name: ((credhub_prefix))/silk_controller
   type: certificate
   value:
@@ -55,7 +55,7 @@ credentials:
   value:
     certificate: ((vault "((vault_prefix))/network_policy/certs/ca:certificate"))
     private_key: ((vault "((vault_prefix))/network_policy/certs/ca:key"))
-    ca: ((vault "((vault_prefix))/network_policy/certs/ca:certificate
+    ca: ((vault "((vault_prefix))/network_policy/certs/ca:certificate" ))
 - name: ((credhub_prefix))/network_policy_server_external
   type: certificate
   value:
@@ -140,7 +140,7 @@ credentials:
   value:
     certificate: ((vault "((vault_prefix))/cf_internal/certs/ca:certificate"))
     private_key: ((vault "((vault_prefix))/cf_internal/certs/ca:key"))
-    ca: ((vault "((vault_prefix))/cf_internal/certs/ca:certificate
+    ca: ((vault "((vault_prefix))/cf_internal/certs/ca:certificate" ))
 - name: ((credhub_prefix))/blobstore_tls
   type: certificate
   value:
@@ -188,7 +188,7 @@ credentials:
   value:
     certificate: ((vault "((vault_prefix))/loggregator/certs/ca:certificate"))
     private_key: ((vault "((vault_prefix))/loggregator/certs/ca:key"))
-    ca: ((vault "((vault_prefix))/loggregator/certs/ca:certificate
+    ca: ((vault "((vault_prefix))/loggregator/certs/ca:certificate" ))
 - name: ((credhub_prefix))/loggregator_tls_statsdinjector
   type: certificate
   value:
@@ -272,7 +272,7 @@ credentials:
   value:
     certificate: ((vault "((vault_prefix))/log_cache/certs/ca:certificate"))
     private_key: ((vault "((vault_prefix))/log_cache/certs/ca:key"))
-    ca: ((vault "((vault_prefix))/log_cache/certs/ca:certificate
+    ca: ((vault "((vault_prefix))/log_cache/certs/ca:certificate" ))
 - name: ((credhub_prefix))/log_cache
   type: certificate
   value:
@@ -302,7 +302,7 @@ credentials:
   value:
     certificate: ((vault "((vault_prefix))/router/certs/ca:certificate"))
     private_key: ((vault "((vault_prefix))/router/certs/ca:key"))
-    ca: ((vault "((vault_prefix))/router/certs/ca:certificate
+    ca: ((vault "((vault_prefix))/router/certs/ca:certificate" ))
 - name: ((credhub_prefix))/router_ssl
   type: certificate
   value:
@@ -314,7 +314,7 @@ credentials:
   value:
     certificate: ((vault "((vault_prefix))/routing_api/certs/ca:certificate"))
     private_key: ((vault "((vault_prefix))/routing_api/certs/ca:key"))
-    ca: ((vault "((vault_prefix))/routing_api/certs/ca:certificate
+    ca: ((vault "((vault_prefix))/routing_api/certs/ca:certificate" ))
 - name: ((credhub_prefix))/routing_api_tls
   type: certificate
   value:
@@ -332,7 +332,7 @@ credentials:
   value:
     certificate: ((vault "((vault_prefix))/uaa/certs/ca:certificate"))
     private_key: ((vault "((vault_prefix))/uaa/certs/ca:key"))
-    ca: ((vault "((vault_prefix))/uaa/certs/ca:certificate
+    ca: ((vault "((vault_prefix))/uaa/certs/ca:certificate" ))
 - name: ((credhub_prefix))/uaa_ssl
   type: certificate
   value:
@@ -395,7 +395,7 @@ credentials:
   value:
     certificate: ((vault "((vault_prefix))/application/certs/ca:certificate"))
     private_key: ((vault "((vault_prefix))/application/certs/ca:key"))
-    ca: ((vault "((vault_prefix))/application/certs/ca:certificate
+    ca: ((vault "((vault_prefix))/application/certs/ca:certificate" ))
 - name: ((credhub_prefix))/diego_instance_identity_ca
   type: certificate
   value:
