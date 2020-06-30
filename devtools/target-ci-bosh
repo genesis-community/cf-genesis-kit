@@ -1,0 +1,7 @@
+#!/bin/bash
+
+unset BOSH_ALL_PROXY
+export BOSH_ENVIRONMENT=$(safe get /concourse/genesis/bosh:uri)
+export BOSH_CA_CERT=$(safe get /concourse/genesis/bosh:ca)
+export BOSH_CLIENT=$(safe get /concourse/genesis/bosh:username)
+export BOSH_CLIENT_SECRET=$(safe get /concourse/genesis/bosh:password)
