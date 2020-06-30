@@ -148,7 +148,7 @@ meta:
           BOSH_CA_CERT:         (( grab meta.bosh.cacert ))
           BOSH_CLIENT:          (( grab meta.bosh.username ))
           BOSH_CLIENT_SECRET:   (( grab meta.bosh.password ))
-    
+
     testflight-config:
       params:
         SKIP_FRESH:           false
@@ -202,11 +202,11 @@ jobs:
         task: deploy
         config:
           .: (( inject meta.jobs.testflight-config ))
-                  
+
     - name: cats
       in_parallel:
         fail_fast: true
-        limit: 3
+        limit: 1
         steps:
           - .: (( inject meta.jobs.cats ))
             task: cats-apps
@@ -534,4 +534,3 @@ resources:
       user:         (( grab meta.github.owner ))
       repository:   (( grab meta.github.repo ))
       access_token: (( grab meta.github.access_token ))
-      
