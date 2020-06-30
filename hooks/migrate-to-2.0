@@ -1,0 +1,7 @@
+migrate_credentials_to_credhub() {
+    vault_paths=$(safe paths --keys $GENESIS_VAULT_BASE | jq -c -R -s 'split("\n") | map(select(length > 0))')
+    credhub import -f <(bosh int hooks/support/vault-credhub-mapping.yml \
+         -v=credhub_prefix=$GENESIS_CREDHUB_ROOT -v=vault_prefix=$GENESIS_VAULT_BASE | spruce json \
+        | jq --argjson paths $vault_paths '.credentials | map(select(.value | try .private_key // . | split("\"")[1] | not IN($paths[])))' \
+        | spruce merge)
+}

@@ -9,6 +9,19 @@ if ! [[ "$genesis_version" =~ -dev$ ]] && ! new_enough "$genesis_version" "$min_
 fi
 set -e
 
+# Upgrade check
+set +e
+version="$(exodus kit_version)"
+if [[ "${version}" != "" ]] && ! new_enough "${version}" "1.10.1"; then
+    printf >&2 "please upgrade to cf kit 1.10.1 before upgrading to > 2.0"
+    exit 1
+fi
+
+if [[ "${version}" != "" ]] && ! new_enough "${version}" "2.0" ; then
+    source hooks/migrate-to-2.0
+    migrate_credentials_to_credhub
+fi
+
 switch_cf_version() {
   describe >&2 "" \
     "- #y{Experimental Feature Enabled:} Custom cf-deployment version: $version"
@@ -181,7 +194,7 @@ for want in $GENESIS_REQUESTED_FEATURES; do
       features+=( "enable-service-discovery" ) #FIXME once spruce can go-patch over (( grabs ))
       ;;
     cf-deployment/operations/enable-service-discovery)
-      if ! want_feature "bare" ; then 
+      if ! want_feature "bare" ; then
         features+=( "enable-service-discovery" ) #FIXME remove once spruce can go-patch over (( grabs ))
       fi
       ;;
@@ -374,4 +387,3 @@ if ! want_feature "bare" ; then
 fi
 
 echo "${manifest[@]}"
-
