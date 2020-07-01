@@ -9,19 +9,6 @@ if ! [[ "$genesis_version" =~ -dev$ ]] && ! new_enough "$genesis_version" "$min_
 fi
 set -e
 
-# Upgrade check
-set +e
-version="$(exodus kit_version)"
-if [[ "${version}" != "" ]] && ! new_enough "${version}" "1.10.1"; then
-    printf >&2 "please upgrade to cf kit 1.10.1 before upgrading to > 2.0"
-    exit 1
-fi
-
-if [[ "${version}" != "" ]] && ! new_enough "${version}" "2.0" ; then
-    source hooks/migrate-to-2.0
-    migrate_credentials_to_credhub
-fi
-
 switch_cf_version() {
   describe >&2 "" \
     "- #y{Experimental Feature Enabled:} Custom cf-deployment version: $version"
@@ -384,6 +371,13 @@ if ! want_feature "bare" ; then
     manifest+=( "cf-deployment/operations/bosh-lite.yml" )
     ;;
   esac
+fi
+
+# Include the migration manifest fragments
+version="$(exodus kit_version)"
+if [[ -n "${version}" ]] && ! new_enough "${version}" "2.0.0-rc1"; then
+  manifest+=( "..." ) # TODO
+  :
 fi
 
 echo "${manifest[@]}"
