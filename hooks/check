@@ -18,7 +18,11 @@ if [[ -n "$GENESIS_CLOUD_CONFIG" ]] ; then
   for t in 5GB 10GB 100GB ; do 
     cloud_config_needs disk_type "$t"
   done
+  for t in diego-ssh-proxy-network-properties cf-router-network-properties cf-tcp-router-network-properties 50GB_ephemeral_disk 100GB_ephemeral_disk ; do 
+    cloud_config_needs vm_extensions "$t"
+  done
 
+# TODO: check if logic
   if want_feature 'partitioned-network' ; then
     cloud_config_needs network "$(lookup params.cf_core_network cf-core)"
     cloud_config_needs network "$(lookup params.cf_edge_network cf-edge)"
