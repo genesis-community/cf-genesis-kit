@@ -362,6 +362,10 @@ postgres-db)
   ;;
 esac
 
+if [[ -n "${aws_blobstore_region:-}" ]] ; then
+  echo "  blobstore_s3_region: $aws_blobstore_region"
+fi
+
 if [[ -z $use_provided_cert ]]; then
   echo "  # Skip SSL validation since we use self-signed certs"
   echo "  skip_ssl_validation: true"
