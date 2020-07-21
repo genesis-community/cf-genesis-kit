@@ -1,0 +1,12 @@
+- type: replace
+  path: /instance_groups/name=database/jobs/-
+  value:
+    name: migrate-postgres
+    release: migrate-postgres
+
+- type: replace
+  path: /releases/-
+  value:
+    name: migrate-postgres
+    version: latest
+    # url: git+https://github.com/rkoster/migrate-postgres-boshrelease.git
