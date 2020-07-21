@@ -10,3 +10,4 @@
     name: migrate-postgres
     version: latest
     # url: git+https://github.com/rkoster/migrate-postgres-boshrelease.git
+    # TODO: create a proper release
