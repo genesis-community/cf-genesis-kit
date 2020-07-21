@@ -9,7 +9,6 @@ features=()
 
 ask_for_loadbalancer() {
   load_balancer= # Assigned below
-  describe "#gu{Load Balancer}"
   prompt_for load_balancer "select" \
     'What load balancer would you like to use in front of this Cloud Foundry?' \
     -o "[external] An existing ${1:-"external Load Balancer"}" \
@@ -58,7 +57,6 @@ ask_for_loadbalancer() {
 ##       files.  See sample for azure blobstore on line 132 of hooks/blueprint
 ##       for example of how they are consumed
 ask_for_database() {
-  describe "#gu{Database}"
   inst="database"
   case "${1:-}" in
   rds)
@@ -137,30 +135,28 @@ cfversion="$(spruce json cf-deployment/cf-deployment.yml | jq -r '.manifest_vers
 describe "" \
   "#Gku{Cloud Foundry Genesis Kit $GENESIS_KIT_VERSION}" \
   "" \
-  "This kit is based on cf-deployment $cfversion, but contains best-practice" \
+  "This kit is based on #c{cf-deployment $cfversion}, but contains best-practice" \
   "enhancements derived from the v1.x version of the kit."
 
 ok=
 while [[ $ok != "true" ]]; do
-  echo
-  echo "Your Cloud Foundry instance needs a base domain, from which all the"
-  echo "other endpoint URLs and domains will be fashioned."
-  echo
+  describe "" \
+    "Your Cloud Foundry instance needs a base domain, from which all the" \
+    "other endpoint URLs and domains will be fashioned."
   prompt_for base_domain line \
     "What is the base domain of your Cloud Foundry?"
 
-      echo
-  describe "Using the base domain of #C{$base_domain},"
-      echo "you will get the following domains and endpoints:"
-      echo
-  describe "    apps: https://APP-NAME.#M{run}.#C{$base_domain}"
-  describe "  cf api: https://#M{api.system}.#C{$base_domain}"
-  describe "     uaa: https://#M{uaa.system}.#C{$base_domain}"
-  describe "          https://#M{login.system}.#C{$base_domain}"
-      echo
+  describe "" \
+    "Using the base domain of #C{$base_domain}," \
+    "you will get the following domains and endpoints:" \
+    "" \
+    "    apps: https://#yi{<APP-NAME>}.#M{run}.#C{$base_domain}" \
+    "  cf api: https://#M{api.system}.#C{$base_domain}" \
+    "     uaa: https://#M{uaa.system}.#C{$base_domain}" \
+    "          https://#M{login.system}.#C{$base_domain}" \
 
-  prompt_for ok boolean \
-    'Is this acceptable?'
+  prompt_for ok boolean --default "y" \
+    'Is this acceptable [y|n]?'
 done
 
 describe "" \
@@ -197,7 +193,7 @@ if [[ $use_bare == 'true' ]] ; then
 
 else
   # IaaS selection
-  describe "#gu{Iaas Selection}"
+  describe "" "#gu{Iaas Selection}"
   iaas= # Assigned below
   prompt_for iaas "select" \
     'What IaaS are you deploying to?' \
@@ -234,7 +230,6 @@ else
     ask_for_loadbalancer "Elastic Load Balancer"
     ask_for_database rds
 
-    describe "#gu{Blobstore}"
     use_aws_stuff=
     prompt_for use_aws_stuff boolean \
       'Would you like to use Amazon S3 to store droplets and application bits?'
@@ -256,7 +251,6 @@ else
     ask_for_loadbalancer "Google Cloud Load Balancer"
     ask_for_database gcp
 
-    describe "#gu{Blobstore}"
     use_gcp_blobstore= # Assigned below
     prompt_for use_gcp_blobstore "select" \
       'What would you like to use to store droplets, buildpacks and application bits?' \
@@ -299,31 +293,31 @@ else
     ;;
   esac;
 
-  describe "" "#guExtra bits" ""
+  describe "" "#gu{Extra Features}" ""
 
   small_footprint=
-  prompt_for small_footprint boolean \
-    'Would you like to set up integration for the CF App Autocaler Genesis Kit?'
+  prompt_for small_footprint boolean --default n \
+    'Would you like to use a small footprint (minimal VMs on one AZ) [y|n]?'
   [[ "$small_footprint" == 'true' ]] && features+=( 'small-footprint' )
 
   use_nsf=
-  prompt_for use_nsf boolean \
-    'Would you like to set up integration for the CF App Autocaler Genesis Kit?'
+  prompt_for use_nsf boolean --default n \
+    'Would you like to enable NFS Volume Services [y|n]?'
   [[ "$use_nsf" == 'true' ]] && features+=( 'nfs-volume-services' )
 
   service_discovery=
-  prompt_for service_discovery boolean \
-    'Would you like to set up integration for the CF App Autocaler Genesis Kit?'
+  prompt_for service_discovery boolean --default y\
+    'Would you like to enable service discovery [y|n]?'
   [[ "$service_discovery" == 'true' ]] && features+=( 'enable-service-discovery' )
 
   use_autoscaler=
   prompt_for use_autoscaler boolean \
-    'Would you like to set up integration for the CF App Autocaler Genesis Kit?'
+    'Would you like to set up integration for the CF App Autocaler Genesis Kit [y|n]?'
   [[ "$use_autoscaler" == 'true' ]] && features+=( 'app-autoscaler-integration' )
 
   use_prometheus=
   prompt_for use_prometheus boolean \
-    'Would you like to set up integration for the CF App Autocaler Genesis Kit?'
+    'Would you like to set up integration for the Prometheus Genesis Kit [y|n]?'
   [[ "$use_prometheus" == 'true' ]] && features+=( 'prometheus-integration' )
 
 fi
@@ -338,10 +332,15 @@ echo "---"
 echo "kit:"
 echo "  name:    $GENESIS_KIT_NAME"
 echo "  version: $GENESIS_KIT_VERSION"
-echo "  features:"
-for feature in "${features[@]}" ; do
-  echo "    - $feature"
-done
+
+set +u
+if [[ ${#features[@]} -gt 0 ]] ; then
+  echo "  features:"
+  for feature in "${features[@]}" ; do
+    echo "    - $feature"
+  done
+fi
+set -u
 
 genesis_config_block
 
