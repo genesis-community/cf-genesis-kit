@@ -1,4 +1,7 @@
 credentials:
+- name: ((credhub_prefix))/cc_directory_key
+  type: password
+  value: ((vault "((vault_prefix))/cc:directory_key"))
 - name: ((credhub_prefix))/blobstore_admin_users_password
   type: password
   value: ((vault "((vault_prefix))/blobstore/creds:password"))
