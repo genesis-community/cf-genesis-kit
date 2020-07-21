@@ -188,7 +188,8 @@ for want in $GENESIS_REQUESTED_FEATURES; do
     bare|partitioned-network|haproxy|tls|self-signed) features+=( "$want" ) ;;
     aws-blobstore|azure-blobstore|gcp-blobstore|gcp-use-access-key) features+=( "$want" ) ;;
     local-postgres-db|local-mysql-db|mysql-db|postgres-db) features+=( "$want" ) ;;
-    nfs-volume-services|small-footprint|app-autoscaler-integration|prometheus-integration) features+=( "$want" ) ;;
+    nfs-volume-services|small-footprint|enable-service-discovery) features+=( "$want" ) ;;
+    app-autoscaler-integration|prometheus-integration) features+=( "$want" ) ;;
     cf-deployment/*)
       if [[ -f "$want.yml" ]] ; then
         features+=( "$want" )

@@ -293,7 +293,7 @@ else
     ;;
   esac;
 
-  describe "" "#gu{Extra Features}" ""
+  describe "" "#gu{Extra Features}"
 
   small_footprint=
   prompt_for small_footprint boolean --default n \
