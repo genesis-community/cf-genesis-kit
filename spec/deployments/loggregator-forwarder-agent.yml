@@ -1,0 +1,12 @@
+---
+kit:
+  name:    dev
+  features:
+    - loggregator-forwarder-agent
+
+genesis:
+  env:         loggregator-forwarder-agent
+
+params:
+  base_domain: cf.testing.examle
+

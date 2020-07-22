@@ -1,0 +1,45 @@
+---
+
+# This provides TLS support and the associated variable block to generate the
+# required certs.
+#
+# Relies on overlay/routing/haproxy.yml to be applied first.
+
+params:
+  disable_tls_10: true
+  disable_tls_11: true
+
+instance_groups:
+- name: haproxy
+  jobs:
+  - name: haproxy
+    properties:
+      ha_proxy:
+        backend_ca_file: ((router_ssl.ca))
+        backend_port: 443
+        backend_ssl: verify
+        disable_tls_10: (( grab params.disable_tls_10 ))
+        disable_tls_11: (( grab params.disable_tls_11 ))
+
+        ssl_pem: ((haproxy_ssl.certificate))((haproxy_ssl.private_key))
+
+variables:
+- name: haproxy_ca
+  options:
+    common_name: haproxyCA
+    is_ca: true
+    duration: 3650
+  type: certificate
+- name: haproxy_ssl
+  options:
+    alternative_names:
+    - ((system_domain))
+    - '*.((system_domain))'
+    ca: haproxy_ca
+    common_name: haproxySSL
+    extended_key_usage: [server_auth,client_auth]
+  type: certificate
+
+exodus:
+  self-signed: true
+

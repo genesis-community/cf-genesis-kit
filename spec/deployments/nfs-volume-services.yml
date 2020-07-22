@@ -1,0 +1,12 @@
+---
+kit:
+  name:    dev
+  features:
+    - nfs-volume-services
+
+genesis:
+  env:         nfs-volume-services
+
+params:
+  base_domain: cf.testing.examle
+

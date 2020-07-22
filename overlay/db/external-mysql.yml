@@ -1,0 +1,6 @@
+---
+params:
+  external_db_host:     (( param "Please provide the hostname / IP of your external MySQL database instance" ))
+  external_db_scheme:   mysql
+  external_db_port:     3306
+  external_db_password: ((external_db_password))

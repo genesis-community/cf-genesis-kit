@@ -1,0 +1,11 @@
+---
+kit:
+  name:    dev
+  features:
+    - gcp-blobstore
+
+genesis:
+  env:         blobstore-gcp
+
+params:
+  base_domain: cf.testing.examle

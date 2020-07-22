@@ -1,0 +1,19 @@
+---
+kit:
+  name:    dev
+  features:
+    - postgres-db
+
+genesis:
+  env:         postgres-db
+
+params:
+  base_domain: cf.testing.examle
+  external_db_host: test-external-postgres-db-host
+  external_db_port: test-port
+  external_db_username: test-db-username
+  external_db_password: test-db-password
+  bbsdb_host: test bbsdb-host
+  bbsdb_user: test-bbsdb-user 
+  bbsdb_password: test-bbsdb-password
+

@@ -1,0 +1,12 @@
+---
+kit:
+  name:    dev
+  features:
+    - small-footprint
+
+genesis:
+  env:         small-footprint
+
+params:
+  base_domain: cf.testing.examle
+

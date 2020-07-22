@@ -1,0 +1,42 @@
+--- # overrides: basic overrides for genesis compatibility
+exodus:
+  cf_deployment_version: (( grab manifest_version ))
+
+  admin_username: admin
+  admin_password: ((cf_admin_password))
+  base_domain:    (( grab params.base_domain ))
+  system_domain:  (( grab params.system_domain ))
+  app_domains:    (( grab params.app_domains ))
+  apps_domain:    (( grab params.apps_domain ))
+  api_domain:     (( grab params.api_domain ))
+
+  edge_network:    (( grab params.cf_edge_network || params.network ))
+  core_network:    (( grab params.cf_core_network || params.network ))
+  runtime_network: (( grab params.cf_runtime_network || params.network ))
+
+  vaulted_uaa_clients: (( concat meta.vault "/uaa/client_secrets:firehose" ))
+
+  system_org:   system
+  system_space: system
+
+# BOSH Variables - used to populate ((variables))
+bosh-variables:
+  system_domain:   (( grab params.system_domain ))
+  deployment_name: (( grab name ))
+  network_name:    (( grab params.network ))
+
+meta:
+  app_domains:
+    - ((system_domain))
+  default_apps_domains: (( grab params.apps_domains || meta.app_domains ))
+  internal_app_domains: []
+  default_azs: [z1, z2, z3]
+
+params:
+  network: default
+
+  base_domain: (( param "What is the base domain for this Cloud Foundry?" ))
+  system_domain: (( concat "system." params.base_domain ))
+  app_domains: (( grab meta.default_apps_domains meta.internal_app_domains ))
+  apps_domain: (( grab params.app_domains[0] ))
+  api_domain:  (( concat "api." params.system_domain ))

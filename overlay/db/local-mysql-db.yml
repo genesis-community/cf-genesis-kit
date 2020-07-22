@@ -1,0 +1,7 @@
+# These variables are only valid if you're using mysql.
+# This needs to be separate from the base, because the use-postgres ops file
+# cannot be guaranteed to run after the overlay base and therefore clean up
+# these keys for us.
+variables:
+- { name: pxc_galera_ca, options: { duration: 3650 } }
+- { name: pxc_server_ca, options: { duration: 3650 } }

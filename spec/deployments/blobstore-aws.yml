@@ -1,0 +1,12 @@
+---
+kit:
+  name:    dev
+  features:
+    - aws-blobstore
+
+genesis:
+  env:         blobstore-aws
+
+params:
+  base_domain: cf.testing.examle
+  blobstore_s3_region: blobstore-s3-region

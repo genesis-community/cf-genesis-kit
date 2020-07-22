@@ -1,0 +1,12 @@
+---
+kit:
+  name:    dev
+  features:
+    - container-routing-integrity
+
+genesis:
+  env:         container-routing-integrity
+
+params:
+  base_domain: cf.testing.examle
+

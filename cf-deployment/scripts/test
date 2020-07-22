@@ -1,0 +1,88 @@
+#!/bin/bash
+
+set -ue
+
+exit_code=0
+GREEN='\033[0;32m'
+LIGHT_GREEN='\033[0;92m'
+RED='\033[0;31m'
+LIGHT_RED='\033[1;31m'
+YELLOW='\033[0;93m'
+NOCOLOR='\033[0m'
+
+script_home="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+home="$( cd "${script_home}/.." && pwd )"
+
+# suite_name should be defined by each of our test suite functions
+suite_name="UNDEFINED"
+
+# Grab each of our test suites, exercised by test_opsfile_interpolation()
+for script in `ls ${script_home}/*.sh`; do
+  source $script
+done
+
+# If we get killed, kill backgrounded processes
+trap 'kill $(jobs -p) > /dev/null 2>&1' SIGTERM SIGINT
+
+fail() {
+  echo -e "${RED} FAIL - ${LIGHT_RED} $suite_name ${RED} - ${NOCOLOR} $1"
+  exit_code=1
+}
+
+pass() {
+  echo -e "${GREEN} PASS - ${YELLOW} $suite_name ${GREEN} - ${NOCOLOR} $1"
+}
+
+interpolate() {
+  if [[ ${1} == output:* ]]; then
+    interpolation_output=$1
+    empty_string=""
+    interpolation_output="${interpolation_output/output: /$empty_string}"; shift
+  else
+    interpolation_output=/dev/null
+  fi
+
+  local vars_store=$(mktemp)
+  cp ${home}/scripts/fixtures/unit-test-vars-store.yml $vars_store
+
+  bosh interpolate --vars-store $vars_store --var-errs -v system_domain=foo.bar.com ${home}/cf-deployment.yml $@ > $interpolation_output
+  local exit_code=$?
+
+  rm $vars_store
+  return $exit_code
+}
+
+test_opsfile_interpolation() {
+  test_backup_and_restore_ops &
+
+  for job in $(jobs -p); do
+    wait $job || exit_code=1
+  done
+}
+main() {
+  local ops_directories
+  local ops_directories_without_test
+  local ops_directories_without_community
+
+  ops_directories=$(find operations \
+                         -type d \
+                         -not -name 'example-vars-files' \
+                         -not -name 'workaround')
+  ops_directories_without_test="$(echo "${ops_directories}" | grep -v -e test)"
+  ops_directories_without_community="$(echo "${ops_directories}" | grep -v -e community)"
+
+  echo
+  echo -e "${LIGHT_GREEN} ***** Begin interpolation operations tests ***** ${NOCOLOR}"
+  test_opsfile_interpolation
+
+  echo
+  if [ "$exit_code" == "0" ]; then
+    echo -e "${LIGHT_GREEN}All tests passed. ${NOCOLOR}"
+  else
+    echo -e "${RED}At least one test failed. ${NOCOLOR}"
+  fi
+
+  exit $exit_code
+}
+
+time main

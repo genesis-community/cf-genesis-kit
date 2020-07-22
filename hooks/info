@@ -1,16 +1,15 @@
 #!/bin/bash
 set -eu
-vault="secret/$GENESIS_VAULT_PREFIX"
-
-base=$(lookup params.base_domain)
-system_domain=$(lookup params.system_domain system.$base)
-
-api_url=https://api.$system_domain
-password=$(safe read $vault/admin_user:password)
+exodus_data="$(lookup --exodus .)"
+system_domain="$(echo "$exodus_data" | jq -r '.system_domain // "system.\(.base_domain)"')"
+api_domain="$(echo "$exodus_data" | jq -r '.api_domain // "api.\($system_domain)"' --arg system_domain "$system_domain")"
+api_url=https://$api_domain
+admin=$(exodus admin_username)
+password=$(exodus admin_password)
 
       echo "cloud foundry api"
   describe "       url: #C{$api_url}"
-  describe "  username: #M{admin}"
+  describe "  username: #M{$admin}"
   describe "  password: #G{$password}"
 
       echo

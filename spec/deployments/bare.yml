@@ -1,0 +1,13 @@
+---
+kit:
+  name:    dev
+  features:
+    - partitioned-network
+    - bare
+
+genesis:
+  env:         bare
+
+params:
+  base_domain: cf.testing.examle
+

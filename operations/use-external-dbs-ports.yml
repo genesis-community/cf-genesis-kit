@@ -1,0 +1,33 @@
+---
+
+# For some reason, the cf-deployment ops file for external database allows
+# different hosts for all the different database schemas, but rely on the same
+# port.  This allows the port to be different.
+
+- type: replace
+  path: /instance_groups/name=uaa/jobs/name=uaa/properties/uaadb/port
+  value: ((external_uaa_database_port))
+- type: replace
+  path: /instance_groups/name=api/jobs/name=cloud_controller_ng/properties/ccdb/port
+  value: &external_cc_database_port "((external_cc_database_port))"
+- type: replace
+  path: /instance_groups/name=diego-api/jobs/name=bbs/properties/diego/bbs/sql/db_port
+  value: ((external_bbs_database_port))
+- type: replace
+  path: /instance_groups/name=api/jobs/name=routing-api/properties/routing_api/sqldb/port
+  value: ((external_routing_api_database_port))
+- type: replace
+  path: /instance_groups/name=api/jobs/name=policy-server/properties/database/port
+  value: ((external_policy_server_database_port))
+- type: replace
+  path: /instance_groups/name=diego-api/jobs/name=silk-controller/properties/database/port
+  value: ((external_silk_controller_database_port))
+- type: replace
+  path: /instance_groups/name=diego-api/jobs/name=locket/properties/diego/locket/sql/db_port
+  value: ((external_locket_database_port))
+- type: replace
+  path: /instance_groups/name=credhub/jobs/name=credhub/properties/credhub/data_storage/port
+  value: ((external_credhub_database_port))
+- type: replace
+  path: /instance_groups/name=scheduler/jobs/name=cc_deployment_updater/properties/ccdb/port
+  value: "((external_cc_database_port))"

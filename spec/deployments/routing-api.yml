@@ -1,0 +1,12 @@
+---
+kit:
+  name:    dev
+  features:
+    - routing-api
+
+genesis:
+  env:         routing-api
+
+params:
+  base_domain: cf.testing.examle
+

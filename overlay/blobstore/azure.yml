@@ -1,0 +1,8 @@
+
+bosh-variables:
+  environment: (( grab params.blobstore_environment || params.azure_environment || "AzureCloud" ))
+
+# Credhub Secrets
+#   blobstore_storage_account_name
+#   blobstore_storage_access_key
+

@@ -1,0 +1,175 @@
+- type: replace
+  path: /instance_groups/name=api/jobs/name=cloud_controller_ng/properties/cc/volume_services_enabled?
+  value: true
+- type: replace
+  path: /instance_groups/name=cc-worker/jobs/name=cloud_controller_worker/properties/cc/volume_services_enabled?
+  value: true
+- type: replace
+  path: /instance_groups/name=scheduler/jobs/name=cloud_controller_clock/properties/cc/volume_services_enabled?
+  value: true
+- type: replace
+  path: /instance_groups/name=database/jobs/name=pxc-mysql/properties/seeded_databases/-
+  value:
+    name: nfs-broker
+    password: ((nfs-broker-database-password))
+    username: nfs-broker
+- type: replace
+  path: /instance_groups/name=uaa/jobs/name=uaa/properties/uaa/clients/nfs-broker-push-client?
+  value:
+    authorities: cloud_controller.admin
+    authorized-grant-types: client_credentials
+    secret: ((nfs-broker-push-uaa-client-secret))
+- type: replace
+  path: /instance_groups/name=uaa/jobs/name=uaa/properties/uaa/clients/nfs-broker-credhub-client?
+  value:
+    authorities: credhub.read,credhub.write
+    authorized-grant-types: client_credentials
+    secret: ((nfs-broker-credhub-uaa-client-secret))
+- type: replace
+  path: /instance_groups/name=credhub/jobs/name=credhub/properties/credhub/authorization/permissions/-
+  value:
+    actors:
+    - uaa-client:nfs-broker-credhub-client
+    operations:
+    - read
+    - write
+    - delete
+    - read_acl
+    - write_acl
+    path: /nfsbroker/*
+- type: replace
+  path: /instance_groups/-
+  value:
+    azs:
+    - z1
+    instances: 1
+    jobs:
+    - name: nfsbrokerpush
+      properties:
+        nfsbrokerpush:
+          app_domain: ((system_domain))
+          app_name: nfs-broker
+          cf:
+            client_id: nfs-broker-push-client
+            client_secret: ((nfs-broker-push-uaa-client-secret))
+          create_credhub_security_group: true
+          create_sql_security_group: false
+          credhub:
+            uaa_ca_cert: ((uaa_ssl.ca))
+            uaa_client_id: nfs-broker-credhub-client
+            uaa_client_secret: ((nfs-broker-credhub-uaa-client-secret))
+          db:
+            ca_cert: ((mysql_server_certificate.ca))
+            driver: mysql
+            host: sql-db.service.cf.internal
+            name: nfs-broker
+            password: ((nfs-broker-database-password))
+            port: 3306
+            username: nfs-broker
+          domain: ((system_domain))
+          organization: system
+          password: ((nfs-broker-password))
+          skip_cert_verify: true
+          space: nfs-broker-space
+          store_id: nfsbroker
+          syslog_url: ""
+          username: nfs-broker
+      provides:
+        nfsbrokerpush:
+          as: ignore-me
+      release: nfs-volume
+    - name: cf-cli-6-linux
+      release: cf-cli
+    lifecycle: errand
+    name: nfs-broker-push
+    networks:
+    - name: default
+    stemcell: default
+    vm_type: minimal
+- type: replace
+  path: /instance_groups/name=diego-cell/jobs/-
+  value:
+    name: nfsv3driver
+    properties:
+      nfsv3driver:
+        tls:
+          ca_cert: ((nfsv3driver_cert.ca))
+          client_cert: ((nfsv3driver_client_cert.certificate))
+          client_key: ((nfsv3driver_client_cert.private_key))
+          server_cert: ((nfsv3driver_cert.certificate))
+          server_key: ((nfsv3driver_cert.private_key))
+    release: nfs-volume
+- type: replace
+  path: /instance_groups/name=diego-cell/jobs/name=mapfs?
+  value:
+    name: mapfs
+    release: mapfs
+- type: replace
+  path: /variables/-
+  value:
+    name: nfs-broker-password
+    type: password
+- type: replace
+  path: /variables/-
+  value:
+    name: nfs-broker-database-password
+    type: password
+- type: replace
+  path: /variables/-
+  value:
+    name: nfs-broker-push-uaa-client-secret
+    type: password
+- type: replace
+  path: /variables/-
+  value:
+    name: nfs-broker-credhub-password
+    type: password
+- type: replace
+  path: /variables/-
+  value:
+    name: nfs-broker-credhub-uaa-client-secret
+    type: password
+- type: replace
+  path: /variables/-
+  value:
+    name: nfs_ca
+    options:
+      common_name: nfs-ca
+      is_ca: true
+    type: certificate
+- type: replace
+  path: /variables/-
+  value:
+    name: nfsv3driver_cert
+    options:
+      alternative_names:
+      - 127.0.0.1
+      ca: nfs_ca
+      common_name: 127.0.0.1
+      extended_key_usage:
+      - server_auth
+    type: certificate
+- type: replace
+  path: /variables/-
+  value:
+    name: nfsv3driver_client_cert
+    options:
+      ca: nfs_ca
+      common_name: nfs-client
+      extended_key_usage:
+      - client_auth
+    type: certificate
+- type: replace
+  path: /releases/-
+  value:
+    name: nfs-volume
+    sha1: d1d55087df3f77e08186b7362dc29d7133e7535d
+    url: https://bosh.io/d/github.com/cloudfoundry/nfs-volume-release?v=6.1.0
+    version: 6.1.0
+- type: replace
+  path: /releases/name=mapfs?
+  value:
+    name: mapfs
+    sha1: 0d47263c4bdf967c532592a226298bac67a2b5ed
+    url: https://bosh.io/d/github.com/cloudfoundry/mapfs-release?v=1.2.3
+    version: 1.2.3

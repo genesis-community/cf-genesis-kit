@@ -1,8 +1,5 @@
 #!/bin/bash
 set -eu
-vault="secret/$GENESIS_VAULT_PREFIX"
-target=$GENESIS_ENVIRONMENT
-
 
 list() {
   echo "The following addons are defined:"
@@ -14,13 +11,6 @@ list() {
   echo "  setup-cli         Installs cf CLI plugins like 'Targets', which"
   echo "                    helps to manage multiple Cloud Foundries from a"
   echo "                    single jumpbox."
-  echo
-  echo "  bind-autoscaler   Binds the Autoscaler service broker to your"
-  echo "                    deployed CF. Only works if the autoscaler"
-  echo "                    feature was enabled during deploy."
-  echo
-  echo "  asg               Generates application security group definitions,"
-  echo "                    in JSON, which can then be fed into Cloud Foundry."
   echo
   echo "  smoketest         Run the smoke tests errand on the first vm in the"
   echo "                    api instance group."
@@ -36,21 +26,16 @@ login() {
     exit 1
   fi
 
-  base=$(lookup params.base_domain)
-  system_domain=$(lookup params.system_domain system.$base)
+  base="$(lookup params.base_domain)"
+  system_domain="$(lookup --exodus system_domain "system.$base")"
   api_url=https://api.$system_domain
-  password=$(safe read $vault/admin_user:password)
+  username="$(exodus admin_username)"
+  password="$(exodus admin_password)"
 
-  if want_feature self-signed; then
-    cf api $api_url --skip-ssl-validation
-  elif [[ "$(lookup params.skip_ssl_validation)" == "true" ]]; then
-    cf api $api_url --skip-ssl-validation
-  else
-    cf api $api_url
-  fi
-
-  cf auth admin "$password"
-  cf save-target -f $target
+  #TODO enfoce ssl validation
+  cf api "$api_url" --skip-ssl-validation
+  cf auth "$username" "$password"
+  cf save-target -f "$GENESIS_ENVIRONMENT"
   echo ; echo
   cf target
 }
@@ -85,45 +70,8 @@ setup-cli)
   cf plugins
   ;;
 
-asg)
-  echo "To allow Cloud Foundry application instances to contact"
-  echo "other application instances via the CF gorouters:"
-  echo
-  lookup params.cf_public_ips '[]' | jq '.[] | { "destination": ., "protocol": "all" }' | jq -s
-  echo
-  echo "To allow Cloud Floundry application instances to contact"
-  echo "the services networks (for consuming brokered services):"
-  echo
-  lookup params.app_services_networks '[]' | jq '.[] | { "destination": ., "protocol": "all" }' | jq -s
-  echo
-  ;;
-
-bind-autoscaler)
-  if [[ $(exodus autoscaler_enabled) != "1" ]]; then
-    echo "This Genesis deployment does not have the Autoscaler feature."
-    exit 1
-  fi
-  login
-  username=$(safe read $vault/autoscaler/servicebroker_account:username)
-  password=$(safe read $vault/autoscaler/servicebroker_account:password)
-  base=$(exodus system_domain)
-  url="autoscalerservicebroker.$base"
-  if [[ $(exodus self-signed) == "1" ]]; then
-    cf create-service-broker autoscaler $username $password http://$url
-    echo "Successfully created the service broker."
-    exit 0
-  fi
-  cf create-service-broker autoscaler $username $password https://$url
-  echo "Successfully created the service broker."
-  exit 0
-  ;;
-
 smoketest)
-  $GENESIS_BOSH_COMMAND -e $BOSH_ENVIRONMENT -d $BOSH_DEPLOYMENT run-errand smoke_tests --instance uaa/first
-  ;;
-cats)
-  cats
-  exit 0
+  "$GENESIS_BOSH_COMMAND" -e "$BOSH_ENVIRONMENT" -d "$BOSH_DEPLOYMENT" run-errand smoke_tests
   ;;
 *)
   echo "Unrecognized Cloud Foundry Genesis Kit addon."

@@ -1,0 +1,14 @@
+#!/bin/bash
+
+# Upgrade check
+set +e
+version="$(exodus kit_version)"
+if [[ -n "${version:-}" ]] && ! new_enough "${version}" "2.0" ; then
+  # Migrate the secrets
+  source $GENESIS_ROOT/hooks/migrate-to-2.0
+  migrate_credentials_to_credhub
+
+  # Anything else it needs
+fi
+
+

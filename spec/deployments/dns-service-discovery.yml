@@ -1,0 +1,12 @@
+---
+kit:
+  name:    dev
+  features:
+    - dns-service-discovery
+
+genesis:
+  env:         dns-service-discovery
+
+params:
+  base_domain: cf.testing.examle
+

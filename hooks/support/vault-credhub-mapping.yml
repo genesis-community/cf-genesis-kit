@@ -1,0 +1,428 @@
+credentials:
+- name: ((credhub_prefix))/blobstore_admin_users_password
+  type: password
+  value: ((vault "((vault_prefix))/blobstore/creds:password"))
+- name: ((credhub_prefix))/blobstore_secure_link_secret
+  type: password
+  value: ((vault "((vault_prefix))/blobstore/creds:secret"))
+- name: ((credhub_prefix))/cc_bulk_api_password
+  type: password
+  value: ((vault "((vault_prefix))/cc:bulk_api"))
+- name: ((credhub_prefix))/cc_db_encryption_key
+  type: password
+  value: ((vault "((vault_prefix))/cc:db_encryption_key"))
+- name: ((credhub_prefix))/cc_internal_api_password
+  type: password
+  value: ((vault "((vault_prefix))/cc:internal_api"))
+- name: ((credhub_prefix))/cc_staging_upload_password
+  type: password
+  value: ((vault "((vault_prefix))/cc:staging_upload"))
+- name: ((credhub_prefix))/diego_database_password
+  type: password
+  value: ((vault "((vault_prefix))/diegodb:password"))
+- name: ((credhub_prefix))/uaa_database_password
+  type: password
+  value: ((vault "((vault_prefix))/uaadb:password"))
+- name: ((credhub_prefix))/network_policy_database_password
+  type: password
+  value: ((vault "((vault_prefix))/autoscalerdb:password"))
+- name: ((credhub_prefix))/network_connectivity_database_password
+  type: password
+  value: ((vault "((vault_prefix))/autoscalerdb:password"))
+- name: ((credhub_prefix))/uaa_default_encryption_passphrase
+  type: password
+  value: ((vault "((vault_prefix))/uaa/encryption_key:current"))
+- name: ((credhub_prefix))/silk_ca
+  type: certificate
+  value:
+    certificate: ((vault "((vault_prefix))/silk/certs/ca:certificate"))
+    private_key: ((vault "((vault_prefix))/silk/certs/ca:key"))
+    ca: ((vault "((vault_prefix))/silk/certs/ca:certificate" ))
+- name: ((credhub_prefix))/silk_controller
+  type: certificate
+  value:
+    certificate: ((vault "((vault_prefix))/silk/certs/controller:certificate"))
+    private_key: ((vault "((vault_prefix))/silk/certs/controller:key"))
+    ca_name: ((credhub_prefix))/silk_ca
+- name: ((credhub_prefix))/silk_daemon
+  type: certificate
+  value:
+    certificate: ((vault "((vault_prefix))/silk/certs/daemon:certificate"))
+    private_key: ((vault "((vault_prefix))/silk/certs/daemon:key"))
+    ca_name: ((credhub_prefix))/silk_ca
+- name: ((credhub_prefix))/network_policy_ca
+  type: certificate
+  value:
+    certificate: ((vault "((vault_prefix))/network_policy/certs/ca:certificate"))
+    private_key: ((vault "((vault_prefix))/network_policy/certs/ca:key"))
+    ca: ((vault "((vault_prefix))/network_policy/certs/ca:certificate" ))
+- name: ((credhub_prefix))/network_policy_server_external
+  type: certificate
+  value:
+    certificate: ((vault "((vault_prefix))/network_policy/certs/server_external:certificate"))
+    private_key: ((vault "((vault_prefix))/network_policy/certs/server_external:key"))
+    ca_name: ((credhub_prefix))/network_policy_ca
+- name: ((credhub_prefix))/network_policy_server
+  type: certificate
+  value:
+    certificate: ((vault "((vault_prefix))/network_policy/certs/server:certificate"))
+    private_key: ((vault "((vault_prefix))/network_policy/certs/server:key"))
+    ca_name: ((credhub_prefix))/network_policy_ca
+- name: ((credhub_prefix))/network_policy_client
+  type: certificate
+  value:
+    certificate: ((vault "((vault_prefix))/network_policy/certs/client:certificate"))
+    private_key: ((vault "((vault_prefix))/network_policy/certs/client:key"))
+    ca_name: ((credhub_prefix))/network_policy_ca
+- name: ((credhub_prefix))/uaa_clients_tcp_emitter_secret
+  type: password
+  value: ((vault "((vault_prefix))/uaa/client_secrets:tcp_emitter"))
+- name: ((credhub_prefix))/nats_password
+  type: password
+  value: ((vault "((vault_prefix))/nats:password"))
+- name: ((credhub_prefix))/router_status_password
+  type: password
+  value: ((vault "((vault_prefix))/gorouter/status:password"))
+- name: ((credhub_prefix))/cf_admin_password
+  type: password
+  value: ((vault "((vault_prefix))/admin_user:password"))
+- name: ((credhub_prefix))/router_route_services_secret
+  type: password
+  value: ((vault "((vault_prefix))/gorouter/route_services:secret"))
+- name: ((credhub_prefix))/uaa_admin_client_secret
+  type: password
+  value: ((vault "((vault_prefix))/uaa/client_secrets:admin_client"))
+- name: ((credhub_prefix))/uaa_clients_cc-routing_secret
+  type: password
+  value: ((vault "((vault_prefix))/uaa/client_secrets:cc_routing"))
+- name: ((credhub_prefix))/uaa_clients_cc-service-dashboards_secret
+  type: password
+  value: ((vault "((vault_prefix))/uaa/client_secrets:cc_broker"))
+- name: ((credhub_prefix))/uaa_clients_cc_service_key_client_secret
+  type: password
+  value: ((vault "((vault_prefix))/uaa/client_secrets:cc_service_key_client"))
+- name: ((credhub_prefix))/uaa_clients_cf_smoke_tests_secret
+  type: password
+  value: ((vault "((vault_prefix))/uaa/client_secrets:cf_smoke_tests"))
+- name: ((credhub_prefix))/uaa_clients_cloud_controller_username_lookup_secret
+  type: password
+  value: ((vault "((vault_prefix))/uaa/client_secrets:cc_user_lookup"))
+- name: ((credhub_prefix))/uaa_clients_doppler_secret
+  type: password
+  value: ((vault "((vault_prefix))/uaa/client_secrets:doppler"))
+- name: ((credhub_prefix))/uaa_clients_gorouter_secret
+  type: password
+  value: ((vault "((vault_prefix))/uaa/client_secrets:gorouter"))
+- name: ((credhub_prefix))/uaa_clients_network_policy_secret
+  type: password
+  value: ((vault "((vault_prefix))/uaa/client_secrets:network_policy"))
+- name: ((credhub_prefix))/uaa_clients_ssh-proxy_secret
+  type: password
+  value: ((vault "((vault_prefix))/uaa/client_secrets:ssh_proxy"))
+- name: ((credhub_prefix))/uaa_clients_tcp_router_secret
+  type: password
+  value: ((vault "((vault_prefix))/uaa/client_secrets:tcp_router"))
+- name: ((credhub_prefix))/diego_bbs_encryption_keys_passphrase
+  type: password
+  value: ((vault "((vault_prefix))/diego/encryption_key:value"))
+- name: ((credhub_prefix))/diego_ssh_proxy_host_key
+  type: ssh
+  value:
+    public_key: ((vault "((vault_prefix))/ssh_proxy/host_key:public"))
+    private_key: ((vault "((vault_prefix))/ssh_proxy/host_key:private"))
+- name: ((credhub_prefix))/uaa_jwt_signing_key
+  type: rsa
+  value:
+    public_key: ((vault "((vault_prefix))/uaa/jwt_signing_key:public"))
+    private_key: ((vault "((vault_prefix))/uaa/jwt_signing_key:private"))
+- name: ((credhub_prefix))/service_cf_internal_ca
+  type: certificate
+  value:
+    certificate: ((vault "((vault_prefix))/cf_internal/certs/ca:certificate"))
+    private_key: ((vault "((vault_prefix))/cf_internal/certs/ca:key"))
+    ca: ((vault "((vault_prefix))/cf_internal/certs/ca:certificate" ))
+- name: ((credhub_prefix))/blobstore_tls
+  type: certificate
+  value:
+    certificate: ((vault "((vault_prefix))/cf_internal/certs/blobstore_tls:certificate"))
+    private_key: ((vault "((vault_prefix))/cf_internal/certs/blobstore_tls:key"))
+    ca_name: ((credhub_prefix))/service_cf_internal_ca
+- name: ((credhub_prefix))/diego_auctioneer_client
+  type: certificate
+  value:
+    certificate: ((vault "((vault_prefix))/cf_internal/certs/diego_auctioneer_client:certificate"))
+    private_key: ((vault "((vault_prefix))/cf_internal/certs/diego_auctioneer_client:key"))
+    ca_name: ((credhub_prefix))/service_cf_internal_ca
+- name: ((credhub_prefix))/diego_auctioneer_server
+  type: certificate
+  value:
+    certificate: ((vault "((vault_prefix))/cf_internal/certs/diego_auctioneer_server:certificate"))
+    private_key: ((vault "((vault_prefix))/cf_internal/certs/diego_auctioneer_server:key"))
+    ca_name: ((credhub_prefix))/service_cf_internal_ca
+- name: ((credhub_prefix))/diego_bbs_client
+  type: certificate
+  value:
+    certificate: ((vault "((vault_prefix))/cf_internal/certs/diego_bbs_client:certificate"))
+    private_key: ((vault "((vault_prefix))/cf_internal/certs/diego_bbs_client:key"))
+    ca_name: ((credhub_prefix))/service_cf_internal_ca
+- name: ((credhub_prefix))/diego_bbs_server
+  type: certificate
+  value:
+    certificate: ((vault "((vault_prefix))/cf_internal/certs/diego_bbs_server:certificate"))
+    private_key: ((vault "((vault_prefix))/cf_internal/certs/diego_bbs_server:key"))
+    ca_name: ((credhub_prefix))/service_cf_internal_ca
+- name: ((credhub_prefix))/diego_rep_client
+  type: certificate
+  value:
+    certificate: ((vault "((vault_prefix))/cf_internal/certs/diego_rep_client:certificate"))
+    private_key: ((vault "((vault_prefix))/cf_internal/certs/diego_rep_client:key"))
+    ca_name: ((credhub_prefix))/service_cf_internal_ca
+- name: ((credhub_prefix))/diego_rep_agent_v2
+  type: certificate
+  value:
+    certificate: ((vault "((vault_prefix))/cf_internal/certs/diego_rep_agent_v2:certificate"))
+    private_key: ((vault "((vault_prefix))/cf_internal/certs/diego_rep_agent_v2:key"))
+    ca_name: ((credhub_prefix))/service_cf_internal_ca
+- name: ((credhub_prefix))/loggregator_ca
+  type: certificate
+  value:
+    certificate: ((vault "((vault_prefix))/loggregator/certs/ca:certificate"))
+    private_key: ((vault "((vault_prefix))/loggregator/certs/ca:key"))
+    ca: ((vault "((vault_prefix))/loggregator/certs/ca:certificate" ))
+- name: ((credhub_prefix))/loggregator_tls_statsdinjector
+  type: certificate
+  value:
+    certificate: ((vault "((vault_prefix))/loggregator/certs/loggregator_tls_statsdinjector:certificate"))
+    private_key: ((vault "((vault_prefix))/loggregator/certs/loggregator_tls_statsdinjector:key"))
+    ca_name: ((credhub_prefix))/loggregator_ca
+- name: ((credhub_prefix))/loggregator_tls_agent
+  type: certificate
+  value:
+    certificate: ((vault "((vault_prefix))/loggregator/certs/loggregator_tls_agent:certificate"))
+    private_key: ((vault "((vault_prefix))/loggregator/certs/loggregator_tls_agent:key"))
+    ca_name: ((credhub_prefix))/loggregator_ca
+- name: ((credhub_prefix))/loggregator_tls_doppler
+  type: certificate
+  value:
+    certificate: ((vault "((vault_prefix))/loggregator/certs/loggregator_tls_doppler:certificate"))
+    private_key: ((vault "((vault_prefix))/loggregator/certs/loggregator_tls_doppler:key"))
+    ca_name: ((credhub_prefix))/loggregator_ca
+- name: ((credhub_prefix))/loggregator_tls_tc
+  type: certificate
+  value:
+    certificate: ((vault "((vault_prefix))/loggregator/certs/loggregator_tls_tc:certificate"))
+    private_key: ((vault "((vault_prefix))/loggregator/certs/loggregator_tls_tc:key"))
+    ca_name: ((credhub_prefix))/loggregator_ca
+- name: ((credhub_prefix))/loggregator_tls_cc_tc
+  type: certificate
+  value:
+    certificate: ((vault "((vault_prefix))/cf_internal/certs/loggregator_tls_cc_tc:certificate"))
+    private_key: ((vault "((vault_prefix))/cf_internal/certs/loggregator_tls_cc_tc:key"))
+    ca_name: ((credhub_prefix))/service_cf_internal_ca
+- name: ((credhub_prefix))/loggregator_rlp_gateway_tls_cc
+  type: certificate
+  value:
+    certificate: ((vault "((vault_prefix))/cf_internal/certs/loggregator_rlp_gateway_tls_cc:certificate"))
+    private_key: ((vault "((vault_prefix))/cf_internal/certs/loggregator_rlp_gateway_tls_cc:key"))
+    ca_name: ((credhub_prefix))/service_cf_internal_ca
+- name: ((credhub_prefix))/loggregator_tls_rlp
+  type: certificate
+  value:
+    certificate: ((vault "((vault_prefix))/loggregator/certs/loggregator_tls_rlp:certificate"))
+    private_key: ((vault "((vault_prefix))/loggregator/certs/loggregator_tls_rlp:key"))
+    ca_name: ((credhub_prefix))/loggregator_ca
+- name: ((credhub_prefix))/loggregator_rlp_gateway
+  type: certificate
+  value:
+    certificate: ((vault "((vault_prefix))/loggregator/certs/loggregator_tls_rlp_gateway:certificate"))
+    private_key: ((vault "((vault_prefix))/loggregator/certs/loggregator_tls_rlp_gateway:key"))
+    ca_name: ((credhub_prefix))/loggregator_ca
+- name: ((credhub_prefix))/adapter_rlp_tls
+  type: certificate
+  value:
+    certificate: ((vault "((vault_prefix))/loggregator/certs/adapter_rlp_tls:certificate"))
+    private_key: ((vault "((vault_prefix))/loggregator/certs/adapter_rlp_tls:key"))
+    ca_name: ((credhub_prefix))/loggregator_ca
+- name: ((credhub_prefix))/scheduler_api_tls
+  type: certificate
+  value:
+    certificate: ((vault "((vault_prefix))/cf_internal/certs/scheduler_api_tls:certificate"))
+    private_key: ((vault "((vault_prefix))/cf_internal/certs/scheduler_api_tls:key"))
+    ca_name: ((credhub_prefix))/service_cf_internal_ca
+- name: ((credhub_prefix))/adapter_tls
+  type: certificate
+  value:
+    certificate: ((vault "((vault_prefix))/loggregator/certs/adapter_tls:certificate"))
+    private_key: ((vault "((vault_prefix))/loggregator/certs/adapter_tls:key"))
+    ca_name: ((credhub_prefix))/loggregator_ca
+- name: ((credhub_prefix))/scheduler_client_tls
+  type: certificate
+  value:
+    certificate: ((vault "((vault_prefix))/loggregator/certs/scheduler_client_tls:certificate"))
+    private_key: ((vault "((vault_prefix))/loggregator/certs/scheduler_client_tls:key"))
+    ca_name: ((credhub_prefix))/loggregator_ca
+- name: ((credhub_prefix))/logs_provider
+  type: certificate
+  value:
+    certificate: ((vault "((vault_prefix))/loggregator/certs/logs_provider:certificate"))
+    private_key: ((vault "((vault_prefix))/loggregator/certs/logs_provider:key"))
+    ca_name: ((credhub_prefix))/loggregator_ca
+- name: ((credhub_prefix))/log_cache_ca
+  type: certificate
+  value:
+    certificate: ((vault "((vault_prefix))/log_cache/certs/ca:certificate"))
+    private_key: ((vault "((vault_prefix))/log_cache/certs/ca:key"))
+    ca: ((vault "((vault_prefix))/log_cache/certs/ca:certificate" ))
+- name: ((credhub_prefix))/log_cache
+  type: certificate
+  value:
+    certificate: ((vault "((vault_prefix))/log_cache/certs/server:certificate"))
+    private_key: ((vault "((vault_prefix))/log_cache/certs/server:key"))
+    ca_name: ((credhub_prefix))/log_cache_ca
+- name: ((credhub_prefix))/cc_logcache_tls
+  type: certificate
+  value:
+    certificate: ((vault "((vault_prefix))/log_cache/certs/cc_logcache_tls:certificate"))
+    private_key: ((vault "((vault_prefix))/log_cache/certs/cc_logcache_tls:key"))
+    ca_name: ((credhub_prefix))/log_cache_ca
+- name: ((credhub_prefix))/logcache_ssl
+  type: certificate
+  value:
+    certificate: ((vault "((vault_prefix))/cf_internal/certs/logcache_ssl:certificate"))
+    private_key: ((vault "((vault_prefix))/cf_internal/certs/logcache_ssl:key"))
+    ca_name: ((credhub_prefix))/service_cf_internal_ca
+- name: ((credhub_prefix))/log_cache_proxy_tls
+  type: certificate
+  value:
+    certificate: ((vault "((vault_prefix))/log_cache/certs/proxy_tls:certificate"))
+    private_key: ((vault "((vault_prefix))/log_cache/certs/proxy_tls:key"))
+    ca_name: ((credhub_prefix))/log_cache_ca
+- name: ((credhub_prefix))/router_ca
+  type: certificate
+  value:
+    certificate: ((vault "((vault_prefix))/router/certs/ca:certificate"))
+    private_key: ((vault "((vault_prefix))/router/certs/ca:key"))
+    ca: ((vault "((vault_prefix))/router/certs/ca:certificate" ))
+- name: ((credhub_prefix))/router_ssl
+  type: certificate
+  value:
+    certificate: ((vault "((vault_prefix))/router/certs/ssl:certificate"))
+    private_key: ((vault "((vault_prefix))/router/certs/ssl:key"))
+    ca_name: ((credhub_prefix))/router_ca
+- name: ((credhub_prefix))/routing_api_ca
+  type: certificate
+  value:
+    certificate: ((vault "((vault_prefix))/routing_api/certs/ca:certificate"))
+    private_key: ((vault "((vault_prefix))/routing_api/certs/ca:key"))
+    ca: ((vault "((vault_prefix))/routing_api/certs/ca:certificate" ))
+- name: ((credhub_prefix))/routing_api_tls
+  type: certificate
+  value:
+    certificate: ((vault "((vault_prefix))/routing_api/certs/server:certificate"))
+    private_key: ((vault "((vault_prefix))/routing_api/certs/server:key"))
+    ca_name: ((credhub_prefix))/routing_api_ca
+- name: ((credhub_prefix))/routing_api_tls_client
+  type: certificate
+  value:
+    certificate: ((vault "((vault_prefix))/routing_api/certs/client:certificate"))
+    private_key: ((vault "((vault_prefix))/routing_api/certs/client:key"))
+    ca_name: ((credhub_prefix))/routing_api_ca
+- name: ((credhub_prefix))/uaa_ca
+  type: certificate
+  value:
+    certificate: ((vault "((vault_prefix))/uaa/certs/ca:certificate"))
+    private_key: ((vault "((vault_prefix))/uaa/certs/ca:key"))
+    ca: ((vault "((vault_prefix))/uaa/certs/ca:certificate" ))
+- name: ((credhub_prefix))/uaa_ssl
+  type: certificate
+  value:
+    certificate: ((vault "((vault_prefix))/uaa/certs/ssl:certificate"))
+    private_key: ((vault "((vault_prefix))/uaa/certs/ssl:key"))
+    ca_name: ((credhub_prefix))/uaa_ca
+- name: ((credhub_prefix))/uaa_login_saml
+  type: certificate
+  value:
+    certificate: ((vault "((vault_prefix))/uaa/certs/login_saml:certificate"))
+    private_key: ((vault "((vault_prefix))/uaa/certs/login_saml:key"))
+    ca_name: ((credhub_prefix))/uaa_ca
+- name: ((credhub_prefix))/cc_tls
+  type: certificate
+  value:
+    certificate: ((vault "((vault_prefix))/cf_internal/certs/cc_tls:certificate"))
+    private_key: ((vault "((vault_prefix))/cf_internal/certs/cc_tls:key"))
+    ca_name: ((credhub_prefix))/service_cf_internal_ca
+- name: ((credhub_prefix))/cc_public_tls
+  type: certificate
+  value:
+    certificate: ((vault "((vault_prefix))/cf_internal/certs/cc_public_tls:certificate"))
+    private_key: ((vault "((vault_prefix))/cf_internal/certs/cc_public_tls:key"))
+    ca_name: ((credhub_prefix))/service_cf_internal_ca
+- name: ((credhub_prefix))/cc_bridge_tps
+  type: certificate
+  value:
+    certificate: ((vault "((vault_prefix))/cf_internal/certs/cc_bridge_tps:certificate"))
+    private_key: ((vault "((vault_prefix))/cf_internal/certs/cc_bridge_tps:key"))
+    ca_name: ((credhub_prefix))/service_cf_internal_ca
+- name: ((credhub_prefix))/cc_bridge_cc_uploader
+  type: certificate
+  value:
+    certificate: ((vault "((vault_prefix))/cf_internal/certs/cc_bridge_cc_uploader:certificate"))
+    private_key: ((vault "((vault_prefix))/cf_internal/certs/cc_bridge_cc_uploader:key"))
+    ca_name: ((credhub_prefix))/service_cf_internal_ca
+- name: ((credhub_prefix))/cc_bridge_cc_uploader_server
+  type: certificate
+  value:
+    certificate: ((vault "((vault_prefix))/cf_internal/certs/cc_bridge_cc_uploader_server:certificate"))
+    private_key: ((vault "((vault_prefix))/cf_internal/certs/cc_bridge_cc_uploader_server:key"))
+    ca_name: ((credhub_prefix))/service_cf_internal_ca
+- name: ((credhub_prefix))/diego_locket_server
+  type: certificate
+  value:
+    certificate: ((vault "((vault_prefix))/cf_internal/certs/diego_locket_server:certificate"))
+    private_key: ((vault "((vault_prefix))/cf_internal/certs/diego_locket_server:key"))
+    ca_name: ((credhub_prefix))/service_cf_internal_ca
+- name: ((credhub_prefix))/diego_locket_client
+  type: certificate
+  value:
+    certificate: ((vault "((vault_prefix))/cf_internal/certs/diego_locket_client:certificate"))
+    private_key: ((vault "((vault_prefix))/cf_internal/certs/diego_locket_client:key"))
+    ca_name: ((credhub_prefix))/service_cf_internal_ca
+- name: ((credhub_prefix))/locket_database_password
+  type: password
+  value: ((vault "((vault_prefix))/autoscalerdb:password"))
+- name: ((credhub_prefix))/application_ca
+  type: certificate
+  value:
+    certificate: ((vault "((vault_prefix))/application/certs/ca:certificate"))
+    private_key: ((vault "((vault_prefix))/application/certs/ca:key"))
+    ca: ((vault "((vault_prefix))/application/certs/ca:certificate" ))
+- name: ((credhub_prefix))/diego_instance_identity_ca
+  type: certificate
+  value:
+    certificate: ((vault "((vault_prefix))/diego_instance_identity/certs/ca:certificate"))
+    private_key: ((vault "((vault_prefix))/diego_instance_identity/certs/ca:key"))
+    ca_name: ((credhub_prefix))/application_ca
+- name: ((credhub_prefix))/gorouter_backend_tls
+  type: certificate
+  value:
+    certificate: ((vault "((vault_prefix))/cf_internal/certs/gorouter_backend_tls:certificate"))
+    private_key: ((vault "((vault_prefix))/cf_internal/certs/gorouter_backend_tls:key"))
+    ca_name: ((credhub_prefix))/service_cf_internal_ca
+- name: ((credhub_prefix))/ssh_proxy_backends_tls
+  type: certificate
+  value:
+    certificate: ((vault "((vault_prefix))/cf_internal/certs/ssh_proxy_backends_tls:certificate"))
+    private_key: ((vault "((vault_prefix))/cf_internal/certs/ssh_proxy_backends_tls:key"))
+    ca_name: ((credhub_prefix))/service_cf_internal_ca
+- name: ((credhub_prefix))/loggregator_rlp_gateway_tls
+  type: certificate
+  value:
+    certificate: ((vault "((vault_prefix))/cf_internal/certs/loggregator_rlp_gateway_tls:certificate"))
+    private_key: ((vault "((vault_prefix))/cf_internal/certs/loggregator_rlp_gateway_tls:key"))
+    ca_name: ((credhub_prefix))/service_cf_internal_ca
+- name: ((credhub_prefix))/loggregator_trafficcontroller_tls
+  type: certificate
+  value:
+    certificate: ((vault "((vault_prefix))/cf_internal/certs/loggregator_trafficcontroller_tls:certificate"))
+    private_key: ((vault "((vault_prefix))/cf_internal/certs/loggregator_trafficcontroller_tls:key"))
+    ca_name: ((credhub_prefix))/service_cf_internal_ca

@@ -1,0 +1,14 @@
+---
+
+# This provides the nominal edge network as the default for the dns and gateway
+# if HAProxy uses a different network for its ingress addresses.  This can't be
+# done as a go-patch file as the network name is dynamic, depending on features
+#
+# Relies on overlay/routing/haproxy.yml to be applied first.
+
+instance_groups:
+ - name: haproxy
+   networks:
+   - name: (( grab params.cf_edge_network || default))
+     default: [dns, gateway]
+
