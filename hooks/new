@@ -49,11 +49,11 @@ ask_for_database() {
   case "${1:-}" in
   rds)
     prompt_for database select \
-      'Where would you like to house Cloud Foundry configuration and metadata?' \
-      -o '[postgres-db]  PostgreSQL Amazon RDS' \
-      -o '[mysql-db]     MySQL Amazon RDS' \
-      -o '[local-db]     an internal database node (not HA)' \
-      -o '[local-ha-db]  internal HA database cluster'
+      'Where would you like to house the Cloud Foundry configuration and metadata?' \
+      -o 'PostgreSQL Amazon RDS' \
+      -o 'MySQL Amazon RDS' \
+      -o 'an internal PostgreSQL database node' \
+      -o 'an internal MySQL database node'
 
     case $database in
     postgres-db) inst="Amazon RDS PostgreSQL instance" ;;
