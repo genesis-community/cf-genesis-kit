@@ -61,11 +61,11 @@ ask_for_database() {
   case "${1:-}" in
   rds)
     prompt_for database "select" \
-      'Where would you like to house Cloud Foundry configuration and metadata?' \
-      -o '[postgres-db]       PostgreSQL Amazon RDS' \
-      -o '[mysql-db]          MySQL Amazon RDS' \
-      -o '[local-postgres-db] an internal PostgreSQL database node' \
-      -o '[local-mysql-db]    internal MySQL database node'
+      'Where would you like to house the Cloud Foundry configuration and metadata?' \
+      -o 'a PostgreSQL Amazon RDS' \
+      -o 'a MySQL Amazon RDS' \
+      -o 'an internal PostgreSQL database node' \
+      -o 'an internal MySQL database node'
 
     case "$database" in
     postgres-db) inst="Amazon RDS PostgreSQL instance" ;;
@@ -75,11 +75,11 @@ ask_for_database() {
 
   gcp)
     prompt_for database "select" \
-      'Where would you like to house Cloud Foundry configuration and metadata?' \
-      -o '[postgres-db]  PostgreSQL Google Cloud SQL' \
-      -o '[mysql-db]     MySQL Google Cloud SQL' \
-      -o '[local-postgres-db] an internal PostgreSQL database node' \
-      -o '[local-mysql-db]    internal MySQL database node'
+      'Where would you like to house the Cloud Foundry configuration and metadata?' \
+      -o 'a PostgreSQL Google Cloud SQL' \
+      -o 'a MySQL Google Cloud SQL' \
+      -o 'an internal PostgreSQL database node' \
+      -o 'an internal MySQL database node'
 
     case $database in
     postgres-db) inst="Google Cloud SQL PostgreSQL instance" ;;
@@ -89,11 +89,11 @@ ask_for_database() {
 
   '')
     prompt_for database "select" \
-      'Where would you like to house Cloud Foundry configuration and metadata?' \
-      -o '[postgres-db]       Existing external PostgreSQL Database' \
-      -o '[mysql-db]          Existing external MySQL Database' \
-      -o '[local-postgres-db] Internal PostgreSQL database node' \
-      -o '[local-mysql-db]    Internal MySQL database node'
+      'Where would you like to house the Cloud Foundry configuration and metadata?' \
+      -o 'an existing external PostgreSQL Database' \
+      -o 'an existing external MySQL Database' \
+      -o 'an internal PostgreSQL database node' \
+      -o 'an internal MySQL database node'
 
     case $database in
     postgres-db) inst="external PostgreSQL instance" ;;
