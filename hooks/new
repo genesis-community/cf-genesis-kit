@@ -2,6 +2,7 @@
 set -eu
 
 database=
+bucket_prefix=
 use_provided_cert=
 
 declare -a features
@@ -143,6 +144,7 @@ while [[ $ok != "true" ]]; do
   describe "" \
     "Your Cloud Foundry instance needs a base domain, from which all the" \
     "other endpoint URLs and domains will be fashioned."
+  base_domain=
   prompt_for base_domain line \
     "What is the base domain of your Cloud Foundry?"
 
@@ -244,6 +246,9 @@ else
 
       move_secrets_to_credhub blobstore:aws_access_key    blobstore_access_key_id
       move_secrets_to_credhub blobstore:aws_access_secret blobstore_secret_access_key
+
+      bucket_prefix="$( echo "$GENESIS_ENVIRONMENT" | tr "[:upper:]" "[:lower:]" | tr ._ -- | sed -e 's/[^a-z0-9\.-]//')" # will remove accented letters, sorry
+      [[ "$bucket_prefix" == "$GENESIS_ENVIRONMENT" ]] && bucket_prefix=''
     fi
     ;;
 
@@ -284,6 +289,9 @@ else
       move_secrets_to_credhub blobstore:gcp_secret_key blobstore_secret_access_key
       ;;
     esac
+
+    bucket_prefix="$( echo "$GENESIS_ENVIRONMENT" | tr "[:upper:]" "[:lower:]" | tr ._ -- | sed -e 's/[^a-z0-9\.-]//')" # will remove accented letters, sorry
+    [[ "$bucket_prefix" == "$GENESIS_ENVIRONMENT" ]] && bucket_prefix=''
 
     ;;
 
@@ -364,6 +372,9 @@ esac
 
 if [[ -n "${aws_blobstore_region:-}" ]] ; then
   echo "  blobstore_s3_region: $aws_blobstore_region"
+fi
+if [[ -n "${bucket_prefix:-}" ]] ; then
+  echo "  blobstore_bucket_prefix: $bucket_prefix"
 fi
 
 if [[ -z $use_provided_cert ]]; then

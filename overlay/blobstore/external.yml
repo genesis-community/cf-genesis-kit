@@ -1,5 +1,12 @@
+meta:
+  bucket_prefix: (( grab params.blobstore_bucket_prefix || $GENESIS_ENVIRONMENT ))
+  bucket_path:
+    app-packages: (( concat meta.bucket_prefix "-app-packages" ))
+    buildpacks:   (( concat meta.bucket_prefix "-buildpacks" ))
+    droplets:     (( concat meta.bucket_prefix "-droplets" ))
+    resources:    (( concat meta.bucket_prefix "-resources" ))
 bosh-variables:
-  app_package_directory_key: (( grab params.blobstore_app_packages_directory || "app-packages" ))
-  buildpack_directory_key:   (( grab params.blobstore_buildpacks_directory   || "buildpacks" ))
-  droplet_directory_key:     (( grab params.blobstore_droplets_directory     || "droplets" ))
-  resource_directory_key:    (( grab params.blobstore_resources_directory    || "resources" ))
+  app_package_directory_key: (( grab params.blobstore_app_packages_directory || meta.bucket_path.app-packages ))
+  buildpack_directory_key:   (( grab params.blobstore_buildpacks_directory   || meta.bucket_path.buildpacks   ))
+  droplet_directory_key:     (( grab params.blobstore_droplets_directory     || meta.bucket_path.droplets     ))
+  resource_directory_key:    (( grab params.blobstore_resources_directory    || meta.bucket_path.resources    ))
