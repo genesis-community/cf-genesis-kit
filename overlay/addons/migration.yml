@@ -1,0 +1,29 @@
+meta:
+  cc:
+    directory_key: ((cc_directory_key))
+
+instance_groups:
+# original has key key-2016-06
+- name: diego-api
+  jobs:
+  - name: bbs
+    properties:
+      diego:
+        bbs:
+          active_key_label: key1
+          encryption_keys:
+          - label: key1
+
+- name: api
+  jobs:
+  - name: cloud_controller_ng
+    properties:
+      cc:
+        buildpacks:
+          buildpack_directory_key: (( concat genesis.env "-cc-buildpacks-" meta.cc.directory_key ))
+        droplets:  
+          droplet_directory_key: (( concat genesis.env "-cc-droplets-" meta.cc.directory_key ))
+        resource_pool:  
+          resource_directory_key: (( concat genesis.env "-cc-resources-" meta.cc.directory_key ))
+        packages:  
+          app_package_directory_key: (( concat genesis.env "-cc-packages-" meta.cc.directory_key ))
