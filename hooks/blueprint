@@ -68,8 +68,11 @@ if ! want_feature "bare" ; then
   manifest+=( \
     "overlay/override-app-domains.yml" \
     "overlay/ten-year-ca-expiry.yml" \
-    "cf-deployment/operations/use-compiled-releases.yml" \
   )
+  if want_feature "compiled-releases" ; then
+    want_feature "cf-deployment/operations/use-compiled-releases" ||
+      manifest+=( "cf-deployment/operations/use-compiled-releases.yml" )
+  fi
 fi
 
 version=""
@@ -215,6 +218,7 @@ for want in $GENESIS_REQUESTED_FEATURES; do
         describe "#R[ERROR]} #c{$want} is not an upstream operation -- see cf-deployment for valid operations."
       fi
       ;;
+    compiled-releases) : ;; #dealt with above
     *)
       if [[ -f "$GENESIS_ROOT/ops/$want.yml" ]] ; then
         features+=( "$want" )
