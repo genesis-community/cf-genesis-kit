@@ -1,9 +1,7 @@
 #!/bin/bash
 set -eu
 
-use_db=
-use_lb=
-use_blobstore=
+database=
 use_provided_cert=
 
 declare -a features
@@ -20,7 +18,7 @@ ask_for_loadbalancer() {
     return
   fi
 
-  features+=( "cf-deployment/operations/haproxy" );
+  features+=( "haproxy" "tls" );
   cert= # Assigned below
   prompt_for cert "select" \
     'Cloud Foundry requires a TLS certificate to support HTTPS traffic.' \
@@ -47,18 +45,19 @@ ask_for_loadbalancer() {
       -p <(safe read "${GENESIS_SECRETS_BASE}haproxy/ssl:key"         | sed -e '/^$/d')
 
     safe rm "${GENESIS_SECRETS_BASE}haproxy/ssl"
+  else
+    features+=( 'self-signed' )
   fi
 }
 
 ## TODO: Convert to genesis v2.7.7 and credhub below {{{
 
-## TODO: figure out how to map these features to cf-deployment ops files, and 
+## TODO: figure out how to map these features to cf-deployment ops files, and
 ##       add any glue files to populate variables as overlay or operations
 ##       files.  See sample for azure blobstore on line 132 of hooks/blueprint
 ##       for example of how they are consumed
 ask_for_database() {
   inst="database"
-  database=
   case "${1:-}" in
   rds)
     prompt_for database "select" \
@@ -72,7 +71,6 @@ ask_for_database() {
     postgres-db) inst="Amazon RDS PostgreSQL instance" ;;
     mysql-db)    inst="Amazon RDS MySQL instance" ;;
     esac
-    use_db="$database"
     ;;
 
   gcp)
@@ -87,7 +85,6 @@ ask_for_database() {
     postgres-db) inst="Google Cloud SQL PostgreSQL instance" ;;
     mysql-db)    inst="Google Cloud SQL MySQL instance" ;;
     esac
-    use_db=$database
     ;;
 
   '')
@@ -102,7 +99,6 @@ ask_for_database() {
     postgres-db) inst="external PostgreSQL instance" ;;
     mysql-db)    inst="external MySQL instance" ;;
     esac
-    use_db=$database
     ;;
 
   *)
@@ -126,152 +122,225 @@ ask_for_database() {
     move_secrets_to_credhub external_db:password external_db_password
     ;;
   esac
+
+  features+=( "$database" )
 }
 # }}}
 
 ### ----------------------------------------------------------------------------
 ### Main
 ### ----------------------------------------------------------------------------
+cfversion="$(spruce json cf-deployment/cf-deployment.yml | jq -r '.manifest_version')"
 
-# IaaS selection
-iaas= # Assigned below
-prompt_for iaas "select" \
-  'What IaaS are you deploying to?' \
-  -o '[aws]       Amazon Web Services'   \
-  -o '[azure]     Microsoft Azure'       \
-  -o '[google]    Google Cloud Platform' \
-  -o '[other]     Other (OpenStack, vSphere, etc.)'
-
-# Iaas: Azure
-case "$iaas" in
-azure)
-  ask_for_loadbalancer "Azure Load Balancer"
-  ask_for_database
-
-  ## This block has been updated with pattern for credhub/cf-deployment ops files
-  use_azure_storage= # Assigned below
-  prompt_for use_azure_storage boolean \
-    'Would you like to use Azure Storage to store droplets and application bits?'
-  if [[ $use_azure_storage == 'true' ]]; then
-    use_blobstore=azure
-    # Workaround until Credhub is first-class supported
-    prompt_for "${GENESIS_SECRETS_BASE}blobstore:storage_account_name" secret-line \
-      'What is your Azure Storage Account Name?'
-    prompt_for "${GENESIS_SECRETS_BASE}blobstore:storage_access_key" secret-line \
-      'What is your Azure Storage Account Key?'
-
-    # Workaround until kits can prompt into Credhub
-    move_secrets_to_credhub blobstore:storage_account_name blobstore_storage_account_name
-    move_secrets_to_credhub blobstore:storage_access_key   blobstore_storage_access_key
-  fi
-  ;;
-
-aws)
-  ask_for_loadbalancer "Elastic Load Balancer"
-  ask_for_database rds
-
-  prompt_for use_aws_stuff boolean \
-    'Would you like to use Amazon S3 to store droplets and application bits?'
-  if [[ $use_aws_stuff == 'true' ]]; then
-    use_blobstore=aws
-    prompt_for blobstore:aws_access_key secret-line \
-      'What is your Amazon S3 Access Key ID?'
-    prompt_for blobstore:aws_access_secret secret-line \
-      'What is your Amazon S3 Secret Access Key?'
-    prompt_for aws_blobstore_region "line" \
-      'What region contains the your Amazon S3 blobstore?'
-
-    move_secrets_to_credhub blobstore:aws_access_key    blobstore_access_key_id
-    move_secrets_to_credhub blobstore:aws_access_secret blobstore_secret_access_key
-  fi
-  ;;
-
-google)
-  ask_for_loadbalancer "Google Cloud Load Balancer"
-  ask_for_database gcp
-
-  use_gcp_blobstore= # Assigned below
-  prompt_for use_gcp_blobstore "select" \
-    'What would you like to use to store droplets, buildpacks and application bits?' \
-    -o '[gcp] Existing Google Cloud Storage accessed via project and json key' \
-    -o '[gcpaccess] Existing Google Cloud Storage accessed via access and secret keys' \
-    -o '[builtin] Local singleton blobstore that will be deployed in this deployment' \
-    --default 'gcp'
-
-  case "$use_gcp_blobstore" in
-  gcp)
-    use_blobstore=gcp
-    prompt_for blobstore:gcp_project_name secret-line \
-      'What is your Google Cloud Project Name?'
-    prompt_for blobstore:gcp_client_email secret-line \
-      'What is the Cloud Storage Service Account ID (@<project>.iam.gserviceaccount.com)?'
-    prompt_for blobstore:gcp_json_key secret-block \
-      'What is the Cloud Storage Service Account (JSON) Key?'
-
-    move_secrets_to_credhub blobstore:gcp_project_name gcs_project
-    move_secrets_to_credhub blobstore:gcp_client_email gcs_service_account_email
-    move_secrets_to_credhub blobstore:gcp_json_key     gcs_service_account_json_key
-    ;;
-  gcpaccess)
-    use_blobstore=gcp
-    prompt_for blobstore:gcp_access_key secret-line \
-      'What is your Google Cloud Storage access key?'
-    prompt_for blobstore:gcp_secret_key secret-line \
-      'What is your Google Cloud Storage secret access key?'
-
-    move_secrets_to_credhub blobstore:gcp_access_key blobstore_access_key_id
-    move_secrets_to_credhub blobstore:gcp_secret_key blobstore_secret_access_key
-    ;;
-  esac
-
-  ;;
-
-*)
-  ask_for_haproxy
-  ask_for_database
-  ;;
-esac;
-
-if [[ -z $use_blobstore ]]; then
-  use_blobstore=local
-fi
-
-prompt_for use_autoscaler boolean \
-  'Would you like to use App Autoscaler to dynamically scale CF applications?'
-
-echo
-echo "Your Cloud Foundry instance needs a base domain, from which all the"
-echo "other endpoint URLs and domains will be fashioned."
-echo
+describe "" \
+  "#Gku{Cloud Foundry Genesis Kit $GENESIS_KIT_VERSION}" \
+  "" \
+  "This kit is based on #c{cf-deployment $cfversion}, but contains best-practice" \
+  "enhancements derived from the v1.x version of the kit."
 
 ok=
 while [[ $ok != "true" ]]; do
+  describe "" \
+    "Your Cloud Foundry instance needs a base domain, from which all the" \
+    "other endpoint URLs and domains will be fashioned."
   prompt_for base_domain line \
     "What is the base domain of your Cloud Foundry?"
 
-      echo
-  describe "Using the base domain of #C{$base_domain},"
-      echo "you will get the following domains and endpoints:"
-      echo
-  describe "    apps: https://APP-NAME.#M{run}.#C{$base_domain}"
-  describe "  cf api: https://#M{api.system}.#C{$base_domain}"
-  describe "     uaa: https://#M{uaa.system}.#C{$base_domain}"
-  describe "          https://#M{login.system}.#C{$base_domain}"
-      echo
+  describe "" \
+    "Using the base domain of #C{$base_domain}," \
+    "you will get the following domains and endpoints:" \
+    "" \
+    "    apps: https://#yi{<APP-NAME>}.#M{run}.#C{$base_domain}" \
+    "  cf api: https://#M{api.system}.#C{$base_domain}" \
+    "     uaa: https://#M{uaa.system}.#C{$base_domain}" \
+    "          https://#M{login.system}.#C{$base_domain}" \
 
-  prompt_for ok boolean \
-    'Is this acceptable?'
+  prompt_for ok boolean --default "y" \
+    'Is this acceptable [y|n]?'
 done
+
+describe "" \
+  "This new environment can be configured as a bare cf-deployment deployment with" \
+  "just enough modifications to allow it to work with Genesis, or it can be" \
+  "configured with enhanced best-practice features that were present in the" \
+  "v1.x kit versions."
+
+use_bare=
+prompt_for use_bare "boolean" \
+  "Would you like to use the enhanced Genesis kit features [y|n]?" \
+  --invert --default "y"
+
+if [[ $use_bare == 'true' ]] ; then
+  features+=( bare )
+
+  network_topography=
+  prompt_for network_topography "select" \
+    "What network topography would you like to use?" \
+    -o "[] Single 'default' network" \
+    -o "[partitioned-network] Partitioned network that separates core, edge and runtime vms" \
+    --default "partitioned-network"
+
+  [[ -n $network_topography ]] && features+=( "$network_topography" )
+
+  prompt_for load_balancer "select" \
+    'What load balancer would you like to use in front of this Cloud Foundry?' \
+    -o "[external] An existing ${1:-"external Load Balancer"}" \
+    -o '[haproxy] An internal HAProxy Load Balancer' \
+    --default 'external'
+  if [[ $load_balancer == 'haproxy' ]]; then
+    features+=( "cf-deployment/operations/haproxy" );
+  fi
+
+else
+  # IaaS selection
+  describe "" "#gu{Iaas Selection}"
+  iaas= # Assigned below
+  prompt_for iaas "select" \
+    'What IaaS are you deploying to?' \
+    -o '[aws]       Amazon Web Services'   \
+    -o '[azure]     Microsoft Azure'       \
+    -o '[google]    Google Cloud Platform' \
+    -o '[other]     Other (OpenStack, vSphere, etc.)'
+
+  # Iaas: Azure
+  case "$iaas" in
+  azure)
+    ask_for_loadbalancer "Azure Load Balancer"
+    ask_for_database
+
+    describe "#gu{Blobstore}"
+    use_azure_storage= # Assigned below
+    prompt_for use_azure_storage boolean \
+      'Would you like to use Azure Storage to store droplets and application bits?'
+    if [[ $use_azure_storage == 'true' ]]; then
+      features+=( 'azure-blobstore' )
+      # Workaround until Credhub is first-class supported
+      prompt_for "${GENESIS_SECRETS_BASE}blobstore:storage_account_name" secret-line \
+        'What is your Azure Storage Account Name?'
+      prompt_for "${GENESIS_SECRETS_BASE}blobstore:storage_access_key" secret-line \
+        'What is your Azure Storage Account Key?'
+
+      # Workaround until kits can prompt into Credhub
+      move_secrets_to_credhub blobstore:storage_account_name blobstore_storage_account_name
+      move_secrets_to_credhub blobstore:storage_access_key   blobstore_storage_access_key
+    fi
+    ;;
+
+  aws)
+    ask_for_loadbalancer "Elastic Load Balancer"
+    ask_for_database rds
+
+    use_aws_stuff=
+    prompt_for use_aws_stuff boolean \
+      'Would you like to use Amazon S3 to store droplets and application bits?'
+    if [[ $use_aws_stuff == 'true' ]]; then
+      features+=( 'aws-blobstore' );
+      prompt_for blobstore:aws_access_key secret-line \
+        'What is your Amazon S3 Access Key ID?'
+      prompt_for blobstore:aws_access_secret secret-line \
+        'What is your Amazon S3 Secret Access Key?'
+      prompt_for aws_blobstore_region "line" \
+        'What region contains the your Amazon S3 blobstore?'
+
+      move_secrets_to_credhub blobstore:aws_access_key    blobstore_access_key_id
+      move_secrets_to_credhub blobstore:aws_access_secret blobstore_secret_access_key
+    fi
+    ;;
+
+  google)
+    ask_for_loadbalancer "Google Cloud Load Balancer"
+    ask_for_database gcp
+
+    use_gcp_blobstore= # Assigned below
+    prompt_for use_gcp_blobstore "select" \
+      'What would you like to use to store droplets, buildpacks and application bits?' \
+      -o '[gcp] Existing Google Cloud Storage accessed via project and json key' \
+      -o '[gcpaccess] Existing Google Cloud Storage accessed via access and secret keys' \
+      -o '[builtin] Local singleton blobstore that will be deployed in this deployment' \
+      --default 'gcp'
+
+    case "$use_gcp_blobstore" in
+    gcp)
+      features+=( 'gcp-blobstore' )
+      prompt_for blobstore:gcp_project_name secret-line \
+        'What is your Google Cloud Project Name?'
+      prompt_for blobstore:gcp_client_email secret-line \
+        'What is the Cloud Storage Service Account ID (@<project>.iam.gserviceaccount.com)?'
+      prompt_for blobstore:gcp_json_key secret-block \
+        'What is the Cloud Storage Service Account (JSON) Key?'
+
+      move_secrets_to_credhub blobstore:gcp_project_name gcs_project
+      move_secrets_to_credhub blobstore:gcp_client_email gcs_service_account_email
+      move_secrets_to_credhub blobstore:gcp_json_key     gcs_service_account_json_key
+      ;;
+    gcpaccess)
+      features+=( 'gcp-blobstore' 'gcp-use-access-key' )
+      prompt_for blobstore:gcp_access_key secret-line \
+        'What is your Google Cloud Storage access key?'
+      prompt_for blobstore:gcp_secret_key secret-line \
+        'What is your Google Cloud Storage secret access key?'
+
+      move_secrets_to_credhub blobstore:gcp_access_key blobstore_access_key_id
+      move_secrets_to_credhub blobstore:gcp_secret_key blobstore_secret_access_key
+      ;;
+    esac
+
+    ;;
+
+  *)
+    ask_for_loadbalancer
+    ask_for_database
+    ;;
+  esac;
+
+  describe "" "#gu{Extra Features}"
+
+  small_footprint=
+  prompt_for small_footprint boolean --default n \
+    'Would you like to use a small footprint (minimal VMs on one AZ) [y|n]?'
+  [[ "$small_footprint" == 'true' ]] && features+=( 'small-footprint' )
+
+  use_nsf=
+  prompt_for use_nsf boolean --default n \
+    'Would you like to enable NFS Volume Services [y|n]?'
+  [[ "$use_nsf" == 'true' ]] && features+=( 'nfs-volume-services' )
+
+  service_discovery=
+  prompt_for service_discovery boolean --default y\
+    'Would you like to enable service discovery [y|n]?'
+  [[ "$service_discovery" == 'true' ]] && features+=( 'enable-service-discovery' )
+
+  use_autoscaler=
+  prompt_for use_autoscaler boolean \
+    'Would you like to set up integration for the CF App Autocaler Genesis Kit [y|n]?'
+  [[ "$use_autoscaler" == 'true' ]] && features+=( 'app-autoscaler-integration' )
+
+  use_prometheus=
+  prompt_for use_prometheus boolean \
+    'Would you like to set up integration for the Prometheus Genesis Kit [y|n]?'
+  [[ "$use_prometheus" == 'true' ]] && features+=( 'prometheus-integration' )
+
+fi
+
+describe "" \
+  "Further cf-deployment operations can be added as features manually.  Just" \
+  "specify them as #m{cf-deployment/operations/<subpath-to-ops-file-without-.yml>}" \
+  "in the #c{features} list -- they will be applied in the order that they appear."
 
 (
 echo "---"
 echo "kit:"
 echo "  name:    $GENESIS_KIT_NAME"
 echo "  version: $GENESIS_KIT_VERSION"
-echo "  features:"
-for feature in "${features[@]}" ; do
-  echo "    - $feature"
-done
+
+set +u
+if [[ ${#features[@]} -gt 0 ]] ; then
+  echo "  features:"
+  for feature in "${features[@]}" ; do
+    echo "    - $feature"
+  done
+fi
+set -u
 
 genesis_config_block
 
@@ -279,7 +348,7 @@ echo "params:"
 echo "  # Cloud Foundry base domain"
 echo "  base_domain: $base_domain"
 
-case $use_db in
+case $database in
 mysql-db)
   echo
   echo "  # External MySQL configuration"
@@ -291,18 +360,17 @@ postgres-db)
   echo "  # External PostgreSQL configuration"
   echo "  external_db_host: $db_host"
   ;;
-
-local-ha-db)
-  echo
-  echo "  # VIP for the HA Postgres DB"
-  echo "  postgres_vip: $postgres_vip"
 esac
+
+if [[ -n "${aws_blobstore_region:-}" ]] ; then
+  echo "  blobstore_s3_region: $aws_blobstore_region"
+fi
 
 if [[ -z $use_provided_cert ]]; then
   echo "  # Skip SSL validation since we use self-signed certs"
   echo "  skip_ssl_validation: true"
 fi
-) >$GENESIS_ROOT/$GENESIS_ENVIRONMENT.yml
+) > "$GENESIS_ROOT/$GENESIS_ENVIRONMENT.yml"
 
 offer_environment_editor
 
