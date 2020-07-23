@@ -7,3 +7,11 @@ migrate_credentials_to_credhub() {
          | jq --argjson paths $vault_paths '.credentials  | map(select(.value | try .private_key // . | split("\"")[1] | IN($paths[]))) | {credentials: .}' \
          | spruce merge )
 }
+
+validate_expected_vault_secrets() {
+  : # TODO
+}
+
+correct_x509_certs() {
+  : # TODO
+}

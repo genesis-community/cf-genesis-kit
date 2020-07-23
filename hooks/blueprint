@@ -81,18 +81,18 @@ warn=
 declare -a features; features=()
 
 # TODO: double check!!!!!
-if [[ $(safe read "${GENESIS_SECRETS_BASE}cc:directory_key") || $(credhub get -n "${GENESIS_CREDHUB_ROOT}/cc_directory_key") ]]; then
-  if ! want_feature "migration-from-old-1x-kit" ; then
+if [[ $(safe read "${GENESIS_SECRETS_BASE}cc:directory_key" >/dev/null 2>&1) || $(credhub get -n "${GENESIS_CREDHUB_ROOT}/cc_directory_key" >/dev/null 2>&1) ]]; then
+  if ! want_feature "migrated-v1-env" ; then
     abort=1
     describe >&2 \
-      "#Y{[WARNING]} You are upgrading from cf 1.x to 2.x, please add the following feature flag #c{migration-from-old-1x-kit}" \
+      "#Y{[WARNING]} You are upgrading from cf 1.x to 2.x, please add the following feature flag #c{migrated-v1-env}" \
       "              this needs to be specified in the enviorment file"
   fi
   else
-  if want_feature "migration-from-old-1x-kit" ; then
+  if want_feature "migrated-v1-env" ; then
     abort=1
     describe >&2 \
-      "#Y{[WARNING]} You are setting up a new enviroment but have enabled the feature flag #c{migration-from-old-1x-kit}" \
+      "#Y{[WARNING]} You are setting up a new enviroment but have enabled the feature flag #c{migrated-v1-env}" \
       "              please remove it from the specified in the enviorment file"
   fi
 fi
@@ -206,7 +206,7 @@ for want in $GENESIS_REQUESTED_FEATURES; do
         features+=( "enable-service-discovery" ) #FIXME remove once spruce can go-patch over (( grabs ))
       fi
       ;;
-    migration-from-old-1x-kit|bare|partitioned-network|haproxy|tls|self-signed) features+=( "$want" ) ;;
+    migrated-v1-env|bare|partitioned-network|haproxy|tls|self-signed) features+=( "$want" ) ;;
     aws-blobstore|azure-blobstore|gcp-blobstore|gcp-use-access-key) features+=( "$want" ) ;;
     local-postgres-db|local-mysql-db|mysql-db|postgres-db) features+=( "$want" ) ;;
     nfs-volume-services|small-footprint|enable-service-discovery) features+=( "$want" ) ;;
@@ -248,6 +248,10 @@ else
 fi
 declare -a blobstores; blobstores=()
 declare -a databases; databases=()
+
+if want_feature "migrated-v1-env" || want_feature "azure-blobstore" || want_feature 'aws-blobstore' || want_feature 'gcp-blobstore' ; then
+  manifest+=( "overlay/blobstore/meta.yml" )
+fi
 
 for want in $GENESIS_REQUESTED_FEATURES; do
   if [[ $want =~ cf-deployment/.* ]] ; then
@@ -337,7 +341,7 @@ for want in $GENESIS_REQUESTED_FEATURES; do
       manifest+=( "overlay/addons/autoscaler.yml" ) ;;
     prometheus-integration)
       manifest+=( "overlay/addons/prometheus.yml" ) ;;
-    migration-from-old-1x-kit)
+    migrated-v1-env)
       manifest+=( "overlay/addons/migration.yml" ) ;;
       
     esac
@@ -372,9 +376,7 @@ fi
 if ! want_feature "bare" ; then
 
   if [[ "${#databases}" == 0 ]]; then
-  manifest+=( \
-    "cf-deployment/operations/use-postgres.yml" \
-  )
+  manifest+=( "cf-deployment/operations/use-postgres.yml" )
   fi
 
   ###-----------------------------------------------------------------------------
@@ -400,7 +402,7 @@ fi
 
 # Include the migration manifest fragments
 version="$(exodus kit_version)"
-if [[ -n "${version}" ]] && ! new_enough "${version}" "2.0.0"; then
+if [[ -n "${version}" ]] && ! new_enough "${version}" "2.0.0-rc0"; then
   manifest+=( "overlay/migrate/cells.yml" )
 
   if want_feature "local-postgres-db"; then # TODO: or postgres-db external??

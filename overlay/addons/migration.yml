@@ -1,6 +1,8 @@
 meta:
-  cc:
-    directory_key: ((cc_directory_key))
+  blobstore_bucket_type: (( grab params.blobstore_bucket_type || "cc" ))
+  identifier: (( concat genesis.env "-cc" ))
+  blogstore_bucket_path:
+    app-packages: (( concat meta.blobstore_bucket_prefix "-packages-" meta.blobstore_bucket_suffix ))
 
 instance_groups:
 # original has key key-2016-06
@@ -20,10 +22,10 @@ instance_groups:
     properties:
       cc:
         buildpacks:
-          buildpack_directory_key: (( concat genesis.env "-cc-buildpacks-" meta.cc.directory_key ))
+          buildpack_directory_key: (( grab meta.blobstore_bucket_path.buildpacks ))
         droplets:  
-          droplet_directory_key: (( concat genesis.env "-cc-droplets-" meta.cc.directory_key ))
+          droplet_directory_key: (( grab meta.blobstore_bucket_path.droplets ))
         resource_pool:  
-          resource_directory_key: (( concat genesis.env "-cc-resources-" meta.cc.directory_key ))
+          resource_directory_key: (( grab meta.blobstore_bucket_path.resources ))
         packages:  
-          app_package_directory_key: (( concat genesis.env "-cc-packages-" meta.cc.directory_key ))
+          app_package_directory_key: (( grab meta.blobstore_bucket_path.app-packages ))
