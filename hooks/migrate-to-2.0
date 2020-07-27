@@ -1,12 +1,15 @@
+# vim:ft=bash
+
 migrate_credentials_to_credhub() {
-    vault_prefix=${GENESIS_SECRETS_MOUNT}${GENESIS_SECRETS_SLUG}
-    vault_paths=$(safe paths --keys ${vault_prefix} | jq -c -R -s 'split("\n") | map(select(length > 0))')
-    credhub import -f <( \
-      bosh int ./hooks/support/vault-credhub-mapping.yml \
-         -v=credhub_prefix=$GENESIS_CREDHUB_ROOT -v=vault_prefix=${vault_prefix#/} | spruce json \
-         | jq --argjson paths $vault_paths '.credentials  | map(select(.value | try .private_key // . | split("\"")[1] | IN($paths[]))) | {credentials: .}' \
-         | spruce merge )
-}
+  vault_prefix=${GENESIS_SECRETS_MOUNT}${GENESIS_SECRETS_SLUG}
+  echo >&2 vault_prefix=$vault_prefix
+  vault_paths=$(safe paths --keys ${vault_prefix} | jq -c -R -s 'split("\n") | map(select(length > 0))')
+  credhub import -f <( \
+    bosh int ./hooks/support/vault-credhub-mapping.yml \
+    -v=credhub_prefix=$GENESIS_CREDHUB_ROOT -v=vault_prefix=${vault_prefix#/} | spruce json \
+    | jq --argjson paths $vault_paths '.credentials  | map(select(.value | try .private_key // . | split("\"")[1] | IN($paths[]))) | {credentials: .}' \
+    | spruce merge )
+  }
 
 validate_expected_vault_secrets() {
   : # TODO
@@ -15,3 +18,4 @@ validate_expected_vault_secrets() {
 correct_x509_certs() {
   : # TODO
 }
+

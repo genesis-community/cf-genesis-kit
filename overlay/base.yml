@@ -32,6 +32,16 @@ meta:
   internal_app_domains: []
   default_azs: [z1, z2, z3]
 
+  database_defaults:
+    cloud_controller:     {name: cloud_controller,     user: cloud_controller}
+    uaa:                  {name: uua,                  user: uua}
+    diego:                {name: diego,                user: diego}
+    routing_api:          {name: routing-api,          user: routing-api}
+    network_policy:       {name: network_policy,       user: network_policy}
+    network_connectivity: {name: network_connectivity, user: network_connectivity}
+    locket:               {name: locket,               user: locket}
+    credhub:              {name: credhub,              user: credhub}
+
 params:
   network: default
 

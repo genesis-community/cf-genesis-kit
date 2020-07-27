@@ -1,0 +1,55 @@
+- type: replace
+  path: /instance_groups/name=database/jobs/name=postgres/properties/databases
+  value:
+    databases:
+    - citext: true
+      name: ((cc_database_name))
+      tag: cc
+    - citext: true
+      name: ((uaa_database_name))
+      tag: uaa
+    - citext: true
+      name: ((diego_database_name))
+      tag: diego
+    - citext: true
+      name: ((routing_api_database_name))
+      tag: routing-api
+    - citext: false
+      name: ((network_policy_database_name))
+      tag: networkpolicy
+    - citext: false
+      name: ((network_connectivity_database_name))
+      tag: networkconnectivity
+    - citext: true
+      name: ((locket_database_name))
+      tag: locket
+    - citext: true
+      name: ((credhub_database_name))
+      tag: credhub
+    db_scheme: postgres
+    port: 5524
+    roles:
+    - name: ((cloud_controller_database_username))
+      password: ((cc_database_password))
+      tag: admin
+    - name: ((uaa_database_username))
+      password: ((uaa_database_password))
+      tag: admin
+    - name: ((diego_database_username))
+      password: ((diego_database_password))
+      tag: admin
+    - name: ((routing_api_database_username))
+      password: ((routing_api_database_password))
+      tag: admin
+    - name: ((network_policy_database_username))
+      password: ((network_policy_database_password))
+      tag: admin
+    - name: ((network_connectivity_database_username))
+      password: ((network_connectivity_database_password))
+      tag: admin
+    - name: ((locket_database_username))
+      password: ((locket_database_password))
+      tag: locket
+    - name: ((credhub_database_username))
+      password: ((credhub_database_password))
+      tag: admin

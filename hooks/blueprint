@@ -80,23 +80,6 @@ abort=
 warn=
 declare -a features; features=()
 
-# TODO: double check!!!!!
-if [[ $(safe read "${GENESIS_SECRETS_BASE}cc:directory_key" >/dev/null 2>&1) || $(credhub get -n "${GENESIS_CREDHUB_ROOT}/cc_directory_key" >/dev/null 2>&1) ]]; then
-  if ! want_feature "migrated-v1-env" ; then
-    abort=1
-    describe >&2 \
-      "#Y{[WARNING]} You are upgrading from cf 1.x to 2.x, please add the following feature flag #c{migrated-v1-env}" \
-      "              this needs to be specified in the enviorment file"
-  fi
-  else
-  if want_feature "migrated-v1-env" ; then
-    abort=1
-    describe >&2 \
-      "#Y{[WARNING]} You are setting up a new enviroment but have enabled the feature flag #c{migrated-v1-env}" \
-      "              please remove it from the specified in the enviorment file"
-  fi
-fi
-
 for want in $GENESIS_REQUESTED_FEATURES; do
   if [[ "$want" =~ ^cf-deployment-version- ]] ; then
     # Check if explicit verison of cf-deployment is requested
@@ -206,11 +189,12 @@ for want in $GENESIS_REQUESTED_FEATURES; do
         features+=( "enable-service-discovery" ) #FIXME remove once spruce can go-patch over (( grabs ))
       fi
       ;;
-    migrated-v1-env|bare|partitioned-network|haproxy|tls|self-signed) features+=( "$want" ) ;;
+    bare|partitioned-network|haproxy|tls|self-signed) features+=( "$want" ) ;;
     aws-blobstore|azure-blobstore|gcp-blobstore|gcp-use-access-key) features+=( "$want" ) ;;
     local-postgres-db|local-mysql-db|mysql-db|postgres-db) features+=( "$want" ) ;;
     nfs-volume-services|small-footprint|enable-service-discovery) features+=( "$want" ) ;;
     app-autoscaler-integration|prometheus-integration) features+=( "$want" ) ;;
+    +migrated_v1_env|+override-db-names) features+=( "$want" ) ;;
     cf-deployment/*)
       if [[ -f "$want.yml" ]] ; then
         features+=( "$want" )
@@ -249,7 +233,7 @@ fi
 declare -a blobstores; blobstores=()
 declare -a databases; databases=()
 
-if want_feature "migrated-v1-env" || want_feature "azure-blobstore" || want_feature 'aws-blobstore' || want_feature 'gcp-blobstore' ; then
+if want_feature "+migrated-v1-env" || want_feature "azure-blobstore" || want_feature 'aws-blobstore' || want_feature 'gcp-blobstore' ; then
   manifest+=( "overlay/blobstore/meta.yml" )
 fi
 
@@ -320,11 +304,25 @@ for want in $GENESIS_REQUESTED_FEATURES; do
     local-postgres-db)
       databases+=( "$want" )
       manifest+=( "cf-deployment/operations/use-postgres.yml" )
+      if want_feature '+override-db-names' ; then
+        manifest+=( \
+          "operations/db-override-names.yml" \
+          "operations/db-override-postgres-names.yml" \
+          "overlay/db/internal-overrides.yml" \
+        )
+      fi
       ;;
 
     local-mysql-db)
       databases+=( "$want" )
       manifest+=( "overlay/db/local-mysql-db.yml" )
+      if want_feature '+override-db-names' ; then
+        manifest+=( \
+          "operations/db-override-names.yml" \
+          "operations/db-override-mysql-names.yml" \
+          "overlay/db/internal-overrides.yml" \
+        )
+      fi
       ;;
 
     ###-----------------------------------------------------------------------------
@@ -341,9 +339,9 @@ for want in $GENESIS_REQUESTED_FEATURES; do
       manifest+=( "overlay/addons/autoscaler.yml" ) ;;
     prometheus-integration)
       manifest+=( "overlay/addons/prometheus.yml" ) ;;
-    migrated-v1-env)
+    +migrated-v1-env)
       manifest+=( "overlay/addons/migration.yml" ) ;;
-      
+
     esac
 
     ###-----------------------------------------------------------------------------

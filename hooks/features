@@ -1,0 +1,14 @@
+#!/bin/bash
+echo "$GENESIS_REQUESTED_FEATURES"
+db_overrides="$(lookup params 2>/dev/null | jq -r '. | keys| .[] | select(. | test("^(cc|uaa|diego|policyserver|silk|locket|routingapi|credhub)db_(name|user)$"))')"
+[[ -z "$db_overrides" ]] || echo "+override-db-names"
+
+migrated_v1_env="$(exodus migrated_v1_env)"
+if [[ $migrated_v1_env != "1" ]] ; then
+  version="$(exodus kit_version)"
+  if [[ -n "${version:-}" ]] && ! new_enough "${version}" "2.0.0-rc0" ; then
+    migrated_v1_env=1
+  fi
+fi
+[[ -n "${migrated_v1_env:-}" ]] && echo "+migrated_v1_env"
+exit 0

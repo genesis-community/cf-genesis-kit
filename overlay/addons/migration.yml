@@ -1,8 +1,34 @@
+exodus:
+  migrated_v1_env: 1
+
 meta:
   blobstore_bucket_type: (( grab params.blobstore_bucket_type || "cc" ))
   identifier: (( concat genesis.env "-cc" ))
   blogstore_bucket_path:
     app-packages: (( concat meta.blobstore_bucket_prefix "-packages-" meta.blobstore_bucket_suffix ))
+
+  database_defaults:
+    cloud_controller:
+      name: ccdb
+      user: ccadmin
+    uaa:
+      name: uuadb
+      user: uuaadmin
+    diego:
+      name: diegodb
+      user: diegoadmin
+    routing_api:
+      name: routingapidb
+      user: routingapiadmin
+    network_policy:
+      name: policyserverdb
+      user: policyserveradmin
+    network_connectivity:
+      name: silkdb
+      user: silkadmin
+    locket:
+      name: locketdb
+      user: locketadmin
 
 instance_groups:
 # original has key key-2016-06
@@ -29,3 +55,14 @@ instance_groups:
           resource_directory_key: (( grab meta.blobstore_bucket_path.resources ))
         packages:  
           app_package_directory_key: (( grab meta.blobstore_bucket_path.app-packages ))
+
+bosh-variables:
+  cloud_controller_database_name: (( grab params.ccdb_name || meta.database_defaults.ccdb_name ))
+  10:  value: ((cloud_controller_database_name))
+17:  value: ((cloud_controller_database_name))
+24:  value: ((uaa_database_name))
+31:  value: ((diego_database_name))
+38:  value: ((network_policy_database_name))
+45:  value: ((network_connectivity_database_name))
+52:  value: ((locket_database_name))
+59:  value: ((credhub_database_name))
