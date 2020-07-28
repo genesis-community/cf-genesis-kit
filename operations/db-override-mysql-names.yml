@@ -1,5 +1,5 @@
 - type: replace
-  path: /instance_groups/name=database/jobs/name=pxc-mysql/properties/properties/seeded_database
+  path: /instance_groups/name=database/jobs/name=pxc-mysql/properties/seeded_databases
   value:
     - name:     ((cloud_controller_database_name))
       password: ((cc_database_password))

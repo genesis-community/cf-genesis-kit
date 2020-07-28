@@ -1,28 +1,28 @@
 ---
 bosh-variables:
 
-  external_uaa_database_name:                 (( grab params.uaadb_name          || meta.database_defaults.uaa.name ))
-  external_uaa_database_username:             (( grab params.uaadb_user          || meta.database_defaults.uaa.user ))
+  uaa_database_name:                      (( grab params.uaadb_name          || meta.database_defaults.uaa.name ))
+  uaa_database_username:                  (( grab params.uaadb_user          || meta.database_defaults.uaa.user ))
 
-  external_cc_database_name:                  (( grab params.ccdb_name           || meta.database_defaults.cloud_controller.name ))
-  external_cc_database_username:              (( grab params.ccdb_user           || meta.database_defaults.cloud_controller.user ))
+  cloud_controller_database_name:         (( grab params.ccdb_name           || meta.database_defaults.cloud_controller.name ))
+  cloud_controller_database_username:     (( grab params.ccdb_user           || meta.database_defaults.cloud_controller.user ))
 
-  external_bbs_database_name:                 (( grab params.diegodb_name        || meta.database_defaults.diego.name ))
-  external_bbs_database_username:             (( grab params.diegodb_user        || meta.database_defaults.diego.user ))
+  diego_database_name:                    (( grab params.diegodb_name        || meta.database_defaults.diego.name ))
+  diego_database_username:                (( grab params.diegodb_user        || meta.database_defaults.diego.user ))
 
-  external_policy_server_database_name:       (( grab params.policyserverdb_name || meta.database_defaults.network_policy.name ))
-  external_policy_server_database_username:   (( grab params.policyserverdb_user || meta.database_defaults.network_policy.user ))
+  network_policy_database_name:           (( grab params.policyserverdb_name || meta.database_defaults.network_policy.name ))
+  network_policy_database_username:       (( grab params.policyserverdb_user || meta.database_defaults.network_policy.user ))
 
-  external_silk_controller_database_name:     (( grab params.silkdb_name         || meta.database_defaults.network_connectivity.name ))
-  external_silk_controller_database_username: (( grab params.silkdb_user         || meta.database_defaults.network_connectivity.user ))
+  network_connectivity_database_name:     (( grab params.silkdb_name         || meta.database_defaults.network_connectivity.name ))
+  network_connectivity_database_username: (( grab params.silkdb_user         || meta.database_defaults.network_connectivity.user ))
 
-  external_routing_api_database_name:         (( grab params.routingapidb_name   || meta.database_defaults.routing_api.name ))
-  external_routing_api_database_username:     (( grab params.routingapidb_user   || meta.database_defaults.routing_api.user ))
+  routing_api_database_name:              (( grab params.routingapidb_name   || meta.database_defaults.routing_api.name ))
+  routing_api_database_username:          (( grab params.routingapidb_user   || meta.database_defaults.routing_api.user ))
 
-  external_locket_database_name:              (( grab params.locketdb_name       || meta.database_defaults.locket.name ))
-  external_locket_database_username:          (( grab params.locketdb_user       || meta.database_defaults.locket.user ))
+  locket_database_name:                   (( grab params.locketdb_name       || meta.database_defaults.locket.name ))
+  locket_database_username:               (( grab params.locketdb_user       || meta.database_defaults.locket.user ))
 
-  external_credhub_database_name:             (( grab params.credhubdb_name      || meta.database_defaults.credhub.name ))
-  external_credhub_database_username:         (( grab params.credhubdb_user      || meta.database_defaults.credhub.user ))
+  credhub_database_name:                  (( grab params.credhubdb_name      || meta.database_defaults.credhub.name ))
+  credhub_database_username:              (( grab params.credhubdb_user      || meta.database_defaults.credhub.user ))
 
 

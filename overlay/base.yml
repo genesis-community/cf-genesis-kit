@@ -34,7 +34,7 @@ meta:
 
   database_defaults:
     cloud_controller:     {name: cloud_controller,     user: cloud_controller}
-    uaa:                  {name: uua,                  user: uua}
+    uaa:                  {name: uaa,                  user: uaa}
     diego:                {name: diego,                user: diego}
     routing_api:          {name: routing-api,          user: routing-api}
     network_policy:       {name: network_policy,       user: network_policy}

@@ -232,6 +232,7 @@ declare -a blobstores; blobstores=()
 declare -a databases; databases=()
 
 if want_feature "+migrated-v1-env" || want_feature "azure-blobstore" || want_feature 'aws-blobstore' || want_feature 'gcp-blobstore' ; then
+  want_feature 'bare' && bail "Cannot have #C{bare} feature when migrating from v1"
   manifest+=( "overlay/blobstore/meta.yml" )
 fi
 
