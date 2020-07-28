@@ -303,6 +303,11 @@ else
 
   describe "" "#gu{Extra Features}"
 
+  compiled_releases=
+  prompt_for compiled_releases boolean --default n \
+    'Would you like to use pre-compiled releases [y|n]?'
+  [[ "$compiled_releases" == 'true' ]] && features+=( 'compiled-releases' )
+
   small_footprint=
   prompt_for small_footprint boolean --default n \
     'Would you like to use a small footprint (minimal VMs on one AZ) [y|n]?'

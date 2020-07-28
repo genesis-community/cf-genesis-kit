@@ -70,10 +70,6 @@ if ! want_feature "bare" ; then
     "overlay/override-app-domains.yml" \
     "overlay/ten-year-ca-expiry.yml" \
   )
-  if want_feature "compiled-releases" ; then
-    want_feature "cf-deployment/operations/use-compiled-releases" ||
-      manifest+=( "cf-deployment/operations/use-compiled-releases.yml" )
-  fi
 fi
 
 version=""
@@ -190,6 +186,9 @@ for want in $GENESIS_REQUESTED_FEATURES; do
         features+=( "enable-service-discovery" ) #FIXME remove once spruce can go-patch over (( grabs ))
       fi
       ;;
+    compiled-releases)
+      want_feature "cf-deployment/operations/use-compiled-releases" || features+=( "compiled-releases" )
+      ;;
     bare|partitioned-network|haproxy|tls|self-signed) features+=( "$want" ) ;;
     aws-blobstore|azure-blobstore|gcp-blobstore|gcp-use-access-key) features+=( "$want" ) ;;
     local-postgres-db|local-mysql-db|mysql-db|postgres-db) features+=( "$want" ) ;;
@@ -203,7 +202,6 @@ for want in $GENESIS_REQUESTED_FEATURES; do
         describe "#R[ERROR]} #c{$want} is not an upstream operation -- see cf-deployment for valid operations."
       fi
       ;;
-    compiled-releases) : ;; #dealt with above
     *)
       if [[ -f "$GENESIS_ROOT/ops/$want.yml" ]] ; then
         features+=( "$want" )
@@ -330,6 +328,8 @@ for want in $GENESIS_REQUESTED_FEATURES; do
     ## Addons
     #
 
+    compiled-releases)
+      manifest+=( "cf-deployment/operations/use-compiled-releases.yml" ) ;;
     small-footprint)
       manifest+=( "operations/small-footprint.yml" ) ;;
     nfs-volume-services)
