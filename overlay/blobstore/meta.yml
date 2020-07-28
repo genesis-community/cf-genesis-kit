@@ -1,10 +1,10 @@
 meta:
   blobstore_bucket_env:  (( grab params.blobstore_bucket_env  || $GENESIS_ENVIRONMENT  ))
   blobstore_bucket_type: (( grab params.blobstore_bucket_type || $GENESIS_TYPE ))
-  blobstore_bucket_prefix_default: (( concat meta.blobstore_bucket_env '-' meta.blobstore_bucket_type ))
-  blobstore_bucket_prefix: (( grab params.blobstore_bucket_prefix || params.blobstore_bucket_prefix_default ))
+  blobstore_bucket_prefix_default: (( concat meta.blobstore_bucket_env "-" meta.blobstore_bucket_type ))
+  blobstore_bucket_prefix: (( grab params.blobstore_bucket_prefix || meta.blobstore_bucket_prefix_default ))
   blobstore_bucket_suffix: (( grab params.blobstore_bucket_suffix || "((cc_directory_key))" ))
-  ))
+
   blobstore_bucket_path:
     app-packages: (( concat meta.blobstore_bucket_prefix "-app-packages-" meta.blobstore_bucket_suffix ))
     buildpacks:   (( concat meta.blobstore_bucket_prefix "-buildpacks-"   meta.blobstore_bucket_suffix ))
