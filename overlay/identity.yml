@@ -1,0 +1,12 @@
+instance_groups:
+- name: api
+  jobs:
+  - name: cloud_controller_ng
+    properties:
+      name:  (( concat "Cloud Foundry (" genesis.env ")" ))
+      build: (( concat "cf-genesis-kit v" kit.version ))
+      support_address: (( grab params.identity_support_address || "https://github.com/genesis-community/cf-genesis-kit" ))
+      description: (( grab params.identity_description || "Use `genesis info` on environment file for more details" ))
+      cc:
+        min_cli_version: "6.23.0"
+        min_recommended_cli_version: "6.23.0"

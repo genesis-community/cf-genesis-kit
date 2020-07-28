@@ -66,6 +66,7 @@ manifest+=( overlay/base.yml )
 ### Set up some best practices if not bare
 if ! want_feature "bare" ; then
   manifest+=( \
+    "overlay/identity.yml" \
     "overlay/override-app-domains.yml" \
     "overlay/ten-year-ca-expiry.yml" \
   )
