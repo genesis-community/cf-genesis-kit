@@ -41,9 +41,12 @@ ask_for_loadbalancer() {
     done
     echo
 
-    credhub "set" -n "${GENESIS_CREDHUB_ROOT}/router_ssl" -t certificate -r /dev/null \
+    output="$( \
+      credhub "set" -n "${GENESIS_CREDHUB_ROOT}/router_ssl" -t certificate -r /dev/null \
       -c <(safe read "${GENESIS_SECRETS_BASE}haproxy/ssl:certificate" | sed -e '/^$/d') \
-      -p <(safe read "${GENESIS_SECRETS_BASE}haproxy/ssl:key"         | sed -e '/^$/d')
+      -p <(safe read "${GENESIS_SECRETS_BASE}haproxy/ssl:key"         | sed -e '/^$/d') \
+      2>&1 )"
+    [[ $? == "0" ]] || bail "#R{[ERROR]} Could not write to credhub: $output"
 
     safe rm "${GENESIS_SECRETS_BASE}haproxy/ssl"
   else
