@@ -188,7 +188,7 @@ if [[ $use_bare == 'true' ]] ; then
     -o '[haproxy] An internal HAProxy Load Balancer' \
     --default 'external'
   if [[ $load_balancer == 'haproxy' ]]; then
-    features+=( "cf-deployment/operations/haproxy" );
+    features+=( "cf-deployment/operations/use-haproxy" );
   fi
 
 else
