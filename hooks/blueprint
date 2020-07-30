@@ -190,10 +190,13 @@ for want in $GENESIS_REQUESTED_FEATURES; do
     compiled-releases)
       want_feature "cf-deployment/operations/use-compiled-releases" || features+=( "compiled-releases" )
       ;;
+    small-footprint)
+      want_feature "cf-deployment/operations/scale-to-one-az" || features+=( "small-footprint" )
+      ;;
     local-postgres-db|local-mysql-db|mysql-db|postgres-db) db_specified=1; features+=( "$want" ) ;;
     bare|partitioned-network|haproxy|tls|self-signed) features+=( "$want" ) ;;
     aws-blobstore|azure-blobstore|gcp-blobstore|gcp-use-access-key) features+=( "$want" ) ;;
-    nfs-volume-services|small-footprint|enable-service-discovery) features+=( "$want" ) ;;
+    nfs-volume-services|enable-service-discovery) features+=( "$want" ) ;;
     app-autoscaler-integration|prometheus-integration) features+=( "$want" ) ;;
     +migrated_v1_env|+override-db-names) features+=( "$want" ) ;;
     cf-deployment/*)
@@ -331,7 +334,7 @@ for want in $GENESIS_REQUESTED_FEATURES; do
     compiled-releases)
       manifest+=( "cf-deployment/operations/use-compiled-releases.yml" ) ;;
     small-footprint)
-      manifest+=( "operations/small-footprint.yml" ) ;;
+      manifest+=( "cf-deployment/operations/scale-to-one-az.yml" ) ;;
     nfs-volume-services)
       manifest+=( "cf-deployment/operations/enable-nfs-volume-service.yml" );;
     enable-service-discovery)
