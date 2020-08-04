@@ -11,3 +11,10 @@ meta:
     droplets:     (( concat meta.blobstore_bucket_prefix "-droplets-"     meta.blobstore_bucket_suffix ))
     resources:    (( concat meta.blobstore_bucket_prefix "-resources-"    meta.blobstore_bucket_suffix ))
 
+variables:
+- name: cc_directory_key
+  type: password
+  options:
+    length: 10 # 26^10 = 1.4 x 10^14 possibilities
+    exclude_upper: true
+    exclude_number: true
