@@ -40,11 +40,6 @@ if [[ -n "$GENESIS_CLOUD_CONFIG" ]] ; then
   fi
 fi
 
-# Upgrade check
-version="$(exodus kit_version)"
-if [[ -n "${version:-}" ]] && ! new_enough "${version}" "1.10.1"; then
-  bail "Please upgrade to cf kit 1.10.1 before upgrading to > 2.0"
-fi
 
 # Runtime config checks
 runtime_ok=yes
@@ -67,20 +62,30 @@ fi
 
 env_ok=yes
 # Environment Parameter checks - none yet!
+version="$(exodus kit_version)"
+if [[ -n "${version:-}" ]] ; then
+  set +e
+  if ! new_enough "$version" "2.0.0-rc0" ; then
+    describe "" "  #C{[Checking Upgrade from $version]}"
+
+    if ! new_enough "${version}" "1.10.1" ; then
+      describe "    #R{[ERROR]} Please upgrade to cf kit 1.10.1 before upgrading to > 2.0"
+      env_ok=no
+    else
+      #TODO: Check if safe secrets are present to be imported by migration hook
+      :
+    fi
+  fi
+  set -e
+fi
+
 
 if [[ "$env_ok" == "yes" ]]; then
-  describe "  environment files [#G{OK}]"
+  describe "  environment files [#G{OK}]" ""
 else
-  describe "  environment files [#R{FAILED}]"
+  describe "  environment files [#R{FAILED}]" ""
 fi
 
-if [[ -n "${version}" ]] && ! new_enough "${version}" "2.0.0-rc1"; then
-  # TODO: check if secrets are present
-  :
-
-fi
-
-if [[ "$env_ok" == "no" || "$cc_ok" == "no" || "$runtime_ok" == no ]] ; then
-  exit 1
-fi
+[[ "$env_ok" == "no" || "$cc_ok" == "no" || "$runtime_ok" == no ]] && exit 1
+exit 0
 
