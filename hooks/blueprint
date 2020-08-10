@@ -363,6 +363,7 @@ for want in $GENESIS_REQUESTED_FEATURES; do
           manifest+=( "overlay/routing/haproxy-provided-cert.yml" )
         fi
       fi
+      want_feature "small-footprint" && manifest+=( "overlay/routing/haproxy-small-footprint.yml" )
     fi
 
   fi
