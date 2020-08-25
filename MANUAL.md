@@ -1,7 +1,9 @@
 # Cloud Foundry Genesis Kit Manual
 
 The **Cloud Foundry Genesis Kit** deploys a single instance of
-Cloud Foundry.
+Cloud Foundry.  As of v2.0.0, this is now based on [cf-deployment][cf-deployment]]
+
+[cf-deplyment]: https://https://github.com/cloudfoundry/cf-deployment
 
 # Requirements
 
@@ -10,10 +12,42 @@ available in the runtime config prior to Kit deployment. Please
 refer to [bosh-deployment][bosh-deployment] for an example
 runtime config.
 
+Furthermore, this kit requires the BOSH director to be deployed with Credhub.
+It is recommended that you use the latest release of
+[bosh-genesis-kit][bosh-genesis-kit], as this will ensure everything is
+correctly configured.
+
 
 [bosh-deployment]: https://github.com/cloudfoundry/bosh-deployment/blob/master/runtime-configs/dns.yml
+[bosh-genesis-kit]: https://github.com/genesis-community/bosh-genesis-kit
 
-# Parameters
+# General Usage Guidelines
+
+As per usual with Genesis kits, you will need a Genesis deployment repository
+to contain your environment file.  If you don't already have one from a
+previous `cf` version, run `genesis init -k cf/<version>`, where <version> is
+replaced with the current cf genesis kit version.  If you have this already,
+you'll need to download the latest copy of this kit via `genesis fetch-kit`
+from within that directory.
+
+Once in the Genesis `cf` deployment repository, and run `genesis new <env>` to
+create a new env file, replacing `<env>` with your desired env.  This will
+walk you through a wizard that will populate the desired features and the
+corresponding parameters.
+
+Once you have an env file, you may want to manually change parameters or
+features. The rest of this document covers how to modify your environment
+files to make use of provided features.
+
+# Features
+
+## Features Provided by the Genesis Kit
+
+## Features Provided by `cf-deployment`
+
+## Providing your Own Features
+
+# Kit Feature Parameters
 
   - `base_domain` - The base domain for this Cloud Foundry
     deployment.  All domains (system, api, apps, etc.) will be
