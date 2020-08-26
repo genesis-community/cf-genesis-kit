@@ -41,11 +41,59 @@ files to make use of provided features.
 
 # Features
 
+In genesis kits features can be opted-in to on a per-environment bases by adding the `features` array to the environment file:
+```
+kit:
+  features:
+  - feature-a
+  - feature-b
+```
+
+Using features is a way to configure the kit to suite the requirements of your specific deployment.
+
 ## Features Provided by the Genesis Kit
+  - `cf-deployment-version-<manifest-version-number>` - Specify a specific version of the upstream cf-deployment-manifest.
+  - `compiled-releases` - Use pre-compiled releases to speed up initial deploy time (alias of upstream `cf-deployment/operations/use-compiled-releases`).
+  - `small-footprint` - Use the minimal number of vms and only 1 az to deploy cf.
+  - `postgres-db` - Use an external postgres instance to host persistent data.
+  - `mysql-db` - Use an external postgres instance to host persistent data.
+  - `local-mysql-db` - Use a mysql database and deploy it on a vm as part of this deployment.
+  - `bare` - Deploy _only_ the cf-deployment files without genesis packaged best-practices applied.
+  - `haproxy` - Deploy an haproxy loadbalancer in front of cf.
+  - `tls` - Configure haproxy to use tls.
+  - `self-signed` - Generate self-signed certs for haproxy.
+  - `aws-blobstore` - Use S3 storage as external blobsore.
+  - `azure-blobstore` - Use Azure blob storage as external blobstore.
+  - `gcp-blobstore` - Use GCS as external blobstore.
+  - `gcp-use-access-key` - Use use google storage access key/secret to access the external GCS blobstore (instead of service account credentials which is the default).
+  - `nfs-volume-services` - Alias of `cf-deployment/operations/enable-nfs-volume-service`
+  - `enable-service-discovery` - Enables bosh-dns support on diego cells.
+  - `app-autoscaler-integration` - Add a uaa client for the app autoscaler (must be deployed via [cf-app-autoscaler-genesis-kit](https://github.com/genesis-community/cf-app-autoscaler-genesis-kit)).
+  - `prometheus-integration` - Configure cf to export to prometheus (must deployed via [prometheus-genesis-kit](https://github.com/genesis-community/prometheus-genesis-kit)).
+  - `migrated-v1-env` - Fix the database names after having migrated from v1 kit.
 
 ## Features Provided by `cf-deployment`
 
+In addition to the bundled features that this kit exposes you can also include any ops files contained in the upstream [cf-deployment](https://https://github.com/cloudfoundry/cf-deployment) by referencing them via:
+```
+kit:
+  features:
+  - cf-deployment/path/to/file # omit .yml suffix
+```
+
 ## Providing your Own Features
+
+If you would like to apply additional ops-files for unsupported features you can do so by adding them under:
+```
+./ops/<feature-name>.yml
+```
+
+and reference them in your environment file via:
+```
+kit:
+  features:
+  - <feature-name>
+```
 
 # Kit Feature Parameters
 
