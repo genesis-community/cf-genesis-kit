@@ -81,6 +81,8 @@ kit:
   - cf-deployment/path/to/file # omit .yml suffix
 ```
 
+Caveat: Not all features are compatible with this kit and features are applied in order, so ordering may matter.
+
 ## Providing your Own Features
 
 If you would like to apply additional ops-files for unsupported features you can do so by adding them under:
@@ -94,6 +96,55 @@ kit:
   features:
   - <feature-name>
 ```
+
+## Feature Params
+The following params are always included:
+
+| param | description | default |
+| --- | --- | --- |
+| `network` |  what network should be used? | `default` |
+| `base_domain` | What is the base domain for this Cloud Foundry? | |
+| `system_domain` | What is the system domain for this Cloud Foundry? | `system.<base_domain>` |
+| `api_domain` |  What is the api domain for this Cloud Foundry? | `api.<system_domain>` |
+| `apps_domain` | What is the apps domain for this Cloud Foundy? | `<system-domain>` |
+
+These params need to be set when activating features:
+  - **aws-blobstore**:
+    | param | description |
+    | --- | --- |
+    | `blobstore_s3_region` | the s3 region of the blobstore |
+
+  - **external-mysql**:
+    | param | description | default |
+    | --- | --- | --- |
+    | `external_db_host` | The external host for your mysql db | |
+    | `external_db_port` | The port for your external mysql db | `3306` |
+    | `external_db_password` | The password for the external mysql db | `((external_db_password))` (Credhub lookup) |
+
+  - **external-postgres**:
+    | param | description | default |
+    | --- | --- | --- |
+    | `external_db_host` | The external host for your postgres db | |
+    | `external_db_port` | The port for your external postgres db | `5432` |
+    | `external_db_password` | The password for the external postgres db | `((external_db_password))` (Credhub lookup) |
+  - **haproxy**:
+    | param | description | default |
+    | --- | --- | --- |
+    | `internal_only_domains` | Internal only domains | `[]` |
+    | `trusted_domain_cidrs` | Trusted cidrs | `~` |
+    | `haproxy_instances` | How many haproxy instances? | 2 |
+    | `haproxy_vm_type` | The vm type in cloud-config for haproxy | `haproxy` |
+    | `cf_lb_network` | What network should haproxy be deployed to? | `(( grab params.cf_edge_network || default))` |
+    | `haproxy_ips` | What static ips should be used for haproxy | |
+  - **haproxy** + **small-footprint**:
+    | param | description | default |
+    | --- | --- | --- |
+    | `haproxy_instances` | How many haproxy instances? | 1 |
+  - **haproxy** + **tls**:
+    | param | description | default |
+    | --- | --- | --- |
+    | `disable_tls_10` | Disable tls 10? | `true` |
+    | `disable_tls_11` | Disable tls 11? | `true` |
 
 # Kit Feature Parameters
 
