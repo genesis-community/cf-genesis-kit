@@ -41,11 +41,240 @@ files to make use of provided features.
 
 # Features
 
+In genesis kits features can be opted-in to on a per-environment bases by adding the `features` array to the environment file:
+```
+kit:
+  features:
+  - feature-a
+  - feature-b
+```
+
+Using features is a way to configure the kit to suite the requirements of your specific deployment.
+
 ## Features Provided by the Genesis Kit
+General:
+  - `compiled-releases` - Use pre-compiled releases to speed up initial deploy time (alias of upstream `cf-deployment/operations/use-compiled-releases`).
+  - `small-footprint` - Use the minimal number of vms and only 1 az to deploy cf.
+  - `nfs-volume-services` - Alias of `cf-deployment/operations/enable-nfs-volume-service`
+  - `enable-service-discovery` - Enables bosh-dns support on diego cells.
+  - `app-autoscaler-integration` - Add a uaa client for the app autoscaler (must be deployed via [cf-app-autoscaler-genesis-kit](https://github.com/genesis-community/cf-app-autoscaler-genesis-kit)).
+  - `prometheus-integration` - Configure cf to export to prometheus (must deployed via [prometheus-genesis-kit](https://github.com/genesis-community/prometheus-genesis-kit)).
+  - `bare` - Deploy _only_ the cf-deployment files without genesis packaged best-practices applied.
+  - `migrated-v1-env` - Fix the database names after having migrated from v1 kit.
+
+Database related - choose one:
+  - `postgres-db` - Use an external postgres instance to host persistent data.
+  - `mysql-db` - Use an external postgres instance to host persistent data.
+  - `local-mysql-db` - Use a mysql database and deploy it on a vm as part of this deployment.
+  - `override-db-names` - When specifying `local-mysql-db` (or `local-postgresql-db` which is on by default) you can override the names of the databases that are created.
+
+Load balancer related:
+  - `haproxy` - Deploy an haproxy loadbalancer in front of cf.
+  - `tls` - Configure haproxy to use tls.
+  - `self-signed` - Generate self-signed certs for haproxy.
+
+Blobstore related:
+  - `aws-blobstore` - Use S3 storage as external blobsore.
+  - `azure-blobstore` - Use Azure blob storage as external blobstore.
+  - `gcp-blobstore` - Use GCS as external blobstore.
+  - `gcp-use-access-key` - Use use google storage access key/secret to access the external GCS blobstore (instead of service account credentials which is the default).
 
 ## Features Provided by `cf-deployment`
 
+In addition to the bundled features that this kit exposes you can also include any ops files contained in the upstream [cf-deployment](https://https://github.com/cloudfoundry/cf-deployment) by referencing them via:
+```
+kit:
+  features:
+  - cf-deployment/path/to/file # omit .yml suffix
+```
+
+Caveat: Not all features are compatible with this kit and features are applied in order, so ordering may matter.
+
 ## Providing your Own Features
+
+If you would like to apply additional ops-files for unsupported features you can do so by adding them under:
+```
+./ops/<feature-name>.yml
+```
+
+and reference them in your environment file via:
+```
+kit:
+  features:
+  - <feature-name>
+```
+
+## Feature Params
+The following params are always included:
+| param | description | default |
+| --- | --- | --- |
+| `cf_core_network` | What network should be used for cf core-components? | `cf-core` |
+| `cf_edge_network` | What network should be used for cf edge-components? | `cf-edge` |
+| `cf_runtime_network` | What network should be used for cf runtime-components? | `cf-runtime` |
+| `base_domain` | What is the base domain for this Cloud Foundry? | |
+| `system_domain` | What is the system domain for this Cloud Foundry? | `system.<base_domain>` |
+| `api_domain` |  What is the api domain for this Cloud Foundry? | `api.<system_domain>` |
+| `apps_domain` | What is the apps domain for this Cloud Foundy? | `run.<system-domain>` |
+| `identity_support_address` | Identity support address | `"https://github.com/genesis-community/cf-genesis-kit"` | 
+| `identity_description` | Identity description | `"Use 'genesis info' on environment file for more details"` |
+
+These params need to be set when activating features:
+  - **aws-blobstore**:
+    | param | description | default |
+    | --- | --- | --- |
+    | `blobstore_s3_region` | The s3 region of the blobstore | |
+    | `blobstore_bucket_prefix` | Prefix for the path where blobs are stored in the bucket | `"$GENESIS_ENVIRONMENT-$GENESIS_TYPE"`
+    | `blobstore_bucket_suffix` | Suffix for the path where blobs are stored in the bucket | `"((cc_director_key))"` |
+    | `blobstore_app_packages_directory` | Directory for the app packages | `blobstore_bucket_prefix` + `"-app-packages-"` + `blobstore_bucket_suffix` |
+    | `blobstore_buildpacks_directory` | Directory for the app packages | `blobstore_bucket_prefix` + `"-buildpacks-"` + `blobstore_bucket_suffix` |
+    | `blobstore_droplets_directory` | Directory for the app packages | `blobstore_bucket_prefix` + `"-droplets-"` + `blobstore_bucket_suffix` |
+    | `blobstore_resources_directory` | Directory for the app packages | `blobstore_bucket_prefix` + `"-resources-"` + `blobstore_bucket_suffix` |
+  - **azure-blobstore**:
+    | param | description | default |
+    | --- | --- | --- |
+    | `azure_environment` | What is environment where this blobstore exists? | `AzureCloud` |
+    | `blobstore_bucket_prefix` | Prefix for the path where blobs are stored in the bucket | `"$GENESIS_ENVIRONMENT-$GENESIS_TYPE"`
+    | `blobstore_bucket_suffix` | Suffix for the path where blobs are stored in the bucket | `"((cc_director_key))"` |
+    | `blobstore_app_packages_directory` | Directory for the app packages | `blobstore_bucket_prefix` + `"-app-packages-"` + `blobstore_bucket_suffix` |
+    | `blobstore_buildpacks_directory` | Directory for the app packages | `blobstore_bucket_prefix` + `"-buildpacks-"` + `blobstore_bucket_suffix` |
+    | `blobstore_droplets_directory` | Directory for the app packages | `blobstore_bucket_prefix` + `"-droplets-"` + `blobstore_bucket_suffix` |
+    | `blobstore_resources_directory` | Directory for the app packages | `blobstore_bucket_prefix` + `"-resources-"` + `blobstore_bucket_suffix` |
+
+  - **bare**:
+    | param | description | default |
+    | --- | --- | --- |
+    | `network` | What network should Cloud Foundry be deployed to? | default |
+
+  - **external-mysql**:
+    | param | description | default |
+    | --- | --- | --- |
+    | `external_db_host` | The default host for your mysql db | |
+    | `external_db_port` | The default for your external mysql db | `3306` |
+    | `external_db_password` | The password for the external mysql db | `((external_db_password))` (Credhub lookup) |
+    | `uaadb_name` | The name of the UAA Database | `uaadb` |
+    | `uaadb_host` | The host of the external UAA database | `external_db_host` |
+    | `uaadb_port` | The port of the external UAA database | `external_db_port` |
+    | `uaadb_user` | The UAA database used | `uuaadmin` |
+    | `uaadb_password` | The UAA database password | `external_db_password` |
+    | `ccdb_name` | The name of the Cloud Controller database | `ccdb` |
+    | `ccdb_host` | The host of the external Cloud Controller database | `external_db_host` |
+    | `ccdb_port` | The port of the external Cloud Controller database | `external_db_port` |
+    | `ccdb_user` | The Cloud Controller database user | `ccadmin` |
+    | `ccdb_password` | The Cloud Controller database password | `external_db_password` |
+    | `diegodb_name` | The name of the Diego Database | `diegodb` |
+    | `diegodb_host` | The host of the external Diego database | `external_db_host` |
+    | `diegodb_port` | The port of the external Diego database | `external_db_port` |
+    | `diegodb_user` | The Diego database used | `diegoadmin` |
+    | `diegodb_password` | The Diego database password | `external_db_password` |
+    | `policyserverdb_name` | The name of the Network Policy database | `policyserverdb` |
+    | `policyserverdb_host` | The host of the external Network Policy database | `external_db_host` |
+    | `policyserverdb_port` | The port of the external Network Policy database | `external_db_port` |
+    | `policyserverdb_user` | The Network Policy database used | `policyserveradmin` |
+    | `silkdb_name` | The name of the Silk Database | `silkdb` |
+    | `silkdb_host` | The host of the external Silk database | `external_db_host` |
+    | `silkdb_port` | The port of the external Silk database | `external_db_port` |
+    | `silkdb_user` | The Silk database used | `silkadmin` |
+    | `silkdb_password` | The Silk database password | `external_db_password` |
+    | `routingapidb_name` | The name of the Routing API database | `routingapidb` |
+    | `routingapidb_host` | The host of the external Routing API database | `external_db_host` |
+    | `routingapidb_port` | The port of the external Routing API database | `external_db_port` |
+    | `routingapidb_user` | The Routing API database used | `routingapiadmin` |
+    | `routingapidb_password` | The Routing API database password | `external_db_password` |
+    | `locketdb_name` | The name of the Locket database | `locketdb` |
+    | `locketdb_host` | The host of the external Locket database | `external_db_host` |
+    | `locketdb_port` | The port of the external Locket database | `external_db_port` |
+    | `locketdb_user` | The Locket database used | `locketadmin` |
+    | `locketdb_password` | The Locket database password | `external_db_password` |
+    | `credhubdb_name` | The name of the Credhub database | `credhubdb` |
+    | `credhubdb_host` | The host of the external Credhub database | `external_db_host` |
+    | `credhubdb_port` | The port of the external Credhub database | `external_db_port` |
+    | `credhubdb_user` | The Credhub database used | `credhubadmin` |
+    | `credhubdb_password` | The Credhub database password | `external_db_password` |
+  - **external-postgres**:
+    | param | description | default |
+    | --- | --- | --- |
+    | `external_db_host` | The external host for your postgres db | |
+    | `external_db_port` | The port for your external postgres db | `5432` |
+    | `external_db_password` | The password for the external postgres db | `((external_db_password))` (Credhub lookup) |
+    | `uaadb_name` | The name of the UAA Database | `uaadb` |
+    | `uaadb_host` | The host of the external UAA database | `external_db_host` |
+    | `uaadb_port` | The port of the external UAA database | `external_db_port` |
+    | `uaadb_user` | The UAA database used | `uuaadmin` |
+    | `uaadb_password` | The UAA database password | `external_db_password` |
+    | `ccdb_name` | The name of the Cloud Controller database | `ccdb` |
+    | `ccdb_host` | The host of the external Cloud Controller database | `external_db_host` |
+    | `ccdb_port` | The port of the external Cloud Controller database | `external_db_port` |
+    | `ccdb_user` | The Cloud Controller database user | `ccadmin` |
+    | `ccdb_password` | The Cloud Controller database password | `external_db_password` |
+    | `diegodb_name` | The name of the Diego Database | `diegodb` |
+    | `diegodb_host` | The host of the external Diego database | `external_db_host` |
+    | `diegodb_port` | The port of the external Diego database | `external_db_port` |
+    | `diegodb_user` | The Diego database used | `diegoadmin` |
+    | `diegodb_password` | The Diego database password | `external_db_password` |
+    | `policyserverdb_name` | The name of the Network Policy database | `policyserverdb` |
+    | `policyserverdb_host` | The host of the external Network Policy database | `external_db_host` |
+    | `policyserverdb_port` | The port of the external Network Policy database | `external_db_port` |
+    | `policyserverdb_user` | The Network Policy database used | `policyserveradmin` |
+    | `silkdb_name` | The name of the Silk Database | `silkdb` |
+    | `silkdb_host` | The host of the external Silk database | `external_db_host` |
+    | `silkdb_port` | The port of the external Silk database | `external_db_port` |
+    | `silkdb_user` | The Silk database used | `silkadmin` |
+    | `silkdb_password` | The Silk database password | `external_db_password` |
+    | `routingapidb_name` | The name of the Routing API database | `routingapidb` |
+    | `routingapidb_host` | The host of the external Routing API database | `external_db_host` |
+    | `routingapidb_port` | The port of the external Routing API database | `external_db_port` |
+    | `routingapidb_user` | The Routing API database used | `routingapiadmin` |
+    | `routingapidb_password` | The Routing API database password | `external_db_password` |
+    | `locketdb_name` | The name of the Locket database | `locketdb` |
+    | `locketdb_host` | The host of the external Locket database | `external_db_host` |
+    | `locketdb_port` | The port of the external Locket database | `external_db_port` |
+    | `locketdb_user` | The Locket database used | `locketadmin` |
+    | `locketdb_password` | The Locket database password | `external_db_password` |
+    | `credhubdb_name` | The name of the Credhub database | `credhubdb` |
+    | `credhubdb_host` | The host of the external Credhub database | `external_db_host` |
+    | `credhubdb_port` | The port of the external Credhub database | `external_db_port` |
+    | `credhubdb_user` | The Credhub database used | `credhubadmin` |
+    | `credhubdb_password` | The Credhub database password | `external_db_password` |
+  - **haproxy**:
+    | param | description | default |
+    | --- | --- | --- |
+    | `internal_only_domains` | Internal only domains | `[]` |
+    | `trusted_domain_cidrs` | Trusted cidrs | `~` |
+    | `haproxy_instances` | How many haproxy instances? | 2 |
+    | `haproxy_vm_type` | The vm type in cloud-config for haproxy | `haproxy` |
+    | `cf_lb_network` | What network should haproxy be deployed to? | `cf_edge_network` or `default` |
+    | `haproxy_ips` | What static ips should be used for haproxy | |
+    | `availability_zones` | What azs should haproxy be deployed to? | `[z1, z2, z3]` |
+
+  - **haproxy** + **small-footprint**:
+    | param | description | default |
+    | --- | --- | --- |
+    | `haproxy_instances` | How many haproxy instances? | 1 |
+  - **haproxy** + **tls**:
+    | param | description | default |
+    | --- | --- | --- |
+    | `disable_tls_10` | Disable tls 10? | `true` |
+    | `disable_tls_11` | Disable tls 11? | `true` |
+  - **override-db-names**:
+    | param | description | default |
+    | --- | --- | --- |
+    | `uaadb_name` | Name of the UAA database | `uuadb` |
+    | `uaadb_user` | Name of the UAA database user | `uuaadmin` |
+    | `ccdb_name` | Name of the Cloud Controller database | `ccdb` |
+    | `ccdb_user` | Name of the Cloud Controller database user | `ccadmin` |
+    | `diegodb_name` | Name of the Diego database | `diegodb` |
+    | `diegodb_user` | Name of the Diego database user | `diegoadmin` |
+    | `policyserverdb_name` | Name of the Network Policy database | `policyserverdb` |
+    | `policyserverdb_user` | Name of the Network Policy database user | `policyserveradmin` |
+    | `silkdb_name` | Name of the Silk database | `silkdb` |
+    | `silkdb_user` | Name of the Silk database user | `silkadmin` |
+    | `routingapidb_name` | Name of the Routing API database | `routingapidb` |
+    | `routingapidb_user` | Name of the Routing API database user | `routingapiadmin` |
+    | `locketdb_name` | Name of the Locket database | `locketdb` |
+    | `locketdb_user` | Name of the Locket database user | `locketadmin` |
+    | `credhubdb_name` | Name of the Credhub database | `credhubdb` |
+    | `credhubdb_user` | Name of the Credhub database user | `credhubadmin` |
+
 
 # Kit Feature Parameters
 
