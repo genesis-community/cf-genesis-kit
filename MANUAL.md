@@ -150,6 +150,7 @@ These params need to be set when activating features:
     | --- | --- | --- |
     | `external_db_host` | The default host for your mysql db | |
     | `external_db_port` | The default for your external mysql db | `3306` |
+    | `external_db_user` | The username for all mysql databases (set if you are using the same user for all dbs) | |
     | `external_db_password` | The password for the external mysql db | `((external_db_password))` (Credhub lookup) |
     | `uaadb_name` | The name of the UAA Database | `uaadb` |
     | `uaadb_host` | The host of the external UAA database | `external_db_host` |
@@ -195,6 +196,7 @@ These params need to be set when activating features:
     | --- | --- | --- |
     | `external_db_host` | The external host for your postgres db | |
     | `external_db_port` | The port for your external postgres db | `5432` |
+    | `external_db_user` | The username for all mysql databases (set if you are using the same user for all dbs) | |
     | `external_db_password` | The password for the external postgres db | `((external_db_password))` (Credhub lookup) |
     | `uaadb_name` | The name of the UAA Database | `uaadb` |
     | `uaadb_host` | The host of the external UAA database | `external_db_host` |
