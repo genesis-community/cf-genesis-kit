@@ -8,6 +8,6 @@
   path: /releases/-
   value:
     name: migrate-postgres
-    version: latest
-    # url: git+https://github.com/rkoster/migrate-postgres-boshrelease.git
-    # TODO: create a proper release
+    version: 1.0.0
+    url: https://github.com/rkoster/migrate-postgres-boshrelease/releases/download/v1.0.0/migrate-postgres-1.0.0.tgz
+    sha1: 22e3ca0c5050cdf289972c74206663b8f97526d1
