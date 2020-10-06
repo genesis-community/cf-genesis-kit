@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+
+set -e
+set -o pipefail
+
+ref=$(cat cf-deployment/.git/ref | cut -c1-8)
+
+pushd git > /dev/null
+
+if [[ -z $(git config --global user.email) ]]; then
+    git config --global user.email "ci@starkandwayne.com"
+fi
+if [[ -z $(git config --global user.name) ]]; then
+    git config --global user.name "CI Bot"
+fi
+
+echo "CHECKING git status"
+git status
+
+echo "MERGE cf-deployment repo"
+rm -r cf-deployment
+cp -r ../cf-deployment .
+rm -rf cf-deployment/{ci}
+
+echo "recreate spec-test results to validate: the cf-deployment update "
+pushd spec > /dev/null
+# TODO: remove spec/{credhub,vault} if needed? because this will regenerate vault.
+rm -rf results/
+ginkgo
+popd
+
+git add cf-deployment
+git add spec/
+git commit -m "Update to cloudfoundry/cf-deployment@$ref"
+
+popd > /dev/null

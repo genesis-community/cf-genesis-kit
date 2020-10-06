@@ -1,0 +1,15 @@
+---
+platform: linux
+
+image_resource:
+  type: docker-image
+  source:
+    repository: starkandwayne/concourse-go
+    tag: '1.14'
+
+inputs:
+- name: git
+- name: git-ci
+
+run:
+  path: git-ci/ci/tasks/spec-tests/task

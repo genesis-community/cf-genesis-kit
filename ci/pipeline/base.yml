@@ -1,0 +1,81 @@
+---
+#
+# ci/pipeline.yml
+#
+# Pipeline structure file for a Genesis Release pipeline
+#
+# DO NOT MAKE CHANGES TO THIS FILE.  Instead, modify
+# ci/settings.yml and override what needs overridden.
+# This uses spruce, so you have some options there.
+#
+# author:  James Hunt <james@niftylogic.com>
+# created: 2018-01-23
+
+meta:
+  kit:      (( param "Which kit is this pipeline for?" ))
+  name:     (( concat meta.kit "-genesis-kit" ))
+  release:  (( concat meta.kit " Genesis Kit" ))
+  target:   (( param "Please identify the name of the target Concourse CI" ))
+  url:      (( param "Please specify the full url of the target Concourse CI" ))
+  pipeline: (( grab meta.name ))
+
+  vault:
+    url:   (( param "Please provide the address of your Vault" ))
+    token: (( param "Please provide a Vault Token" ))
+
+  git:
+    email: ci@starkandwayne.com
+    name:  Stark & Wayne CI Bot
+
+  image:
+    name: starkandwayne/genesis
+    tag: latest
+
+  aws:
+    bucket:      genesis-pipeline
+    region_name: us-east-1
+    access_key: (( param "Please set your AWS Access Key ID for your pipeline S3 Bucket" ))
+    secret_key: (( param "Please set your AWS Secret Key ID for your pipeline S3 Bucket" ))
+
+  github:
+    uri:          (( concat "git@github.com:" meta.github.owner "/" meta.github.repo ))
+    owner:        (( param "Please specify the name of the user / organization that owns the Github repository" ))
+    repo:         (( param "Please specify the name of the Github repository" ))
+    branch:       master
+    private_key:  (( param "Please generate an SSH Deployment Key for this repo and specify it here" ))
+    access_token: (( param "Please generate a Personal Access Token to be used for creating github releases (do you have a ci-bot?)" ))
+
+  bosh:
+    uri:        (( param "Please specify the Genesis CI BOSH Director URI" ))
+    cacert:     (( param "Please specify the Genesis CI BOSH Director Root CA cert" ))
+    username:   admin
+    password:   (( param "Please specify the Genesis CI BOSH Director admin password" ))
+
+  shout:
+    topic:    (( concat meta.name "-pipeline" ))
+    url:      (( param "Please specify the Shout! endpoint" ))
+    username: (( param "Please specify the Shout! operations username" ))
+    password: (( param "Please specify the Shout! operations password" ))
+
+    metadata:
+      build-team-name:     $BUILD_TEAM_NAME
+      build-job-name:      $BUILD_JOB_NAME
+      build-pipeline-name: $BUILD_PIPELINE_NAME
+
+    links:
+      pipeline: (( concat meta.url "/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME" ))
+      build:    (( concat meta.shout.links.pipeline "/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME" ))
+
+groups:
+  - name: (( grab meta.pipeline ))
+    jobs:
+    - spec-tests
+    - testflight
+    - pre
+    - rc
+    - shipit
+    - major
+    - minor
+  - name: upstream
+    jobs:
+    - cf-deployment
