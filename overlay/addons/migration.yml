@@ -12,8 +12,8 @@ meta:
       name: ccdb
       user: ccadmin
     uaa:
-      name: uuadb
-      user: uuaadmin
+      name: uaadb
+      user: uaaadmin
     diego:
       name: diegodb
       user: diegoadmin
