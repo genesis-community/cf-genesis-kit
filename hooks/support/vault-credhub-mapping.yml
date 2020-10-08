@@ -1,4 +1,16 @@
 credentials:
+- name: ((credhub_prefix))/external_db_user
+  type: password
+  value: ((vault "((vault_prefix))/external_db:username"))
+- name: ((credhub_prefix))/external_db_password
+  type: password
+  value: ((vault "((vault_prefix))/external_db:password"))
+- name: ((credhub_prefix))/blobstore_access_key_id
+  type: password
+  value: ((vault "((vault_prefix))/blobstore:aws_access_key"))
+- name: ((credhub_prefix))/blobstore_secret_access_key
+  type: password
+  value: ((vault "((vault_prefix))/blobstore:aws_access_secret"))
 - name: ((credhub_prefix))/cc_directory_key
   type: password
   value: ((vault "((vault_prefix))/cc:directory_key"))

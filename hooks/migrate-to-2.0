@@ -9,7 +9,13 @@ migrate_credentials_to_credhub() {
     -v=credhub_prefix=$GENESIS_CREDHUB_ROOT -v=vault_prefix=${vault_prefix#/} | spruce json \
     | jq --argjson paths $vault_paths '.credentials  | map(select(.value | try .private_key // . | split("\"")[1] | IN($paths[]))) | {credentials: .}' \
     | spruce merge )
-  }
+
+  external_db_user=$(credhub get -n ${GENESIS_CREDHUB_ROOT}/external_db_user -j | jq -r '.value')
+  if [[ ${external_db_user} != "" ]] ; then
+    describe >&2 "#Y{{WARNING}} You must set params.external_db_user to '((external_db_user))' "\
+      "in your #C{$GENESIS_ENVIRONMENT.yml} to use the username that was located in vault"
+  fi
+}
 
 validate_expected_vault_secrets() {
   : # TODO
