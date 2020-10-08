@@ -203,7 +203,9 @@ for want in $GENESIS_REQUESTED_FEATURES; do
       if [[ -f "$want.yml" ]] ; then
         features+=( "$want" )
       else
-        describe "#R[ERROR]} #c{$want} is not an upstream operation -- see cf-deployment for valid operations."
+        abort=1
+        describe >&2 \
+          "#R[ERROR]} #c{$want} is not an upstream operation -- see cf-deployment for valid operations."
       fi
       ;;
     *)
