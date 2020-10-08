@@ -54,6 +54,7 @@
     name: loggr-syslog-binding-cache
     release: loggregator-agent
     properties:
+      enabled: false
       external_port: 9000
       tls:
         ca_cert: "((binding_cache_tls.ca))"
@@ -115,28 +116,3 @@
       common_name: loggr_syslog_binding_cache_metrics
       extended_key_usage:
       - server_auth
-
-#################
-# Remove cf-syslog-drain-release #
-#################
-
-- type: remove
-  path: /releases/name=cf-syslog-drain?
-
-- type: remove
-  path: /instance_groups/name=adapter?
-
-- type: remove
-  path: /instance_groups/name=scheduler/jobs/name=scheduler?
-
-- type: remove
-  path: /variables/name=adapter_tls?
-
-- type: remove
-  path: /variables/name=adapter_rlp_tls?
-
-- type: remove
-  path: /variables/name=scheduler_client_tls?
-
-- type: remove
-  path: /variables/name=scheduler_api_tls?

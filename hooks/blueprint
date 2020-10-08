@@ -61,7 +61,7 @@ else
 fi
 
 ### Minimal injections required for Genesis compliance
-manifest+=( overlay/base.yml )
+manifest+=( overlay/base.yml overlay/upstream_version.yml)
 
 ### Set up some best practices if not bare
 if ! want_feature "bare" ; then
