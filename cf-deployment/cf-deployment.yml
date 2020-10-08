@@ -2411,9 +2411,9 @@ releases:
   version: 4.29.1
   sha1: 77d0ba607bdfca1917f75d001d9638f73d09e8e5
 - name: loggregator
-  url: https://bosh.io/d/github.com/cloudfoundry/loggregator-release?v=106.3.9
-  version: 106.3.9
-  sha1: 7a576ef4ec0c62649e581ca473447f6df5238af6
+  url: "https://bosh.io/d/github.com/cloudfoundry/loggregator-release?v=106.3.11"
+  version: "106.3.11"
+  sha1: "c74c945f313a953664f299af63403aae48bd2051"
 - name: nats
   url: https://bosh.io/d/github.com/cloudfoundry/nats-release?v=34
   version: "34"
