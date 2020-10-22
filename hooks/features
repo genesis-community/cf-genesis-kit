@@ -10,5 +10,5 @@ if [[ $migrated_v1_env != "1" ]] ; then
     migrated_v1_env=1
   fi
 fi
-[[ -n "${migrated_v1_env:-}" ]] && echo "+migrated_v1_env"
+[[ -n "${migrated_v1_env:-}" ]] && echo "+migrated-v1-env"
 exit 0
