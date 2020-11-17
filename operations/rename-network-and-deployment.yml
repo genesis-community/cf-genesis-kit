@@ -266,3 +266,17 @@
       deployment: ((deployment_name))
       network: ((cf_core_network))
       domain: bosh
+  - domain: nats.service.cf.internal
+    targets:
+    - query: '*'
+      instance_group: nats
+      deployment: ((deployment_name))
+      network: ((cf_core_network))
+      domain: bosh
+  - domain: _.nats.service.cf.internal
+    targets:
+    - query: '_'
+      instance_group: nats
+      deployment: ((deployment_name))
+      network: ((cf_core_network))
+      domain: bosh
