@@ -26,6 +26,8 @@ github.com/cppforlife/go-patch v0.2.0/go.mod h1:67a7aIi94FHDZdoeGSJRRFDp66l9MhaA
 github.com/cpuguy83/go-md2man v1.0.10/go.mod h1:SmD6nW6nTyfqj6ABTjUi3V3JVMnlJmwcJI5acqYI6dE=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
+github.com/egymgmbh/go-prefix-writer v0.0.0-20180609083313-7326ea162eca h1:7oodhZp9MZW0DBkrZXyUsJWKQFy35SVxjZ8K4vHXnk8=
+github.com/egymgmbh/go-prefix-writer v0.0.0-20180609083313-7326ea162eca/go.mod h1:UhMFM+dnOcm1f0Pve8uqRaxAhEYki+/CuA2BTDp2T04=
 github.com/envoyproxy/go-control-plane v0.9.0/go.mod h1:YTl/9mNaCwkRvm6d1a2C3ymFceY/DCBVvsKhRF0iEA4=
 github.com/envoyproxy/go-control-plane v0.9.4/go.mod h1:6rpuAdCZL397s3pYoYcLgu1mIlRU8Am5FuJP05cCM98=
 github.com/envoyproxy/protoc-gen-validate v0.1.0/go.mod h1:iSmxcyjqTsJpI2R4NaDN7+kN2VEUnK/pcBlmesArF7c=
@@ -43,6 +45,10 @@ github.com/genesis-community/testkit v0.0.0-20200514092308-140df9ed9b0a h1:hWe4x
 github.com/genesis-community/testkit v0.0.0-20200514092308-140df9ed9b0a/go.mod h1:z35CwFDExuvyO6VcwkIx3nsD0H4Lzl6eCABFYCeAYzw=
 github.com/genesis-community/testkit v0.0.0-20200527124226-44e92150f258 h1:hJaS51CeVOGffOHtRgEf4YyjZOVqfYRgl/p4KBkwZfM=
 github.com/genesis-community/testkit v0.0.0-20200527124226-44e92150f258/go.mod h1:z35CwFDExuvyO6VcwkIx3nsD0H4Lzl6eCABFYCeAYzw=
+github.com/genesis-community/testkit v0.0.0-20201019192431-73745e0ca145 h1:FMCRcyz9ORA8q78GQEV/MKHDr8IBNGXNeCMl5gMODbw=
+github.com/genesis-community/testkit v0.0.0-20201019192431-73745e0ca145/go.mod h1:ZidExZ8ejGOmpm1xhzKUeNw/NPtcHdtB+SeFnbb68QI=
+github.com/genesis-community/testkit v0.0.0-20201118150714-8ecbf156e1ff h1:fiXbNUpMpSXclPq7P7v0+nyECJwYyJ1q2uLAbC84kes=
+github.com/genesis-community/testkit v0.0.0-20201118150714-8ecbf156e1ff/go.mod h1:ZidExZ8ejGOmpm1xhzKUeNw/NPtcHdtB+SeFnbb68QI=
 github.com/gofrs/flock v0.7.1/go.mod h1:F1TvTiK9OcQqauNUHlbJvyl9Qa1QvF/gOUDKA14jxHU=
 github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b/go.mod h1:SBH7ygxi8pfUlaOkMMuAQtPIUF8ecWP5IEl/CR7VP2Q=
 github.com/golang/mock v1.1.1/go.mod h1:oTYuIxOrZwtPieC+H1uAHpcLFnEyAGVDL/k47Jfbm0A=

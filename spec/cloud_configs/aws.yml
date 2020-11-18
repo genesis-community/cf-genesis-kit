@@ -23,6 +23,18 @@ vm_types:
   cloud_properties:
     instance_type: m5.large
     ephemeral_disk: {size: 25_000}
+- name: minimal
+  cloud_properties:
+    instance_type: m1.minimal
+    ephemeral_disk: {size: 25_000}
+- name: small
+  cloud_properties:
+    instance_type: m2.small
+    ephemeral_disk: {size: 25_000}
+- name: small-highmem
+  cloud_properties:
+    instance_type: m2.large
+    ephemeral_disk: {size: 25_000}
 - name: large
   cloud_properties:
     instance_type: m5.xlarge
@@ -33,6 +45,12 @@ disk_types:
   disk_size: 3000
 - name: large
   disk_size: 50_000
+- name: 5GB
+  disk_size: 5_000
+- name: 10GB
+  disk_size: 10_000
+- name: 100GB
+  disk_size: 100_000
 
 networks:
 - name: bosh
@@ -47,6 +65,42 @@ networks:
     static: [ 10.99.0.16 - 10.99.0.30 ]
     cloud_properties:
       subnet: test-subnet
+- name: cf-core
+  type: manual
+  subnets:
+  - range: 10.99.0.0/16
+    gateway: 10.99.0.1
+    azs: [z1, z2, z3]
+    dns:
+    - test-dns
+    reserved: [ 10.99.1.1 - 10.99.1.15 ]
+    static: [ 10.99.1.16 - 10.99.1.30 ]
+    cloud_properties:
+      subnet: test-subnet
+- name: cf-edge
+  type: manual
+  subnets:
+  - range: 10.99.0.0/16
+    gateway: 10.99.0.1
+    azs: [z1, z2, z3]
+    dns:
+    - test-dns
+    reserved: [ 10.99.2.1 - 10.99.2.15 ]
+    static: [ 10.99.2.16 - 10.99.2.30 ]
+    cloud_properties:
+      subnet: test-subnet
+- name: cf-runtime
+  type: manual
+  subnets:
+  - range: 10.99.0.0/16
+    gateway: 10.99.0.1
+    azs: [z1, z2, z3]
+    dns:
+    - test-dns
+    reserved: [ 10.99.3.1 - 10.99.3.15 ]
+    static: [ 10.99.3.16 - 10.99.3.30 ]
+    cloud_properties:
+      subnet: test-subnet
 - name: vip
   type: vip
 
@@ -57,3 +111,9 @@ compilation:
   vm_type: default
   network: default
 
+vm_extensions:
+- name: 100GB_ephemeral_disk
+- name: 50GB_ephemeral_disk
+- name: cf-router-network-properties
+- name: cf-tcp-router-network-properties
+- name: diego-ssh-proxy-network-properties

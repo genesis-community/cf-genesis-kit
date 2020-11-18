@@ -1,0 +1,3 @@
+gcs_project: test-access-key
+gcs_service_account_email: test-secret-access-key
+gcs_service_account_json_key: test

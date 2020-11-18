@@ -15,9 +15,10 @@ var _ = Describe("Interal Kit", func() {
 	})
 
 	Test(Environment{
-		Name:        "bare",
-		CloudConfig: "aws",
-		CPI:         "aws",
+		Name:          "bare",
+		CloudConfig:   "aws",
+		RuntimeConfig: "dns",
+		CPI:           "aws",
 	})
 	// ROUTING
 	Test(Environment{
@@ -26,9 +27,11 @@ var _ = Describe("Interal Kit", func() {
 		CPI:         "aws",
 	})
 	Test(Environment{
-		Name:        "haproxy-tls",
-		CloudConfig: "aws",
-		CPI:         "aws",
+		Name:          "haproxy-tls",
+		CloudConfig:   "aws",
+		RuntimeConfig: "dns",
+		CredhubVars:   "haproxy-tls",
+		CPI:           "aws",
 	})
 	Test(Environment{
 		Name:        "haproxy-self-signed",
@@ -48,19 +51,27 @@ var _ = Describe("Interal Kit", func() {
 	})
 	// BLOBSTORE
 	Test(Environment{
-		Name:        "blobstore-aws",
-		CloudConfig: "aws",
-		CPI:         "aws",
+		Name:          "blobstore-aws",
+		CloudConfig:   "aws",
+		RuntimeConfig: "dns",
+		CredhubVars:   "aws",
+		CPI:           "aws",
 	})
 	Test(Environment{
-		Name:        "blobstore-gcp",
-		CloudConfig: "aws",
-		CPI:         "aws",
+		Name:          "blobstore-gcp",
+		CloudConfig:   "aws",
+		RuntimeConfig: "dns",
+		CredhubVars:   "gcp",
+		CPI:           "aws",
+		// Focus:         true,
 	})
 	Test(Environment{
-		Name:        "blobstore-azure",
-		CloudConfig: "aws",
-		CPI:         "aws",
+		Name:          "blobstore-azure",
+		CloudConfig:   "aws",
+		RuntimeConfig: "dns",
+		CredhubVars:   "azure",
+		CPI:           "aws",
+		Focus:         true,
 	})
 	// FEATURES
 	Test(Environment{

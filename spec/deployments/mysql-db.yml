@@ -1,6 +1,7 @@
 ---
 kit:
   name:    dev
+  version: 2.0.0
   features:
     - mysql-db
 
@@ -14,6 +15,6 @@ params:
   external_db_username: test-db-username
   external_db_password: test-db-password
   bbsdb_host: test bbsdb-host
-  bbsdb_user: test-bbsdb-user 
+  bbsdb_user: test-bbsdb-user
   bbsdb_password: test-bbsdb-password
 
