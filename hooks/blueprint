@@ -54,14 +54,14 @@ manifest=( \
 )
 
 ### Minimal injections required for Genesis compliance
+manifest+=( overlay/base.yml overlay/upstream_version.yml)
+
+### Minimal injections required for Genesis compliance
 if ! want_feature "bare" || want_feature "partitioned-network" ; then
   manifest+=( "operations/rename-network-and-deployment.yml" )
 else
   manifest+=( "cf-deployment/operations/rename-network-and-deployment.yml" )
 fi
-
-### Minimal injections required for Genesis compliance
-manifest+=( overlay/base.yml overlay/upstream_version.yml)
 
 ### Set up some best practices if not bare
 if ! want_feature "bare" ; then
