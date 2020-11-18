@@ -15,10 +15,10 @@ if [[ -n "$GENESIS_CLOUD_CONFIG" ]] ; then
   for t in minimal small small-highmem; do
     cloud_config_needs vm_type "$t"
   done
-  for t in 5GB 10GB 100GB ; do 
+  for t in 5GB 10GB 100GB ; do
     cloud_config_needs disk_type "$t"
   done
-  for t in diego-ssh-proxy-network-properties cf-router-network-properties cf-tcp-router-network-properties 50GB_ephemeral_disk 100GB_ephemeral_disk ; do 
+  for t in diego-ssh-proxy-network-properties cf-router-network-properties cf-tcp-router-network-properties 50GB_ephemeral_disk 100GB_ephemeral_disk ; do
     cloud_config_needs vm_extensions "$t"
   done
 
@@ -44,8 +44,8 @@ fi
 # Runtime config checks
 runtime_ok=yes
 
-# Check for BOSH DNS
-if [[ $(bosh rc | spruce json | jq -r '.addons[] | select(.name == "bosh-dns")') == "" ]]; then
+# # Check for BOSH DNS
+if ! rcq -e '.addons[] | .name | select(. == "bosh-dns")' >/dev/null 2>&1; then
   runtime_ok=no
   describe "  #R{Errors were found} in your runtime-config:"
   describe "    - #R{BOSH DNS is not in the runtime-config, which is required. Refer to}"
