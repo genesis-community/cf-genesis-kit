@@ -25,6 +25,9 @@
   path:  /bosh-variables/cf_runtime_network?
   value: (( grab params.cf_runtime_network ))
 
+- type: remove
+  path: /bosh-variables/network_name
+
 # Split networks
 
 - type: replace
