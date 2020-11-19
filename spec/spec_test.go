@@ -22,9 +22,10 @@ var _ = Describe("Interal Kit", func() {
 	})
 	// ROUTING
 	Test(Environment{
-		Name:        "haproxy",
-		CloudConfig: "aws",
-		CPI:         "aws",
+		Name:          "haproxy",
+		CloudConfig:   "aws",
+		RuntimeConfig: "dns",
+		CPI:           "aws",
 	})
 	Test(Environment{
 		Name:          "haproxy-tls",
@@ -34,20 +35,23 @@ var _ = Describe("Interal Kit", func() {
 		CPI:           "aws",
 	})
 	Test(Environment{
-		Name:        "haproxy-self-signed",
-		CloudConfig: "aws",
-		CPI:         "aws",
+		Name:          "haproxy-self-signed",
+		CloudConfig:   "aws",
+		RuntimeConfig: "dns",
+		CPI:           "aws",
 	})
 	// DB
 	Test(Environment{
-		Name:        "mysql-db",
-		CloudConfig: "aws",
-		CPI:         "aws",
+		Name:          "mysql-db",
+		CloudConfig:   "aws",
+		RuntimeConfig: "dns",
+		CPI:           "aws",
 	})
 	Test(Environment{
-		Name:        "postgres-db",
-		CloudConfig: "aws",
-		CPI:         "aws",
+		Name:          "postgres-db",
+		CloudConfig:   "aws",
+		RuntimeConfig: "dns",
+		CPI:           "aws",
 	})
 	// BLOBSTORE
 	Test(Environment{
@@ -73,39 +77,46 @@ var _ = Describe("Interal Kit", func() {
 	})
 	// FEATURES
 	Test(Environment{
-		Name:        "container-routing-integrity",
-		CloudConfig: "aws",
-		CPI:         "aws",
+		Name:          "container-routing-integrity",
+		CloudConfig:   "aws",
+		RuntimeConfig: "dns",
+		CPI:           "aws",
 	})
 	Test(Environment{
-		Name:        "native-garden-runc",
-		CloudConfig: "aws",
-		CPI:         "aws",
+		Name:          "native-garden-runc",
+		CloudConfig:   "aws",
+		RuntimeConfig: "dns",
+		CPI:           "aws",
 	})
 	Test(Environment{
-		Name:        "loggregator-forwarder-agent",
-		CloudConfig: "aws",
-		CPI:         "aws",
+		Name:          "loggregator-forwarder-agent",
+		CloudConfig:   "aws",
+		RuntimeConfig: "dns",
+		CPI:           "aws",
 	})
 	Test(Environment{
-		Name:        "dns-service-discovery",
-		CloudConfig: "aws",
-		CPI:         "aws",
+		Name:          "dns-service-discovery",
+		CloudConfig:   "aws",
+		RuntimeConfig: "dns",
+		CPI:           "aws",
 	})
 	Test(Environment{
-		Name:        "routing-api",
-		CloudConfig: "aws",
-		CPI:         "aws",
+		Name:          "routing-api",
+		CloudConfig:   "aws",
+		RuntimeConfig: "dns",
+		CPI:           "aws",
 	})
 	Test(Environment{
-		Name:        "app-autoscaler-integration",
-		CloudConfig: "aws",
-		CPI:         "aws",
+		Name:          "app-autoscaler-integration",
+		CloudConfig:   "aws",
+		RuntimeConfig: "dns",
+		CPI:           "aws",
 	})
 	Test(Environment{
-		Name:        "small-footprint",
-		CloudConfig: "aws",
-		CPI:         "aws",
+		Name:          "small-footprint",
+		CloudConfig:   "aws",
+		RuntimeConfig: "dns",
+		CPI:           "aws",
 	})
 	// Test(Environment{
 	// 	Focus:       true,
