@@ -5,7 +5,7 @@ go 1.14
 require (
 	github.com/alecthomas/participle v0.4.4 // indirect
 	github.com/fsnotify/fsnotify v1.4.9 // indirect
-	github.com/genesis-community/testkit v0.0.0-20201118150714-8ecbf156e1ff
+	github.com/genesis-community/testkit v0.0.0-20201119095716-4166cbe08703
 	github.com/gonvenience/neat v1.3.0 // indirect
 	github.com/itchyny/astgen-go v0.0.0-20200519013840-cf3ea398f645 // indirect
 	github.com/itchyny/gojq v0.10.2 // indirect
