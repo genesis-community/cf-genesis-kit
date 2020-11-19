@@ -63,7 +63,6 @@ var _ = Describe("Interal Kit", func() {
 		RuntimeConfig: "dns",
 		CredhubVars:   "gcp",
 		CPI:           "aws",
-		Focus:         true,
 	})
 	Test(Environment{
 		Name:          "blobstore-azure",
@@ -71,7 +70,6 @@ var _ = Describe("Interal Kit", func() {
 		RuntimeConfig: "dns",
 		CredhubVars:   "azure",
 		CPI:           "aws",
-		Focus:         true,
 	})
 	// FEATURES
 	Test(Environment{
