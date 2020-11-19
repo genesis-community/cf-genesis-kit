@@ -45,7 +45,7 @@ fi
 runtime_ok=yes
 
 # # Check for BOSH DNS
-if ! rcq -e '.addons[] | .name | select(. == "bosh-dns")' >/dev/null 2>&1; then
+if ! rcq -e '.addons[] | .name | select(. == "bosh-dns")'; then
   runtime_ok=no
   describe "  #R{Errors were found} in your runtime-config:"
   describe "    - #R{BOSH DNS is not in the runtime-config, which is required. Refer to}"
