@@ -44,7 +44,7 @@ cp -av kit/ci/envs/*.yml work/${KIT_SHORTNAME}-deployments/
 header "Handing off to \$kit/ci/test..."
 cd work/${KIT_SHORTNAME}-deployments
 export GENESIS_BOSH_ENVIRONMENT=$BOSH_ENVIRONMENT
-BOSH=bosh ../../kit/ci/test
+KIT=${KIT_SHORTNAME} BOSH=bosh ../../kit/ci/test
 
 echo
 echo "SUCCESS"
