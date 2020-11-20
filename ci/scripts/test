@@ -28,7 +28,6 @@ header "Cleaning up from any previous deployments (if necessary)..."
 cleanup ci-baseline-${KIT}
 safe rm -rf secret/ci/baseline/${KIT}
 safe ssh secret/ci/baseline/${KIT}/test-user
-
 header "Deploying BASELINE environment to verify functionality..."
 cd dev
 # make sure hooks are executable before screaming at shipit for failing.
@@ -39,6 +38,6 @@ genesis deploy -y ci-baseline
 $BOSH -d ci-baseline-${KIT} instances --ps
 
 header "Validating BASELINE environment..."
-echo >&2 "release engineers forgot the validate step!"; exit 1; # FIXME override this!
+$BOSH -d ci-baseline-${KIT} run-errand smoke_tests --instance=uaa/first
 
 cleanup ci-baseline-${KIT}

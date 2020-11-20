@@ -47,7 +47,7 @@ export PATH=$PATH:$PWD/kit/ci/scripts
 header "Handing off to \$kit/ci/test..."
 cd work/${KIT_SHORTNAME}-deployments
 export GENESIS_BOSH_ENVIRONMENT=$BOSH_ENVIRONMENT
-BOSH=bosh ../../git-ci/ci/scripts/test
+KIT=${KIT_SHORTNAME} BOSH=bosh ../../git-ci/ci/scripts/test
 
 echo
 echo "SUCCESS"
