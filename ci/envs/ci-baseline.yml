@@ -12,10 +12,11 @@ kit:
     - autoscaler
     - routing-api
 
-params:
+genesis:
   env:   ci-baseline
-  bosh:  snw-genesis-ci
+  bosh_env:  snw-genesis-ci
 
+params:
   availability_zones: [z1]
 
   disk_type: default
