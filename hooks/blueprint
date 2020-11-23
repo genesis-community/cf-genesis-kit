@@ -69,6 +69,7 @@ if ! want_feature "bare" ; then
     "overlay/identity.yml" \
     "overlay/override-app-domains.yml" \
     "overlay/ten-year-ca-expiry.yml" \
+    "overlay/uaa-branding.yml" \
   )
 fi
 

@@ -1,0 +1,22 @@
+meta:
+  branding:
+    product_logo:       (( grab params.cf_branding_product_logo       || nil ))
+    square_logo:        (( grab params.cf_branding_square_logo        || nil ))
+    footer_legal_text:  (( grab params.cf_branding_footer_legal_text  || nil ))
+    footer_links:       (( grab params.cf_branding_footer_links       || nil ))
+
+instance_groups:
+  - name: uaa
+    jobs:
+      - name: uaa
+        properties:
+          login:
+            links:
+              passwd: (( concat "https://login." params.system_domain "/forgot_password" ))
+              signup: (( concat "https://login." params.system_domain "/create_account" ))
+            branding:
+              product_logo: (( grab meta.branding.product_logo ))
+              square_logo: (( grab meta.branding.square_logo ))
+              footer_legal_text: (( grab meta.branding.footer_legal_text ))
+              footer_links: (( grab meta.branding.footer_links ))
+
