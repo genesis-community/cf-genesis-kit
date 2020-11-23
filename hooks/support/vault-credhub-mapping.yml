@@ -20,6 +20,15 @@ credentials:
 - name: ((credhub_prefix))/blobstore_secure_link_secret
   type: password
   value: ((vault "((vault_prefix))/blobstore/creds:secret"))
+- name: ((credhub_prefix))/gcs_project
+  type: password
+  value: ((vault "((vault_prefix))/blobstore:gcp_project_name"))
+- name: ((credhub_prefix))/gcs_service_account_email
+  type: password
+  value: ((vault "((vault_prefix))/blobstore:gcp_client_email"))
+- name: ((credhub_prefix))/gcs_service_account_json_key
+  type: password
+  value: ((vault "((vault_prefix))/blobstore:gcp_json_key"))
 - name: ((credhub_prefix))/cc_bulk_api_password
   type: password
   value: ((vault "((vault_prefix))/cc:bulk_api"))
