@@ -74,7 +74,8 @@ Load balancer related:
   - `self-signed` - Generate self-signed certs for haproxy.
 
 Blobstore related:
-  - `aws-blobstore` - Use S3 storage as external blobsore.
+  - `aws-blobstore` - Use AWS S3 storage as external blobsore.
+  - `minio-blobstore` - Use Minio S3-compatible storage as external blobsore.
   - `azure-blobstore` - Use Azure blob storage as external blobstore.
   - `gcp-blobstore` - Use GCS as external blobstore.
   - `gcp-use-access-key` - Use use google storage access key/secret to access the external GCS blobstore (instead of service account credentials which is the default).
@@ -123,6 +124,16 @@ These params need to be set when activating features:
     | param | description | default |
     | --- | --- | --- |
     | `blobstore_s3_region` | The s3 region of the blobstore | |
+    | `blobstore_bucket_prefix` | Prefix for the path where blobs are stored in the bucket | `"$GENESIS_ENVIRONMENT-$GENESIS_TYPE"`
+    | `blobstore_bucket_suffix` | Suffix for the path where blobs are stored in the bucket | `"((cc_director_key))"` |
+    | `blobstore_app_packages_directory` | Directory for the app packages | `blobstore_bucket_prefix` + `"-app-packages-"` + `blobstore_bucket_suffix` |
+    | `blobstore_buildpacks_directory` | Directory for the app packages | `blobstore_bucket_prefix` + `"-buildpacks-"` + `blobstore_bucket_suffix` |
+    | `blobstore_droplets_directory` | Directory for the app packages | `blobstore_bucket_prefix` + `"-droplets-"` + `blobstore_bucket_suffix` |
+    | `blobstore_resources_directory` | Directory for the app packages | `blobstore_bucket_prefix` + `"-resources-"` + `blobstore_bucket_suffix` |
+  - **minio-blobstore**:
+    | param | description | default |
+    | --- | --- | --- |
+    | `blobstore_minio_endpoint` | The URL (including protocol and option port) of the Minio endpoint of the blobstore | |
     | `blobstore_bucket_prefix` | Prefix for the path where blobs are stored in the bucket | `"$GENESIS_ENVIRONMENT-$GENESIS_TYPE"`
     | `blobstore_bucket_suffix` | Suffix for the path where blobs are stored in the bucket | `"((cc_director_key))"` |
     | `blobstore_app_packages_directory` | Directory for the app packages | `blobstore_bucket_prefix` + `"-app-packages-"` + `blobstore_bucket_suffix` |
@@ -505,6 +516,21 @@ The following secrets will be pulled from the vault:
   - **Access Key** - The Amazon Access Key ID (and its counterpart
     secret key) for use when dealing with the S3 API.
     It is stored in the vault, at `secret/$env/blobstore`.
+
+### Using an Minio S3-compatible Blobstore
+
+The `minio-blobstore` feature will configure Cloud Foundry to use a
+local S3-compatible bucket to store all blobs in.
+
+The following parameters are defined:
+
+  - `blobstore_minio_endpoint` - This is the full URL, including protocol and
+    optional port, of the Minio (or compatible) S3 service.  This parameter is **required**.
+
+The following secrets will be pulled from Credhub:
+
+  - **blobstore_access_key_id**
+  - **blobstore_secret_access_key**
 
 ### Using an Azure Blobstore
 

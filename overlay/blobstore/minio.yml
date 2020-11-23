@@ -1,0 +1,17 @@
+params:
+  blobstore_minio_endpoint: (( param "Specify the Minio URL (including protocol) to use as your Cloud Controller blobstore" ))
+
+bosh-variables:
+  fog_connection:
+    provider: AWS
+    endpoint: (( grab params.blobstore_minio_endpoint ))
+    aws_access_key_id: ((blobstore_access_key_id))
+    aws_secret_access_key: ((blobstore_secret_access_key))
+    aws_signature_version: '2'
+    region: "''"
+    path_style: true
+
+# Credhub Secrets
+#   blobstore_access_key_id
+#   blobstore_secret_access_key
+

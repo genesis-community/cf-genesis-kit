@@ -195,7 +195,7 @@ for want in $GENESIS_REQUESTED_FEATURES; do
       ;;
     local-postgres-db|local-mysql-db|mysql-db|postgres-db) db_specified=1; features+=( "$want" ) ;;
     bare|partitioned-network|haproxy|tls|self-signed) features+=( "$want" ) ;;
-    aws-blobstore|azure-blobstore|gcp-blobstore|gcp-use-access-key) features+=( "$want" ) ;;
+    minio-blobstore|aws-blobstore|azure-blobstore|gcp-blobstore|gcp-use-access-key) features+=( "$want" ) ;;
     nfs-volume-services|enable-service-discovery) features+=( "$want" ) ;;
     app-autoscaler-integration|prometheus-integration) features+=( "$want" ) ;;
     +migrated-v1-env|+override-db-names) features+=( "$want" ) ;;
@@ -236,7 +236,7 @@ fi
 declare -a blobstores; blobstores=()
 declare -a databases; databases=()
 
-if want_feature "+migrated-v1-env" || want_feature "azure-blobstore" || want_feature 'aws-blobstore' || want_feature 'gcp-blobstore' ; then
+if want_feature "+migrated-v1-env" || want_feature "azure-blobstore" || want_feature 'minio-blobstore' || want_feature 'aws-blobstore' || want_feature 'gcp-blobstore' ; then
   want_feature 'bare' && bail "Cannot have #C{bare} feature when migrating from v1"
   manifest+=( "overlay/blobstore/meta.yml" )
 fi
@@ -271,7 +271,14 @@ for want in $GENESIS_REQUESTED_FEATURES; do
         "overlay/blobstore/external.yml" \
         "overlay/blobstore/aws.yml" \
         "cf-deployment/operations/use-external-blobstore.yml" \
-        "cf-deployment/operations/use-s3-blobstore.yml" \
+      )
+      ;;
+    minio-blobstore)
+      blobstores+=( "$want" )
+      manifest+=( \
+        "overlay/blobstore/external.yml" \
+        "overlay/blobstore/minio.yml" \
+        "cf-deployment/operations/use-external-blobstore.yml" \
       )
       ;;
     gcp-blobstore)
