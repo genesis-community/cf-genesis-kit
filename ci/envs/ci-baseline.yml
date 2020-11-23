@@ -1,16 +1,11 @@
 ---
 kit:
   features:
-    - local-ha-db
-    - local-blobstore
     - haproxy
     - tls
     - self-signed
     - small-footprint
-    - dns-service-discovery
-    - container-routing-integrity
-    - autoscaler
-    - routing-api
+    - cf-deployment/operations/enable-service-discovery
 
 genesis:
   env:   ci-baseline
