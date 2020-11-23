@@ -154,7 +154,7 @@ These params need to be set when activating features:
   - **bare**:
     | param | description | default |
     | --- | --- | --- |
-    | `network` | What network should Cloud Foundry be deployed to? | default |
+    | `network` | What network should Cloud Foundry be deployed to? | `default` |
 
   - **external-mysql**:
     | param | description | default |
@@ -286,146 +286,70 @@ These params need to be set when activating features:
     | `credhubdb_name` | Name of the Credhub database | `credhubdb` |
     | `credhubdb_user` | Name of the Credhub database user | `credhubadmin` |
 
+# Retired Parameters (from v1.x)
 
-# Kit Feature Parameters
+## General 
 
-  - `base_domain` - The base domain for this Cloud Foundry
-    deployment.  All domains (system, api, apps, etc.) will be
-    based off of this base domain, unless you override them.
-    This parameter is **required**.
+Some of these features may return in latter v2.x releases, but for the v2.0.0 release, they have been removed as they are not compatible with the upstream `cf-deployment` configuration, or have been replaced by an ops file.
 
-  - `system_domain` - The system domain.  Defaults to `system.`
-    plus the base domain.
+  - `skip_ssl_validation` - This configuration now defaults to true instead of false, as per upstream cf-deployment.  If you want to enforce TLS validation, use the upstream feature `cf-deployment/operations/stop-skipping-tls-validation`
 
-  - `apps_domains` - A list of global application domains.
-    Defaults to a list of one domain, `run.` plus the base domain.
+  - `default_app_memory` - It was: *How much memory (in megabytes) to assign a pushed application that did not specify its memory requirements, explicitly.  Defaults to `256`.*
 
-  - `skip_ssl_validation` - Whether or not to enforce validation
-    of X.509 certificates received during TLS negotiation.  If you
-    have a self-signed certificate, or an untrusted authority, you
-    should set this, but be aware that doing so reduces security
-    slightly.  This affects the smoke-test errand as well as
-    internal Cloud Foundry components.
+  - `default_app_disk_in_mb` - It was: *How much disk (in megabytes) to assign a pushed application that did not specify its memory requirements, explicitly. Defaults to `1000`.*
 
-    Defaults to `false`.
+  - `default_stack` - `cflinuxfs3` is the only stack supported.
 
-  - `default_app_memory` - How much memory (in megabytes) to
-    assign a pushed application that did not specify its memory
-    requirements, explicitly.  Defaults to `256`.
+  - `availability_zones` - These are now locked to whatever upstream
+    `cf-deployment` specifies.
 
-  - `default_app_disk_in_mb` - How much disk (in megabytes) to
-    assign a pushed application that did not specify its memory
-    requirements, explicitly. Defaults to `1000`.
+  - `uaa_lockout_failure_count` - It was: *Number of failed UAA login attempts before lockout.*
 
-  - `default_stack` - Which Cloud Foundry stack to use by default
-    when pushing apps.  The options are currently `cflinuxfs2` and
-    `cflinuxfs3`.  Defaults to `cflinuxfs3`
+  - `uaa_lockout_window` - It was: *How much time (in seconds) in which `uaa_lockout_failure_count` must occur in order for account to be locked. Defaults to `1200`.*
 
-  - `availability_zones` - Which AZs to deploy to. Defaults to 
-    `[z1, z2, z3]`
+  - `uaa_lockout_time` - It was: *How long (in seconds) the account is locked out for violating `uaa_lockout_failure_count` within `uaa_lockout_failure_time_between_failures`. Defaults to `300`.*
 
-  - `uaa_lockout_failure_count` - Number of failed UAA login attempts
-    before lockout.
+  - `uaa_refresh_token_validity` - It was: *How long (in seconds) a CF refresh is valid for. Defaults to `2592000`.*
 
-  - `uaa_lockout_window` - How much time (in seconds) in which
-    `uaa_lockout_failure_count` must occur in order for account
-    to be locked. Defaults to `1200`.
+  - `grootfs_reserved_space` - It was: *The amount of space (in MB) the garbage collection for Garden should keep free for other jobs. GC will delete unneeded layers as need to keep this space free. `-1` disables GC. Defaults to `15360`.*
 
-  - `uaa_lockout_time` - How long (in seconds) the account
-    is locked out for violating `uaa_lockout_failure_count` within 
-    `uaa_lockout_failure_time_between_failures`. Defaults to `300`.
-
-  - `uaa_refresh_token_validity` - How long (in seconds) a CF refresh
-    is valid for. Defaults to `2592000`.
-
-  - `cf_branding_product_logo` - A base64 encoded image to display on
-    the web UI login prompt. Defaults to `nil`. Read more in the
-    [Branding][2] section.
-
-  - `cf_branding_square_logo` - A base64 encoded image to display
-    in areas where a smaller logo is necessary. Defaults to `nil`.
-    Read more in the [Branding][2] section.
-
-  - `cf_footer_legal_text` - A string to display in the footer,
-    typically used for compliance text. Defaults to `nil`. Read more
-    in the [Branding][2] section.
-
-  - `cf_footer_links` - A YAML list of links to enumerate in the footer
-    of the web UI. Defaults to `nil`. Read more in the [Branding][2]
-    section.
-
-  - `grootfs_reserved_space` - The amount of space (in MB) the garbage
-    collection for Garden should keep free for other jobs. GC will
-    delete unneeded layers as need to keep this space free. `-1`
-    disables GC. Defaults to `15360`.
-
-  - `vm_strategy` - The method used for managing vm rotation.  By default, it
-    is `delete-create`, but it can also be set to `create-swap-delete` to
-    minimize downtime.
+  - `vm_strategy` - The default is `delete-create`, but can be set to create-swap-delete by using the feature `cf-deployment/operations/experimental/use-create-swap-delete-vm-strategy`
 
     [2]: (#branding)
 
-## Deployment Parameters
+## Sizing and Scaling
 
-  - `stemcell_os`
-  - `stemcell_version`
-
-## Sizing & Scaling Parameters
-
-  - `nats_instances` - How many NATS message bus nodes to deploy.
-    Defaults to `2`.
+Upstream `cf-deployments` only supports three vm types: minimum, small and
+small-highmem.  As such, v2.0.0 of Genesis CF Kit does not support specifying
+per-instance-group vm types.
 
   - `nats_vm_type` - What type of VM to deploy for the nodes in
     the NATS message bus cluster.  Defaults to `nats`. 
     Recommend `1 cpu / 2g mem`.
 
-  - `uaa_instances` - How many UAA nodes to deploy.
-    Defaults to `2`.
-
   - `uaa_vm_type` - What type of VM to deploy for the nodes in
     the UAA cluster.  Defaults to `uaa`. Recommend `2 cpu / 4g mem`.
-
-  - `api_instances` - How many Cloud Controller API nodes to
-    deploy.  Defaults to `2`.
 
   - `api_vm_type` - What type of VM to deploy for the nodes in
     the Cloud Controller API cluster.  Defaults to `api`. 
     Recommend `2 cpu / 4g mem`.
 
-  - `doppler_instance` - How many doppler nodes to deploy.
-    Defaults to `2`.
-
   - `doppler_vm_type` - What type of VM to deploy for the doppler
     nodes.  Defaults to `doppler`. Recommend `1 cpu / 2g mem`.
-
-  - `loggregator_instances` - How many loggregator / traffic
-    controller nodes to deploy.  Defaults to `2`.
 
   - `loggregator_vm_type` - What type of VM to deploy for the
     loggregator traffic controller nodes.  Defaults to `loggregator`. 
     Recommend `2 cpu / 4g mem`.
 
-  - `router_instances` - How many gorouter nodes to deploy.
-    Defaults to `2`.
-
   - `router_vm_type` - What type of VM to deploy for the gorouter
     nodes.  Defaults to `router`. Recommend `1 cpu / 2g mem`.
-
-  - `bbs_instances` - How many Diego BBS nodes to deploy.
-    Defaults to `2`.
 
   - `bbs_vm_type` - What type of VM to deploy for the Diego BBS
     nodes.  Defaults to `bbs`. Recommend `1 cpu / 2g mem`.
 
-  - `diego_instances` - How many Diego auctioneers to deploy.
-    Defaults to `2`.
-
   - `diego_vm_type` - What type of VM to deploy for the Diego
     orchestration nodes (not the cells, the auctioneers).
     Defaults to `diego`. Recommend `2 cpu / 4g mem`.
-
-  - `cell_instances` - How many Diego Cells (runtimes) to deploy.
-    Defaults to `3`.
 
   - `cell_vm_type` - What type of VM to deploy for the Diego Cells
     (application runtime).  These are usually very large machines.
@@ -434,10 +358,76 @@ These params need to be set when activating features:
   - `errand_vm_type` - What type of VM to deploy for the
     smoke-tests errand.  Defaults to `errand`. Recommend `1 cpu / 2g mem`.
 
-  - `syslogger_instances` - How many scalable syslog VMs to deploy.
-
   - `syslogger_vm_type` - What type of VM to deploy for the scalable
     syslog. Defaults to `syslogger`. Recommend `1 cpu / 2g mem`.
+
+
+# Kit Base Parameters
+
+  - `base_domain` - The base domain for this Cloud Foundry deployment.  All domains (system, api, apps, etc.) will be based off of this base domain, unless you override them.  This parameter is **required**.
+
+  - `system_domain` - The system domain.  Defaults to `system.` plus the base domain.
+
+  - `apps_domains` - A list of global application domains.  Defaults to a list of one domain, `run.` plus the base domain.  Note: if using `bare` feature, this will default to the system domain
+
+## Branding
+
+  - `cf_branding_product_logo` - It was: *A base64 encoded image to display on the web UI login prompt. Defaults to `nil`. Read more in the [Branding][2] section.*
+
+  - `cf_branding_square_logo` - It was: *A base64 encoded image to display in areas where a smaller logo is necessary. Defaults to `nil`.  Read more in the [Branding][2] section.*
+
+  - `cf_footer_legal_text` - It was: *A string to display in the footer, typically used for compliance text. Defaults to `nil`. Read more in the [Branding][2] section.*
+
+  - `cf_footer_links` - It was: *A YAML list of links to enumerate in the footer of the web UI. Defaults to `nil`. Read more in the [Branding][2] section.*
+
+
+## Deployment Parameters
+
+  - `stemcell_os`
+  - `stemcell_version`
+
+## Sizing & Scaling Parameters
+  
+  Defaults are as per `cf-deployment`
+
+  - `nats_instances` - How many NATS message bus nodes to deploy.
+
+  - `diego-cell_instances` - How many Diego Cells (runtimes) to deploy.
+    (`cell_instances` from v1.x will be translated to this value during
+    deployment)
+
+  - `diego-api_instances` - How many Diego BBS nodes to deploy.
+    (`bbs_instances` from v1.x will be translated to this value during
+    deployment)
+
+  - `uaa_instances` - How many UAA nodes to deploy.
+
+  - `scheduler_instances` - How many Diego auctioneers to deploy.
+    (`diego_instances` from v1.x will be translated to this value during
+    deployment)
+
+  - `api_instances` - How many Cloud Controller API nodes to deploy
+
+  - `router_instances` - How many gorouter nodes to deploy.
+
+  - `cc-worker_instances` - How many cc-worker nodes to deploy.
+
+  - `adapter_instances` - How many scalable syslog VMs to deploy.
+    (`syslogger_instances` from v1.x will be translated to this value during
+    deployment)
+
+  - `doppler_instances` - How many doppler nodes to deploy.
+
+  - `log-api_instances` - How many loggregator / traffic controller nodes to deploy.
+    (`loggregator_instances` from v1.x will be translated to this value during
+    deployment)
+
+  - `tcp-router_instances` - How many TCP router nodes to deploy.
+
+  - `credhub_instances` - How many credhub nodes to deploy.
+
+  - `haproxy_instances` - How many HAProxy instances to deploy.  Defaults to
+    `2`, only valid if `haproxy` feature enabled.
 
 ## Networking Parameters
 
@@ -472,6 +462,9 @@ least into easily firewalled CIDR ranges:
 These networks may be physically discrete, or they may be "soft"
 segregation in a larger network (i.e. a /20 being carved up into
 several /24 "networks").
+
+Note: if using the `bare` feature, you will have a flat network model as
+defined in upstream `cf-deployments`, defaulting to the name `default`
 
 ## Choosing a Blobstore
 
@@ -511,11 +504,10 @@ The following parameters are defined:
   - `blobstore_s3_region` - The name of the AWS region in which to
     find the S3 bucket.  This parameter is **required**.
 
-The following secrets will be pulled from the vault:
+The following secrets will be pulled from Credhub:
 
-  - **Access Key** - The Amazon Access Key ID (and its counterpart
-    secret key) for use when dealing with the S3 API.
-    It is stored in the vault, at `secret/$env/blobstore`.
+  - `blobstore_access_key_id`
+  - `blobstore_secret_access_key`
 
 ### Using an Minio S3-compatible Blobstore
 
@@ -529,8 +521,8 @@ The following parameters are defined:
 
 The following secrets will be pulled from Credhub:
 
-  - **blobstore_access_key_id**
-  - **blobstore_secret_access_key**
+  - `blobstore_access_key_id`
+  - `blobstore_secret_access_key`
 
 ### Using an Azure Blobstore
 
@@ -572,13 +564,14 @@ Google Cloud Platform's object storage offering.
 There are currently no parameters defined for this type of
 blobstore.
 
-The following secrets will be pulled from the vault:
+The following secrets will be pulled from Credhub:
+  - `gcs_project`: The name of project for accessing Google Cloud Storage.
+  - `gcs_service_account_email`: The email for the GCS service account.
+  - `gcs_service_account_json_key`: The JSON key containing the access credentials for the GCS service account.
 
-  - **Service Account** - The Google Cloud Storage service account
-    to use when dealing with the GCP API.  Three things are
-    stored: the project name, the service account email address,
-    and the JSON key (the actual credentials) of the account.
-    These are stored in the vault, at `secret/$env/blobstore`.
+These values will be generated by `genesis new`, or migrated from the
+corresponding values in Vault during a v1.x migration.  Otherwise, you will
+have to populate these values manually via the Credhub cli.
 
 Note: prior versions of the Cloud Foundry kit leveraged legacy
 Amazon-like access-key/secret-key credentials.  It now uses
@@ -597,76 +590,20 @@ can rely on cloud provider RDBMS offerings when appropriate.
 
 ### Using a Local Database
 
-There are two feature options that are available, `local-db`, a
-single, non-HA PostgreSQL node, and `local-ha-db`, a dual-node
-master/replica HA PostgreSQL that uses a VRRP VIP with HAProxy.
+There are two feature options that are available, `local-postgres-db`, a
+single, non-HA PostgreSQL node, and `local-mysql-db`, the default PXC MySQL
+database that comes with upstream cf-deployment.
 
 Both features are a mostly hands-off change to the deployment, since
 the kit will generate all internal passwords, and automatically wire
 up to the new node for database DSNs.
 
-This feature brings the [cloudfoundry-community/postgres][1] BOSH
-release into play.
 
-[1]: https://github.com/cloudfoundry-community/postgres-boshrelease
-
-#### Local Postgres (non-HA) DB
-
-The following parameters are defined:
-
-  - `postgres_vm_type` - The VM type (per cloud config) to use
-    when deploying the standalone database node.
-    Defaults to `postgres`. Recommend `2 cpu / 4g mem`.
-
-  - `postgres_disk_pool` - The disk type (per cloud config) to use
-    when provisioning the persistent storage for the database.
-    Defaults to `postgres`.
-
-  - `postgres_max_connections` - How many connections the internal
-    Postgres DB should maintain at once. Only used if internal
-    DB is deployed. Defaults to `100`.
-
-#### Local Postgres (HA) DB
-
-The following parameters are defined:
-
-  - `postgres_vm_type` - The VM type (per cloud config) to use
-    when deploying the standalone database node.
-    Defaults to `postgres`. Recommend `2 cpu / 4g mem`.
-
-  - `postgres_disk_pool` - The disk type (per cloud config) to use
-    when provisioning the persistent storage for the database.
-    Defaults to `postgres`.
-
-  - `postgres_max_connections` - How many connections the internal
-    Postgres DB should maintain at once. Only used if internal
-    DB is deployed. Defaults to `100`.
-
-  - `postgres_vip` - What VRRP VIP to use for the HAProxy/keepalived.
-    This field has no default, and must be provided.
-
-### Using an External MySQL / MariaDB Database
+### Using an External Database
 
 The `mysql-db` feature configures Cloud Foundry to connect to a
 single, external MySQL or MariaDB database server for all of its
 RDBMS needs.
-
-The following parameters are defined:
-
-  - `external_db_host` - The hostname (FQDN) or IP address of the
-    database server.  This parameter is **required**.
-
-  - `external_db_port` - The TCP port that MySQL / MariaDB is
-    listening on.  Defaults to `3306`, the standard MySQL port.
-
-The following secrets are pulled from the vault:
-
-  - **Database User Credentials** - The username and password for
-    accessing the UAA database (`uaadb`), Cloud Controller
-    database (`ccdb`), and Diego BBS database (`diegodb`).
-    These are stored in the vault at `secret/$env/external_db`.
-
-### Using an External PostgreSQL Database
 
 The `postgres-db` feature configures Cloud Foundry to connect to a
 single, external PostgreSQL database server for all of its RDBMS
@@ -677,16 +614,81 @@ The following parameters are defined:
   - `external_db_host` - The hostname (FQDN) or IP address of the
     database server.  This parameter is **required**.
 
-  - `external_db_port` - The TCP port that MySQL / MariaDB is
-    listening on.  Defaults to `5432`, the standard Postgres port.
+  - `external_db_port` - The TCP port that the database is
+    listening on.  Defaults to `3306` for MySQL or 5678 for PostgreSQL.
 
-The following secrets are pulled from the vault:
+#### Configurating Database Access
 
-  - **Database User Credentials** - The username and password for
-    accessing the UAA database (`uaadb`), Cloud Controller
-    database (`ccdb`), and Diego BBS database (`diegodb`).
-    These are stored in the vault at `secret/$env/external_db`.
+By default, each database used by CF has its own name, username and password.
+The name and username have defaults, but you must specify the password for
+each database.  Alternatively, you can configure the databases to share
+username and password.
 
+##### Shared Database User
+
+To configure the databases to have a single common user, add the following to
+your environment file:
+
+```
+params:
+  external_db_username: ((external_db_user))
+  external_db_password: ((external_db_password)
+```
+
+These were created when `genesis new` was added.  If the environment was not
+created in this manner, you will have to add these values explicitly using the
+`credhub` cli.
+
+##### Per-database Users
+
+The databases used by CloudFoundry are `cloud_controller`, `uaa`, `diego`,
+`routing-api`, `network_policy`,`network_connectivity`,`locket`, and
+`credhub`.  Each of these databases use a user by the same name as the
+database.  To set the password for each of the users to the a common single
+password, just set `external_db_password`, but don't set
+`external_db_username`.
+
+To set unique passwords, set the following parameters in the environment file
+and add the corresponding secrets to credhub:
+
+```
+params:
+  uaadb_password:          ((uaa_db_password))
+  ccdb_password:           ((cloud_controller_db_password))
+  diegodb_password:        ((diego_db_password))
+  policyserverdb_password: ((network_policy_db_password))
+  silkdb_password:         ((network_connectivity_db_password))
+  routingapidb_password:   ((routing_api_db_password))
+  locketdb_password:       ((locket_db_password))
+  credhubdb_password:      ((credhub_db_password))
+```
+
+
+You can also customize the database `name`, `host`, `port` or `user` for any
+of the above databases, by replacing `password` with the above params.  Any
+parameter not overridden will use the default name and user, and the common
+host and port.
+
+### Special Database Consideration when Upgrading from v1.10.1
+
+Upgrading from 1.10.1 will result in a slightly different experience.
+Existing local PostgreSQL databases will be renamed to match the expected
+names for upstream `cf-deployment`, *EXCEPT* in the case where the names have
+been overridden with v1.x parameters for setting the database name.
+
+Similarly, local database usernames will be set to the common username for
+that database *UNLESS* overridden by v1.x parameters for setting database
+usernames.
+
+As for External Databases, v1.x parameters will be kept as specified in the
+environment files, with the single exception:  You must add the
+`external_db_username` parameter.  The secret value will be transfered into
+Credhub from vault, so just set it to `((external_db_user))`.
+
+However, if you are specifying each database's user password individually, you
+do not need to specify the `external_db_username` parameter.  You will need to
+transfer the passwords from vault to Credhub manually, and update the
+environment file accordingly in this case.
 
 ## Routing & TLS
 
@@ -722,44 +724,6 @@ Certificates will then be automatically generated with the proper
 subject alternate names for all of the domains (system and apps)
 that Cloud Foundry will use.
 
-### Enabling the Routing API
-
-The routing API for Cloud Foundry allows router groups to be queried in the
-Cloud Foundry API. This may be necessary if you are using cf-mgmt. The routing
-API can be enabled by specifying the `routing-api` feature in the kit.
-
-If the routing API is enabled and you are using an external database, you will
-need to ensure that the `routingapidb` is created.
-
-## DNS-Based Service Discovery
-
-If you want your Cloud Foundry applications to be able to find one
-another via DNS names (on internal routes), and thereby
-communicate directly with one another, without having to first
-transit the gorouter (and incur a roundtrip _outside_ the runtime),
-you can add the `dns-service-discovery` feature to your
-environment file.
-
-This enables BOSH-DNS resolution of names inside of CF application
-containers, allowing them to find other BOSH-deployed services in
-the `*.bosh` DNS zone, as well as other Cloud Foundry components
-in the `*.cf.internal` domain -- you may need to review your
-application security groups to ensure that applications are only
-allowed to the bits and pieces of Cloud Foundry that you want them
-to access.  By default, the ASGs deployed by this kit do _not_
-allow such communication.
-
-If you want to change the internal domain used for service
-discovery, you may set the `internal_domain` property, which
-defaults to "apps.internal".  (Note that there should be **no**
-trailing `.`).
-
-
-## Container Routing Integrity
-
-The `container-routing-integrity` feature enables TLS Validation of the cells.
-See [HTTP Routing#With TLS Enabled](https://docs.cloudfoundry.org/concepts/http-routing.html#with-tls)
-
 ## Small Footprint Cloud Foundry
 
 Sometimes, you may want to sacrifice redundancy and high
@@ -786,101 +750,6 @@ NFS volumes provided by the NFS Volume Services Broker.
 
 There are currently no parameters defined for this feature.
 
-
-## App Autoscaler
-
-If you wish to dynamically scale your instances based on pre-defined
-policies via Cloud Foundry's [App
-Autoscaler](https://github.com/cloudfoundry-incubator/app-autoscaler),
-you can do so via the `autoscaler` feature. It acts as a service
-broker, and must be bound to your organization & space. The following
-parameters are configurable:
-
-### BOSH-Related Params
-
-  - `autoscaler_network` - Which network to deploy Autoscaler on.
-    Defaults to `cf-autoscaler`.
-
-  - `autoscaler_api_instances` - How many instances to deploy of
-    the Autoscaler API server. Defaults to `1`.
-
-  - `autoscaler_api_vm_type` - Which VM type to use for the
-    Autoscaler API instance. Defaults to `as-api`. 
-    Recommend `1 cpu / 2g mem`.
-
-  - `autoscaler_broker_instances` - How many instances to deploy
-    of the Autoscaler service broker. Defaults to `1`.
-
-  - `autoscaler_broker_vm_type` - Which VM type to use for the
-    Autoscaler API instance. Defaults to `as-broker`. 
-    Recommend `1 cpu / 2g mem`.
-
-  - `autoscaler_scheduler_instances` - How many instances to
-    deploy of the Autoscaler scheduler. Defaults to `1`.
-
-  - `autoscaler_scheduler_vm_type` - Which VM type to use for the
-    Autoscaler scheduler instance. Defaults to `as-scheduler`. 
-    Recommend `1 cpu / 2g mem`.
-
-  - `autoscaler_collector_instances` - How many instances to
-    deploy of the Autoscaler metrics collector. Defaults to `1`.
-
-  - `autoscaler_collector_vm_type` - Which VM type to use for the
-    Autoscaler MetricsCollector instance. Defaults to
-    `as-collector`.  Recommend `1 cpu / 2g mem`.
-
-  - `autoscaler_scaler_instances` - How many instances to deploy
-    of the Autoscaler event generator. Defaults to `1`.
-
-  - `autoscaler_scaler_vm_type` - Which VM type to use for the
-    Autoscaler event generator instance. Defaults to `as-scaler`.  
-    Recommend `1 cpu / 2g mem`.
-
-  - `autoscaler_engine_instances` - How many instances to deploy
-    of the Autoscaler scaling engine. Defaults to `1`.
-
-  - `autoscaler_engine_vm_type` - Which VM type to use for the
-    Autoscaler scaling engine instance. Defaults to `as-engine`.  
-    Recommend `1 cpu / 2g mem`.
-
-### Autoscaler-Related Params
-
-  - `autoscaler_broker_url` - URL to register with the Route
-    Register. Defaults to
-    `autoscalerservicebroker.$system_domain`.
-
-  - `autoscaler_plans` - A YAML list of plans for the service broker. Defaults to:
-
-    ```
-    - id: autoscaler-example-plan-id
-      name: autoscaler-example-plan
-      description: This is the example service plan.
-    ```
-
-### Autoscaler DB
-
-App Autoscaler requires a PostgreSQL server. If you've enabled the
-`local-db` or `local-db-ha` feature, Autoscaler automatically uses
-that information and sets up the proper tables. No extra
-configuration is necessary.
-
-If an external PostgreSQL server is used, you will need to create a
-database with the name `autoscaler`. No other configuration is
-required, as the feature will grab the necessary db information
-previously provided.
-
-If an external MySQL server is used, a local non-HA PostgreSQL DB is
-deployed alongside Autoscaler. No extra configuration is necessary.
-This DB will only be used to store Autoscaler state information.
-
-### Service Binding
-
-An addon called `bind-autoscaler` is available that will automatically
-create the service broker within your CF deployment named
-`autoscaler`. An operator will still need to enable access and bind
-the service to each app manually. More information about App
-Autoscaler can be found on [App Autoscaler's Policy
-Documentation](https://git.io/fNt3l)
 
 # Zero-downtime App Deployments
 
@@ -1009,6 +878,9 @@ vm_extensions:
 
 
 # History
+
+Version 2.0.0 refactored to be based on upstream `cf-deployment` de-facto
+deplo9yment repository (v12.45.0)
 
 Version 1.7.0 primarily removes static IPs and consolidates the
 `access` and `router` instance groups, without updating any
