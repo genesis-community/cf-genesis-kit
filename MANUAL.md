@@ -290,7 +290,7 @@ These params need to be set when activating features:
 
 ## General 
 
-Some of these features may return in latter v2.x releases, but for the v2.0.0 release, they have been removed as they are not compatible with the upstream `cf-deployment` configuration, or have been replaced by an ops file.
+Some of these features may return in latter v2.x releases, but for the v2.0.0 release, they have been removed as they are not compatible with the upstream `cf-deployment` configuration, or have been replaced by an ops file.  If needed, `instance_groups` overrides in the environment file can be used to effect the desired configuration
 
   - `skip_ssl_validation` - This configuration now defaults to true instead of false, as per upstream cf-deployment.  If you want to enforce TLS validation, use the upstream feature `cf-deployment/operations/stop-skipping-tls-validation`
 
@@ -315,7 +315,7 @@ Some of these features may return in latter v2.x releases, but for the v2.0.0 re
 
   - `vm_strategy` - The default is `delete-create`, but can be set to create-swap-delete by using the feature `cf-deployment/operations/experimental/use-create-swap-delete-vm-strategy`
 
-    [2]: (#branding)
+  - `max_log_lines_per_second` - This has been replaced with the upstream feature `cf-deployment/operations/experimental/enable-app-log-rate-limiting` and setting `bosh-variables.app_log_rate_limit` to the desired value.
 
 ## Sizing and Scaling
 
@@ -362,7 +362,7 @@ per-instance-group vm types.
     syslog. Defaults to `syslogger`. Recommend `1 cpu / 2g mem`.
 
 
-# Kit Base Parameters
+# Supported Kit Base Parameters
 
   - `base_domain` - The base domain for this Cloud Foundry deployment.  All domains (system, api, apps, etc.) will be based off of this base domain, unless you override them.  This parameter is **required**.
 
@@ -372,14 +372,15 @@ per-instance-group vm types.
 
 ## Branding
 
-  - `cf_branding_product_logo` - It was: *A base64 encoded image to display on the web UI login prompt. Defaults to `nil`. Read more in the [Branding][2] section.*
+  - `cf_branding_product_logo` - A base64 encoded image to display on the web UI login prompt. Defaults to `nil`. Read more in the [Branding][2] section.
 
-  - `cf_branding_square_logo` - It was: *A base64 encoded image to display in areas where a smaller logo is necessary. Defaults to `nil`.  Read more in the [Branding][2] section.*
+  - `cf_branding_square_logo` - A base64 encoded image to display in areas where a smaller logo is necessary. Defaults to `nil`.  Read more in the [Branding][2] section.
 
-  - `cf_footer_legal_text` - It was: *A string to display in the footer, typically used for compliance text. Defaults to `nil`. Read more in the [Branding][2] section.*
+  - `cf_footer_legal_text` - A string to display in the footer, typically used for compliance text. Defaults to `nil`. Read more in the [Branding][2] section.
 
-  - `cf_footer_links` - It was: *A YAML list of links to enumerate in the footer of the web UI. Defaults to `nil`. Read more in the [Branding][2] section.*
+  - `cf_footer_links` - A YAML list of links to enumerate in the footer of the web UI. Defaults to `nil`. Read more in the [Branding][2] section.
 
+    [2]: (#branding)
 
 ## Deployment Parameters
 

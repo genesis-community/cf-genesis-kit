@@ -1,62 +1,55 @@
-# Major Release
+# Major Release: 2.0.0
 
-* This release brings `cf-genesis-kit` up to date with the releases found in
-  `cf-deployment` v12.25.0.
+This is the official v2.0.0 release of the cf-genesis-kit, the Genesis kit for Cloud Foundry, and the first to be based on the `cf-deployment` de-facto method for deploying Cloud Foundry.  Previous v1.x kit releases were originally based on `cf-release` but heavily curated by Stark & Wayne.
 
-# New Features
+This release is based on upstream `cf-deployment` v12.25.0.
 
-* Log Throttling: by specifying `params.max_log_lines_per_second`, you can
-  limit the maximum log lines per second per app instance.  A value of 0
-  disables this limit (which is the default state).
+See MANUAL.md for full details of the release, but the following are specific highlights and caveats, particularly for migration of existing v1 deployments:
 
-  Note: This is an _EXPERIMENTAL_ feature, and as such, should not be used in
-  a production environment without full understanding of its implications.
-  See the associated [Pivotal Tracker story](https://www.pivotaltracker.com/n/projects/1003146/stories/170087515)
+- You will need to be on v1.10.1 of the cf-genesis-kit to upgrade.
 
-# Core Components
+- App Autoscaler is no longer part of the cf-genesis-kit.  Please use the standalone cf-app-autoscaler-genesis-kit.  If using external database, you can migrate by simply disabling the feature in cf kit, deploying, then deploying the cf-app-autoscaler kit using the same configuration.  If using internal databse for the app autoscaler, you will need to dump and restore the database as appropriate.
 
-| Release           | Version                                                                                       | Release Date      |
-| ----------------- | --------------------------------------------------------------------------------------------- | ----------------- |
-| bpm               | [1.1.6](https://github.com/cloudfoundry/bpm-release/releases/tag/v1.1.6)                      | 05 December 2019  |
-| capi              | [1.89.0](https://github.com/cloudfoundry/capi-release/releases/tag/1.89.0)                    | 06 December 2019  |
-| cf-networking     | [2.27.0](https://github.com/cloudfoundry/cf-networking-release/releases/tag/2.27.0)           | 02 December 2019  |
-|*cf-smoke-tests*   | [40.0.125](https://github.com/cloudfoundry/cf-smoke-tests-release/releases/tag/40.0.125)      | 03 January 2020   |
-|*cflinuxfs3*       | [0.154.0](https://github.com/cloudfoundry/cflinuxfs3-release/releases/tag/v0.154.0)           | 14 January 2020   |
-|*cf-cli*           | [1.24.0](https://github.com/bosh-packages/cf-cli-release/releases/tag/v1.24.0)                | 08 January 2020   |
-|*diego*            | [2.42.0](https://github.com/cloudfoundry/diego-release/releases/tag/v2.42.0)                  | 14 January 2020   |
-| garden-runc       | [1.19.9](https://github.com/cloudfoundry/garden-runc-release/releases/tag/v1.19.9)            | 21 November 2019  |
-|*loggregator*      | [106.3.5](https://github.com/cloudfoundry/loggregator-release/releases/tag/v106.3.5)          | 13 January 2020   |
-|*loggregator-agent*| [5.3.4](https://github.com/cloudfoundry/loggregator-agent-release/releases/tag/v5.3.4)        | 13 January 2020   |
-|*log-cache*        | [2.6.8](https://github.com/cloudfoundry/log-cache-release/releases/tag/v2.6.8)                | 30 December 2019  |
-| nats              | [32](https://github.com/cloudfoundry/nats-release/releases/tag/v32)                           | 11 December 2019  |
-| routing           | [0.196.0](https://github.com/cloudfoundry/routing-release/releases/tag/0.196.0)               | 05 December 2019  |
-|*statsd-injector*  | [1.11.13](https://github.com/cloudfoundry/statsd-injector-release/releases/tag/v1.11.13)      | 13 January 2020   |
-|*cf-syslog-drain*  | [10.2.9](https://github.com/cloudfoundry/cf-syslog-drain-release/releases/tag/v10.2.9)        | 13 January 2020   |
-|*uaa*              | [74.13.0](https://github.com/cloudfoundry/uaa-release/releases/tag/v74.13.0)                  | 13 January 2020   |
-| silk              | [2.27.0](https://github.com/cloudfoundry/silk-release/releases/tag/2.27.0)                    | 02 December 2019  |
-| bosh-dns-aliases  | [0.0.3](https://github.com/cloudfoundry/bosh-dns-aliases-release/releases/tag/v0.0.3)         | 24 October 2018   |
-| cflinuxfs2        | [1.286.0](https://github.com/cloudfoundry/cflinuxfs2-release/releases/tag/v1.286.0)           | 12 June 2019      |
-| app-autoscaler    | [2.0.0](https://github.com/cloudfoundry-incubator/app-autoscaler-release/releases/tag/v2.0.0) | 15 August 2019    |
-| nfs-volume        | [2.3.0](https://github.com/cloudfoundry/nfs-volume-release/releases/tag/v2.3.0)               | 21 August 2019    |
-| mapfs             | [1.2.0](https://github.com/cloudfoundry/mapfs-release/releases/tag/v1.2.0)                    | 15 July 2019      |
-| postgres          | [3.2.0](https://github.com/cloudfoundry-community/postgres-boshrelease/releases/tag/v3.2.0)   | 19 September 2019 |
-| haproxy           | [9.7.1](https://github.com/cloudfoundry-incubator/haproxy-boshrelease/releases/tag/v9.7.1)    | 05 September 2019 |
+- NFS volume services is now part of the kit, thanks to upstream operations file.  Note, this is currently only compatible with local MySQL database.
 
+- Most of the existing kit features are still available. See MANUAL.md for details.
 
-# Buildpacks
+- New explicit Minio blobstore support.  If you are currently using the `aws-blobstore` feature and overriding the endpoint, please switch to using `minio-blobstore` and configuring `params.blobstore_minio_endpoint`.  No need to set `params.aws_region` anymore, or specify a fog configuration block.
 
-| Release     | Version                                                                                   | Release Date     |
-| ----------- | ----------------------------------------------------------------------------------------- | ---------------- |
-|*binary*     | [1.0.36](https://github.com/cloudfoundry/binary-buildpack-release/releases/tag/1.0.36)    | 08 January 2020  |
-|*dotnet-core*| [2.3.3](https://github.com/cloudfoundry/dotnet-core-buildpack-release/releases/tag/2.3.3) | 08 January 2020  |
-|*go*         | [1.9.4](https://github.com/cloudfoundry/go-buildpack-release/releases/tag/1.9.4)          | 08 January 2020  |
-| java        | [4.26](https://github.com/cloudfoundry/java-buildpack-release/releases/tag/4.26)          | 21 November 2019 |
-|*nginx*      | [1.1.3](https://github.com/cloudfoundry/nginx-buildpack-release/releases/tag/1.1.3)       | 08 January 2020  |
-|*nodejs*     | [1.7.8](https://github.com/cloudfoundry/nodejs-buildpack-release/releases/tag/1.7.8)      | 08 January 2020  |
-|*php*        | [4.4.5](https://github.com/cloudfoundry/php-buildpack-release/releases/tag/4.4.5)         | 08 January 2020  |
-|*python*     | [1.7.5](https://github.com/cloudfoundry/python-buildpack-release/releases/tag/1.7.5)      | 08 January 2020  |
-|*r*          | [1.1.1](https://github.com/cloudfoundry/r-buildpack-release/releases/tag/1.1.1)           | 08 January 2020  |
-|*ruby*       | [1.8.6](https://github.com/cloudfoundry/ruby-buildpack-release/releases/tag/1.8.6)        | 08 January 2020  |
-|*staticfile* | [1.5.3](https://github.com/cloudfoundry/staticfile-buildpack-release/releases/tag/1.5.3)  | 08 January 2020  |
+- Users of external databases, special action may be needed on your part during the migration.  See MANUAL.md for details regarding correct method to ensure access to the External Database after migrating to v2.0.0.
 
-Note: Core Component and Buildpack releases in *italics* were updated as part of this kit release.
+- Upstream `cf-deployment` uses a very concise set of vm_types and availability zones.  If you currently specify overrides to these, please be advised that they will not work as-is in 2.0.0 -- you will need to modify your cloud config to match what `cf-deployment` expects, or add `instance_groups` overrides in your environment file; setting `params` will not have any effect.
+
+- For the most part, secrets stored in Vault are seamlessly migrated into Credhub.  The exception of course if for any non-default secrets that are specified in your environment file, such as per-database user passwords for external database.  These will have to be manually transferred into Credhub and the environment file updated to reflect the new location.
+
+- Compiled release can now be used, but are opt-in.
+
+- In addition to the normal features provided by the kit, you can now specify upstream `cf-deployment` operations as features, as well as your own operation files (using either go-patch or spruce overlay syntax).
+
+- The following features are now included by default and do not need to be specified:
+  - `loggregator-forwarder-agent`
+  - `local-blobstore`
+  - `container-routing-integrity`
+  - `routing-api`
+  - `omit-haproxy`
+
+- The old kit acquired a cruft of feature renames, which are being dropped, as
+  well as some features that no longer make sense:
+  - `shield-dbs`, `shield-blobstores`: These features have been deprecated, in favor of BOSH add-ons
+  - `blobstore-*`: these have been renamed `*-blobstore`
+  - `db-external-*`: renamed `*-db`
+  - `db-internal-postgres`, `local-db`: these were changed to `local-postgres-db`, as we now have a corresponding `local-mysql-db`
+  - `haproxy-tls`, `haproxy-notls`, `haproxy-self-signed`: These are now compound features of `haproxy`, `tls` and `self-signed`, the latter two only having effect if `haproxy` feature is specified.
+  - `minimum-vms`: this has been renamed `small-footprint`
+  - `azure`: automatically used when deploying to MS Azure CPI
+  - `cflinuxfs2` is no longer supported
+  - `local-ha-db` is no longer supported - please use an external High Availability Database if this function is desired.
+  - `autoscaler`, `autoscaler-postgres` - autoscaler is no longer included in the kit, please use the cf-app-autoscaler genesis kit.
+  - `native-garden-runc`: replaced by the upstream `cf-deployment/operations/experimental/use-native-garden-runc-runner` feature
+  - `app-bosh-dns`, `dns-service-discovery`: These features are now implemented as `cf-deployment/operations/enable-service-discovery` from the upstream
+
+  - Additional feature: bare
+
+    By default, the v2.0.0 kit is meant to be as close to the 1.x predecessor as possible, just based on upstream cf-deployment. To this end, the default best-practices hat were built into it are maintained going forward. This includes the separation of concerns regarding network subnets (cf-core, cf-edge, and cf-runtime instead of everything in default), usage of postgres, and a different domain for apps instead of putting them in system.<base-domain>, automatic azure tweaks when azure cpi is detected, etc. However, if you want a deployment as close to upstream as possible, we offer the the bare feature: this feature limits the default configuration to the base minimum required to support being deployed by genesis. Do not use this feature for existing v1.0 migrations.
+
+As with any major upgrade, it is highly recommended that you test this with your configuration in a sandbox or lab environment thoroughly before applying it to your developer or production environments.  All care has been taken to ensure this product is fit for usability, but the shear complexity and permutations of configurations make it impossible to account for every possible scenario.  If you find an issue, please reach out to us on the Genesis Slack #help channel, or by opening a GitHub issue.
