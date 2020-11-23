@@ -1,0 +1,5 @@
+--- []
+
+# This is a dynamically created file for setting the instance counts when
+# specified by `params.*_instances` entries.  It is created by the
+# hooks/blueprint script.

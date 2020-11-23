@@ -424,4 +424,42 @@ if [[ -n "${version}" ]] && ! new_enough "${version}" "2.0.0-rc0"; then
   :
 fi
 
+# Dynamic instance counts
+instance_group_counts="$(
+  lookup "params" | \
+  jq -r 'with_entries(if (.key|test("_instances$")) then {key: (.key|capture("(?<k>.*)_instances$")|.k), value: .value} else empty end )|to_entries | .[] | "\(.key) \(.value)"' \
+)"
+if [[ -n "$instance_group_counts" ]] ; then
+  used=''
+  counts_op_file="operations/dynamic/instance_counts.yml"
+  echo "--- # Dynamically created instance overrides" > "$counts_op_file"
+  while read -r inst_grp count; do
+    [[ $inst_grp == "haproxy" ]]     && continue # dealt with elsewhere
+    [[ $inst_grp == "cell" ]]        && inst_grp="diego-cell" && echo >&2 "WARNING: params.cell_instances has been translated as params.diego-cell_instances";
+    [[ $inst_grp == "diego" ]]       && inst_grp="scheduler" && echo >&2 "WARNING: params.diego_instances has been translated as params.scheduler_instances";
+    [[ $inst_grp == "bbs" ]]         && inst_grp="diego-api" && echo >&2 "WARNING: params.bbs_instances has been translated as params.diego-api_instances";
+    [[ $inst_grp == "loggregator" ]] && inst_grp="log-api" && echo >&2 "WARNING: params.loggregator_instances has been translated as params.log-api_instances";
+    [[ $inst_grp == "syslogger" ]]   && inst_grp="adapter" && echo >&2 "WARNING: params.syslogger_instances has been translated as params.adapter_instances";
+    if [[ $inst_grp =~ ^(nats|diego-cell|diego-api|uaa|scheduler|router|api|cc-worker|adapter|doppler|log-api|tcp-router|credhub)$ ]] ; then
+      cat <<EOF >> "$counts_op_file"
+- type: replace
+  path: /instance_groups/name=${inst_grp}/instances
+  value: ${count}
+EOF
+      used="$(echo "$used";echo $inst_grp)"
+    else
+      bail \
+        "#R{[ERROR]} No such instance group $inst_grp - cannot change instance counts to $count." \
+        "        Valid instance groups are:" \
+        "          nats, diego-cell, diego-api, uaa, scheduler, router, api, cc-worker, adapter," \
+        "          doppler, log-api, tcp-router, credhub, haproxy"
+    fi
+  done < <(echo "$instance_group_counts")
+  dups="$(echo "$used"|sort|uniq -d)";
+  if [[ -n "$dups" ]] ; then
+    bail \
+      "#R{[ERROR]} Instance counts specified (or translated as) multiple times:" "$dups"
+  fi
+  manifest+=( "$counts_op_file" )
+fi
 echo "${manifest[@]}"
