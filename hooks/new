@@ -120,7 +120,7 @@ ask_for_database() {
     db_user=
     prompt_for db_user line \
       "What is your $inst database username?"
-    credhub set -n "/$GENESIS_CREDHUB_ROOT/external_db_username" -t value -v "$db_user"
+    credhub set -n "/$GENESIS_CREDHUB_ROOT/external_db_user" -t value -v "$db_user"
     prompt_for external_db:password secret-line \
       "What is the password for the $inst $db_user user?"
     move_secrets_to_credhub external_db:password external_db_password
