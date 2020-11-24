@@ -551,6 +551,14 @@ instance_groups:
         - label: default_key
           passphrase: <!{credhub}:uaa_default_encryption_passphrase!>
       login:
+        branding:
+          footer_legal_text: null
+          footer_links: null
+          product_logo: null
+          square_logo: null
+        links:
+          passwd: https://login.system.cf.testing.examle/forgot_password
+          signup: https://login.system.cf.testing.examle/create_account
         saml:
           activeKeyId: key-1
           keys:

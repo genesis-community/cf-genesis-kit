@@ -76,176 +76,176 @@ addons:
       aliases:
       - domain: _.cell.service.cf.internal
         targets:
-        - deployment: blobstore-aws-cf
+        - deployment: blobstore-minio-cf
           domain: bosh
           instance_group: diego-cell
           network: cf-runtime
           query: _
-        - deployment: blobstore-aws-cf
+        - deployment: blobstore-minio-cf
           domain: bosh
           instance_group: windows2012R2-cell
           network: cf-runtime
           query: _
-        - deployment: blobstore-aws-cf
+        - deployment: blobstore-minio-cf
           domain: bosh
           instance_group: windows2016-cell
           network: cf-runtime
           query: _
-        - deployment: blobstore-aws-cf
+        - deployment: blobstore-minio-cf
           domain: bosh
           instance_group: isolated-diego-cell
           network: cf-runtime
           query: _
       - domain: auctioneer.service.cf.internal
         targets:
-        - deployment: blobstore-aws-cf
+        - deployment: blobstore-minio-cf
           domain: bosh
           instance_group: scheduler
           network: cf-core
           query: '*'
       - domain: bbs.service.cf.internal
         targets:
-        - deployment: blobstore-aws-cf
+        - deployment: blobstore-minio-cf
           domain: bosh
           instance_group: diego-api
           network: cf-core
           query: q-s4
       - domain: bits.service.cf.internal
         targets:
-        - deployment: blobstore-aws-cf
+        - deployment: blobstore-minio-cf
           domain: bosh
           instance_group: bits
           network: cf-core
           query: '*'
       - domain: blobstore.service.cf.internal
         targets:
-        - deployment: blobstore-aws-cf
+        - deployment: blobstore-minio-cf
           domain: bosh
           instance_group: singleton-blobstore
           network: cf-core
           query: '*'
       - domain: cc-uploader.service.cf.internal
         targets:
-        - deployment: blobstore-aws-cf
+        - deployment: blobstore-minio-cf
           domain: bosh
           instance_group: api
           network: cf-core
           query: '*'
       - domain: cloud-controller-ng.service.cf.internal
         targets:
-        - deployment: blobstore-aws-cf
+        - deployment: blobstore-minio-cf
           domain: bosh
           instance_group: api
           network: cf-core
           query: '*'
       - domain: credhub.service.cf.internal
         targets:
-        - deployment: blobstore-aws-cf
+        - deployment: blobstore-minio-cf
           domain: bosh
           instance_group: credhub
           network: cf-core
           query: '*'
       - domain: doppler.service.cf.internal
         targets:
-        - deployment: blobstore-aws-cf
+        - deployment: blobstore-minio-cf
           domain: bosh
           instance_group: doppler
           network: cf-core
           query: '*'
       - domain: file-server.service.cf.internal
         targets:
-        - deployment: blobstore-aws-cf
+        - deployment: blobstore-minio-cf
           domain: bosh
           instance_group: api
           network: cf-core
           query: '*'
       - domain: gorouter.service.cf.internal
         targets:
-        - deployment: blobstore-aws-cf
+        - deployment: blobstore-minio-cf
           domain: bosh
           instance_group: router
           network: cf-edge
           query: '*'
       - domain: locket.service.cf.internal
         targets:
-        - deployment: blobstore-aws-cf
+        - deployment: blobstore-minio-cf
           domain: bosh
           instance_group: diego-api
           network: cf-core
           query: '*'
       - domain: loggregator-trafficcontroller.service.cf.internal
         targets:
-        - deployment: blobstore-aws-cf
+        - deployment: blobstore-minio-cf
           domain: bosh
           instance_group: log-api
           network: cf-core
           query: '*'
       - domain: policy-server.service.cf.internal
         targets:
-        - deployment: blobstore-aws-cf
+        - deployment: blobstore-minio-cf
           domain: bosh
           instance_group: api
           network: cf-core
           query: '*'
       - domain: reverse-log-proxy.service.cf.internal
         targets:
-        - deployment: blobstore-aws-cf
+        - deployment: blobstore-minio-cf
           domain: bosh
           instance_group: log-api
           network: cf-core
           query: '*'
       - domain: routing-api.service.cf.internal
         targets:
-        - deployment: blobstore-aws-cf
+        - deployment: blobstore-minio-cf
           domain: bosh
           instance_group: api
           network: cf-core
           query: '*'
       - domain: silk-controller.service.cf.internal
         targets:
-        - deployment: blobstore-aws-cf
+        - deployment: blobstore-minio-cf
           domain: bosh
           instance_group: diego-api
           network: cf-core
           query: '*'
       - domain: sql-db.service.cf.internal
         targets:
-        - deployment: blobstore-aws-cf
+        - deployment: blobstore-minio-cf
           domain: bosh
           instance_group: database
           network: cf-core
           query: '*'
       - domain: ssh-proxy.service.cf.internal
         targets:
-        - deployment: blobstore-aws-cf
+        - deployment: blobstore-minio-cf
           domain: bosh
           instance_group: scheduler
           network: cf-core
           query: '*'
       - domain: tps.service.cf.internal
         targets:
-        - deployment: blobstore-aws-cf
+        - deployment: blobstore-minio-cf
           domain: bosh
           instance_group: scheduler
           network: cf-core
           query: '*'
       - domain: uaa.service.cf.internal
         targets:
-        - deployment: blobstore-aws-cf
+        - deployment: blobstore-minio-cf
           domain: bosh
           instance_group: uaa
           network: cf-core
           query: '*'
       - domain: nats.service.cf.internal
         targets:
-        - deployment: blobstore-aws-cf
+        - deployment: blobstore-minio-cf
           domain: bosh
           instance_group: nats
           network: cf-core
           query: '*'
       - domain: _.nats.service.cf.internal
         targets:
-        - deployment: blobstore-aws-cf
+        - deployment: blobstore-minio-cf
           domain: bosh
           instance_group: nats
           network: cf-core
@@ -265,12 +265,12 @@ exodus:
   cf_deployment_version: v12.45.0
   core_network: cf-core
   edge_network: cf-edge
-  features: aws-blobstore
+  features: minio-blobstore
   runtime_network: cf-runtime
   system_domain: system.cf.testing.examle
   system_org: system
   system_space: system
-  vaulted_uaa_clients: /secret/blobstore/aws/cf/uaa/client_secrets:firehose
+  vaulted_uaa_clients: /secret/blobstore/minio/cf/uaa/client_secrets:firehose
 instance_groups:
 - azs:
   - z1
@@ -721,12 +721,15 @@ instance_groups:
       build: cf-genesis-kit v2.0.0
       cc:
         buildpacks:
-          buildpack_directory_key: blobstore-aws-cf-buildpacks-((cc_directory_key))
+          buildpack_directory_key: blobstore-minio-cf-buildpacks-((cc_directory_key))
           fog_connection:
             aws_access_key_id: ((blobstore_access_key_id))
             aws_secret_access_key: ((blobstore_secret_access_key))
+            aws_signature_version: "2"
+            endpoint: test-minio-endpoint
+            path_style: true
             provider: AWS
-            region: blobstore-s3-region
+            region: ''''''
         bulk_api_password: <!{credhub}:cc_bulk_api_password!>
         database_encryption:
           current_key_label: encryption_key_0
@@ -742,12 +745,15 @@ instance_groups:
         diego:
           docker_staging_stack: cflinuxfs3
         droplets:
-          droplet_directory_key: blobstore-aws-cf-droplets-((cc_directory_key))
+          droplet_directory_key: blobstore-minio-cf-droplets-((cc_directory_key))
           fog_connection:
             aws_access_key_id: ((blobstore_access_key_id))
             aws_secret_access_key: ((blobstore_secret_access_key))
+            aws_signature_version: "2"
+            endpoint: test-minio-endpoint
+            path_style: true
             provider: AWS
-            region: blobstore-s3-region
+            region: ''''''
         install_buildpacks:
         - name: staticfile_buildpack
           package: staticfile-buildpack-cflinuxfs3
@@ -782,12 +788,15 @@ instance_groups:
           private_key: <!{credhub}:cc_tls.private_key!>
           public_cert: <!{credhub}:cc_tls.certificate!>
         packages:
-          app_package_directory_key: blobstore-aws-cf-app-packages-((cc_directory_key))
+          app_package_directory_key: blobstore-minio-cf-app-packages-((cc_directory_key))
           fog_connection:
             aws_access_key_id: ((blobstore_access_key_id))
             aws_secret_access_key: ((blobstore_secret_access_key))
+            aws_signature_version: "2"
+            endpoint: test-minio-endpoint
+            path_style: true
             provider: AWS
-            region: blobstore-s3-region
+            region: ''''''
         public_tls:
           ca_cert: <!{credhub}:cc_public_tls.ca!>
           certificate: <!{credhub}:cc_public_tls.certificate!>
@@ -796,9 +805,12 @@ instance_groups:
           fog_connection:
             aws_access_key_id: ((blobstore_access_key_id))
             aws_secret_access_key: ((blobstore_secret_access_key))
+            aws_signature_version: "2"
+            endpoint: test-minio-endpoint
+            path_style: true
             provider: AWS
-            region: blobstore-s3-region
-          resource_directory_key: blobstore-aws-cf-resources-((cc_directory_key))
+            region: ''''''
+          resource_directory_key: blobstore-minio-cf-resources-((cc_directory_key))
         security_group_definitions:
         - name: public_networks
           rules:
@@ -839,7 +851,7 @@ instance_groups:
       credhub_api:
         ca_cert: <!{credhub}:credhub_tls.ca!>
       description: Use `genesis info` on environment file for more details
-      name: Cloud Foundry (blobstore-aws)
+      name: Cloud Foundry (blobstore-minio)
       router:
         route_services_secret: <!{credhub}:router_route_services_secret!>
       routing_api:
@@ -1031,43 +1043,55 @@ instance_groups:
     properties:
       cc:
         buildpacks:
-          buildpack_directory_key: blobstore-aws-cf-buildpacks-((cc_directory_key))
+          buildpack_directory_key: blobstore-minio-cf-buildpacks-((cc_directory_key))
           fog_connection:
             aws_access_key_id: ((blobstore_access_key_id))
             aws_secret_access_key: ((blobstore_secret_access_key))
+            aws_signature_version: "2"
+            endpoint: test-minio-endpoint
+            path_style: true
             provider: AWS
-            region: blobstore-s3-region
+            region: ''''''
         database_encryption:
           current_key_label: encryption_key_0
           keys:
             encryption_key_0: <!{credhub}:cc_db_encryption_key!>
         db_encryption_key: <!{credhub}:cc_db_encryption_key!>
         droplets:
-          droplet_directory_key: blobstore-aws-cf-droplets-((cc_directory_key))
+          droplet_directory_key: blobstore-minio-cf-droplets-((cc_directory_key))
           fog_connection:
             aws_access_key_id: ((blobstore_access_key_id))
             aws_secret_access_key: ((blobstore_secret_access_key))
+            aws_signature_version: "2"
+            endpoint: test-minio-endpoint
+            path_style: true
             provider: AWS
-            region: blobstore-s3-region
+            region: ''''''
         internal_api_password: <!{credhub}:cc_internal_api_password!>
         mutual_tls:
           ca_cert: <!{credhub}:cc_tls.ca!>
           private_key: <!{credhub}:cc_tls.private_key!>
           public_cert: <!{credhub}:cc_tls.certificate!>
         packages:
-          app_package_directory_key: blobstore-aws-cf-app-packages-((cc_directory_key))
+          app_package_directory_key: blobstore-minio-cf-app-packages-((cc_directory_key))
           fog_connection:
             aws_access_key_id: ((blobstore_access_key_id))
             aws_secret_access_key: ((blobstore_secret_access_key))
+            aws_signature_version: "2"
+            endpoint: test-minio-endpoint
+            path_style: true
             provider: AWS
-            region: blobstore-s3-region
+            region: ''''''
         resource_pool:
           fog_connection:
             aws_access_key_id: ((blobstore_access_key_id))
             aws_secret_access_key: ((blobstore_secret_access_key))
+            aws_signature_version: "2"
+            endpoint: test-minio-endpoint
+            path_style: true
             provider: AWS
-            region: blobstore-s3-region
-          resource_directory_key: blobstore-aws-cf-resources-((cc_directory_key))
+            region: ''''''
+          resource_directory_key: blobstore-minio-cf-resources-((cc_directory_key))
         staging_upload_password: <!{credhub}:cc_staging_upload_password!>
         staging_upload_user: staging_user
       ccdb:
@@ -1143,43 +1167,55 @@ instance_groups:
     properties:
       cc:
         buildpacks:
-          buildpack_directory_key: blobstore-aws-cf-buildpacks-((cc_directory_key))
+          buildpack_directory_key: blobstore-minio-cf-buildpacks-((cc_directory_key))
           fog_connection:
             aws_access_key_id: ((blobstore_access_key_id))
             aws_secret_access_key: ((blobstore_secret_access_key))
+            aws_signature_version: "2"
+            endpoint: test-minio-endpoint
+            path_style: true
             provider: AWS
-            region: blobstore-s3-region
+            region: ''''''
         database_encryption:
           current_key_label: encryption_key_0
           keys:
             encryption_key_0: <!{credhub}:cc_db_encryption_key!>
         db_encryption_key: <!{credhub}:cc_db_encryption_key!>
         droplets:
-          droplet_directory_key: blobstore-aws-cf-droplets-((cc_directory_key))
+          droplet_directory_key: blobstore-minio-cf-droplets-((cc_directory_key))
           fog_connection:
             aws_access_key_id: ((blobstore_access_key_id))
             aws_secret_access_key: ((blobstore_secret_access_key))
+            aws_signature_version: "2"
+            endpoint: test-minio-endpoint
+            path_style: true
             provider: AWS
-            region: blobstore-s3-region
+            region: ''''''
         internal_api_password: <!{credhub}:cc_internal_api_password!>
         mutual_tls:
           ca_cert: <!{credhub}:cc_tls.ca!>
           private_key: <!{credhub}:cc_tls.private_key!>
           public_cert: <!{credhub}:cc_tls.certificate!>
         packages:
-          app_package_directory_key: blobstore-aws-cf-app-packages-((cc_directory_key))
+          app_package_directory_key: blobstore-minio-cf-app-packages-((cc_directory_key))
           fog_connection:
             aws_access_key_id: ((blobstore_access_key_id))
             aws_secret_access_key: ((blobstore_secret_access_key))
+            aws_signature_version: "2"
+            endpoint: test-minio-endpoint
+            path_style: true
             provider: AWS
-            region: blobstore-s3-region
+            region: ''''''
         resource_pool:
           fog_connection:
             aws_access_key_id: ((blobstore_access_key_id))
             aws_secret_access_key: ((blobstore_secret_access_key))
+            aws_signature_version: "2"
+            endpoint: test-minio-endpoint
+            path_style: true
             provider: AWS
-            region: blobstore-s3-region
-          resource_directory_key: blobstore-aws-cf-resources-((cc_directory_key))
+            region: ''''''
+          resource_directory_key: blobstore-minio-cf-resources-((cc_directory_key))
         staging_upload_password: <!{credhub}:cc_staging_upload_password!>
         staging_upload_user: staging_user
       ccdb:
@@ -1840,7 +1876,7 @@ instance_groups:
   stemcell: default
   vm_type: minimal
 manifest_version: v12.45.0
-name: blobstore-aws-cf
+name: blobstore-minio-cf
 releases:
 - name: binary-buildpack
   sha1: 0269a613be68f988682bbf56504b78477965b1c4

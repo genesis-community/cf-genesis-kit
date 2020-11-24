@@ -389,7 +389,7 @@ instance_groups:
             db_password: test-db-password
             db_port: test-port
             db_schema: diego
-            db_username: diego
+            db_username: test-db-username
       enable_consul_service_registration: false
       logging:
         format:
@@ -411,7 +411,7 @@ instance_groups:
         password: test-db-password
         port: test-port
         type: mysql
-        username: network_connectivity
+        username: test-db-username
       server_cert: <!{credhub}:silk_controller.certificate!>
       server_key: <!{credhub}:silk_controller.private_key!>
       silk_daemon:
@@ -431,7 +431,7 @@ instance_groups:
             db_password: test-db-password
             db_port: test-port
             db_schema: locket
-            db_username: locket
+            db_username: test-db-username
       enable_consul_service_registration: false
       logging:
         format:
@@ -483,6 +483,14 @@ instance_groups:
         - label: default_key
           passphrase: <!{credhub}:uaa_default_encryption_passphrase!>
       login:
+        branding:
+          footer_legal_text: null
+          footer_links: null
+          product_logo: null
+          square_logo: null
+        links:
+          passwd: https://login.system.cf.testing.examle/forgot_password
+          signup: https://login.system.cf.testing.examle/create_account
         saml:
           activeKeyId: key-1
           keys:
@@ -595,7 +603,7 @@ instance_groups:
         db_scheme: mysql
         port: test-port
         roles:
-        - name: uaa
+        - name: test-db-username
           password: test-db-password
           tag: admin
         tls: disabled
@@ -813,7 +821,7 @@ instance_groups:
         db_scheme: mysql
         port: test-port
         roles:
-        - name: cloud_controller
+        - name: test-db-username
           password: test-db-password
           tag: admin
       credhub_api:
@@ -939,7 +947,7 @@ instance_groups:
           port: test-port
           schema: routing-api
           type: mysql
-          username: routing-api
+          username: test-db-username
         system_domain: system.cf.testing.examle
       uaa:
         ca_cert: <!{credhub}:uaa_ssl.ca!>
@@ -955,7 +963,7 @@ instance_groups:
         password: test-db-password
         port: test-port
         type: mysql
-        username: network_policy
+        username: test-db-username
       enable_space_developer_self_service: true
       enable_tls: true
       server_cert: <!{credhub}:network_policy_server_external.certificate!>
@@ -1070,7 +1078,7 @@ instance_groups:
         db_scheme: mysql
         port: test-port
         roles:
-        - name: cloud_controller
+        - name: test-db-username
           password: test-db-password
           tag: admin
       routing_api:
@@ -1193,7 +1201,7 @@ instance_groups:
         db_scheme: mysql
         port: test-port
         roles:
-        - name: cloud_controller
+        - name: test-db-username
           password: test-db-password
           tag: admin
       routing_api:
@@ -1227,7 +1235,7 @@ instance_groups:
         db_scheme: mysql
         port: test-port
         roles:
-        - name: cloud_controller
+        - name: test-db-username
           password: test-db-password
           tag: admin
     release: capi
@@ -1810,7 +1818,7 @@ instance_groups:
           port: test-port
           require_tls: false
           type: mysql
-          username: credhub
+          username: test-db-username
         encryption:
           keys:
           - active: true
