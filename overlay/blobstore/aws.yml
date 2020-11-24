@@ -2,12 +2,11 @@ params:
   blobstore_s3_region: (( param "Specify the AWS region for your Cloud Controller blobstore" ))
 
 bosh-variables:
-  aws_region: (( grab params.blobstore_s3_region ))
   fog_connection:
     provider: AWS
     aws_access_key_id: ((blobstore_access_key_id))
     aws_secret_access_key: ((blobstore_secret_access_key))
-    region: ((aws_region))
+    region: (( grab params.blobstore_s3_region ))
 
 # Credhub Secrets
 #   blobstore_access_key_id
