@@ -8,6 +8,6 @@
   path: /releases/-
   value:
     name: migrate-postgres
-    version: 1.0.0
-    url: https://github.com/rkoster/migrate-postgres-boshrelease/releases/download/v1.0.0/migrate-postgres-1.0.0.tgz
-    sha1: 22e3ca0c5050cdf289972c74206663b8f97526d1
+    version: 1.0.1
+    url: https://github.com/rkoster/migrate-postgres-boshrelease/releases/download/v1.0.1/migrate-postgres-1.0.1.tgz
+    sha1: b66d02413a3745b23c4b55897019a9d24967b56
