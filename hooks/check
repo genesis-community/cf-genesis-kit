@@ -69,7 +69,7 @@ if [[ -n "${version:-}" ]] ; then
     describe "" "  #C{[Checking Upgrade from $version]}"
 
     if ! new_enough "${version}" "1.10.1" ; then
-      describe "    #R{[ERROR]} Please upgrade to cf kit 1.10.1 before upgrading to > 2.0"
+      describe "    #R{[ERROR]} Please upgrade to at least cf kit 1.10.1 before upgrading to v2.x.x"
       env_ok=no
     else
       #TODO: Check if safe secrets are present to be imported by migration hook
@@ -79,6 +79,18 @@ if [[ -n "${version:-}" ]] ; then
   set -e
 fi
 
+for param in skip_ssl_validation api_domain default_app_memory default_app_disk_in_mb \
+             default_stack availability_zones uaa_lockout_failure_count \
+             uaa_lockout_window uaa_lockout_time uaa_refresh_token_validity \
+             grootfs_reserved_space vm_strategy max_log_lines_per_second nats_vm_type \
+             uaa_vm_type api_vm_type doppler_vm_type loggregator_vm_type \
+             router_vm_type bbs_vm_type diego_vm_type cell_vm_type errand_vm_type \
+             syslogger_vm_type ; do
+  if [[ -n "$(lookup "params.$param" )" ]] ; then
+    describe "  - #R{params.$param} no longer supported"
+    env_ok=no
+  fi
+done
 
 if [[ "$env_ok" == "yes" ]]; then
   describe "  environment files [#G{OK}]" ""
