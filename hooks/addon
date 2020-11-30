@@ -49,6 +49,15 @@ login)
   exit 0
   ;;
 
+remigrate)
+  # Migrate the secrets
+  set -e
+  #shellcheck disable=SC1091
+  source ./hooks/migrate-to-2.0
+  validate_expected_vault_secrets
+  correct_x509_certs
+  migrate_credentials_to_credhub
+  ;;
 
 setup-cli)
   if ! cf list-plugin-repos | grep -q CF-Community; then
