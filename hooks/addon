@@ -75,6 +75,15 @@ smoketest)
   "$GENESIS_BOSH_COMMAND" -e "$BOSH_ENVIRONMENT" -d "$BOSH_DEPLOYMENT" run-errand smoke_tests
   ;;
 
+remigrate)
+  # Migrate the secrets
+  set -e
+  source ./hooks/migrate-to-2.0
+  validate_expected_vault_secrets
+  correct_x509_certs
+  migrate_credentials_to_credhub
+  ;;
+
 *)
   echo "Unrecognized Cloud Foundry Genesis Kit addon."
   list
