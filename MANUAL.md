@@ -114,7 +114,6 @@ The following params are always included:
 | `cf_runtime_network` | What network should be used for cf runtime-components? | `cf-runtime` |
 | `base_domain` | What is the base domain for this Cloud Foundry? | |
 | `system_domain` | What is the system domain for this Cloud Foundry? | `system.<base_domain>` |
-| `api_domain` |  What is the api domain for this Cloud Foundry? | `api.<system_domain>` |
 | `apps_domain` | What is the apps domain for this Cloud Foundy? | `run.<system-domain>` |
 | `identity_support_address` | Identity support address | `"https://github.com/genesis-community/cf-genesis-kit"` | 
 | `identity_description` | Identity description | `"Use 'genesis info' on environment file for more details"` |
@@ -293,6 +292,8 @@ These params need to be set when activating features:
 Some of these features may return in latter v2.x releases, but for the v2.0.0 release, they have been removed as they are not compatible with the upstream `cf-deployment` configuration, or have been replaced by an ops file.  If needed, `instance_groups` overrides in the environment file can be used to effect the desired configuration
 
   - `skip_ssl_validation` - This configuration now defaults to true instead of false, as per upstream cf-deployment.  If you want to enforce TLS validation, use the upstream feature `cf-deployment/operations/stop-skipping-tls-validation`
+
+  - `api_domain` - It was: *What is the api domain for this Cloud Foundry?*  It is now `api.<system_domain>`.
 
   - `default_app_memory` - It was: *How much memory (in megabytes) to assign a pushed application that did not specify its memory requirements, explicitly.  Defaults to `256`.*
 
