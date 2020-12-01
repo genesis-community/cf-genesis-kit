@@ -1,0 +1,16 @@
+---
+releases:
+
+  # This fixes #156
+- name: diego
+  url: https://bosh.io/d/github.com/cloudfoundry/diego-release?v=2.48.0
+  version: 2.48.0
+  sha1: fbf8ebfeda1f326f5d6834b9a621b88a548e06e3
+- name: nats
+  url: https://bosh.io/d/github.com/cloudfoundry/nats-release?v=38
+  version: "38"
+  sha1: e6c50707e2dc7330b7dfa3fcf1a0df06918ced07
+- name: routing
+  url: https://bosh.io/d/github.com/cloudfoundry/routing-release?v=0.208.0
+  version: 0.208.0
+  sha1: 537d8303a083fb4efa5dadf24411fa4758e25b68

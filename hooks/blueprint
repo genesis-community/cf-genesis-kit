@@ -54,7 +54,7 @@ manifest=( \
 )
 
 ### Minimal injections required for Genesis compliance
-manifest+=( overlay/base.yml overlay/upstream_version.yml)
+manifest+=( overlay/base.yml overlay/upstream_version.yml )
 
 ### Minimal injections required for Genesis compliance
 if ! want_feature "bare" || want_feature "partitioned-network" ; then
@@ -71,6 +71,9 @@ if ! want_feature "bare" ; then
     "overlay/ten-year-ca-expiry.yml" \
     "overlay/uaa-branding.yml" \
   )
+
+  # Temporary override of specific releases - FIXME when upstream catches up
+  manifest+=(  "overlay/overrides-releases.yml" )
 fi
 
 version=""
