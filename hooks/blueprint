@@ -73,7 +73,7 @@ if ! want_feature "bare" ; then
   )
 
   # Temporary override of specific releases - FIXME when upstream catches up
-  manifest+=(  "overlay/overrides-releases.yml" )
+  manifest+=(  "overlay/override-releases.yml" )
 fi
 
 version=""
