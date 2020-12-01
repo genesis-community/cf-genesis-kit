@@ -1,10 +1,13 @@
 ---
 name:    Cloud Foundry
-version: 1.8.0
+version: 1.10.2
 authors: [ James Hunt <jhunt@starkandwayne.com>,
-           Dennis Bell <dbell@starkandwayne.com> ]
+           Dennis Bell <dbell@starkandwayne.com>,
+           Kevin Rutten <krutten@starkandwayne.com> ]
 docs:    https://github.com/genesis-community/cf-genesis-kit
 code:    https://github.com/genesis-community/cf-genesis-kit
+
+genesis_version_min: 2.7.21
 
 description: |
   This kit will deploy OSS Cloud Foundry to BOSH. It contains
@@ -59,7 +62,7 @@ certificates:
         usage:     [ server_auth, client_auth ]
       cc_public_tls:
         valid_for: 1y
-        names:     [ "api.system.${params.base_domain}",
+        names:     [ "api.${params.system_domain}",
                      "cloud-controller-ng.service.cf.internal" ]
 
       diego_auctioneer_client: #was diego/certs/auctioneer_client
@@ -114,11 +117,11 @@ certificates:
       logcache_ssl:
         valid_for: 1y
         names:     [ "log-cache",
-                      "log-cache.system.${params.base_domain}",
-                     "*.log-cache.system.${params.base_domain}" ]
+                      "log-cache.${params.system_domain}",
+                     "*.log-cache.${params.system_domain}" ]
       loggregator_rlp_gateway_tls:
         valid_for: 1y
-        names:     [ "log-stream.system.${params.base_domain}",
+        names:     [ "log-stream.${params.system_domain}",
                      "log-api.service.cf.internal" ]
       loggregator_rlp_gateway_tls_cc:
         valid_for: 1y
@@ -130,7 +133,7 @@ certificates:
         usage:     [ client_auth ]
       loggregator_trafficcontroller_tls:
         valid_for: 1y
-        names:     [ "doppler.system.${params.base_domain}",
+        names:     [ "doppler.${params.system_domain}",
                      "log-api.service.cf.internal" ]
       scheduler_api_tls:
         valid_for: 1y
@@ -156,7 +159,7 @@ certificates:
       cc_logcache_tls:
         valid_for: 1y
         names:     [ "cloud-controller-ng.service.cf.internal",
-                     "api.system.${params.base_domain}" ]
+                     "api.${params.system_domain}" ]
       proxy_tls:
         valid_for: 1y
         names:     [ "localhost" ]
@@ -261,7 +264,7 @@ certificates:
         usage:     [ server_auth ]
       server_external:  #new
         valid_for: 1y
-        names:     [ "api.system.${params.base_domain}" ]
+        names:     [ "api.${params.system_domain}" ]
         usage:     [ server_auth ]
 
     router/certs:
@@ -271,8 +274,8 @@ certificates:
       ssl:
         valid_for: 1y
         names:     [ "routerSSL",
-                      "system.${params.base_domain}",
-                      "*.system.${params.base_domain}" ]
+                      "${params.system_domain}",
+                      "*.${params.system_domain}" ]
         usage:     [ server_auth ]
 
     silk/certs:
@@ -321,10 +324,10 @@ certificates:
       ssl:
         valid_for: 1y
         names:     [ "*.${params.base_domain}",
-                     "*.system.${params.base_domain}",
-                     "*.run.${params.base_domain}",
-                     "*.uaa.system.${params.base_domain}",
-                     "*.login.system.${params.base_domain}" ]
+                     "*.${params.system_domain}",
+                     "*.${params.apps_domains[0]}",
+                     "*.uaa.${params.system_domain}",
+                     "*.login.${params.system_domain}" ]
 
   autoscaler:
     autoscaler/certs:
@@ -342,7 +345,7 @@ certificates:
         names:     [ "servicebroker client" ]
       servicebroker_public:
         valid_for: 1y
-        names:     [ "autoscalerservicebroker.system.${params.base_domain}" ]
+        names:     [ "autoscalerservicebroker.${params.system_domain}" ]
       servicebroker_server:
         valid_for: 1y
         names:     [ "servicebroker.service.cf.internal" ]
@@ -351,7 +354,7 @@ certificates:
         names:     [ "apiserver client" ]
       apiserver_public:
         valid_for: 1y
-        names:     [ "autoscaler.system.${params.base_domain}" ]
+        names:     [ "autoscaler.${params.system_domain}" ]
       apiserver_server:
         valid_for: 1y
         names:     [ "apiserver.service.cf.internal" ]
