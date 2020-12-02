@@ -82,10 +82,7 @@ fi
 for param in skip_ssl_validation api_domain default_app_memory default_app_disk_in_mb \
              default_stack availability_zones uaa_lockout_failure_count \
              uaa_lockout_window uaa_lockout_time uaa_refresh_token_validity \
-             grootfs_reserved_space vm_strategy max_log_lines_per_second nats_vm_type \
-             uaa_vm_type api_vm_type doppler_vm_type loggregator_vm_type \
-             router_vm_type bbs_vm_type diego_vm_type cell_vm_type errand_vm_type \
-             syslogger_vm_type ; do
+             grootfs_reserved_space vm_strategy max_log_lines_per_second ; do
   if [[ -n "$(lookup "params.$param" )" ]] ; then
     describe "  - #R{params.$param} no longer supported"
     env_ok=no

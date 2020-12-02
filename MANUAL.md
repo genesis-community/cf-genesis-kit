@@ -318,51 +318,6 @@ Some of these features may return in latter v2.x releases, but for the v2.0.0 re
 
   - `max_log_lines_per_second` - This has been replaced with the upstream feature `cf-deployment/operations/experimental/enable-app-log-rate-limiting` and setting `bosh-variables.app_log_rate_limit` to the desired value.
 
-## Sizing and Scaling
-
-Upstream `cf-deployments` only supports three vm types: minimum, small and
-small-highmem.  As such, v2.0.0 of Genesis CF Kit does not support specifying
-per-instance-group vm types.
-
-  - `nats_vm_type` - What type of VM to deploy for the nodes in
-    the NATS message bus cluster.  Defaults to `nats`. 
-    Recommend `1 cpu / 2g mem`.
-
-  - `uaa_vm_type` - What type of VM to deploy for the nodes in
-    the UAA cluster.  Defaults to `uaa`. Recommend `2 cpu / 4g mem`.
-
-  - `api_vm_type` - What type of VM to deploy for the nodes in
-    the Cloud Controller API cluster.  Defaults to `api`. 
-    Recommend `2 cpu / 4g mem`.
-
-  - `doppler_vm_type` - What type of VM to deploy for the doppler
-    nodes.  Defaults to `doppler`. Recommend `1 cpu / 2g mem`.
-
-  - `loggregator_vm_type` - What type of VM to deploy for the
-    loggregator traffic controller nodes.  Defaults to `loggregator`. 
-    Recommend `2 cpu / 4g mem`.
-
-  - `router_vm_type` - What type of VM to deploy for the gorouter
-    nodes.  Defaults to `router`. Recommend `1 cpu / 2g mem`.
-
-  - `bbs_vm_type` - What type of VM to deploy for the Diego BBS
-    nodes.  Defaults to `bbs`. Recommend `1 cpu / 2g mem`.
-
-  - `diego_vm_type` - What type of VM to deploy for the Diego
-    orchestration nodes (not the cells, the auctioneers).
-    Defaults to `diego`. Recommend `2 cpu / 4g mem`.
-
-  - `cell_vm_type` - What type of VM to deploy for the Diego Cells
-    (application runtime).  These are usually very large machines.
-    Defaults to `cell`. Recommend `4 cpu / 16g mem`.
-
-  - `errand_vm_type` - What type of VM to deploy for the
-    smoke-tests errand.  Defaults to `errand`. Recommend `1 cpu / 2g mem`.
-
-  - `syslogger_vm_type` - What type of VM to deploy for the scalable
-    syslog. Defaults to `syslogger`. Recommend `1 cpu / 2g mem`.
-
-
 # Supported Kit Base Parameters
 
   - `base_domain` - The base domain for this Cloud Foundry deployment.  All domains (system, api, apps, etc.) will be based off of this base domain, unless you override them.  This parameter is **required**.
@@ -388,48 +343,112 @@ per-instance-group vm types.
   - `stemcell_os`
   - `stemcell_version`
 
-## Sizing & Scaling Parameters
+## VM Scaling Parameters
   
   Defaults are as per `cf-deployment`
-
-  - `nats_instances` - How many NATS message bus nodes to deploy.
-
-  - `diego-cell_instances` - How many Diego Cells (runtimes) to deploy.
-    (`cell_instances` from v1.x will be translated to this value during
-    deployment)
-
-  - `diego-api_instances` - How many Diego BBS nodes to deploy.
-    (`bbs_instances` from v1.x will be translated to this value during
-    deployment)
-
-  - `uaa_instances` - How many UAA nodes to deploy.
-
-  - `scheduler_instances` - How many Diego auctioneers to deploy.
-    (`diego_instances` from v1.x will be translated to this value during
-    deployment)
-
-  - `api_instances` - How many Cloud Controller API nodes to deploy
-
-  - `router_instances` - How many gorouter nodes to deploy.
-
-  - `cc-worker_instances` - How many cc-worker nodes to deploy.
 
   - `adapter_instances` - How many scalable syslog VMs to deploy.
     (`syslogger_instances` from v1.x will be translated to this value during
     deployment)
 
-  - `doppler_instances` - How many doppler nodes to deploy.
+  - `api_instances` - How many Cloud Controller API nodes to deploy
 
-  - `log-api_instances` - How many loggregator / traffic controller nodes to deploy.
-    (`loggregator_instances` from v1.x will be translated to this value during
-    deployment)
-
-  - `tcp-router_instances` - How many TCP router nodes to deploy.
+  - `cc_worker_instances` - How many cc-worker nodes to deploy.
 
   - `credhub_instances` - How many credhub nodes to deploy.
 
+  - `doppler_instances` - How many doppler nodes to deploy.
+
+  - `diego_api_instances` - How many Diego BBS nodes to deploy.
+    (`bbs_instances` from v1.x will be translated to this value during
+    deployment)
+
+  - `diego_cell_instances` - How many Diego Cells (runtimes) to deploy.
+    (`cell_instances` from v1.x will be translated to this value during
+    deployment)
+
   - `haproxy_instances` - How many HAProxy instances to deploy.  Defaults to
     `2`, only valid if `haproxy` feature enabled.
+
+  - `log_api_instances` - How many loggregator / traffic controller nodes to
+    deploy.  (`loggregator_instances` from v1.x will be translated to this
+    value during deployment)
+
+  - `nats_instances` - How many NATS message bus nodes to deploy.
+
+  - `router_instances` - How many gorouter nodes to deploy.
+
+  - `scheduler_instances` - How many Diego auctioneers to deploy.
+    (`diego_instances` from v1.x will be translated to this value during
+    deployment)
+
+  - `tcp_router_instances` - How many TCP router nodes to deploy.
+
+  - `uaa_instances` - How many UAA nodes to deploy.
+
+## VM Sizing
+
+Upstream `cf-deployments` only supports three vm types: minimum, small and
+small-highmem.  To fine-tune these vms for each instance type, you can use the
+following:
+
+  - `adapter_vm_type` - What type of VM to deploy for the scalable syslog
+    adapter. (`syslogger_vm_type` from v1.x will be translated to this value
+    during deployment).
+    Recommend `1 cpu / 2g mem`.
+
+  - `api_vm_type` - What type of VM to deploy for the nodes in
+    the Cloud Controller API cluster.  Defaults to `api`.
+    Recommend `2 cpu / 4g mem`.
+
+  - `cc_worker_vm_type` - What type of VM to deploy for the cc-worker nodes.
+    Recommend `1 cpu / 2g mem`.
+
+  - `credhub_vm_type` -  What type of VM to deploy for the credhub nodes.
+    Recommend `1 cpu / 2g mem`.
+
+  - `diego_api_vm_type` - What type of VM to deploy for the Diego BBS
+    nodes. (`bbs_vm_type` from v1.x will be translated to this value during
+    deployment)
+    Recommend `1 cpu / 2g mem`.
+
+  - `diego_cell_vm_type` - What type of VM to deploy for the Diego Cells
+    (application runtime).  These are usually very large machines.
+    (`cell_instances` from v1.x will be translated to this value during
+    deployment)
+    Recommend `4 cpu / 16g mem`.
+
+  - `doppler_vm_type` - What type of VM to deploy for the doppler nodes.
+    Recommend `1 cpu / 2g mem`.
+
+  - `nats_vm_type` - What type of VM to deploy for the nodes in
+    the NATS message bus cluster.  Defaults to `nats`. 
+    Recommend `1 cpu / 2g mem`.
+
+  - `log_api_vm_type` - What type of VM to deploy for the
+    loggregator traffic controller nodes.  (`loggregator_vm_type` from v1.x
+    will be translated to this value during deployment)
+    Recommend `2 cpu / 4g mem`.
+
+  - `router_vm_type` - What type of VM to deploy for the gorouter
+    nodes.
+    Recommend `1 cpu / 2g mem`.
+
+  - `errand_vm_type` - What type of VM to deploy for the
+    smoke-tests errand.  Defaults to `errand`. Recommend `1 cpu / 2g mem`.
+
+  - `schedulet_vm_type` - What type of VM to deploy for the Diego
+    orchestration nodes (not the cells, the auctioneers). (`diego_instances`
+    from v1.x will be translated to this value during deployment)
+    Recommend `2 cpu / 4g mem`.
+
+  - `tcp_router_instances` - What type of VM to deploy for the TCP router nodes.
+    Recommend `1 cpu / 2g mem`.
+
+  - `uaa_vm_type` - What type of VM to deploy for the nodes in
+    the UAA cluster.
+    Recommend `2 cpu / 4g mem`.
+
 
 ## Networking Parameters
 

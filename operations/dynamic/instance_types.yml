@@ -1,0 +1,5 @@
+--- []
+
+# This is a dynamically created file for setting the instance vm types when
+# specified by `params.*_vm_type` entries.  It is created by the
+# hooks/blueprint script.
