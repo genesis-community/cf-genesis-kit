@@ -6,6 +6,7 @@ set +e
 if [[ -n "${version:-}" ]] && ! new_enough "${version}" "2.0.0-rc1" ; then
 
   # Migrate the secrets
+  echo "Detected upgrading from version '${version}'. Migrating secrets from Vault to Credhub"
   set -e
   source ./hooks/migrate-to-2.0
   validate_expected_vault_secrets
