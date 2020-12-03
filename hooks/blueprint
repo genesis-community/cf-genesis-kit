@@ -117,6 +117,7 @@ for want in $GENESIS_REQUESTED_FEATURES; do
       warn=1
       describe >&2 \
         "#Y{[WARNING]} The #c{$want} flag has been renamed to #c{local-postgres-db}"
+      db_specified=1
       features+=( "local-postgres-db" )
       ;;
     haproxy-tls)
