@@ -1,19 +1,55 @@
 #!/bin/bash
+set -ue
 
 # Upgrade check
 version="$(exodus kit_version)"
 set +e
 if [[ -n "${version:-}" ]] && ! new_enough "${version}" "2.0.0-rc1" ; then
 
-  # Migrate the secrets
-  set -e
+  describe >&2 "" \
+    "[#M{$GENESIS_ENVIRONMENT}] migrating v#C{${version}} kit secrets from Vault to Credhub..."
+
+  #shellcheck disable=SC1091
   source ./hooks/migrate-to-2.0
   validate_expected_vault_secrets
   correct_x509_certs
   migrate_credentials_to_credhub
-
-  # Anything else it needs
 fi
+
+# Cloud Config checks - deferred to after manifest is fully available.
+describe >&2 "" \
+  "[#M{$GENESIS_ENVIRONMENT}] checking BOSH Cloud Config meets requirements of generated manifest..."
+
+manifest="$(bosh int "$GENESIS_MANIFEST_FILE" -l "$GENESIS_BOSHVARS_FILE" | spruce json)"
+networks="$(jq -r '.instance_groups | map( .networks | .[] |.name) | sort | unique[]' <(echo "$manifest"))"
+vm_types="$(jq -r '.instance_groups | map( .vm_type ) | sort | unique[]' <(echo "$manifest"))"
+vm_extensions="$(jq -r '.instance_groups | map(.vm_extensions//[]) | flatten | sort | unique[]' <(echo "$manifest"))"
+disks="$(jq -r '.instance_groups | map(.persistent_disk_type//[]) | flatten | sort | unique[]' <(echo "$manifest"))"
+
+for t in $networks ; do
+  cloud_config_needs network "$t"
+done
+
+for t in $vm_types; do
+  cloud_config_needs vm_type "$t"
+done
+
+for t in $vm_extensions ; do
+  cloud_config_needs vm_extensions "$t"
+done
+
+for t in $disks ; do
+  cloud_config_needs disk_type "$t"
+done
+
+# Check if there were any errors reported from the above checks.
+cc_ok=yes
+if check_cloud_config ; then
+  describe >&2 "  cloud config [#G{OK}]"
+else
+  describe >&2 "  cloud config [#R{FAILED}]"
+  cc_ok=no
+fi
+
+[[ "$cc_ok" == "no" ]] && exit 1
 exit 0
-
-

@@ -4,7 +4,8 @@ set -u
 min_version="2.7.0"
 genesis_version="$(genesis -v 2>&1 | grep '^Genesis v' | sed -e 's/Genesis v\(.*\) (.*$/\1/')"
 if ! [[ "$genesis_version" =~ -dev$ ]] && ! new_enough "$genesis_version" "$min_version" ; then
-  describe >&2 "" "#R{[ERROR]} This kit needs Genesis $min_version.  Please upgrade before continuing" ""
+  describe >&2 "" \
+    "#R{[ERROR]} This kit needs Genesis $min_version.  Please upgrade before continuing" ""
   exit 1
 fi
 set -e
@@ -12,52 +13,29 @@ set -e
 cc_ok=yes
 # Cloud Config checks
 if [[ -n "$GENESIS_CLOUD_CONFIG" ]] ; then
-  for t in minimal small small-highmem; do
-    cloud_config_needs vm_type "$t"
-  done
-  for t in 5GB 10GB 100GB ; do
-    cloud_config_needs disk_type "$t"
-  done
-  for t in diego-ssh-proxy-network-properties cf-router-network-properties cf-tcp-router-network-properties 50GB_ephemeral_disk 100GB_ephemeral_disk ; do
-    cloud_config_needs vm_extensions "$t"
-  done
-
-# TODO: check if logic
-  if ! want_feature 'bare' || want_feature 'partitioned-network' ; then
-    cloud_config_needs network "$(lookup params.cf_core_network cf-core)"
-    cloud_config_needs network "$(lookup params.cf_edge_network cf-edge)"
-    cloud_config_needs network "$(lookup params.cf_runtime_network cf-runtime)"
-  else
-    cloud_config_needs network "$(lookup params.network default)"
-  fi
-
-  # Check if there were any errors reported from the above checks.
-  if check_cloud_config ; then
-    describe "  cloud config [#G{OK}]"
-  else
-    describe "  cloud config [#R{FAILED}]"
-    cc_ok=no
-  fi
+  describe >&2 "  cloud config [#Y{PENDING}]"
+else
+  describe >&2 "  cloud config [#R{MISSING}]"
+  cc_ok=no
 fi
-
 
 # Runtime config checks
 runtime_ok=yes
 
 # # Check for BOSH DNS
-if ! rcq -e '.addons[] | .name | select(. == "bosh-dns")'; then
+if ! rcq -e '.addons[] | .name | select(. == "bosh-dns")' &>/dev/null; then
   runtime_ok=no
-  describe "  #R{Errors were found} in your runtime-config:"
-  describe "    - #R{BOSH DNS is not in the runtime-config, which is required. Refer to}"
-  describe "      #R{'genesis man $GENESIS_ENVIRONMENT' for more info.}"
-  describe ""
+  describe >&2 \
+    "  #R{Errors were found} in your runtime-config:" \
+    "    - #R{BOSH DNS is not in the runtime-config, which is required. Refer to}" \
+    "      #R{'genesis man $GENESIS_ENVIRONMENT' for more info.}" ""
 fi
 
 # Check if there were any errors reported from runtime config checks
 if [[ "$runtime_ok" == "yes" ]]; then
-  describe "  runtime config [#G{OK}]"
+  describe >&2 "  runtime config [#G{OK}]"
 else
-  describe "  runtime config [#R{FAILED}]"
+  describe >&2 "  runtime config [#R{FAILED}]"
 fi
 
 env_ok=yes
@@ -66,10 +44,10 @@ version="$(exodus kit_version)"
 if [[ -n "${version:-}" ]] ; then
   set +e
   if ! new_enough "$version" "2.0.0-rc0" ; then
-    describe "" "  #C{[Checking Upgrade from $version]}"
+    describe >&2 "" "  #C{[Checking Upgrade from $version]}"
 
     if ! new_enough "${version}" "1.10.1" ; then
-      describe "    #R{[ERROR]} Please upgrade to at least cf kit 1.10.1 before upgrading to v2.x.x"
+      describe >&2 "    #R{[ERROR]} Please upgrade to at least cf kit 1.10.1 before upgrading to v2.x.x"
       env_ok=no
     else
       #TODO: Check if safe secrets are present to be imported by migration hook
@@ -79,20 +57,27 @@ if [[ -n "${version:-}" ]] ; then
   set -e
 fi
 
+declare -a retired_params
+retired_params=()
 for param in skip_ssl_validation api_domain default_app_memory default_app_disk_in_mb \
              default_stack availability_zones uaa_lockout_failure_count \
              uaa_lockout_window uaa_lockout_time uaa_refresh_token_validity \
-             grootfs_reserved_space vm_strategy max_log_lines_per_second ; do
+             grootfs_reserved_space vm_strategy max_log_lines_per_second  ; do
   if [[ -n "$(lookup "params.$param" )" ]] ; then
-    describe "  - #R{params.$param} no longer supported"
-    env_ok=no
+    retired_params+=( "  - #R{params.$param}" )
+    [[ "$GENESIS_IGNORE_RETIRED_PARAMS" =~ ^(y|yes|1|true)$ ]] || env_ok=no
   fi
 done
+if [[ ${#retired_params[@]} -gt 0 ]] ; then
+  display >&2 \
+    "Using the following retired parameters -- see #g{genesis man $GENESIS_ENVIRONMENT} to resolve:" \
+    ${retired_params[@]+"${retired_params[@]}"}
+fi
 
 if [[ "$env_ok" == "yes" ]]; then
-  describe "  environment files [#G{OK}]" ""
+  describe >&2 "  environment files [#G{OK}]"
 else
-  describe "  environment files [#R{FAILED}]" ""
+  describe >&2 "  environment files [#R{FAILED}]"
 fi
 
 [[ "$env_ok" == "no" || "$cc_ok" == "no" || "$runtime_ok" == no ]] && exit 1
