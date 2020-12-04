@@ -1,3 +1,4 @@
 exodus:
-  cf-deployment-version: 12.45.0 (+hot-fix)
+  cf-deployment-version: v12.45.0
   cf-deployment-date:    2020-Oct-08 14:08:11 UTC
+  cf-deployment-url:     https://github.com/cloudfoundry/cf-deployment/releases/tag/v12.45.0

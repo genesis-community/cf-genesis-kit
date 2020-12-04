@@ -1,7 +1,5 @@
 --- # overrides: basic overrides for genesis compatibility
 exodus:
-  cf_deployment_version: (( grab manifest_version ))
-
   admin_username: admin
   admin_password: ((cf_admin_password))
   base_domain:    (( grab params.base_domain ))

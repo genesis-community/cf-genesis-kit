@@ -12,6 +12,7 @@ version="${1:-}"
 #Config
 upstream_name="cf-deployment"
 upstream_path="https://github.com/cloudfoundry/${upstream_name}/archive/v${version}.tar.gz"
+upstream_url="https://github.com/cloudfoundry/${upstream_name}/releases/tag/v${version}"
 upstream_file="${upstream_name}-${version}.tar.gz"
 upstream_dir="$upstream_name"
 files=(
@@ -60,6 +61,7 @@ cat > overlay/upstream_version.yml <<EOF
 exodus:
   ${upstream_name}-version: $version
   ${upstream_name}-date:    $ts
+  ${upstream_name}-url:     $upstream_url
 EOF
 
 rm -rf "$workdir"

@@ -14,3 +14,6 @@ releases:
   url: https://bosh.io/d/github.com/cloudfoundry/routing-release?v=0.208.0
   version: 0.208.0
   sha1: 537d8303a083fb4efa5dadf24411fa4758e25b68
+
+exodus:
+  cf-deployment-hotfixes: true

@@ -4,13 +4,21 @@ exodus_data="$(lookup --exodus .)"
 system_domain="$(echo "$exodus_data" | jq -r '.system_domain // "system.\(.base_domain)"')"
 api_domain="$(echo "$exodus_data" | jq -r '.api_domain // "api.\($system_domain)"' --arg system_domain "$system_domain")"
 api_url=https://$api_domain
-admin=$(exodus admin_username)
-password=$(exodus admin_password)
+admin="$(echo "$exodus_data" | jq -r  '.admin_username')"
+password="$(echo "$exodus_data" | jq -r '.admin_password')"
+upstream_version="$(echo "$exodus_data" | jq -r '."cf-deployment-version"')"
+upstream_hotfixes="$(echo "$exodus_data" | jq -r '."cf-deployment-hotfixes//false"')"
+upstream_url="$(echo "$exodus_data" | jq -r '."cf-deployment-releases"')"
+hotfixes=""
+[[ "$upstream_hotfixes" == "true" ]] && hotfixes=" #Y{(+ hot-fixes)}"
 
-      echo "cloud foundry api"
-  describe "       url: #C{$api_url}"
-  describe "  username: #M{$admin}"
-  describe "  password: #G{$password}"
-
-      echo
-      curl -m5 -Lsk $api_url/v2/info | jq -Cr . | sed -e 's/^/  /'
+describe \
+    "Based on #M{cf-deployment $upstream_version}$hotfixes" \
+    "[url: #c{$upstream_url}]" \
+    "" \
+    "Access to Cloud Foundry API:" \
+    "       url: #C{$api_url}" \
+    "  username: #M{$admin}" \
+    "  password: #G{$password}"
+echo
+curl -m5 -Lsk $api_url/v2/info | jq -Cr . | sed -e 's/^/  /'
