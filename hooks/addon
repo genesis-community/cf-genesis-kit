@@ -51,7 +51,7 @@ login)
 
 remigrate)
   # Migrate the secrets
-  set -e
+
   #shellcheck disable=SC1091
   source ./hooks/migrate-to-2.0
   validate_expected_vault_secrets
