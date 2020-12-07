@@ -1,0 +1,5 @@
+bosh-variables:
+  fog_connection:
+    use_iam_profile: true
+    aws_access_key_id: (( prune ))
+    aws_secret_access_key: (( prune ))

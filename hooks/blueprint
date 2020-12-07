@@ -199,8 +199,8 @@ for want in $GENESIS_REQUESTED_FEATURES; do
       want_feature "cf-deployment/operations/scale-to-one-az" || features+=( "small-footprint" )
       ;;
     local-postgres-db|local-mysql-db|mysql-db|postgres-db) db_specified=1; features+=( "$want" ) ;;
-    bare|partitioned-network|haproxy|tls|self-signed) features+=( "$want" ) ;;
-    minio-blobstore|aws-blobstore|azure-blobstore|gcp-blobstore|gcp-use-access-key) features+=( "$want" ) ;;
+    bare|partitioned-network|haproxy|tls|no-nats-tls|self-signed) features+=( "$want" ) ;;
+    minio-blobstore|aws-blobstore|aws-blobstore-iam|azure-blobstore|gcp-blobstore|gcp-use-access-key) features+=( "$want" ) ;;
     nfs-volume-services|enable-service-discovery) features+=( "$want" ) ;;
     app-autoscaler-integration|prometheus-integration) features+=( "$want" ) ;;
     +migrated-v1-env|+override-db-names) features+=( "$want" ) ;;
@@ -272,13 +272,15 @@ for want in $GENESIS_REQUESTED_FEATURES; do
         "cf-deployment/operations/use-azure-storage-blobstore.yml" \
       )
       ;;
-    aws-blobstore)
+    aws-blobstore|aws-blobstore-iam)
       blobstores+=( "$want" )
       manifest+=( \
         "overlay/blobstore/external.yml" \
         "overlay/blobstore/aws.yml" \
         "cf-deployment/operations/use-external-blobstore.yml" \
       )
+      want_feature "aws-blobstore-iam" && \
+        manifest+=( "overlay/blobstore/aws-iam.yml" )
       ;;
     minio-blobstore)
       blobstores+=( "$want" )
@@ -393,6 +395,8 @@ if [[ "${#databases[@]}" -gt 1 ]] ; then
 fi
 
 if ! want_feature "bare" ; then
+
+  want_feature "no-nats-tls" || manifest+=( "overlay/nats-tls.yml" )
 
   if [[ "${#databases}" == 0 ]]; then
   manifest+=( "cf-deployment/operations/use-postgres.yml" )

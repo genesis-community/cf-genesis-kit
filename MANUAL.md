@@ -61,6 +61,7 @@ General:
   - `prometheus-integration` - Configure cf to export to prometheus (must deployed via [prometheus-genesis-kit](https://github.com/genesis-community/prometheus-genesis-kit)).
   - `bare` - Deploy _only_ the cf-deployment files without genesis packaged best-practices applied.
   - `migrated-v1-env` - Fix the database names after having migrated from v1 kit.
+  - `no-nats-tls` - Nats over TLS was not part of cf-deployment v12.45, but has been turned on by default unless using bare mode.  Set this feature to disable it.
 
 Database related - choose one:
   - `postgres-db` - Use an external postgres instance to host persistent data.
@@ -74,7 +75,9 @@ Load balancer related:
   - `self-signed` - Generate self-signed certs for haproxy.
 
 Blobstore related:
-  - `aws-blobstore` - Use AWS S3 storage as external blobsore.
+  - `aws-blobstore` - Use AWS S3 storage as external blobsore, via credentials.
+  - `aws-blobstore-iam` - Use AWS S3 storage as external blobsore, via IAM
+    configuration
   - `minio-blobstore` - Use Minio S3-compatible storage as external blobsore.
   - `azure-blobstore` - Use Azure blob storage as external blobstore.
   - `gcp-blobstore` - Use GCS as external blobstore.
@@ -119,7 +122,7 @@ The following params are always included:
 | `identity_description` | Identity description | `"Use 'genesis info' on environment file for more details"` |
 
 These params need to be set when activating features:
-  - **aws-blobstore**:
+  - **aws-blobstore/aws-blobstore-iam**:
     | param | description | default |
     | --- | --- | --- |
     | `blobstore_s3_region` | The s3 region of the blobstore | |

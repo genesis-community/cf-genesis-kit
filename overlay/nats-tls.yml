@@ -1,0 +1,47 @@
+instance_groups:
+  - name: nats
+    jobs:
+      - name: nats-tls
+        release: nats
+        provides:
+          nats-tls:
+            as: nats-tls
+            shared: true
+        custom_provider_definitions:
+          - name: nats-tls-address
+            type: address
+        properties:
+          nats:
+            user: nats
+            password: ((nats_password))
+            hostname: nats.service.cf.internal
+            external:
+              tls:
+                ca: ((nats_client_cert.ca))
+                certificate: ((nats_server_cert.certificate))
+                private_key: ((nats_server_cert.private_key))
+variables:
+  - name: nats_ca
+    type: certificate
+    options:
+      is_ca: true
+      common_name: nats
+      duration: 3650
+  - name: nats_client_cert
+    type: certificate
+    options:
+      ca: nats_ca
+      common_name: "nats_client"
+      extended_key_usage:
+        - client_auth
+  - name: nats_server_cert
+    type: certificate
+    options:
+      ca: nats_ca
+      common_name: nats.service.cf.internal
+      extended_key_usage:
+        - server_auth
+    consumes:
+      alternative_name:
+        from: nats-tls-address
+        properties: { wildcard: true }
