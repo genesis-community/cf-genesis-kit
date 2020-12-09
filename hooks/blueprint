@@ -512,10 +512,10 @@ fi
 # Include the migration manifest fragments
 version="$(exodus kit_version)"
 if [[ -n "${version}" ]] && ! new_enough "${version}" "2.0.0-rc0"; then
-  manifest+=( "overlay/migrate/cells.yml" )
+  manifest+=( "operations/migrate/cells.yml")
 
   if want_feature "local-postgres-db"; then # TODO: or postgres-db external??
-    manifest+=( "overlay/migrate/postgres.yml" )
+    manifest+=( "operations/migrate/postgres.yml" )
   fi
   :
 fi
