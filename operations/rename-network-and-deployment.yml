@@ -14,6 +14,10 @@
   value: cf-runtime
 
 - type:  replace
+  path:  /params/cf_db_network?
+  value: (( grab params.cf_core_network ))
+
+- type:  replace
   path:  /bosh-variables?/cf_core_network?
   value: (( grab params.cf_core_network ))
 
@@ -24,6 +28,10 @@
 - type:  replace
   path:  /bosh-variables/cf_runtime_network?
   value: (( grab params.cf_runtime_network ))
+
+- type:  replace
+  path:  /bosh-variables/cf_db_network?
+  value: (( grab params.cf_db_network ))
 
 - type: remove
   path: /bosh-variables/network_name

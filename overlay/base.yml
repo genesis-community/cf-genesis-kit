@@ -43,7 +43,6 @@ meta:
 
 params:
   network: default
-  cf_db_network: (( grab params.cf_core_network || params.network )) # only used if not bare
 
   base_domain: (( param "What is the base domain for this Cloud Foundry?" ))
   system_domain: (( concat "system." params.base_domain ))
