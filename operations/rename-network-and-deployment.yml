@@ -254,7 +254,7 @@
     - query: '*'
       instance_group: database
       deployment: ((deployment_name))
-      network: ((cf_core_network))
+      network: ((cf_db_network))
       domain: bosh
   - domain: ssh-proxy.service.cf.internal
     targets:
