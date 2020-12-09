@@ -30,6 +30,9 @@ meta:
       name: locketdb
       user: locketadmin
 
+params:
+  cf_db_network: cf-db
+
 instance_groups:
 # original has key key-2016-06
 - name: diego-api
