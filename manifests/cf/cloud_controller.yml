@@ -215,17 +215,17 @@ meta:
 
     buildpacks:
       .: (( inject meta.blobstore_config ))
-      buildpack_directory_key: (( concat params.env "-cc-buildpacks-" meta.cc.directory_key ))
+      buildpack_directory_key: (( concat genesis.env "-cc-buildpacks-" meta.cc.directory_key ))
     droplets:
       .: (( inject meta.blobstore_config ))
-      droplet_directory_key: (( concat params.env "-cc-droplets-" meta.cc.directory_key ))
+      droplet_directory_key: (( concat genesis.env "-cc-droplets-" meta.cc.directory_key ))
       max_staged_droplets_stored: null
     resource_pool:
       .: (( inject meta.blobstore_config ))
-      resource_directory_key: (( concat params.env "-cc-resources-" meta.cc.directory_key ))
+      resource_directory_key: (( concat genesis.env "-cc-resources-" meta.cc.directory_key ))
     packages:
       .: (( inject meta.blobstore_config ))
-      app_package_directory_key: (( concat params.env "-cc-packages-" meta.cc.directory_key ))
+      app_package_directory_key: (( concat genesis.env "-cc-packages-" meta.cc.directory_key ))
 
     stacks:
       - name: cflinuxfs3
