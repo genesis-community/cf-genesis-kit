@@ -7,7 +7,7 @@ instance_groups:
         properties:
           smoke_tests:
             api: (( concat "https://api." params.system_domain ))
-            apps_domain: (( grab params.apps_domains[0] ))
+            apps_domain: (( grab params.apps_domain ))
 
             client: cf_smoke_tests
             client_secret: (( grab meta.uaa.cf_smoke_tests ))

@@ -16,7 +16,7 @@ instance_groups:
         release: capi
         provides: { cloud_controller: { as: cloud_controller, shared: true } }
         properties:
-          app_domains:   (( grab params.apps_domains ))
+          app_domains:   (( grab params.app_domains ))
           system_domain: (( grab params.system_domain ))
 
           app_ssh:

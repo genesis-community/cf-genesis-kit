@@ -325,7 +325,7 @@ certificates:
         valid_for: 1y
         names:     [ "*.${params.base_domain}",
                      "*.${params.system_domain}",
-                     "*.${params.apps_domains[0]}",
+                     "*.${params.apps_domain}",
                      "*.uaa.${params.system_domain}",
                      "*.login.${params.system_domain}" ]
 
