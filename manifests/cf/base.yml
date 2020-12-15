@@ -4,13 +4,19 @@ meta:
     proxy: []
     azs: [z1, z2, z3]
 
+  external_app_domains:
+    - (( grab params.app_domain || meta.default_app_domain ))
+  internal_app_domains: []
+  default_app_domain: (( concat "run." params.base_domain ))
+  default_apps_domains: (( grab params.apps_domains || meta.external_app_domains ))
+
 exodus:
   api_url:        (( concat "https://" meta.api_hostname ))
   admin_username: admin
   admin_password: (( vault meta.vault "/admin_user:password" ))
   system_domain:  (( grab params.system_domain ))
-  app_domain:     (( grab params.apps_domains[0] ))
-  app_domains:    (( grab params.apps_domains ))
+  app_domain:     (( grab params.apps_domain ))
+  app_domains:    (( grab params.app_domains ))
 
   vaulted_uaa_clients: (( concat meta.vault "/uaa/client_secrets:firehose" ))
 
@@ -27,7 +33,8 @@ params:
 
   base_domain: (( param "What is the base domain for this Cloud Foundry?" ))
   system_domain: (( concat "system." params.base_domain ))
-  apps_domains: [ (( concat "run." params.base_domain )) ]
+  app_domains: (( grab meta.default_apps_domains meta.internal_app_domains ))
+  apps_domain: (( grab params.app_domains[0] ))
 
   default_stack: cflinuxfs3
 

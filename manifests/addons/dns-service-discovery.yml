@@ -8,11 +8,11 @@
 #
 params:
   internal_domain: apps.internal
-  apps_domains:
-    - (( append ))
-    - name:     (( grab params.internal_domain ))
-      internal: true
 
+meta:
+  internal_app_domains:
+  - name: (( grab params.internal_domain ))
+    internal: true
 
 instance_groups:
     ################################################
