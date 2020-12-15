@@ -1,16 +1,19 @@
-While the 1.x line concluded with 1.10.1, this release contains a fix that is
-important for upgrading to 2.x if you have a non-standard system domain.  See
-below:
-
 # Bug Fix
 
-* Respect `params.system_domain` from env file when generating TLS
-  certificate SANs. This impacts the SANs for cc_public_tls, logcache_ssl,
-  loggregator_rlp_gateway_tls, loggregator_trafficcontroller_tls,
-  cc_logcache_tls, networ_policy.server_external, router.ssl, haproxy.ssl,
-  autoscaler.servicebroker_public and autoscaler.apiserver_public.
+* Use genesis.env, not params.env
 
-  If `params.system_domain` was set in previous versions, the certs were
-  erroneously created using `system.<base_domain>`.  Run `genesis
-  rotate-secrets -P` to regenerate the certs and deploy.
-  
+  Once we updated the min genesi version to above 2.6.13, the
+  autopopulation of `params.env` has been removed.  Therefore, v1.10.2
+  causes genesis to complain that params.env exists, but won't work
+  without it.
+
+  The resolution is to use genesis.env instead of the outdated params.env
+  in the kit's manifest fragments, which is only needed in the blobstore
+  directory key settings.
+
+* Properly handle internal domains for `dns_service_discovery`
+
+  Due to some quirks of spruce, the apps.internal domain wasn't being applied
+  by the inclusion of the `dns_service_discovery` feature; it had to be
+  explicitly added to params.apps_domains.  This is no longer necessary and
+  should be removed
