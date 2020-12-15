@@ -20,8 +20,8 @@ fi
 describe >&2 "" \
   "[#M{$GENESIS_ENVIRONMENT}] checking BOSH Cloud Config meets requirements of generated manifest..."
 
+manifest="$(bosh int "$GENESIS_MANIFEST_FILE" -l "$GENESIS_BOSHVARS_FILE" | spruce json)"
 cc_ok=yes
-missing="$(jq -r '.instance_groups[] | select(.|has("vm_type") and has("networks") and has("instances") and has("azs") and has("jobs") and has("stemcells") |not)|.name' <(echo "$manifest"))"
 missing="$(jq -r '.instance_groups | map({"\(.name)": ((["azs","instances","jobs","name","networks","stemcell","vm_type"]) -  (.|keys))}) | .[] | to_entries[] | select(.value | length > 0) | "    - #m{\(.key)}: #R{\(.value| join(", "))}"' <(echo "$manifest"))"
 if [[ -n "$missing" ]] ; then
   display \
@@ -32,7 +32,6 @@ if [[ -n "$missing" ]] ; then
   cc_ok=no
 fi
 
-manifest="$(bosh int "$GENESIS_MANIFEST_FILE" -l "$GENESIS_BOSHVARS_FILE" | spruce json)"
 networks="$(jq -r '.instance_groups | map( .networks//[] | .[] |.name) | sort | unique[]' <(echo "$manifest"))"
 vm_types="$(jq -r '.instance_groups | map( .vm_type ) | sort | unique[] | select(. != null)' <(echo "$manifest"))"
 vm_extensions="$(jq -r '.instance_groups | map(.vm_extensions//[]) | flatten | sort | unique[]' <(echo "$manifest"))"
