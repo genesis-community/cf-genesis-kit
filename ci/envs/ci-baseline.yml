@@ -12,12 +12,9 @@ genesis:
   bosh_env:  snw-genesis-ci
 
 params:
-  availability_zones: [z1]
-
   disk_type: default
   base_domain:  10.128.9.10.netip.cc
   postgres_vip: 10.128.9.9
-  skip_ssl_validation: true
 
   autoscaler_network: cf-core
 
