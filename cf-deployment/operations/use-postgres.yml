@@ -30,7 +30,6 @@
     name: postgres
     properties:
       databases:
-        collect_statement_statistics: true
         databases:
         - citext: true
           name: cloud_controller
@@ -83,10 +82,6 @@
         - name: credhub
           password: ((credhub_database_password))
           tag: admin
-        - name: superuser
-          password: ((superuser_password))
-          permissions:
-          - "SUPERUSER"
     release: postgres
 - type: replace
   path: /instance_groups/name=api/jobs/name=cloud_controller_ng/properties/ccdb
