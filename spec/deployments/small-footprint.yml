@@ -3,6 +3,7 @@ kit:
   name:    dev
   version: 2.0.0
   features:
+    - haproxy
     - small-footprint
 
 genesis:
@@ -10,4 +11,6 @@ genesis:
 
 params:
   base_domain: cf.testing.examle
-
+  availability_zones:
+    - z2
+  haproxy_ips: test-ha-proxy-ips

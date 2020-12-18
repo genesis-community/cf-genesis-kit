@@ -218,7 +218,19 @@ metric_scraper_ca:
   ca: <!{credhub}:metric_scraper_ca.ca!>
   certificate: <!{credhub}:metric_scraper_ca.certificate!>
   private_key: <!{credhub}:metric_scraper_ca.private_key!>
+nats_ca:
+  ca: <!{credhub}:nats_ca.ca!>
+  certificate: <!{credhub}:nats_ca.certificate!>
+  private_key: <!{credhub}:nats_ca.private_key!>
+nats_client_cert:
+  ca: <!{credhub}:nats_client_cert.ca!>
+  certificate: <!{credhub}:nats_client_cert.certificate!>
+  private_key: <!{credhub}:nats_client_cert.private_key!>
 nats_password: <!{credhub}:nats_password!>
+nats_server_cert:
+  ca: <!{credhub}:nats_server_cert.ca!>
+  certificate: <!{credhub}:nats_server_cert.certificate!>
+  private_key: <!{credhub}:nats_server_cert.private_key!>
 network_connectivity_database_password: <!{credhub}:network_connectivity_database_password!>
 network_policy_ca:
   ca: <!{credhub}:network_policy_ca.ca!>

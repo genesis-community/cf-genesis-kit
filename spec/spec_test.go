@@ -124,6 +124,12 @@ var _ = Describe("Interal Kit", func() {
 		RuntimeConfig: "dns",
 		CPI:           "aws",
 	})
+	Test(Environment{
+		Name:          "availability-zones",
+		CloudConfig:   "aws",
+		RuntimeConfig: "dns",
+		CPI:           "aws",
+	})
 	// Test(Environment{
 	// 	Focus:       true,
 	// 	Name:        "nfs-volume-services",

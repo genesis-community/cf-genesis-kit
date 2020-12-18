@@ -76,176 +76,176 @@ addons:
       aliases:
       - domain: _.cell.service.cf.internal
         targets:
-        - deployment: blobstore-aws-cf
+        - deployment: availability-zones-cf
           domain: bosh
           instance_group: diego-cell
           network: cf-runtime
           query: _
-        - deployment: blobstore-aws-cf
+        - deployment: availability-zones-cf
           domain: bosh
           instance_group: windows2012R2-cell
           network: cf-runtime
           query: _
-        - deployment: blobstore-aws-cf
+        - deployment: availability-zones-cf
           domain: bosh
           instance_group: windows2016-cell
           network: cf-runtime
           query: _
-        - deployment: blobstore-aws-cf
+        - deployment: availability-zones-cf
           domain: bosh
           instance_group: isolated-diego-cell
           network: cf-runtime
           query: _
       - domain: auctioneer.service.cf.internal
         targets:
-        - deployment: blobstore-aws-cf
+        - deployment: availability-zones-cf
           domain: bosh
           instance_group: scheduler
           network: cf-core
           query: '*'
       - domain: bbs.service.cf.internal
         targets:
-        - deployment: blobstore-aws-cf
+        - deployment: availability-zones-cf
           domain: bosh
           instance_group: diego-api
           network: cf-core
           query: q-s4
       - domain: bits.service.cf.internal
         targets:
-        - deployment: blobstore-aws-cf
+        - deployment: availability-zones-cf
           domain: bosh
           instance_group: bits
           network: cf-core
           query: '*'
       - domain: blobstore.service.cf.internal
         targets:
-        - deployment: blobstore-aws-cf
+        - deployment: availability-zones-cf
           domain: bosh
           instance_group: singleton-blobstore
           network: cf-core
           query: '*'
       - domain: cc-uploader.service.cf.internal
         targets:
-        - deployment: blobstore-aws-cf
+        - deployment: availability-zones-cf
           domain: bosh
           instance_group: api
           network: cf-core
           query: '*'
       - domain: cloud-controller-ng.service.cf.internal
         targets:
-        - deployment: blobstore-aws-cf
+        - deployment: availability-zones-cf
           domain: bosh
           instance_group: api
           network: cf-core
           query: '*'
       - domain: credhub.service.cf.internal
         targets:
-        - deployment: blobstore-aws-cf
+        - deployment: availability-zones-cf
           domain: bosh
           instance_group: credhub
           network: cf-core
           query: '*'
       - domain: doppler.service.cf.internal
         targets:
-        - deployment: blobstore-aws-cf
+        - deployment: availability-zones-cf
           domain: bosh
           instance_group: doppler
           network: cf-core
           query: '*'
       - domain: file-server.service.cf.internal
         targets:
-        - deployment: blobstore-aws-cf
+        - deployment: availability-zones-cf
           domain: bosh
           instance_group: api
           network: cf-core
           query: '*'
       - domain: gorouter.service.cf.internal
         targets:
-        - deployment: blobstore-aws-cf
+        - deployment: availability-zones-cf
           domain: bosh
           instance_group: router
           network: cf-edge
           query: '*'
       - domain: locket.service.cf.internal
         targets:
-        - deployment: blobstore-aws-cf
+        - deployment: availability-zones-cf
           domain: bosh
           instance_group: diego-api
           network: cf-core
           query: '*'
       - domain: loggregator-trafficcontroller.service.cf.internal
         targets:
-        - deployment: blobstore-aws-cf
+        - deployment: availability-zones-cf
           domain: bosh
           instance_group: log-api
           network: cf-core
           query: '*'
       - domain: policy-server.service.cf.internal
         targets:
-        - deployment: blobstore-aws-cf
+        - deployment: availability-zones-cf
           domain: bosh
           instance_group: api
           network: cf-core
           query: '*'
       - domain: reverse-log-proxy.service.cf.internal
         targets:
-        - deployment: blobstore-aws-cf
+        - deployment: availability-zones-cf
           domain: bosh
           instance_group: log-api
           network: cf-core
           query: '*'
       - domain: routing-api.service.cf.internal
         targets:
-        - deployment: blobstore-aws-cf
+        - deployment: availability-zones-cf
           domain: bosh
           instance_group: api
           network: cf-core
           query: '*'
       - domain: silk-controller.service.cf.internal
         targets:
-        - deployment: blobstore-aws-cf
+        - deployment: availability-zones-cf
           domain: bosh
           instance_group: diego-api
           network: cf-core
           query: '*'
       - domain: sql-db.service.cf.internal
         targets:
-        - deployment: blobstore-aws-cf
+        - deployment: availability-zones-cf
           domain: bosh
           instance_group: database
           network: cf-core
           query: '*'
       - domain: ssh-proxy.service.cf.internal
         targets:
-        - deployment: blobstore-aws-cf
+        - deployment: availability-zones-cf
           domain: bosh
-          instance_group: scheduler
+          instance_group: router
           network: cf-core
           query: '*'
       - domain: tps.service.cf.internal
         targets:
-        - deployment: blobstore-aws-cf
+        - deployment: availability-zones-cf
           domain: bosh
           instance_group: scheduler
           network: cf-core
           query: '*'
       - domain: uaa.service.cf.internal
         targets:
-        - deployment: blobstore-aws-cf
+        - deployment: availability-zones-cf
           domain: bosh
           instance_group: uaa
           network: cf-core
           query: '*'
       - domain: nats.service.cf.internal
         targets:
-        - deployment: blobstore-aws-cf
+        - deployment: availability-zones-cf
           domain: bosh
           instance_group: nats
           network: cf-core
           query: '*'
       - domain: _.nats.service.cf.internal
         targets:
-        - deployment: blobstore-aws-cf
+        - deployment: availability-zones-cf
           domain: bosh
           instance_group: nats
           network: cf-core
@@ -267,18 +267,19 @@ exodus:
   core_network: cf-core
   db_network: cf-core
   edge_network: cf-edge
-  features: aws-blobstore
+  features: postgres-db,ssh-proxy-on-routers
   runtime_network: cf-runtime
   system_domain: system.cf.testing.examle
   system_org: system
   system_space: system
-  vaulted_uaa_clients: /secret/blobstore/aws/cf/uaa/client_secrets:firehose
+  vaulted_uaa_clients: /secret/availability/zones/cf/uaa/client_secrets:firehose
 features:
   randomize_az_placement: "true"
 instance_groups:
 - azs:
-  - z1
-  - z2
+  - us-west-2a
+  - us-west-2b
+  - us-west-2c
   instances: 1
   jobs:
   - name: smoke_tests
@@ -306,8 +307,9 @@ instance_groups:
     serial: true
   vm_type: minimal
 - azs:
-  - z1
-  - z2
+  - us-west-2a
+  - us-west-2b
+  - us-west-2c
   instances: 2
   jobs:
   - name: nats
@@ -346,8 +348,9 @@ instance_groups:
   stemcell: default
   vm_type: minimal
 - azs:
-  - z1
-  - z2
+  - us-west-2a
+  - us-west-2b
+  - us-west-2c
   instances: 2
   jobs:
   - name: adapter
@@ -372,79 +375,9 @@ instance_groups:
   stemcell: default
   vm_type: minimal
 - azs:
-  - z1
-  instances: 1
-  jobs:
-  - name: postgres
-    properties:
-      databases:
-        databases:
-        - citext: true
-          name: cloud_controller
-          tag: cc
-        - citext: true
-          name: uaa
-          tag: uaa
-        - citext: true
-          name: diego
-          tag: diego
-        - citext: true
-          name: routing-api
-          tag: routing-api
-        - citext: false
-          name: network_policy
-          tag: networkpolicy
-        - citext: false
-          name: network_connectivity
-          tag: networkconnectivity
-        - citext: true
-          name: locket
-          tag: locket
-        - citext: true
-          name: credhub
-          tag: credhub
-        db_scheme: postgres
-        port: 5524
-        roles:
-        - name: cloud_controller
-          password: <!{credhub}:cc_database_password!>
-          tag: admin
-        - name: uaa
-          password: <!{credhub}:uaa_database_password!>
-          tag: admin
-        - name: diego
-          password: <!{credhub}:diego_database_password!>
-          tag: admin
-        - name: routing-api
-          password: <!{credhub}:routing_api_database_password!>
-          tag: admin
-        - name: network_policy
-          password: <!{credhub}:network_policy_database_password!>
-          tag: admin
-        - name: network_connectivity
-          password: <!{credhub}:network_connectivity_database_password!>
-          tag: admin
-        - name: locket
-          password: <!{credhub}:locket_database_password!>
-          tag: locket
-        - name: credhub
-          password: <!{credhub}:credhub_database_password!>
-          tag: admin
-    release: postgres
-  migrated_from:
-  - name: postgres
-  - name: singleton-database
-  name: database
-  networks:
-  - name: cf-core
-  persistent_disk_type: 10GB
-  stemcell: default
-  update:
-    serial: true
-  vm_type: small
-- azs:
-  - z1
-  - z2
+  - us-west-2a
+  - us-west-2b
+  - us-west-2c
   instances: 2
   jobs:
   - name: cfdot
@@ -480,11 +413,11 @@ instance_groups:
           skip_consul_lock: true
           sql:
             db_driver: postgres
-            db_host: sql-db.service.cf.internal
-            db_password: <!{credhub}:diego_database_password!>
-            db_port: 5524
+            db_host: test-external-postgres-db-host
+            db_password: test-db-password
+            db_port: test-port
             db_schema: diego
-            db_username: diego
+            db_username: test-db-username
       enable_consul_service_registration: false
       logging:
         format:
@@ -495,16 +428,18 @@ instance_groups:
         key: <!{credhub}:loggregator_tls_agent.private_key!>
         use_v2_api: true
     release: diego
-  - name: silk-controller
+  - consumes:
+      database: nil
+    name: silk-controller
     properties:
       ca_cert: <!{credhub}:silk_controller.ca!>
       database:
-        host: sql-db.service.cf.internal
+        host: test-external-postgres-db-host
         name: network_connectivity
-        password: <!{credhub}:network_connectivity_database_password!>
-        port: 5524
+        password: test-db-password
+        port: test-port
         type: postgres
-        username: network_connectivity
+        username: test-db-username
       server_cert: <!{credhub}:silk_controller.certificate!>
       server_key: <!{credhub}:silk_controller.private_key!>
       silk_daemon:
@@ -520,11 +455,11 @@ instance_groups:
         locket:
           sql:
             db_driver: postgres
-            db_host: sql-db.service.cf.internal
-            db_password: <!{credhub}:locket_database_password!>
-            db_port: 5524
+            db_host: test-external-postgres-db-host
+            db_password: test-db-password
+            db_port: test-port
             db_schema: locket
-            db_username: locket
+            db_username: test-db-username
       enable_consul_service_registration: false
       logging:
         format:
@@ -562,11 +497,14 @@ instance_groups:
     serial: true
   vm_type: small
 - azs:
-  - z1
-  - z2
+  - us-west-2a
+  - us-west-2b
+  - us-west-2c
   instances: 2
   jobs:
-  - name: uaa
+  - consumes:
+      database: nil
+    name: uaa
     properties:
       encryption:
         active_key_label: default_key
@@ -687,14 +625,15 @@ instance_groups:
             hostnames:
             - uaa.service.cf.internal
       uaadb:
+        address: test-external-postgres-db-host
         databases:
         - name: uaa
           tag: uaa
-        db_scheme: postgresql
-        port: 5524
+        db_scheme: postgres
+        port: test-port
         roles:
-        - name: uaa
-          password: <!{credhub}:uaa_database_password!>
+        - name: test-db-username
+          password: test-db-password
           tag: admin
         tls: disabled
     release: uaa
@@ -732,11 +671,57 @@ instance_groups:
   stemcell: default
   vm_type: minimal
 - azs:
-  - z1
-  - z2
+  - us-west-2a
+  instances: 1
+  jobs:
+  - name: blobstore
+    properties:
+      blobstore:
+        admin_users:
+        - password: <!{credhub}:blobstore_admin_users_password!>
+          username: blobstore-user
+        secure_link:
+          secret: <!{credhub}:blobstore_secure_link_secret!>
+        tls:
+          cert: <!{credhub}:blobstore_tls.certificate!>
+          private_key: <!{credhub}:blobstore_tls.private_key!>
+      select_directories_to_backup:
+      - buildpacks
+      - packages
+      - droplets
+      system_domain: system.cf.testing.examle
+    release: capi
+  - name: route_registrar
+    properties:
+      route_registrar:
+        routes:
+        - name: blobstore
+          port: 8080
+          registration_interval: 20s
+          tags:
+            component: blobstore
+          uris:
+          - blobstore.system.cf.testing.examle
+    release: routing
+  migrated_from:
+  - name: blobstore
+  name: singleton-blobstore
+  networks:
+  - name: cf-core
+  persistent_disk_type: 100GB
+  stemcell: default
+  update:
+    serial: true
+  vm_type: small
+- azs:
+  - us-west-2a
+  - us-west-2b
+  - us-west-2c
   instances: 2
   jobs:
-  - name: cloud_controller_ng
+  - consumes:
+      database: nil
+    name: cloud_controller_ng
     properties:
       app_domains:
       - run.cf.testing.examle
@@ -745,12 +730,14 @@ instance_groups:
       build: cf-genesis-kit v2.0.0
       cc:
         buildpacks:
-          buildpack_directory_key: blobstore-aws-cf-buildpacks-((cc_directory_key))
-          fog_connection:
-            aws_access_key_id: ((blobstore_access_key_id))
-            aws_secret_access_key: ((blobstore_secret_access_key))
-            provider: AWS
-            region: blobstore-s3-region
+          blobstore_type: webdav
+          webdav_config:
+            blobstore_timeout: 5
+            ca_cert: <!{credhub}:blobstore_tls.ca!>
+            password: <!{credhub}:blobstore_admin_users_password!>
+            private_endpoint: https://blobstore.service.cf.internal:4443
+            public_endpoint: https://blobstore.system.cf.testing.examle
+            username: blobstore-user
         bulk_api_password: <!{credhub}:cc_bulk_api_password!>
         database_encryption:
           current_key_label: encryption_key_0
@@ -766,12 +753,14 @@ instance_groups:
         diego:
           docker_staging_stack: cflinuxfs3
         droplets:
-          droplet_directory_key: blobstore-aws-cf-droplets-((cc_directory_key))
-          fog_connection:
-            aws_access_key_id: ((blobstore_access_key_id))
-            aws_secret_access_key: ((blobstore_secret_access_key))
-            provider: AWS
-            region: blobstore-s3-region
+          blobstore_type: webdav
+          webdav_config:
+            blobstore_timeout: 5
+            ca_cert: <!{credhub}:blobstore_tls.ca!>
+            password: <!{credhub}:blobstore_admin_users_password!>
+            private_endpoint: https://blobstore.service.cf.internal:4443
+            public_endpoint: https://blobstore.system.cf.testing.examle
+            username: blobstore-user
         install_buildpacks:
         - name: staticfile_buildpack
           package: staticfile-buildpack-cflinuxfs3
@@ -806,23 +795,27 @@ instance_groups:
           private_key: <!{credhub}:cc_tls.private_key!>
           public_cert: <!{credhub}:cc_tls.certificate!>
         packages:
-          app_package_directory_key: blobstore-aws-cf-app-packages-((cc_directory_key))
-          fog_connection:
-            aws_access_key_id: ((blobstore_access_key_id))
-            aws_secret_access_key: ((blobstore_secret_access_key))
-            provider: AWS
-            region: blobstore-s3-region
+          blobstore_type: webdav
+          webdav_config:
+            blobstore_timeout: 5
+            ca_cert: <!{credhub}:blobstore_tls.ca!>
+            password: <!{credhub}:blobstore_admin_users_password!>
+            private_endpoint: https://blobstore.service.cf.internal:4443
+            public_endpoint: https://blobstore.system.cf.testing.examle
+            username: blobstore-user
         public_tls:
           ca_cert: <!{credhub}:cc_public_tls.ca!>
           certificate: <!{credhub}:cc_public_tls.certificate!>
           private_key: <!{credhub}:cc_public_tls.private_key!>
         resource_pool:
-          fog_connection:
-            aws_access_key_id: ((blobstore_access_key_id))
-            aws_secret_access_key: ((blobstore_secret_access_key))
-            provider: AWS
-            region: blobstore-s3-region
-          resource_directory_key: blobstore-aws-cf-resources-((cc_directory_key))
+          blobstore_type: webdav
+          webdav_config:
+            blobstore_timeout: 5
+            ca_cert: <!{credhub}:blobstore_tls.ca!>
+            password: <!{credhub}:blobstore_admin_users_password!>
+            private_endpoint: https://blobstore.service.cf.internal:4443
+            public_endpoint: https://blobstore.system.cf.testing.examle
+            username: blobstore-user
         security_group_definitions:
         - name: public_networks
           rules:
@@ -851,19 +844,20 @@ instance_groups:
         staging_upload_user: staging_user
         temporary_use_logcache: true
       ccdb:
+        address: test-external-postgres-db-host
         databases:
         - name: cloud_controller
           tag: cc
         db_scheme: postgres
-        port: 5524
+        port: test-port
         roles:
-        - name: cloud_controller
-          password: <!{credhub}:cc_database_password!>
+        - name: test-db-username
+          password: test-db-password
           tag: admin
       credhub_api:
         ca_cert: <!{credhub}:credhub_tls.ca!>
       description: Use `genesis info` on environment file for more details
-      name: Cloud Foundry (blobstore-aws)
+      name: Cloud Foundry (availability-zones)
       router:
         route_services_secret: <!{credhub}:router_route_services_secret!>
       routing_api:
@@ -978,26 +972,28 @@ instance_groups:
           type: tcp
         skip_consul_lock: true
         sqldb:
-          host: sql-db.service.cf.internal
-          password: <!{credhub}:routing_api_database_password!>
-          port: 5524
+          host: test-external-postgres-db-host
+          password: test-db-password
+          port: test-port
           schema: routing-api
           type: postgres
-          username: routing-api
+          username: test-db-username
         system_domain: system.cf.testing.examle
       uaa:
         ca_cert: <!{credhub}:uaa_ssl.ca!>
         tls_port: 8443
     release: routing
-  - name: policy-server
+  - consumes:
+      database: nil
+    name: policy-server
     properties:
       database:
-        host: sql-db.service.cf.internal
+        host: test-external-postgres-db-host
         name: network_policy
-        password: <!{credhub}:network_policy_database_password!>
-        port: 5524
+        password: test-db-password
+        port: test-port
         type: postgres
-        username: network_policy
+        username: test-db-username
       enable_space_developer_self_service: true
       enable_tls: true
       server_cert: <!{credhub}:network_policy_server_external.certificate!>
@@ -1047,62 +1043,74 @@ instance_groups:
   - 50GB_ephemeral_disk
   vm_type: small
 - azs:
-  - z1
-  - z2
+  - us-west-2a
+  - us-west-2b
+  - us-west-2c
   instances: 2
   jobs:
-  - name: cloud_controller_worker
+  - consumes:
+      database: nil
+    name: cloud_controller_worker
     properties:
       cc:
         buildpacks:
-          buildpack_directory_key: blobstore-aws-cf-buildpacks-((cc_directory_key))
-          fog_connection:
-            aws_access_key_id: ((blobstore_access_key_id))
-            aws_secret_access_key: ((blobstore_secret_access_key))
-            provider: AWS
-            region: blobstore-s3-region
+          blobstore_type: webdav
+          webdav_config:
+            blobstore_timeout: 5
+            ca_cert: <!{credhub}:blobstore_tls.ca!>
+            password: <!{credhub}:blobstore_admin_users_password!>
+            private_endpoint: https://blobstore.service.cf.internal:4443
+            public_endpoint: https://blobstore.system.cf.testing.examle
+            username: blobstore-user
         database_encryption:
           current_key_label: encryption_key_0
           keys:
             encryption_key_0: <!{credhub}:cc_db_encryption_key!>
         db_encryption_key: <!{credhub}:cc_db_encryption_key!>
         droplets:
-          droplet_directory_key: blobstore-aws-cf-droplets-((cc_directory_key))
-          fog_connection:
-            aws_access_key_id: ((blobstore_access_key_id))
-            aws_secret_access_key: ((blobstore_secret_access_key))
-            provider: AWS
-            region: blobstore-s3-region
+          blobstore_type: webdav
+          webdav_config:
+            blobstore_timeout: 5
+            ca_cert: <!{credhub}:blobstore_tls.ca!>
+            password: <!{credhub}:blobstore_admin_users_password!>
+            private_endpoint: https://blobstore.service.cf.internal:4443
+            public_endpoint: https://blobstore.system.cf.testing.examle
+            username: blobstore-user
         internal_api_password: <!{credhub}:cc_internal_api_password!>
         mutual_tls:
           ca_cert: <!{credhub}:cc_tls.ca!>
           private_key: <!{credhub}:cc_tls.private_key!>
           public_cert: <!{credhub}:cc_tls.certificate!>
         packages:
-          app_package_directory_key: blobstore-aws-cf-app-packages-((cc_directory_key))
-          fog_connection:
-            aws_access_key_id: ((blobstore_access_key_id))
-            aws_secret_access_key: ((blobstore_secret_access_key))
-            provider: AWS
-            region: blobstore-s3-region
+          blobstore_type: webdav
+          webdav_config:
+            blobstore_timeout: 5
+            ca_cert: <!{credhub}:blobstore_tls.ca!>
+            password: <!{credhub}:blobstore_admin_users_password!>
+            private_endpoint: https://blobstore.service.cf.internal:4443
+            public_endpoint: https://blobstore.system.cf.testing.examle
+            username: blobstore-user
         resource_pool:
-          fog_connection:
-            aws_access_key_id: ((blobstore_access_key_id))
-            aws_secret_access_key: ((blobstore_secret_access_key))
-            provider: AWS
-            region: blobstore-s3-region
-          resource_directory_key: blobstore-aws-cf-resources-((cc_directory_key))
+          blobstore_type: webdav
+          webdav_config:
+            blobstore_timeout: 5
+            ca_cert: <!{credhub}:blobstore_tls.ca!>
+            password: <!{credhub}:blobstore_admin_users_password!>
+            private_endpoint: https://blobstore.service.cf.internal:4443
+            public_endpoint: https://blobstore.system.cf.testing.examle
+            username: blobstore-user
         staging_upload_password: <!{credhub}:cc_staging_upload_password!>
         staging_upload_user: staging_user
       ccdb:
+        address: test-external-postgres-db-host
         databases:
         - name: cloud_controller
           tag: cc
         db_scheme: postgres
-        port: 5524
+        port: test-port
         roles:
-        - name: cloud_controller
-          password: <!{credhub}:cc_database_password!>
+        - name: test-db-username
+          password: test-db-password
           tag: admin
       routing_api:
         enabled: true
@@ -1123,8 +1131,9 @@ instance_groups:
   stemcell: default
   vm_type: minimal
 - azs:
-  - z1
-  - z2
+  - us-west-2a
+  - us-west-2b
+  - us-west-2c
   instances: 2
   jobs:
   - name: cfdot
@@ -1163,58 +1172,69 @@ instance_groups:
         key: <!{credhub}:loggregator_tls_agent.private_key!>
         use_v2_api: true
     release: diego
-  - name: cloud_controller_clock
+  - consumes:
+      database: nil
+    name: cloud_controller_clock
     properties:
       cc:
         buildpacks:
-          buildpack_directory_key: blobstore-aws-cf-buildpacks-((cc_directory_key))
-          fog_connection:
-            aws_access_key_id: ((blobstore_access_key_id))
-            aws_secret_access_key: ((blobstore_secret_access_key))
-            provider: AWS
-            region: blobstore-s3-region
+          blobstore_type: webdav
+          webdav_config:
+            blobstore_timeout: 5
+            ca_cert: <!{credhub}:blobstore_tls.ca!>
+            password: <!{credhub}:blobstore_admin_users_password!>
+            private_endpoint: https://blobstore.service.cf.internal:4443
+            public_endpoint: https://blobstore.system.cf.testing.examle
+            username: blobstore-user
         database_encryption:
           current_key_label: encryption_key_0
           keys:
             encryption_key_0: <!{credhub}:cc_db_encryption_key!>
         db_encryption_key: <!{credhub}:cc_db_encryption_key!>
         droplets:
-          droplet_directory_key: blobstore-aws-cf-droplets-((cc_directory_key))
-          fog_connection:
-            aws_access_key_id: ((blobstore_access_key_id))
-            aws_secret_access_key: ((blobstore_secret_access_key))
-            provider: AWS
-            region: blobstore-s3-region
+          blobstore_type: webdav
+          webdav_config:
+            blobstore_timeout: 5
+            ca_cert: <!{credhub}:blobstore_tls.ca!>
+            password: <!{credhub}:blobstore_admin_users_password!>
+            private_endpoint: https://blobstore.service.cf.internal:4443
+            public_endpoint: https://blobstore.system.cf.testing.examle
+            username: blobstore-user
         internal_api_password: <!{credhub}:cc_internal_api_password!>
         mutual_tls:
           ca_cert: <!{credhub}:cc_tls.ca!>
           private_key: <!{credhub}:cc_tls.private_key!>
           public_cert: <!{credhub}:cc_tls.certificate!>
         packages:
-          app_package_directory_key: blobstore-aws-cf-app-packages-((cc_directory_key))
-          fog_connection:
-            aws_access_key_id: ((blobstore_access_key_id))
-            aws_secret_access_key: ((blobstore_secret_access_key))
-            provider: AWS
-            region: blobstore-s3-region
+          blobstore_type: webdav
+          webdav_config:
+            blobstore_timeout: 5
+            ca_cert: <!{credhub}:blobstore_tls.ca!>
+            password: <!{credhub}:blobstore_admin_users_password!>
+            private_endpoint: https://blobstore.service.cf.internal:4443
+            public_endpoint: https://blobstore.system.cf.testing.examle
+            username: blobstore-user
         resource_pool:
-          fog_connection:
-            aws_access_key_id: ((blobstore_access_key_id))
-            aws_secret_access_key: ((blobstore_secret_access_key))
-            provider: AWS
-            region: blobstore-s3-region
-          resource_directory_key: blobstore-aws-cf-resources-((cc_directory_key))
+          blobstore_type: webdav
+          webdav_config:
+            blobstore_timeout: 5
+            ca_cert: <!{credhub}:blobstore_tls.ca!>
+            password: <!{credhub}:blobstore_admin_users_password!>
+            private_endpoint: https://blobstore.service.cf.internal:4443
+            public_endpoint: https://blobstore.system.cf.testing.examle
+            username: blobstore-user
         staging_upload_password: <!{credhub}:cc_staging_upload_password!>
         staging_upload_user: staging_user
       ccdb:
+        address: test-external-postgres-db-host
         databases:
         - name: cloud_controller
           tag: cc
         db_scheme: postgres
-        port: 5524
+        port: test-port
         roles:
-        - name: cloud_controller
-          password: <!{credhub}:cc_database_password!>
+        - name: test-db-username
+          password: test-db-password
           tag: admin
       routing_api:
         enabled: true
@@ -1240,14 +1260,15 @@ instance_groups:
           private_key: <!{credhub}:cc_tls.private_key!>
           public_cert: <!{credhub}:cc_tls.certificate!>
       ccdb:
+        address: test-external-postgres-db-host
         databases:
         - name: cloud_controller
           tag: cc
         db_scheme: postgres
-        port: 5524
+        port: test-port
         roles:
-        - name: cloud_controller
-          password: <!{credhub}:cc_database_password!>
+        - name: test-db-username
+          password: test-db-password
           tag: admin
     release: capi
   - name: statsd_injector
@@ -1350,12 +1371,12 @@ instance_groups:
   stemcell: default
   update:
     serial: true
-  vm_extensions:
-  - diego-ssh-proxy-network-properties
+  vm_extensions: []
   vm_type: minimal
 - azs:
-  - z1
-  - z2
+  - us-west-2a
+  - us-west-2b
+  - us-west-2c
   instances: 2
   jobs:
   - name: gorouter
@@ -1402,6 +1423,39 @@ instance_groups:
         key: <!{credhub}:loggr_udp_forwarder_tls.private_key!>
         server_name: loggr_udp_forwarder_metrics
     release: loggregator-agent
+  - name: ssh_proxy
+    properties:
+      backends:
+        tls:
+          ca_certificates:
+          - <!{credhub}:diego_instance_identity_ca.ca!>
+          client_certificate: <!{credhub}:ssh_proxy_backends_tls.certificate!>
+          client_private_key: <!{credhub}:ssh_proxy_backends_tls.private_key!>
+          enabled: true
+      bpm:
+        enabled: true
+      diego:
+        ssh_proxy:
+          bbs:
+            ca_cert: <!{credhub}:diego_bbs_client.ca!>
+            client_cert: <!{credhub}:diego_bbs_client.certificate!>
+            client_key: <!{credhub}:diego_bbs_client.private_key!>
+          disable_healthcheck_server: true
+          enable_cf_auth: true
+          host_key: <!{credhub}:diego_ssh_proxy_host_key.private_key!>
+          uaa:
+            ca_cert: <!{credhub}:uaa_ssl.ca!>
+          uaa_secret: <!{credhub}:uaa_clients_ssh-proxy_secret!>
+      enable_consul_service_registration: false
+      logging:
+        format:
+          timestamp: rfc3339
+      loggregator:
+        ca_cert: <!{credhub}:loggregator_tls_agent.ca!>
+        cert: <!{credhub}:loggregator_tls_agent.certificate!>
+        key: <!{credhub}:loggregator_tls_agent.private_key!>
+        use_v2_api: true
+    release: diego
   name: router
   networks:
   - name: cf-edge
@@ -1409,11 +1463,12 @@ instance_groups:
   update:
     serial: true
   vm_extensions:
-  - cf-router-network-properties
+  - diego-ssh-proxy-network-properties
   vm_type: minimal
 - azs:
-  - z1
-  - z2
+  - us-west-2a
+  - us-west-2b
+  - us-west-2c
   instances: 2
   jobs:
   - name: tcp_router
@@ -1446,8 +1501,9 @@ instance_groups:
   - cf-tcp-router-network-properties
   vm_type: minimal
 - azs:
-  - z1
-  - z2
+  - us-west-2a
+  - us-west-2b
+  - us-west-2c
   instances: 4
   jobs:
   - name: doppler
@@ -1540,8 +1596,9 @@ instance_groups:
   stemcell: default
   vm_type: minimal
 - azs:
-  - z1
-  - z2
+  - us-west-2a
+  - us-west-2b
+  - us-west-2c
   instances: 3
   jobs:
   - name: cflinuxfs3-rootfs-setup
@@ -1686,8 +1743,9 @@ instance_groups:
   - 100GB_ephemeral_disk
   vm_type: small-highmem
 - azs:
-  - z1
-  - z2
+  - us-west-2a
+  - us-west-2b
+  - us-west-2c
   instances: 2
   jobs:
   - consumes:
@@ -1787,8 +1845,9 @@ instance_groups:
     serial: true
   vm_type: minimal
 - azs:
-  - z1
-  - z2
+  - us-west-2a
+  - us-west-2b
+  - us-west-2c
   instances: 2
   jobs:
   - name: credhub
@@ -1824,12 +1883,12 @@ instance_groups:
           <!{credhub}:credhub_tls.ca!>
         data_storage:
           database: credhub
-          host: sql-db.service.cf.internal
-          password: <!{credhub}:credhub_database_password!>
-          port: 5524
+          host: test-external-postgres-db-host
+          password: test-db-password
+          port: test-port
           require_tls: false
           type: postgres
-          username: credhub
+          username: test-db-username
         encryption:
           keys:
           - active: true
@@ -1851,8 +1910,9 @@ instance_groups:
   stemcell: default
   vm_type: minimal
 - azs:
-  - z1
-  - z2
+  - us-west-2a
+  - us-west-2b
+  - us-west-2c
   instances: 1
   jobs:
   - name: rotate_cc_database_key
@@ -1865,7 +1925,7 @@ instance_groups:
   stemcell: default
   vm_type: minimal
 manifest_version: v12.45.0
-name: blobstore-aws-cf
+name: availability-zones-cf
 releases:
 - name: binary-buildpack
   sha1: 0269a613be68f988682bbf56504b78477965b1c4
@@ -1943,10 +2003,6 @@ releases:
   sha1: 99603f57c729de560c22aa7b62760f4f8c1c2d6c
   url: https://bosh.io/d/github.com/cloudfoundry/php-buildpack-release?v=4.4.12
   version: 4.4.12
-- name: pxc
-  sha1: f2a479ab18e7327d67705bb54111b9a0f8ffcba3
-  url: https://bosh.io/d/github.com/cloudfoundry-incubator/pxc-release?v=0.24.0
-  version: 0.24.0
 - name: python-buildpack
   sha1: 8096f129612e8f2c2acf1906faa512cb24e9c850
   url: https://bosh.io/d/github.com/cloudfoundry/python-buildpack-release?v=1.7.12
@@ -1991,10 +2047,6 @@ releases:
   sha1: ed3aef6b2b25cb7cec1b0eaff3b7c736374a2f47
   url: https://bosh.io/d/github.com/bosh-packages/cf-cli-release?v=1.26.0
   version: 1.26.0
-- name: postgres
-  sha1: 4488d08ff54117a9d904f6e2f27c82c1cf4c910e
-  url: https://bosh.io/d/github.com/cloudfoundry/postgres-release?v=41
-  version: "41"
 stemcells:
 - alias: default
   os: ubuntu-xenial

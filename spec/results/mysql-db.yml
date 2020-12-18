@@ -261,9 +261,11 @@ exodus:
   apps_domain: run.cf.testing.examle
   base_domain: cf.testing.examle
   cf-deployment-date: 2020-Oct-08 14:08:11 UTC
-  cf-deployment-version: 12.45.0 (+hot-fix)
-  cf_deployment_version: v12.45.0
+  cf-deployment-hotfixes: true
+  cf-deployment-url: https://github.com/cloudfoundry/cf-deployment/releases/tag/v12.45.0
+  cf-deployment-version: v12.45.0
   core_network: cf-core
+  db_network: cf-core
   edge_network: cf-edge
   features: mysql-db
   runtime_network: cf-runtime
@@ -271,9 +273,12 @@ exodus:
   system_org: system
   system_space: system
   vaulted_uaa_clients: /secret/mysql/db/cf/uaa/client_secrets:firehose
+features:
+  randomize_az_placement: "true"
 instance_groups:
 - azs:
   - z1
+  - z2
   instances: 1
   jobs:
   - name: smoke_tests
@@ -314,6 +319,25 @@ instance_groups:
     provides:
       nats:
         as: nats
+        shared: true
+    release: nats
+  - custom_provider_definitions:
+    - name: nats-tls-address
+      type: address
+    name: nats-tls
+    properties:
+      nats:
+        external:
+          tls:
+            ca: <!{credhub}:nats_client_cert.ca!>
+            certificate: <!{credhub}:nats_server_cert.certificate!>
+            private_key: <!{credhub}:nats_server_cert.private_key!>
+        hostname: nats.service.cf.internal
+        password: <!{credhub}:nats_password!>
+        user: nats
+    provides:
+      nats-tls:
+        as: nats-tls
         shared: true
     release: nats
   name: nats
@@ -1841,6 +1865,7 @@ instance_groups:
   vm_type: minimal
 - azs:
   - z1
+  - z2
   instances: 1
   jobs:
   - name: rotate_cc_database_key
