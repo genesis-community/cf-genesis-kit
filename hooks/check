@@ -67,7 +67,7 @@ for param in api_domain default_app_memory default_app_disk_in_mb \
   fi
 done
 if [[ ${#retired_params[@]} -gt 0 ]] ; then
-  display >&2 \
+  describe >&2 \
     "Using the following retired parameters -- see #g{genesis man $GENESIS_ENVIRONMENT} to resolve:" \
     ${retired_params[@]+"${retired_params[@]}"}
 fi

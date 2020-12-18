@@ -24,7 +24,7 @@ manifest="$(bosh int "$GENESIS_MANIFEST_FILE" -l "$GENESIS_BOSHVARS_FILE" | spru
 cc_ok=yes
 missing="$(jq -r '.instance_groups | map({"\(.name)": ((["azs","instances","jobs","name","networks","stemcell","vm_type"]) -  (.|keys))}) | .[] | to_entries[] | select(.value | length > 0) | "    - #m{\(.key)}: #R{\(.value| join(", "))}"' <(echo "$manifest"))"
 if [[ -n "$missing" ]] ; then
-  display \
+  describe \
     "  Invalid Instance Groups (missing one or more required fields):" \
     "$missing" \
     "" \

@@ -422,6 +422,7 @@ if ! want_feature "bare" ; then
 
   want_feature "no-nats-tls" || manifest+=( "overlay/nats-tls.yml" )
 
+  # Handle ssl validation
   skip_ssl_validation="$(jq -r '.skip_ssl_validation' <(echo "$params"))"
   if [[ "$skip_ssl_validation" == 'false' ]] ; then
     if ! want_feature "cf-deployment/operations/stop-skipping-tls-validation"; then
@@ -430,7 +431,7 @@ if ! want_feature "bare" ; then
   fi
 
   if [[ "${#databases}" == 0 ]]; then
-  manifest+=( "cf-deployment/operations/use-postgres.yml" )
+    manifest+=( "cf-deployment/operations/use-postgres.yml" )
   fi
 
   ###-----------------------------------------------------------------------------
