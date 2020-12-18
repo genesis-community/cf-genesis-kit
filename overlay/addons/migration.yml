@@ -2,6 +2,7 @@ exodus:
   migrated_v1_env: 1
 
 meta:
+  default_azs: [ z1, z2, z3 ]
   blobstore_bucket_type: (( grab params.blobstore_bucket_type || "cc" ))
   identifier: (( concat genesis.env "-cc" ))
   blogstore_bucket_path:

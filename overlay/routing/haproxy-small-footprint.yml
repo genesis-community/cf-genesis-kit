@@ -1,7 +1,2 @@
 params:
   haproxy_instances: 1
-
-instance_groups:
-- name: haproxy
-  azs:
-  - (( grap params.availability_zones[0] || meta.default_azs[0] ))

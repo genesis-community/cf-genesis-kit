@@ -48,13 +48,14 @@ switch_cf_version() {
 
 declare -a manifest
 
-### Base configuration
+### Base configuration with minimal injections required for Genesis compliance
 manifest=( \
-  cf-deployment/cf-deployment.yml \
+  "cf-deployment/cf-deployment.yml" \
+  "overlay/base.yml" \
+  "overlay/upstream_version.yml" \
 )
 
-### Minimal injections required for Genesis compliance
-manifest+=( overlay/base.yml overlay/upstream_version.yml )
+cpi="$(bosh_cpi)" || true
 
 ### Minimal injections required for Genesis compliance
 if ! want_feature "bare" || want_feature "partitioned-network" ; then
@@ -71,6 +72,18 @@ if ! want_feature "bare" ; then
     "overlay/ten-year-ca-expiry.yml" \
     "overlay/uaa-branding.yml" \
   )
+
+  # Deal with availability zones - has to be done to core instance groups
+  # before they potentially get removed by further features
+  if [[ $cpi == 'azure' ]] || want_feature "small-footprint" || \
+     want_feature "cf-deployment/operations/scale-to-one-az"; then
+    manifest+=( \
+      "cf-deployment/operations/scale-to-one-az.yml" \
+      "operations/scale-to-one-az.yml" \
+    )
+  fi
+  manifest+=( "operations/custom-azs.yml" )
+
 
   # Temporary override of specific releases - FIXME when upstream catches up
   manifest+=(  "overlay/override-releases.yml" )
@@ -195,8 +208,9 @@ for want in $GENESIS_REQUESTED_FEATURES; do
     compiled-releases)
       want_feature "cf-deployment/operations/use-compiled-releases" || features+=( "compiled-releases" )
       ;;
-    small-footprint)
-      want_feature "cf-deployment/operations/scale-to-one-az" || features+=( "small-footprint" )
+    small-footprint|cf-deployment/operations/scale-to-one-az)
+      # dealt with above, but kept for interoperability checks with other features
+      features+=( "small-footprint" );
       ;;
     local-postgres-db|local-mysql-db|mysql-db|postgres-db) db_specified=1; features+=( "$want" ) ;;
     bare|partitioned-network|haproxy|tls|no-nats-tls|self-signed) features+=( "$want" ) ;;
@@ -354,7 +368,7 @@ for want in $GENESIS_REQUESTED_FEATURES; do
     compiled-releases)
       manifest+=( "cf-deployment/operations/use-compiled-releases.yml" ) ;;
     small-footprint)
-      manifest+=( "cf-deployment/operations/scale-to-one-az.yml" ) ;;
+      : ;; # already dealt with
     nfs-volume-services)
       manifest+=( "cf-deployment/operations/enable-nfs-volume-service.yml" );;
     enable-service-discovery)
@@ -383,8 +397,7 @@ for want in $GENESIS_REQUESTED_FEATURES; do
           manifest+=( "overlay/routing/haproxy-provided-cert.yml" )
         fi
       fi
-      want_feature "small-footprint" || want_feature "cf/operations/scale-to-one-az" \
-        && manifest+=( "overlay/routing/haproxy-small-footprint.yml" )
+      want_feature "small-footprint" && manifest+=( "overlay/routing/haproxy-small-footprint.yml" )
     fi
 
   fi
@@ -398,10 +411,6 @@ if [[ "${#databases[@]}" -gt 1 ]] ; then
 fi
 
 if [[ "$has_availability_zones" == 'true' || "$randomize_az_placement" == 'true' ]] ; then
-  manifest+=( "operations/custom-azs.yml" )
-  if want_feature "small-footprint" || want_feature "cf/operations/scale-to-one-az"; then
-    manifest+=( "operations/scale-to-one-az.yml" )
-  fi
   if want_feature "bare"; then
     bail "#R{[ERROR]} #M{params.availibility_zones} and #M{params.randomize_az_placement} are not compatible" \
          "        with features #C{bare}."
@@ -427,7 +436,6 @@ if ! want_feature "bare" ; then
   #
 
   # Deal with IaaS peculiarities
-  cpi="$(bosh_cpi)" || true
   case "$cpi" in
   azure)
     # TODO: if this turns out needed, we may re-introduce `azure` feature to include it when bare is specified
@@ -437,7 +445,6 @@ if ! want_feature "bare" ; then
     fi
     manifest+=( \
       "cf-deployment/operations/azure.yml"
-      "operations/scale-to-one-az.yml" \
       "operations/azure-availability_sets.yml" \
     )
     ;;

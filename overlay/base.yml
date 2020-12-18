@@ -29,7 +29,8 @@ meta:
     - ((system_domain))
   default_apps_domains: (( grab params.apps_domains || meta.app_domains ))
   internal_app_domains: []
-  default_azs: [z1, z2, z3]
+  default_azs: [z1, z2]
+  azs: (( grab params.availability_zones || meta.default_azs ))
 
   database_defaults:
     cloud_controller:     {name: cloud_controller,     user: cloud_controller}
