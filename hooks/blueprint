@@ -398,15 +398,14 @@ if [[ "${#databases[@]}" -gt 1 ]] ; then
 fi
 
 if [[ "$has_availability_zones" == 'true' || "$randomize_az_placement" == 'true' ]] ; then
+  manifest+=( "operations/custom-azs.yml" )
   if want_feature "small-footprint" || want_feature "cf/operations/scale-to-one-az"; then
-    bail "#R{[ERROR]} #M{params.availibility_zones} and #M{params.randomize_az_placement} are not compatible" \
-         "        with features #C{small-footprint} or #C{cf/operations/scale-to-one-az}."
+    manifest+=( "operations/scale-to-one-az.yml" )
   fi
   if want_feature "bare"; then
     bail "#R{[ERROR]} #M{params.availibility_zones} and #M{params.randomize_az_placement} are not compatible" \
          "        with features #C{bare}."
   fi
-  manifest+=( "operations/custom-azs.yml" )
 fi
 if ! want_feature "bare" ; then
 
@@ -428,7 +427,7 @@ if ! want_feature "bare" ; then
   #
 
   # Deal with IaaS peculiarities
-  cpi="$(bosh_cpi)"
+  cpi="$(bosh_cpi)" || true
   case "$cpi" in
   azure)
     # TODO: if this turns out needed, we may re-introduce `azure` feature to include it when bare is specified

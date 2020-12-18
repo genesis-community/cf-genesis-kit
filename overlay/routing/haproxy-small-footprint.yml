@@ -4,4 +4,4 @@ params:
 instance_groups:
 - name: haproxy
   azs:
-  - (( grap params.availability_zones[0] || meta.default_azs[0]))
+  - (( grap params.availability_zones[0] || meta.default_azs[0] ))
