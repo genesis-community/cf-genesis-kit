@@ -12,9 +12,7 @@ set -e
 
 cc_ok=yes
 # Cloud Config checks
-if [[ -n "$GENESIS_CLOUD_CONFIG" ]] ; then
-  describe >&2 "  cloud config [#Y{PENDING}]"
-else
+if [[ -z "$GENESIS_CLOUD_CONFIG" ]] ; then
   describe >&2 "  cloud config [#R{MISSING}]"
   cc_ok=no
 fi

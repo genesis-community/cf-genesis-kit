@@ -53,8 +53,12 @@ for t in $disks ; do
   cloud_config_needs disk_type "$t"
 done
 
+if ! check_cloud_config ; then
+  cc_ok=no
+fi
+
 # Check if there were any errors reported from the above checks.
-if check_cloud_config && [[ $cc_ok == "yes" ]]; then
+if [[ $cc_ok == "yes" ]]; then
   describe >&2 "  cloud config [#G{OK}]"
 else
   describe >&2 "  cloud config [#R{FAILED}]"
