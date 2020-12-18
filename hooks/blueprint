@@ -247,6 +247,8 @@ if want_feature "+migrated-v1-env" || want_feature "azure-blobstore" || want_fea
 fi
 
 params="$(lookup "params" "{}")"
+has_availability_zones="$(jq -r '.|has("availability_zones")' <(echo "$params"))"
+randomize_az_placement="$(jq -r '.randomize_az_placement//false' <(echo "$params"))"
 
 for want in $GENESIS_REQUESTED_FEATURES; do
   if [[ $want =~ cf-deployment/.* ]] ; then
@@ -381,7 +383,8 @@ for want in $GENESIS_REQUESTED_FEATURES; do
           manifest+=( "overlay/routing/haproxy-provided-cert.yml" )
         fi
       fi
-      want_feature "small-footprint" && manifest+=( "overlay/routing/haproxy-small-footprint.yml" )
+      want_feature "small-footprint" || want_feature "cf/operations/scale-to-one-az" \
+        && manifest+=( "overlay/routing/haproxy-small-footprint.yml" )
     fi
 
   fi
@@ -394,6 +397,17 @@ if [[ "${#databases[@]}" -gt 1 ]] ; then
   bail "#R{[ERROR]} Too many databases selected; pick only one of: ${databases[*]}"
 fi
 
+if [[ "$has_availability_zones" == 'true' || "$randomize_az_placement" == 'true' ]] ; then
+  if want_feature "small-footprint" || want_feature "cf/operations/scale-to-one-az"; then
+    bail "#R{[ERROR]} #M{params.availibility_zones} and #M{params.randomize_az_placement} are not compatible" \
+         "        with features #C{small-footprint} or #C{cf/operations/scale-to-one-az}."
+  fi
+  if want_feature "bare"; then
+    bail "#R{[ERROR]} #M{params.availibility_zones} and #M{params.randomize_az_placement} are not compatible" \
+         "        with features #C{bare}."
+  fi
+  manifest+=( "operations/custom-azs.yml" )
+fi
 if ! want_feature "bare" ; then
 
   want_feature "no-nats-tls" || manifest+=( "overlay/nats-tls.yml" )
@@ -418,6 +432,10 @@ if ! want_feature "bare" ; then
   case "$cpi" in
   azure)
     # TODO: if this turns out needed, we may re-introduce `azure` feature to include it when bare is specified
+    if [[ "$has_availability_zones" == 'true' || "$randomize_az_placement" == 'true' ]] ; then
+      bail "#R{[ERROR]} #M{params.availibility_zones} and #M{params.randomize_az_placement} are not compatible" \
+           "        with deployments to Azure infrastructure."
+    fi
     manifest+=( \
       "cf-deployment/operations/azure.yml"
       "operations/scale-to-one-az.yml" \

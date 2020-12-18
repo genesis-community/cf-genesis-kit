@@ -60,7 +60,7 @@ fi
 declare -a retired_params
 retired_params=()
 for param in api_domain default_app_memory default_app_disk_in_mb \
-             default_stack availability_zones uaa_lockout_failure_count \
+             default_stack uaa_lockout_failure_count \
              uaa_lockout_window uaa_lockout_time uaa_refresh_token_validity \
              grootfs_reserved_space vm_strategy max_log_lines_per_second  ; do
   if [[ -n "$(lookup "params.$param" )" ]] ; then

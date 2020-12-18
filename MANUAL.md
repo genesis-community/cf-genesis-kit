@@ -302,9 +302,6 @@ Some of these features may return in latter v2.x releases, but for the v2.0.0 re
 
   - `default_stack` - `cflinuxfs3` is the only stack supported.
 
-  - `availability_zones` - These are now locked to whatever upstream
-    `cf-deployment` specifies.
-
   - `uaa_lockout_failure_count` - It was: *Number of failed UAA login attempts before lockout.*
 
   - `uaa_lockout_window` - It was: *How much time (in seconds) in which `uaa_lockout_failure_count` must occur in order for account to be locked. Defaults to `1200`.*
