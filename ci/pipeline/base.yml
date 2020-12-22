@@ -66,6 +66,24 @@ meta:
       pipeline: (( concat meta.url "/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME" ))
       build:    (( concat meta.shout.links.pipeline "/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME" ))
 
+  jobs:
+    cats:
+      params:
+        GENESIS_HONOR_ENV:    1
+        GIT_NAME:             (( grab meta.git.name ))
+        GIT_EMAIL:            (( grab meta.git.email ))
+        VAULT_URI:            (( grab meta.vault.url ))
+        VAULT_TOKEN:          (( grab meta.vault.token ))
+        KIT_SHORTNAME:        (( grab meta.kit ))
+        BOSH_ENVIRONMENT:     (( grab meta.bosh.uri ))
+        BOSH_CA_CERT:         (( grab meta.bosh.cacert ))
+        BOSH_CLIENT:          (( grab meta.bosh.username ))
+        BOSH_CLIENT_SECRET:   (( grab meta.bosh.password ))
+        SKIP_CATS:            false
+        FAILFAST:             true
+        VERBOSE:              false
+        CATS_NODES:           2
+
 groups:
   - name: (( grab meta.pipeline ))
     jobs:

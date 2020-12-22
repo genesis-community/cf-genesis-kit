@@ -4,18 +4,17 @@ platform: linux
 image_resource:
   type: docker-image
   source:
-    repository: starkandwayne/concourse
+    repository: starkandwayne/concourse-go
+    tag: '1.14'
 
 inputs:
 - name: git
   path: kit
 - name: git-ci
-
-outputs:
 - name: work
 
 run:
-  path: git-ci/ci/tasks/test-flight/task
+  path: git-ci/ci/tasks/cats/task
 
 params:
   GENESIS_HONOR_ENV:    1
@@ -28,3 +27,8 @@ params:
   BOSH_CA_CERT:         ((bosh.ca))
   BOSH_CLIENT:          ((bosh.username))
   BOSH_CLIENT_SECRET:   ((bosh.password))
+  SKIP_CATS:            false
+  FAILFAST:             true
+  VERBOSE:              false
+  CATS_NODES:           2
+  RUN_CATS:             nul

@@ -17,7 +17,7 @@ jobs:
         topic:   (( concat meta.shout.topic "-$BUILD_JOB_NAME" ))
         message: tests job '$BUILD_JOB_NAME' succeeded.
         ok:      yes
-        link:    (( grab meta.shout.links.build ))             
+        link:    (( grab meta.shout.links.build ))
     on_failure:
       put: notify
       params:
@@ -44,15 +44,15 @@ jobs:
         topic:   (( concat meta.shout.topic "-$BUILD_JOB_NAME" ))
         message: tests job '$BUILD_JOB_NAME' succeeded.
         ok:      yes
-        link:    (( grab meta.shout.links.build ))             
+        link:    (( grab meta.shout.links.build ))
     on_failure:
       put: notify
       params:
         topic:   (( concat meta.shout.topic "-$BUILD_JOB_NAME" ))
         message: tests job '$BUILD_JOB_NAME' failed.
         ok:      no
-        link:    (( grab meta.shout.links.build ))        
-        
+        link:    (( grab meta.shout.links.build ))
+
 - name: testflight
   public: true
   serial: true
@@ -65,7 +65,7 @@ jobs:
     - task: testflights
       file: git-ci/ci/tasks/test-flight/task.yml
       params:
-        GENESIS_HONOR_ENV:    1
+        GENESIS_HONOR_ENV: "1"
         GIT_NAME:             (( grab meta.git.name ))
         GIT_EMAIL:            (( grab meta.git.email ))
         VAULT_URI:            (( grab meta.vault.url ))
@@ -75,6 +75,9 @@ jobs:
         BOSH_CA_CERT:         (( grab meta.bosh.cacert ))
         BOSH_CLIENT:          (( grab meta.bosh.username ))
         BOSH_CLIENT_SECRET:   (( grab meta.bosh.password ))
+        SKIP_FRESH:           false
+        SKIP_CLEAN:           true
+        SKIP_SMOKE_TESTS:     false
     on_success:
       put: notify
       params:
@@ -89,6 +92,117 @@ jobs:
         message: tests job '$BUILD_JOB_NAME' failed.
         ok:      no
         link:    (( grab meta.shout.links.build ))
+
+- name: cats
+  plan:
+  - do:
+    - in_parallel:
+      - { get: git, trigger: true,  passed: [testflight] }
+      - { get: git-ci }
+      - { get: cats }
+      - { get: work }
+    - in_parallel:
+        fail_fast: true
+        limit: 1
+        steps:
+        - task: cats-apps
+          file: git-ci/ci/tasks/cats/task.yml
+          attempts: 5
+          params:
+            .: (( inject meta.jobs.cats.params ))
+            RUN_CATS: include_apps
+        - task: cats-detect
+          file: git-ci/ci/tasks/cats/task.yml
+          attempts: 5
+          params:
+            .: (( inject meta.jobs.cats.params ))
+            RUN_CATS: include_detect
+        # - task: cats-routing
+        #   file: git-ci/ci/tasks/cats/task.yml
+        #   attempts: 5
+        #   params:
+        #     .: (( inject meta.jobs.cats.params ))
+        #     RUN_CATS: include_routing
+        # - task: cats-backend-compability
+        #   file: git-ci/ci/tasks/cats/task.yml
+        #   attempts: 5
+        #   params:
+        #     .: (( inject meta.jobs.cats.params ))
+        #     RUN_CATS: include_backend_compatibility
+        # - task: cats-internet-dependent
+        #   file: git-ci/ci/tasks/cats/task.yml
+        #   attempts: 5
+        #   params:
+        #     .: (( inject meta.jobs.cats.params ))
+        #     RUN_CATS: include_internet_dependent
+        # - task: cats-route-services
+        #   file: git-ci/ci/tasks/cats/task.yml
+        #   attempts: 5
+        #   params:
+        #     .: (( inject meta.jobs.cats.params ))
+        #     RUN_CATS: include_route_services
+        # - task: cats-sec-grps
+        #   file: git-ci/ci/tasks/cats/task.yml
+        #   attempts: 5
+        #   params:
+        #     .: (( inject meta.jobs.cats.params ))
+        #     RUN_CATS: include_security_groups
+        # - task: cats-services
+        #   file: git-ci/ci/tasks/cats/task.yml
+        #   attempts: 5
+        #   params:
+        #     .: (( inject meta.jobs.cats.params ))
+        #     RUN_CATS: include_services
+        # - task: cats-ssh
+        #   file: git-ci/ci/tasks/cats/task.yml
+        #   attempts: 5
+        #   params:
+        #     .: (( inject meta.jobs.cats.params ))
+        #     RUN_CATS: include_ssh
+        # - task: cats-sso
+        #   file: git-ci/ci/tasks/cats/task.yml
+        #   attempts: 5
+        #   params:
+        #     .: (( inject meta.jobs.cats.params ))
+        #     RUN_CATS: include_sso
+        # - task: cats-tasks
+        #   file: git-ci/ci/tasks/cats/task.yml
+        #   attempts: 5
+        #   params:
+        #     .: (( inject meta.jobs.cats.params ))
+        #     RUN_CATS: include_tasks
+        # - task: cats-v3
+        #   file: git-ci/ci/tasks/cats/task.yml
+        #   attempts: 5
+        #   params:
+        #     .: (( inject meta.jobs.cats.params ))
+        #     RUN_CATS: include_v3
+        # - task: cats-deployments
+        #   file: git-ci/ci/tasks/cats/task.yml
+        #   attempts: 5
+        #   params:
+        #     .: (( inject meta.jobs.cats.params ))
+        #     RUN_CATS: include_deployments
+        # - task: cats-service_discovery
+        #   file: git-ci/ci/tasks/cats/task.yml
+        #   attempts: 5
+        #   params:
+        #     .: (( inject meta.jobs.cats.params ))
+        #     RUN_CATS: include_service_discovery
+        # - task: cats-capi_no_bridge
+        #   file: git-ci/ci/tasks/cats/task.yml
+        #   attempts: 5
+        #   params:
+        #     .: (( inject meta.jobs.cats.params ))
+        #     RUN_CATS: include_capi_no_bridge
+    - task: testflights
+      file: git-ci/ci/tasks/test-flight/task.yml
+      params:
+        SKIP_FRESH:           true
+        SKIP_DEPLOY:          true
+        SKIP_SMOKE_TESTS:     true
+
+
 
 - name: pre
   public: true
