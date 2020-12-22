@@ -274,7 +274,7 @@ exodus:
   system_space: system
   vaulted_uaa_clients: /secret/availability/zones/cf/uaa/client_secrets:firehose
 features:
-  randomize_az_placement: "true"
+  randomize_az_placement: true
 instance_groups:
 - azs:
   - us-west-2a

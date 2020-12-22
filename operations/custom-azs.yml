@@ -2,7 +2,7 @@
 # Use this override to use a customized set of availability zones.
 - type: replace
   path: /features?/randomize_az_placement?
-  value: (( grab params.randomize_az_placement || "true" ))
+  value: (( grab params.randomize_az_placement || true ))
 
 - type: replace
   path: /instance_groups/name=nats/azs
