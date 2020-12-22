@@ -64,6 +64,8 @@ jobs:
       - { get: git-ci }
     - task: testflights
       file: git-ci/ci/tasks/test-flight/task.yml
+      # output_mapping:
+      #   work: workspace
       params:
         GENESIS_HONOR_ENV: "1"
         GIT_NAME:             (( grab meta.git.name ))
@@ -100,7 +102,6 @@ jobs:
       - { get: git, trigger: true,  passed: [testflight] }
       - { get: git-ci }
       - { get: cats }
-      - { get: work }
     - in_parallel:
         fail_fast: true
         limit: 1
@@ -108,15 +109,17 @@ jobs:
         - task: cats-apps
           file: git-ci/ci/tasks/cats/task.yml
           attempts: 5
+          # input_mapping:
+          #   work: workspace
           params:
             .: (( inject meta.jobs.cats.params ))
             RUN_CATS: include_apps
-        - task: cats-detect
-          file: git-ci/ci/tasks/cats/task.yml
-          attempts: 5
-          params:
-            .: (( inject meta.jobs.cats.params ))
-            RUN_CATS: include_detect
+        # - task: cats-detect
+        #   file: git-ci/ci/tasks/cats/task.yml
+        #   attempts: 5
+        #   params:
+        #     .: (( inject meta.jobs.cats.params ))
+        #     RUN_CATS: include_detect
         # - task: cats-routing
         #   file: git-ci/ci/tasks/cats/task.yml
         #   attempts: 5
@@ -195,12 +198,12 @@ jobs:
         #   params:
         #     .: (( inject meta.jobs.cats.params ))
         #     RUN_CATS: include_capi_no_bridge
-    - task: testflights
-      file: git-ci/ci/tasks/test-flight/task.yml
-      params:
-        SKIP_FRESH:           true
-        SKIP_DEPLOY:          true
-        SKIP_SMOKE_TESTS:     true
+    # - task: testflights
+    #   file: git-ci/ci/tasks/test-flight/task.yml
+    #   params:
+    #     SKIP_FRESH:           true
+    #     SKIP_DEPLOY:          true
+    #     SKIP_SMOKE_TESTS:     true
 
 
 

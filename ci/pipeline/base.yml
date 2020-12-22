@@ -90,6 +90,7 @@ groups:
     - spec-tests
     - spec-check
     - testflight
+    - cats
     - pre
     - rc
     - shipit
