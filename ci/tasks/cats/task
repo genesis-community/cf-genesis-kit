@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source kit/ci/scripts/cats.sh
+source kit/ci/scripts/cats
 git config --global user.name  "$GIT_NAME"
 git config --global user.email "$GIT_EMAIL"
 

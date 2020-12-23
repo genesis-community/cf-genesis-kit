@@ -62,10 +62,9 @@ jobs:
     - in_parallel:
       - { get: git, trigger: true,  passed: [spec-tests] }
       - { get: git-ci }
+      - { get: cats }
     - task: testflights
       file: git-ci/ci/tasks/test-flight/task.yml
-      # output_mapping:
-      #   work: workspace
       params:
         GENESIS_HONOR_ENV: "1"
         GIT_NAME:             (( grab meta.git.name ))
@@ -94,14 +93,7 @@ jobs:
         message: tests job '$BUILD_JOB_NAME' failed.
         ok:      no
         link:    (( grab meta.shout.links.build ))
-
-- name: cats
-  plan:
   - do:
-    - in_parallel:
-      - { get: git, trigger: true,  passed: [testflight] }
-      - { get: git-ci }
-      - { get: cats }
     - in_parallel:
         fail_fast: true
         limit: 1
@@ -109,8 +101,6 @@ jobs:
         - task: cats-apps
           file: git-ci/ci/tasks/cats/task.yml
           attempts: 5
-          # input_mapping:
-          #   work: workspace
           params:
             .: (( inject meta.jobs.cats.params ))
             RUN_CATS: include_apps

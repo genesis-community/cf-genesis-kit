@@ -1,3 +1,5 @@
+#!/bin/bash
+
 function lookup(){
   genesis -C "$GENESIS_ROOT" lookup "$GENESIS_ENVIRONMENT" "$@"
 }
