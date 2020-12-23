@@ -45,6 +45,11 @@ meta:
     private_key:  (( param "Please generate an SSH Deployment Key for this repo and specify it here" ))
     access_token: (( param "Please generate a Personal Access Token to be used for creating github releases (do you have a ci-bot?)" ))
 
+  credhub:
+    url: (( param "Please provide a credhub url" ))
+    username: (( param "Please provide a Credhub username" ))
+    password: (( param "Please provide a Credhub password" ))
+
   bosh:
     uri:        (( param "Please specify the Genesis CI BOSH Director URI" ))
     cacert:     (( param "Please specify the Genesis CI BOSH Director Root CA cert" ))
@@ -83,6 +88,10 @@ meta:
         FAILFAST:             true
         VERBOSE:              false
         CATS_NODES:           2
+        CREDHUB_URL:         (( grab meta.credhub.url))
+        CREDHUB_USER:        (( grab meta.credhub.username))
+        CREDHUB_PASSWORD:    (( grab meta.credhub.password))
+
 
 groups:
   - name: (( grab meta.pipeline ))

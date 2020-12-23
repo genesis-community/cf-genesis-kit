@@ -33,3 +33,6 @@ params:
   VERBOSE:              false
   CATS_NODES:           2
   RUN_CATS:             nul
+  CREDHUB_URL:         ((bosh.credhub_url))
+  CREDHUB_USER:        ((bosh.credhub_username))
+  CREDHUB_PASSWORD:    ((bosh.credhub_password))

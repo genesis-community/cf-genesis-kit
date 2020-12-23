@@ -27,13 +27,16 @@ function run_cats(){
       export GENESIS_ROOT=$BUILD_ROOT/work/cf-deployments
       export GENESIS_ENVIRONMENT=ci-baseline
       export vault=/secret/ci/baseline/cf
+      export credhub=/snw-genesis-ci-bosh/ci-baseline-cf
+
+      credhub login --server $CREDHUB_URL --username $CREDHUB_USER --password $CREDHUB_PASSWORD --skip-tls-validation
     ;;
   esac
   echo "$GENESIS_ROOT"
   base=$(lookup params.base_domain)
   system_domain=$(lookup params.system_domain system.$base)
   export API_URL=api.$system_domain
-  export ADMIN_PASSWORD=$(safe read $vault/admin_user:password)
+  export ADMIN_PASSWORD=$(credhub get -q -n $credhub/cf_admin_password)
   export APP_DOMAINS_0=run.$base
   case $RUN_CATS in
     "include_container_networking")

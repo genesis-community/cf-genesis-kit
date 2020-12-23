@@ -12,6 +12,11 @@ meta:
     password: ((bosh.password))
     cacert:   ((bosh.ca))
 
+  credhub:
+    url:      ((bosh.credhub_url))
+    username: ((bosh.credhub_username))
+    password: ((bosh.credhub_password))
+
   vault:
     url:       ((vault.url))
     token:     ((vault.token))
