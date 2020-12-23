@@ -37,33 +37,33 @@ function run_cats(){
   export APP_DOMAINS_0=run.$base
   case $RUN_CATS in
     "include_container_networking")
-      sed -i "s#include_security_groups:.*#include_security_groups: true#g" manifests/cf/cats.yml
+      sed -i "s#include_security_groups:.*#include_security_groups: true#g" ci/scripts/cats.yml
     ;;
     "include_deployments")
-      sed -i "s#include_v3:.*#include_v3: true#g" manifests/cf/cats.yml
+      sed -i "s#include_v3:.*#include_v3: true#g" ci/scripts/cats.yml
     ;;
     "include_service_instance_sharing")
-      sed -i "s#include_services:.*#include_services: true#g" manifests/cf/cats.yml
+      sed -i "s#include_services:.*#include_services: true#g" ci/scripts/cats.yml
     ;;
     "include_sso")
-      sed -i "s#include_services:.*#include_services: true#g" manifests/cf/cats.yml
+      sed -i "s#include_services:.*#include_services: true#g" ci/scripts/cats.yml
     ;;
     "include_tasks")
-      sed -i "s#include_v3:.*#include_v3: true#g" manifests/cf/cats.yml
+      sed -i "s#include_v3:.*#include_v3: true#g" ci/scripts/cats.yml
     ;;
     "include_zipkin")
-      sed -i "s#include_routing:.*#include_routing: true#g" manifests/cf/cats.yml
+      sed -i "s#include_routing:.*#include_routing: true#g" ci/scripts/cats.yml
     ;;
   esac
   if [[ ${RUN_LOCAL} ]]; then
     echo "RUNNING LOCALLY"
     run_local
   else
-    sed -i "s#${RUN_CATS}:.*#${RUN_CATS}: true#g" manifests/cf/cats.yml
+    sed -i "s#${RUN_CATS}:.*#${RUN_CATS}: true#g" ci/scripts/cats.yml
     tmpdir="$BUILD_ROOT/cats"
   fi
   export CONFIG=${tmpdir}/config.json
-  spruce merge manifests/cf/cats.yml | spruce json | jq '.' > ${CONFIG}
+  spruce merge ci/scripts/cats.yml | spruce json | jq '.' > ${CONFIG}
   pushd ${tmpdir}
   FAILFAST_FLAG=""
   VERBOSE_FLAG=""
