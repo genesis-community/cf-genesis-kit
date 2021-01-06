@@ -76,6 +76,9 @@ jobs:
         BOSH_CA_CERT:         (( grab meta.bosh.cacert ))
         BOSH_CLIENT:          (( grab meta.bosh.username ))
         BOSH_CLIENT_SECRET:   (( grab meta.bosh.password ))
+        CREDHUB_URL:          (( grab meta.credhub.url))
+        CREDHUB_USER:         (( grab meta.credhub.username))
+        CREDHUB_PASSWORD:     (( grab meta.credhub.password))
         SKIP_FRESH:           false
         SKIP_CLEAN:           true
         SKIP_SMOKE_TESTS:     false
@@ -188,12 +191,26 @@ jobs:
         #   params:
         #     .: (( inject meta.jobs.cats.params ))
         #     RUN_CATS: include_capi_no_bridge
-    # - task: testflights
-    #   file: git-ci/ci/tasks/test-flight/task.yml
-    #   params:
-    #     SKIP_FRESH:           true
-    #     SKIP_DEPLOY:          true
-    #     SKIP_SMOKE_TESTS:     true
+    - task: cleanup-enviorment
+      file: git-ci/ci/tasks/test-flight/task.yml
+      params:
+        GENESIS_HONOR_ENV: "1"
+        GIT_NAME:             (( grab meta.git.name ))
+        GIT_EMAIL:            (( grab meta.git.email ))
+        VAULT_URI:            (( grab meta.vault.url ))
+        VAULT_TOKEN:          (( grab meta.vault.token ))
+        KIT_SHORTNAME:        (( grab meta.kit ))
+        BOSH_ENVIRONMENT:     (( grab meta.bosh.uri ))
+        BOSH_CA_CERT:         (( grab meta.bosh.cacert ))
+        BOSH_CLIENT:          (( grab meta.bosh.username ))
+        BOSH_CLIENT_SECRET:   (( grab meta.bosh.password ))
+        CREDHUB_URL:          (( grab meta.credhub.url))
+        CREDHUB_USER:         (( grab meta.credhub.username))
+        CREDHUB_PASSWORD:     (( grab meta.credhub.password))
+        SKIP_FRESH:           true
+        SKIP_DEPLOY:          true
+        SKIP_SMOKE_TESTS:     true
+        SKIP_CLEAN:           false
 
 
 

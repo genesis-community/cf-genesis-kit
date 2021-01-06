@@ -84,13 +84,14 @@ meta:
         BOSH_CA_CERT:         (( grab meta.bosh.cacert ))
         BOSH_CLIENT:          (( grab meta.bosh.username ))
         BOSH_CLIENT_SECRET:   (( grab meta.bosh.password ))
+        CREDHUB_URL:          (( grab meta.credhub.url))
+        CREDHUB_USER:         (( grab meta.credhub.username))
+        CREDHUB_PASSWORD:     (( grab meta.credhub.password))
         SKIP_CATS:            false
         FAILFAST:             true
         VERBOSE:              false
         CATS_NODES:           2
-        CREDHUB_URL:         (( grab meta.credhub.url))
-        CREDHUB_USER:        (( grab meta.credhub.username))
-        CREDHUB_PASSWORD:    (( grab meta.credhub.password))
+
 
 
 groups:
