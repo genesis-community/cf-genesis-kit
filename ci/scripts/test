@@ -33,6 +33,10 @@ header "Cleaning up from any previous deployments (if necessary)..."
 if [[ "$SKIP_FRESH" == "false" ]]; then
   cleanup ci-baseline-${KIT}
   safe rm -rf secret/ci/baseline/${KIT}
+
+  credhub login --server $CREDHUB_URL --username $CREDHUB_USER --password $CREDHUB_PASSWORD --skip-tls-validation
+  credhub delete -p /snw-genesis-ci-bosh/ci-baseline-cf/
+
   safe ssh secret/ci/baseline/${KIT}/test-user
 else
   echo "Skipping FRESH"
@@ -51,7 +55,7 @@ fi
 
 if [[ "$SKIP_SMOKE_TESTS" == "false" ]]; then
   header "Validating BASELINE environment..."
-  $BOSH -d ci-baseline-${KIT} run-errand smoke_tests --instance=uaa/first
+  $BOSH -d ci-baseline-${KIT} run-errand smoke_tests
 else
     echo "Skipping smoke_tests"
 fi
