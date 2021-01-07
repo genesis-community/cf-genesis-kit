@@ -1,0 +1,20 @@
+---
+kit:
+  features:
+    - haproxy
+    - tls
+    - self-signed
+    - small-footprint
+    - cf-deployment/operations/enable-service-discovery
+
+genesis:
+  env:   ci-baseline-cats
+  bosh_env:  snw-genesis-ci
+
+params:
+  disk_type: default
+  base_domain:  10.128.9.12.netip.cc
+  postgres_vip: 10.128.9.11
+
+  haproxy_ips:
+    - 10.128.9.12

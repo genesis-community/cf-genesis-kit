@@ -87,10 +87,11 @@ meta:
         CREDHUB_URL:          (( grab meta.credhub.url))
         CREDHUB_USER:         (( grab meta.credhub.username))
         CREDHUB_PASSWORD:     (( grab meta.credhub.password))
+        DEPLOYMENT_NAME:      ci-baseline-cats
         SKIP_CATS:            false
         FAILFAST:             true
         VERBOSE:              false
-        CATS_NODES:           2
+        CATS_NODES:           1
 
 
 
@@ -100,6 +101,7 @@ groups:
     - spec-tests
     - spec-check
     - testflight
+    - cats-tests
     - pre
     - rc
     - shipit
