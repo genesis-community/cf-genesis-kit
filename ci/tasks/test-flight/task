@@ -43,7 +43,7 @@ header "Copying test environment YAMLs from \$kit/ci/envs..."
 cp -av git-ci/ci/envs/*.yml work/${KIT_SHORTNAME}-deployments/
 export PATH=$PATH:$PWD/git-ci/ci/scripts
 
-header "Handing off to \$kit/ci/test..."
+header "Handing off to \$kit/ci/scripts/test..."
 cd work/${KIT_SHORTNAME}-deployments
 export GENESIS_BOSH_ENVIRONMENT=$BOSH_ENVIRONMENT
 KIT=${KIT_SHORTNAME} BOSH=bosh ../../git-ci/ci/scripts/test

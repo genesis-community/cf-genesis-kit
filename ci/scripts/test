@@ -5,6 +5,7 @@ SKIP_FRESH=${SKIP_FRESH:-"false"}
 SKIP_DEPLOY=${SKIP_DEPLOY:-"false"}
 SKIP_SMOKE_TESTS=${SKIP_SMOKE_TESTS:-"false"}
 SKIP_CLEAN=${SKIP_CLEAN:-"false"}
+DEPLOYMENT_NAME=${DEPLOYMENT_NAME-"ci-baseline"}
 
 header() {
 	echo
@@ -31,13 +32,17 @@ $BOSH deployments
 
 header "Cleaning up from any previous deployments (if necessary)..."
 if [[ "$SKIP_FRESH" == "false" ]]; then
-  cleanup ci-baseline-${KIT}
-  safe rm -rf secret/ci/baseline/${KIT}
+  cleanup ${DEPLOYMENT_NAME}-${KIT}
+
+  # replace - with / for safe commands
+  depname=${DEPLOYMENT_NAME//-//}
+  safe rm -rf secret/${depname}/${KIT}
+  safe ssh secret/${depname}/${KIT}/test-user
 
   credhub login --server $CREDHUB_URL --username $CREDHUB_USER --password $CREDHUB_PASSWORD --skip-tls-validation
-  credhub delete -p /snw-genesis-ci-bosh/ci-baseline-cf/
+  credhub delete -p /snw-genesis-ci-bosh/${DEPLOYMENT_NAME}-${KIT}/
 
-  safe ssh secret/ci/baseline/${KIT}/test-user
+
 else
   echo "Skipping FRESH"
 fi
@@ -48,20 +53,20 @@ if [[ "$SKIP_DEPLOY" == "false" ]]; then
   # make sure hooks are executable before screaming at shipit for failing.
   genesis compile-kit --name $KIT -v 9.9.9 --force
   cd ..
-  genesis add-secrets ci-baseline
-  genesis deploy -y ci-baseline
-  $BOSH -d ci-baseline-${KIT} instances --ps
+  genesis add-secrets ${DEPLOYMENT_NAME}
+  genesis deploy -y ${DEPLOYMENT_NAME}
+  $BOSH -d ${DEPLOYMENT_NAME}-${KIT} instances --ps
 fi
 
 if [[ "$SKIP_SMOKE_TESTS" == "false" ]]; then
   header "Validating BASELINE environment..."
-  $BOSH -d ci-baseline-${KIT} run-errand smoke_tests
+  $BOSH -d ${DEPLOYMENT_NAME}-${KIT} run-errand smoke_tests
 else
     echo "Skipping smoke_tests"
 fi
 
 if [[ "$SKIP_CLEAN" == "false" ]]; then
-  cleanup ci-baseline-${KIT}
+  cleanup ${DEPLOYMENT_NAME}-${KIT}
 else
   echo "Skipping CLEANUP"
 fi
