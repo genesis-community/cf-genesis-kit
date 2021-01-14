@@ -62,6 +62,7 @@ General:
   - `bare` - Deploy _only_ the cf-deployment files without genesis packaged best-practices applied.
   - `migrated-v1-env` - Fix the database names after having migrated from v1 kit.
   - `no-nats-tls` - Nats over TLS was not part of cf-deployment v12.45, but has been turned on by default unless using bare mode.  Set this feature to disable it.
+  - `ssh-proxy-on-routers` - moves the ssh-proxy from scheduler instance group to the router instance group, placing it on the edge network, and enabling scaling via scaling the routers.
 
 Database related - choose one:
   - `postgres-db` - Use an external postgres instance to host persistent data.
@@ -322,7 +323,14 @@ Some of these features may return in latter v2.x releases, but for the v2.0.0 re
 
   - `system_domain` - The system domain.  Defaults to `system.` plus the base domain.
 
-  - `apps_domains` - A list of global application domains.  Defaults to a list of one domain, `run.` plus the base domain.  Note: if using `bare` feature, this will default to the system domain
+  - `apps_domains` - A list of global application domains.  Defaults to a list of one domain, `run.` plus the base domain.  Note: if using `bare` feature, this will default to the system domain.  The first listed domain will be used for smoke tests, and anything else that just uses a single domain.
+
+  - `availability_zones` - Specify the desired availability zones, as a list.  If using `small-footprint` feature, only the first AZ will be used.  By default, AZs used will be [z1,z2], unless upgraded from the v1.x series, in which case, [z1,z2,z3] will be used.  Cannot be specified when deploying to Azure.
+
+  - `randomize_az_placement` - Unless set to false, any instances that are remaining after evenly distributing them across the available availability zones for a given instance group, will be randomly assigned instead of sequentially assigned.  This prevents overutilizing the first listed AZs.
+
+  - `skip_ssl_validation` - In v1.x kits, this defaulted to false, but as v2.0 is based on cf-deployment, it keeps to cf-deployments concept of defaulting to true.  If explicitly set to false, it enables the cf-deployment/operations/stop-skipping-tls-validation ops file.
+
 
 ## Branding
 
