@@ -493,6 +493,17 @@ several /24 "networks").
 Note: if using the `bare` feature, you will have a flat network model as
 defined in upstream `cf-deployments`, defaulting to the name `default`
 
+### Loadbalancer
+
+In v1.7.2+, there was the single `cf-load-balanced` VM extension for external
+load balancing.  In v2.x, this has been replaced with the following
+
+     - cf-router-network-properties
+     - cf-tcp-router-network-properties
+     - diego-ssh-proxy-network-properties
+
+Please be sure to update your cloud config accordingly.
+
 ## Choosing a Blobstore
 
 Cloud Foundry uses an object storage system, or _blobstore_ to

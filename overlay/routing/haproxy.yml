@@ -15,6 +15,10 @@ params:
 instance_groups:
   - name: router
     vm_extensions: (( empty array ))
+  - name: tcp-router
+    vm_extensions: (( empty array ))
+  - name: scheduler
+    vm_extensions: (( empty array ))
 
   - (( insert before "router" ))
   - name: haproxy
