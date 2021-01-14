@@ -9,6 +9,10 @@ code:    https://github.com/genesis-community/cf-genesis-kit
 
 genesis_version_min: 2.7.21
 
+required_configs:
+  cloud:   [check, manifest, deploy, pre-deploy]
+  runtime: [check, deploy, pre-deploy]
+
 description: |
   This kit will deploy OSS Cloud Foundry to BOSH. It contains
   subkits to help identify where your databases and blobstore are,
