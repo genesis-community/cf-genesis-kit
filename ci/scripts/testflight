@@ -26,6 +26,8 @@ header() {
 	echo
 }
 
+header "Using $(genesis -v)"
+
 header "Setting up git..."
 git config --global user.name  "$GIT_NAME"
 git config --global user.email "$GIT_EMAIL"
