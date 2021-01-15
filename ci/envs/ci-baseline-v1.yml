@@ -16,7 +16,7 @@ params:
   cf_public_ips:
   - { "destination": "10.128.9.10", "protocol": "all" }
 
-  env:   ci-baseline
+  env:   ci-baseline-v1
   bosh:  snw-genesis-ci
 
   availability_zones: [z1]

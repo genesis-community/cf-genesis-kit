@@ -30,9 +30,6 @@ meta:
   image:
     name: starkandwayne/genesis
     tag: latest
-  cats-image:
-    name: starkandwayne/concourse-go
-    tag: latest
 
   aws:
     bucket:      genesis-pipeline
@@ -53,15 +50,12 @@ meta:
     cacert:     (( param "Please specify the Genesis CI BOSH Director Root CA cert" ))
     username:   admin
     password:   (( param "Please specify the Genesis CI BOSH Director admin password" ))
-  cats:
-    tag:         (( param "Please specify the CATS REPO Version TAG "))
-    git_ssh_url: (( param "Please specify the CATS REPO SSH URL "))
+
   shout:
     topic:    (( concat meta.name "-pipeline" ))
     url:      (( param "Please specify the Shout! endpoint" ))
     username: (( param "Please specify the Shout! operations username" ))
     password: (( param "Please specify the Shout! operations password" ))
-
 
     metadata:
       build-team-name:     $BUILD_TEAM_NAME
@@ -71,95 +65,6 @@ meta:
     links:
       pipeline: (( concat meta.url "/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME" ))
       build:    (( concat meta.shout.links.pipeline "/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME" ))
-  jobs:
-    cats:
-      attempts: 5
-      config:
-        platform: linux
-        image_resource:
-          type: docker-image
-          source:
-            repository: (( grab meta.cats-image.name ))
-            tag:        (( grab meta.cats-image.tag ))
-        inputs:
-          - { name: git, path: kit }
-          - { name: cats-git, path: cats }
-          - { name: work }
-        run:
-          path: bash
-          args:
-          - -ce
-          - |
-            #!/bin/bash
-            source kit/ci/scripts/cats.sh
-            git config --global user.name  "$GIT_NAME"
-            git config --global user.email "$GIT_EMAIL"
-
-            ln -sf $(pwd)/kit/ $(pwd)/work/cf-deployments/dev
-
-            safe target da-vault "$VAULT_URI" -k
-            echo "$VAULT_TOKEN" | safe auth token
-            safe read secret/handshake
-            pushd kit
-              run_cats --deployment-dir $(pwd)/../
-            popd
-
-        params:
-          GENESIS_HONOR_ENV:    1
-          GIT_NAME:             (( grab meta.git.name ))
-          GIT_EMAIL:            (( grab meta.git.email ))
-          VAULT_URI:            (( grab meta.vault.url ))
-          VAULT_TOKEN:          (( grab meta.vault.token ))
-          KIT_SHORTNAME:        (( grab meta.kit ))
-          BOSH_ENVIRONMENT:     (( grab meta.bosh.uri ))
-          BOSH_CA_CERT:         (( grab meta.bosh.cacert ))
-          BOSH_CLIENT:          (( grab meta.bosh.username ))
-          BOSH_CLIENT_SECRET:   (( grab meta.bosh.password ))
-          SKIP_CATS:            false
-          FAILFAST:             true
-          VERBOSE:              false
-          CATS_NODES:           2
-          RUN_CATS:             null
-    testflight:
-      name: testflight
-      task: testflight
-      config:
-        platform: linux
-        image_resource:
-          type: docker-image
-          source:
-            repository: (( grab meta.image.name ))
-            tag:        (( grab meta.image.tag ))
-        inputs:
-          - { name: git, path: kit }
-        outputs:
-          - { name: work }
-        run:
-          path: ./kit/ci/scripts/testflight
-          args: []
-        params:
-          GENESIS_HONOR_ENV:    1
-          GIT_NAME:             (( grab meta.git.name ))
-          GIT_EMAIL:            (( grab meta.git.email ))
-          VAULT_URI:            (( grab meta.vault.url ))
-          VAULT_TOKEN:          (( grab meta.vault.token ))
-          KIT_SHORTNAME:        (( grab meta.kit ))
-          BOSH_ENVIRONMENT:     (( grab meta.bosh.uri ))
-          BOSH_CA_CERT:         (( grab meta.bosh.cacert ))
-          BOSH_CLIENT:          (( grab meta.bosh.username ))
-          BOSH_CLIENT_SECRET:   (( grab meta.bosh.password ))
-
-    testflight-config:
-      params:
-        SKIP_FRESH:           false
-        SKIP_CLEAN:           true
-        SKIP_SMOKE_TESTS:     true
-    cleanup-config:
-       params:
-         SKIP_FRESH:           true
-         SKIP_CLEAN:           true
-         SKIP_SMOKE_TESTS:     true
-
 
 groups:
   - name: (( grab meta.pipeline ))
@@ -168,16 +73,51 @@ groups:
       - pre
       - rc
       - shipit
+  - name: versioning
+    jobs:
       - major
       - minor
+      - patch
 
 jobs:
   - name: testflight
     public: true
     serial: true
     serial_groups: [genesis-ci]
+
     plan:
-    - name: main
+    - do:
+      - get: git
+        trigger: true
+      - task: testflight
+        config:
+          platform: linux
+          image_resource:
+            type: docker-image
+            source:
+              repository: (( grab meta.image.name ))
+              tag:        (( grab meta.image.tag ))
+          inputs:
+            - { name: git, path: kit }
+          outputs:
+            - { name: work }
+          run:
+            path: ./kit/ci/scripts/testflight
+            args: []
+          params:
+            GENESIS_HONOR_ENV:    1
+            GIT_NAME:             (( grab meta.git.name ))
+            GIT_EMAIL:            (( grab meta.git.email ))
+            VAULT_URI:            (( grab meta.vault.url ))
+            VAULT_TOKEN:          (( grab meta.vault.token ))
+            KIT_SHORTNAME:        (( grab meta.kit ))
+            BOSH_ENVIRONMENT:     (( grab meta.bosh.uri ))
+            BOSH_CA_CERT:         (( grab meta.bosh.cacert ))
+            BOSH_CLIENT:          (( grab meta.bosh.username ))
+            BOSH_CLIENT_SECRET:   (( grab meta.bosh.password ))
+            SKIP_FRESH:           false
+            SKIP_CLEAN:           false
+            SKIP_SMOKE_TESTS:     true
       on_success:
         put: notify
         params:
@@ -192,101 +132,7 @@ jobs:
           message: tests job '$BUILD_JOB_NAME' failed.
           ok:      no
           link:    (( grab meta.shout.links.build ))
-      do:
-      - name: get
-        in_parallel:
-          steps:
-            - { get: git, trigger: true }
-            - { get: cats-git, params: { submodule_recursive: true } }
-      - .: (( inject meta.jobs.testflight ))
-        task: deploy
-        config:
-          .: (( inject meta.jobs.testflight-config ))
-
-    - name: cats
-      in_parallel:
-        fail_fast: true
-        limit: 1
-        steps:
-          - .: (( inject meta.jobs.cats ))
-            task: cats-apps
-            config:
-              params:
-                RUN_CATS: include_apps
-          - .: (( inject meta.jobs.cats ))
-            task: cats-detect
-            config:
-              params:
-                RUN_CATS: include_detect
-          - .: (( inject meta.jobs.cats ))
-            task: cats-routing
-            config:
-              params:
-                RUN_CATS: include_routing
-          - .: (( inject meta.jobs.cats ))
-            task: cats-backend-compability
-            config:
-              params:
-                RUN_CATS: include_backend_compatibility
-          - .: (( inject meta.jobs.cats ))
-            task: cats-internet-dependent
-            config:
-              params:
-                RUN_CATS: include_internet_dependent
-          - .: (( inject meta.jobs.cats ))
-            task: cats-route-services
-            config:
-              params:
-                RUN_CATS: include_route_services
-          - .: (( inject meta.jobs.cats ))
-            task: cats-sec-grps
-            config:
-              params:
-                RUN_CATS: include_security_groups
-          - .: (( inject meta.jobs.cats ))
-            task: cats-services
-            config:
-              params:
-                RUN_CATS: include_services
-          - .: (( inject meta.jobs.cats ))
-            task: cats-ssh
-            config:
-              params:
-                RUN_CATS: include_ssh
-          - .: (( inject meta.jobs.cats ))
-            task: cats-sso
-            config:
-              params:
-                RUN_CATS: include_sso
-          - .: (( inject meta.jobs.cats ))
-            task: cats-tasks
-            config:
-              params:
-                RUN_CATS: include_tasks
-          - .: (( inject meta.jobs.cats ))
-            task: cats-v3
-            config:
-              params:
-                RUN_CATS: include_v3
-          - .: (( inject meta.jobs.cats ))
-            task: cats-deployments
-            config:
-              params:
-                RUN_CATS: include_deployments
-          - .: (( inject meta.jobs.cats ))
-            task: cats-service_discovery
-            config:
-              params:
-                RUN_CATS: include_service_discovery
-          - .: (( inject meta.jobs.cats ))
-            task: cats-capi_no_bridge
-            config:
-              params:
-                RUN_CATS: include_capi_no_bridge
-    - .: (( inject meta.jobs.testflight ))
-      task: clean
-      config:
-        .: (( inject meta.jobs.cleanup-config ))
+     
   - name: pre
     public: true
     serial: true
@@ -366,6 +212,27 @@ jobs:
           ok:      no
           link:    (( grab meta.shout.links.build ))
 
+  - name: patch
+    public: true
+    plan:
+    - do:
+      - { get: version, trigger: false, params: {bump: patch} }
+      - { put: version,                 params: {file: version/number} }
+      on_success:
+        put: notify
+        params:
+          topic:   (( concat meta.shout.topic "-$BUILD_JOB_NAME" ))
+          message: patch version bump job 'patch' succeeded.
+          ok:      yes
+          link:    (( grab meta.shout.links.build ))
+      on_failure:
+        put: notify
+        params:
+          topic:   (( concat meta.shout.topic "-$BUILD_JOB_NAME" ))
+          message: patch version bump job 'patch' failed (which is unusual).
+          ok:      no
+          link:    (( grab meta.shout.links.build ))
+
   - name: minor
     public: true
     plan:
@@ -413,13 +280,11 @@ jobs:
     serial: true
     plan:
     - do:
-      - name: inputs
-        in_parallel:
+      - in_parallel:
           steps:
             - { get: version, resource: version, passed: [rc], params: {bump: final} }
             - { get: git,     passed: [rc] }
-      - name: release
-        task: release
+      - task: release
         config:
           platform: linux
           image_resource:
@@ -449,24 +314,20 @@ jobs:
             GIT_NAME:      (( grab meta.git.name ))
             KIT_SHORTNAME: (( grab meta.kit ))
 
-      - name: upload-git
-        put: git
+      - put: git
         params:
           rebase: true
           repository: pushme/git
-      - name: github-release
-        put: github
+      - put: github
         params:
           name:   gh/name
           tag:    gh/tag
           body:   gh/notes.md
           globs: [gh/artifacts/*]
-      - name: version-bump
-        put: version
+      - put: version
         params:
           bump: patch
-      - name: notify
-        in_parallel:
+      - in_parallel:
           steps:
             - put: notify
               params:
@@ -502,23 +363,16 @@ resources:
       branch:      (( grab meta.github.branch ))
       private_key: (( grab meta.github.private_key ))
 
-  - name: cats-git
-    type: git
-    source:
-      uri:         (( grab meta.cats.git_ssh_url ))
-      branch:      (( grab meta.cats.tag ))
-
-
   - name: version
     type: semver
     source :
       driver:            s3
       bucket:            (( grab meta.aws.bucket ))
       region_name:       (( grab meta.aws.region_name ))
-      key:               (( concat meta.name "/version" ))
+      key:               (( concat meta.name "/version-v1" ))
       access_key_id:     (( grab meta.aws.access_key ))
       secret_access_key: (( grab meta.aws.secret_key ))
-      initial_version:   (( grab meta.initial_version || "0.0.1" ))
+      initial_version:   (( grab meta.initial_version || "1.10.4" ))
 
   - name: notify
     type: shout-notification
