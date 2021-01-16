@@ -28,11 +28,12 @@ params:
   postgres_vip: 10.128.8.62
   skip_ssl_validation: true
 
-  cf_core_network: cf-core-v1
-  cf_runtime_network: cf-runtime-v1
-  cf_edge_network: cf-edge-v1
-  cf-db_network: cf-db-v1
-  autoscaler_network: cf-core-v1
+  cf_core_network:     cf-core-v1
+  cf_runtime_network:  cf-runtime-v1
+  cf_edge_network:     cf-edge-v1
+  cf_db_network:       cf-db-v1
+  cf_internal_network: cf-core-v1
+  autoscaler_network:  cf-core-v1
 
   haproxy_instances: 1
   haproxy_ips:
