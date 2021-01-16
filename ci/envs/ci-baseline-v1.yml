@@ -12,25 +12,31 @@ kit:
     - routing-api
     - autoscaler
 
-params:
-  cf_public_ips:
-  - { "destination": "10.128.9.10", "protocol": "all" }
-
+genesis:
   env:   ci-baseline-v1
   bosh:  snw-genesis-ci
+
+params:
+  cf_public_ips:
+  - { "destination": "10.128.8.63", "protocol": "all" }
+
 
   availability_zones: [z1]
 
   disk_type: default
-  base_domain:  10.128.9.10.netip.cc
-  postgres_vip: 10.128.9.9
+  base_domain:  10.128.8.63.netip.cc
+  postgres_vip: 10.128.8.62
   skip_ssl_validation: true
 
-  autoscaler_network: cf-core
+  cf_core_network: cf-core-v1
+  cf_runtime_network: cf-runtime-v1
+  cf_edge_network: cf-edge-v1
+  cf-db_network: cf-db-v1
+  autoscaler_network: cf-core-v1
 
   haproxy_instances: 1
   haproxy_ips:
-  - 10.128.9.10
+  - 10.128.8.63
 
 #   autoscaler_network: default
 #   cf_db_network: default
