@@ -2,9 +2,10 @@
 meta:
   cell:
     trusted_cas:
-      - (( grab meta.certs.diego_instance_identity_ca.ca_cert ))
+      # Dedupped from meta.certs.* because of spruce bug
+      - (( vault meta.vault "/diego_instance_identity/certs/ca:certificate" ))
       # - ((credhub_tls.ca)) #FIXME - will be added once credhub is added
-      - (( grab meta.certs.uaa.ca.cert ))
+      - (( vault meta.vault "/uaa/certs/ca:certificate" ))
 
 params:
   trusted_cas: []
