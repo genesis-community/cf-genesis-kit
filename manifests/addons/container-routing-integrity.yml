@@ -1,11 +1,18 @@
 ---
+params:
+  # The following must be in params because it must occur alphabetically after
+  # meta so that the resolver has happened before it gets pulled in.  This is a
+  # work around for a spruce bug.
+  __workaround__:
+    combined_trusted_cas: (( grab meta.cell.trusted_cas params.trusted_cas ))
+
 instance_groups:
   - name: cell
     jobs:
       - name: rep
         properties:
           containers:
-            trusted_ca_certificates: (( grab meta.cell.trusted_cas params.trusted_cas )) # yes, grab concatenates lists
+            trusted_ca_certificates: (( grab params.__workaround__.combined_trusted_cas ))
             proxy:
               enabled: true
               require_and_verify_client_certificates: true
