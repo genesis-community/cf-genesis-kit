@@ -95,6 +95,9 @@ warn=
 db_specified=
 declare -a features; features=()
 
+opsdir="ops"
+[[ -n "${PREVIOUS_ENV:-}" ]] && opsdir=".genesis/cached/${PREVIOUS_ENV}/$opsdir"
+
 for want in $GENESIS_REQUESTED_FEATURES; do
   if [[ "$want" =~ ^cf-deployment-version- ]] ; then
     # Check if explicit verison of cf-deployment is requested
@@ -228,12 +231,13 @@ for want in $GENESIS_REQUESTED_FEATURES; do
       fi
       ;;
     *)
-      if [[ -f "$GENESIS_ROOT/ops/$want.yml" ]] ; then
+      if [[ -f "$GENESIS_ROOT/${opsdir}/$want.yml" || -f "$GENESIS_ROOT/ops/$want.yml" ]] ; then
         features+=( "$want" )
       else
         abort=1
         describe >&2 \
-          "#R{[ERROR]} The #c{$want} feature is invalid. See the manual for list of valid features."
+          "#R{[ERROR]} The #c{$want} feature is not supported. See the manual for list" \
+          "        of valid features."
       fi
       ;;
     esac
@@ -246,7 +250,6 @@ done
 [[ -n $version ]] && switch_cf_version "$version"
 [[ -z "$db_specified" ]] && ! want_feature 'bare' && features+=( "local-postgres-db" )
 
-# Check for ops features
 if [[ "${#features[@]}" -gt 0 ]] ; then
   GENESIS_REQUESTED_FEATURES="${features[*]}"
 else
@@ -271,6 +274,8 @@ for want in $GENESIS_REQUESTED_FEATURES; do
     else
       bail "#R[ERROR]} Kit $GENESIS_KIT_NAME/$GENESIS_KIT_VERSION does not support the $want feature" ""
     fi
+  elif [[ -f "$GENESIS_ROOT/${opsdir}/$want.yml" ]] ; then
+    manifest+=( "$GENESIS_ROOT/${opsdir}/$want.yml" )
   elif [[ -f "$GENESIS_ROOT/ops/$want.yml" ]] ; then
     manifest+=( "$GENESIS_ROOT/ops/$want.yml" )
   else
