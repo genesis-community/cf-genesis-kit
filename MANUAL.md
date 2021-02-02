@@ -119,7 +119,7 @@ The following params are always included:
 | `base_domain` | What is the base domain for this Cloud Foundry? | |
 | `system_domain` | What is the system domain for this Cloud Foundry? | `system.<base_domain>` |
 | `apps_domain` | What is the apps domain for this Cloud Foundy? | `run.<system-domain>` |
-| `identity_support_address` | Identity support address | `"https://github.com/genesis-community/cf-genesis-kit"` | 
+| `identity_support_address` | Identity support address | `"https://github.com/genesis-community/cf-genesis-kit"` |
 | `identity_description` | Identity description | `"Use 'genesis info' on environment file for more details"` |
 
 These params need to be set when activating features:
@@ -127,27 +127,29 @@ These params need to be set when activating features:
     | param | description | default |
     | --- | --- | --- |
     | `blobstore_s3_region` | The s3 region of the blobstore | |
-    | `blobstore_bucket_prefix` | Prefix for the path where blobs are stored in the bucket | `"$GENESIS_ENVIRONMENT-$GENESIS_TYPE"`
+    | `blobstore_bucket_prefix` | Prefix for the path where blobs are stored in the bucket | `"$GENESIS_ENVIRONMENT-$GENESIS_TYPE"` |
     | `blobstore_bucket_suffix` | Suffix for the path where blobs are stored in the bucket | `"((cc_director_key))"` |
     | `blobstore_app_packages_directory` | Directory for the app packages | `blobstore_bucket_prefix` + `"-app-packages-"` + `blobstore_bucket_suffix` |
     | `blobstore_buildpacks_directory` | Directory for the app packages | `blobstore_bucket_prefix` + `"-buildpacks-"` + `blobstore_bucket_suffix` |
     | `blobstore_droplets_directory` | Directory for the app packages | `blobstore_bucket_prefix` + `"-droplets-"` + `blobstore_bucket_suffix` |
     | `blobstore_resources_directory` | Directory for the app packages | `blobstore_bucket_prefix` + `"-resources-"` + `blobstore_bucket_suffix` |
+
   - **minio-blobstore**:
     | param | description | default |
     | --- | --- | --- |
     | `blobstore_minio_endpoint` | The URL (including protocol and option port) of the Minio endpoint of the blobstore | |
-    | `blobstore_bucket_prefix` | Prefix for the path where blobs are stored in the bucket | `"$GENESIS_ENVIRONMENT-$GENESIS_TYPE"`
+    | `blobstore_bucket_prefix` | Prefix for the path where blobs are stored in the bucket | `"$GENESIS_ENVIRONMENT-$GENESIS_TYPE"` |
     | `blobstore_bucket_suffix` | Suffix for the path where blobs are stored in the bucket | `"((cc_director_key))"` |
     | `blobstore_app_packages_directory` | Directory for the app packages | `blobstore_bucket_prefix` + `"-app-packages-"` + `blobstore_bucket_suffix` |
     | `blobstore_buildpacks_directory` | Directory for the app packages | `blobstore_bucket_prefix` + `"-buildpacks-"` + `blobstore_bucket_suffix` |
     | `blobstore_droplets_directory` | Directory for the app packages | `blobstore_bucket_prefix` + `"-droplets-"` + `blobstore_bucket_suffix` |
     | `blobstore_resources_directory` | Directory for the app packages | `blobstore_bucket_prefix` + `"-resources-"` + `blobstore_bucket_suffix` |
+
   - **azure-blobstore**:
     | param | description | default |
     | --- | --- | --- |
     | `azure_environment` | What is environment where this blobstore exists? | `AzureCloud` |
-    | `blobstore_bucket_prefix` | Prefix for the path where blobs are stored in the bucket | `"$GENESIS_ENVIRONMENT-$GENESIS_TYPE"`
+    | `blobstore_bucket_prefix` | Prefix for the path where blobs are stored in the bucket | `"$GENESIS_ENVIRONMENT-$GENESIS_TYPE"` |
     | `blobstore_bucket_suffix` | Suffix for the path where blobs are stored in the bucket | `"((cc_director_key))"` |
     | `blobstore_app_packages_directory` | Directory for the app packages | `blobstore_bucket_prefix` + `"-app-packages-"` + `blobstore_bucket_suffix` |
     | `blobstore_buildpacks_directory` | Directory for the app packages | `blobstore_bucket_prefix` + `"-buildpacks-"` + `blobstore_bucket_suffix` |
@@ -204,6 +206,7 @@ These params need to be set when activating features:
     | `credhubdb_port` | The port of the external Credhub database | `external_db_port` |
     | `credhubdb_user` | The Credhub database used | `credhubadmin` |
     | `credhubdb_password` | The Credhub database password | `external_db_password` |
+
   - **external-postgres**:
     | param | description | default |
     | --- | --- | --- |
@@ -249,6 +252,7 @@ These params need to be set when activating features:
     | `credhubdb_port` | The port of the external Credhub database | `external_db_port` |
     | `credhubdb_user` | The Credhub database used | `credhubadmin` |
     | `credhubdb_password` | The Credhub database password | `external_db_password` |
+
   - **haproxy**:
     | param | description | default |
     | --- | --- | --- |
@@ -264,11 +268,13 @@ These params need to be set when activating features:
     | param | description | default |
     | --- | --- | --- |
     | `haproxy_instances` | How many haproxy instances? | 1 |
+
   - **haproxy** + **tls**:
     | param | description | default |
     | --- | --- | --- |
     | `disable_tls_10` | Disable tls 10? | `true` |
     | `disable_tls_11` | Disable tls 11? | `true` |
+
   - **override-db-names**:
     | param | description | default |
     | --- | --- | --- |
@@ -350,7 +356,7 @@ Some of these features may return in latter v2.x releases, but for the v2.0.0 re
   - `stemcell_version`
 
 ## VM Scaling Parameters
-  
+
   Defaults are as per `cf-deployment`
 
   - `adapter_instances` - How many scalable syslog VMs to deploy.
