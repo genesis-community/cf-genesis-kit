@@ -1453,7 +1453,7 @@ instance_groups:
     release: loggregator-agent
   name: tcp-router
   networks:
-  - name: cf-core
+  - name: cf-edge
   stemcell: default
   vm_extensions:
   - cf-tcp-router-network-properties

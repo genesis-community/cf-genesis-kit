@@ -96,7 +96,7 @@
 
 - type: replace
   path: /instance_groups/name=tcp-router/networks/name=default/name
-  value: ((cf_core_network))
+  value: ((cf_edge_network))
 
 - type: replace
   path: /instance_groups/name=credhub/networks/name=default/name
