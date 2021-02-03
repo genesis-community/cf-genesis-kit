@@ -15,6 +15,6 @@ params:
   disk_type: default
   base_domain:  10.128.9.10.netip.cc
   postgres_vip: 10.128.9.9
-
+  availability_zones: [z1]
   haproxy_ips:
     - 10.128.9.10
