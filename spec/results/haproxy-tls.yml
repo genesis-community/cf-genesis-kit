@@ -1418,8 +1418,7 @@ instance_groups:
   stemcell: default
   update:
     serial: true
-  vm_extensions:
-  - diego-ssh-proxy-network-properties
+  vm_extensions: []
   vm_type: minimal
 - azs:
   - z1
@@ -1537,8 +1536,7 @@ instance_groups:
   networks:
   - name: cf-core
   stemcell: default
-  vm_extensions:
-  - cf-tcp-router-network-properties
+  vm_extensions: []
   vm_type: minimal
 - azs:
   - z1
