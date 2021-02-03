@@ -13,8 +13,13 @@ genesis:
 
 params:
   disk_type: default
-  base_domain:  10.128.9.12.netip.cc
-  postgres_vip: 10.128.9.11
+  base_domain:  10.128.8.192.netip.cc
+  postgres_vip: 10.128.8.193
 
   haproxy_ips:
-    - 10.128.9.12
+    - 10.128.8.192
+
+  cf_core_network: default
+  cf_edge_network: default
+  cf_runtime_network: default
+  cf_db_network: default
