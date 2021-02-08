@@ -25,9 +25,6 @@
   path: /instance_groups/name=cc-worker/instances/vm_extensions?/-
   value: cc_worker_as
 - type: replace
-  path: /instance_groups/name=adapter/instances/vm_extensions?/-
-  value: adapter_as
-- type: replace
   path: /instance_groups/name=doppler/instances/vm_extensions?/-
   value: doppler_as
 - type: replace

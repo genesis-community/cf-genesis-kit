@@ -51,10 +51,6 @@
   value: ((cf_core_network))
 
 - type: replace
-  path: /instance_groups/name=adapter/networks/name=default/name
-  value: ((cf_core_network))
-
-- type: replace
   path: /instance_groups/name=database/networks/name=default/name
   value: ((cf_db_network))
 

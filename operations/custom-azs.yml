@@ -29,9 +29,6 @@
   path: /instance_groups/name=cc-worker/azs
   value: (( grab meta.azs ))
 - type: replace
-  path: /instance_groups/name=adapter/azs
-  value: (( grab meta.azs ))
-- type: replace
   path: /instance_groups/name=doppler/azs
   value: (( grab meta.azs ))
 - type: replace
