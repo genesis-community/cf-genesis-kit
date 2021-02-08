@@ -32,7 +32,7 @@ header "Checking previous deployments on ${BOSH_ENVIRONMENT}..."
 $BOSH deployments
 
 header "Cleaning up from any previous deployments (if necessary)..."
-for DEPLOYMENT_NAME in $DEPLOYMENT_NAMES do
+for DEPLOYMENT_NAME in $DEPLOYMENT_NAMES; do
   if [[ "$SKIP_FRESH" == "false" ]]; then
     cleanup ${DEPLOYMENT_NAME}-${KIT}
 
