@@ -105,8 +105,12 @@ groups:
     - pre
     - rc
     - shipit
-    - major
-    - minor
+
   - name: upstream
     jobs:
     - cf-deployment
+  - name: versions
+    jobs:
+    - major
+    - minor
+    - patch
