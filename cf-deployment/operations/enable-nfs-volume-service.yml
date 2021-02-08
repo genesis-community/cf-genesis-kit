@@ -8,15 +8,9 @@
   path: /instance_groups/name=scheduler/jobs/name=cloud_controller_clock/properties/cc/volume_services_enabled?
   value: true
 - type: replace
-  path: /instance_groups/name=database/jobs/name=pxc-mysql/properties/seeded_databases/-
-  value:
-    name: nfs-broker
-    password: ((nfs-broker-database-password))
-    username: nfs-broker
-- type: replace
   path: /instance_groups/name=uaa/jobs/name=uaa/properties/uaa/clients/nfs-broker-push-client?
   value:
-    authorities: cloud_controller.admin
+    authorities: cloud_controller.admin,clients.read
     authorized-grant-types: client_credentials
     secret: ((nfs-broker-push-uaa-client-secret))
 - type: replace
@@ -58,14 +52,6 @@
             uaa_ca_cert: ((uaa_ssl.ca))
             uaa_client_id: nfs-broker-credhub-client
             uaa_client_secret: ((nfs-broker-credhub-uaa-client-secret))
-          db:
-            ca_cert: ((mysql_server_certificate.ca))
-            driver: mysql
-            host: sql-db.service.cf.internal
-            name: nfs-broker
-            password: ((nfs-broker-database-password))
-            port: 3306
-            username: nfs-broker
           domain: ((system_domain))
           organization: system
           password: ((nfs-broker-password))
@@ -78,7 +64,7 @@
         nfsbrokerpush:
           as: ignore-me
       release: nfs-volume
-    - name: cf-cli-6-linux
+    - name: cf-cli-7-linux
       release: cf-cli
     lifecycle: errand
     name: nfs-broker-push
@@ -112,11 +98,6 @@
 - type: replace
   path: /variables/-
   value:
-    name: nfs-broker-database-password
-    type: password
-- type: replace
-  path: /variables/-
-  value:
     name: nfs-broker-push-uaa-client-secret
     type: password
 - type: replace
@@ -133,43 +114,46 @@
   path: /variables/-
   value:
     name: nfs_ca
+    type: certificate
     options:
       common_name: nfs-ca
       is_ca: true
-    type: certificate
 - type: replace
   path: /variables/-
   value:
     name: nfsv3driver_cert
+    type: certificate
     options:
-      alternative_names:
-      - 127.0.0.1
       ca: nfs_ca
       common_name: 127.0.0.1
+      alternative_names:
+      - 127.0.0.1
       extended_key_usage:
       - server_auth
-    type: certificate
 - type: replace
   path: /variables/-
   value:
     name: nfsv3driver_client_cert
+    type: certificate
+    update_mode: converge
     options:
       ca: nfs_ca
       common_name: nfs-client
+      alternative_names:
+      - nfs-client
       extended_key_usage:
       - client_auth
-    type: certificate
 - type: replace
   path: /releases/-
   value:
     name: nfs-volume
-    sha1: f9e4d002da0cedacf966e161eb1e0b9dcfe07b07
-    url: https://bosh.io/d/github.com/cloudfoundry/nfs-volume-release?v=7.0.2
-    version: 7.0.2
+    sha1: 6dbfcdb3ed5de63fd63e82710dfb58084c566f62
+    url: https://bosh.io/d/github.com/cloudfoundry/nfs-volume-release?v=7.1.1
+    version: 7.1.1
 - type: replace
   path: /releases/name=mapfs?
   value:
     name: mapfs
-    sha1: 3cc82301f6687b7da727bf0c09a04c072aaf823b
-    url: https://bosh.io/d/github.com/cloudfoundry/mapfs-release?v=1.2.4
-    version: 1.2.4
+    sha1: 440014423159187727d3622d41e5779f0f25902d
+    url: https://bosh.io/d/github.com/cloudfoundry/mapfs-release?v=1.2.6
+    version: 1.2.6

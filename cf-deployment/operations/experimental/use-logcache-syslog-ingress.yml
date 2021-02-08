@@ -22,6 +22,9 @@
     options:
       ca: loggregator_ca
       common_name: doppler.service.cf.internal
+      alternative_names:
+        - "q-s3.doppler.default.cf.bosh"
+        - "doppler.service.cf.internal"
       extended_key_usage:
         - server_auth
 
@@ -30,7 +33,7 @@
 
 - type: replace
   path: /addons/name=loggr-syslog-agent/jobs/name=loggr-syslog-agent/properties/aggregate_drains?
-  value: "syslog-tls://doppler.service.cf.internal:6067"
+  value: "syslog-tls://doppler.service.cf.internal:6067?include-metrics-deprecated=true&ssl-strict-internal=true"
 
 - type: replace
   path: /addons/name=loggr-syslog-agent/jobs/name=loggr-syslog-agent/properties/drain_ca_cert?
@@ -41,8 +44,11 @@
   value:
     name: log_cache_syslog_server_metrics_tls
     type: certificate
+    update_mode: converge
     options:
       ca: metric_scraper_ca
       common_name: log_cache_syslog_server_metrics
+      alternative_names:
+      - log_cache_syslog_server_metrics
       extended_key_usage:
       - server_auth
