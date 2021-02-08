@@ -297,7 +297,7 @@ These params need to be set when activating features:
 
 # Retired Parameters (from v1.x)
 
-## General 
+## General
 
 Some of these features may return in latter v2.x releases, but for the v2.0.0 release, they have been removed as they are not compatible with the upstream `cf-deployment` configuration, or have been replaced by an ops file.  If needed, `instance_groups` overrides in the environment file can be used to effect the desired configuration
 
@@ -434,7 +434,7 @@ following:
     Recommend `1 cpu / 2g mem`.
 
   - `nats_vm_type` - What type of VM to deploy for the nodes in
-    the NATS message bus cluster.  Defaults to `nats`. 
+    the NATS message bus cluster.  Defaults to `nats`.
     Recommend `1 cpu / 2g mem`.
 
   - `log_api_vm_type` - What type of VM to deploy for the
@@ -530,7 +530,7 @@ persistent disk provisioned by BOSH.
 The following parameters are defined:
 
   - `blobstore_vm_type` - The type of VM (per cloud config) to use
-    when deploying the WebDAV blobstore VM.  Defaults to `blobstore`. 
+    when deploying the WebDAV blobstore VM.  Defaults to `blobstore`.
     Recommend `1 cpu / 2g mem`.
 
   - `blobstore_disk_pool` - The disk type (per cloud config) to
@@ -830,7 +830,7 @@ via parameters. Use cases, and examples are below:
 
   This shell command takes `logo.png` and converts it to base64,
   and then strips the `\n` characters usually found in base64 output.
-  This content is then placed in `logo.png.base64`, whose contents 
+  This content is then placed in `logo.png.base64`, whose contents
   can be easily pasted into your Genesis environment file.
 
 - `cf_branding_square_logo`
@@ -842,7 +842,7 @@ via parameters. Use cases, and examples are below:
 
 ## Footer Text & Legal
 
-- `cf_footer_legal_text` 
+- `cf_footer_legal_text`
   A string to display in the footer, typically used for compliance
   text. This string is displayed on all UAA pages.
 
