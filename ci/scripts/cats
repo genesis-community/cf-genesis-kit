@@ -25,9 +25,9 @@ function run_cats(){
       echo "FOUND DEPL. DIR FLAG"
       export BUILD_ROOT=$2
       export GENESIS_ROOT=$BUILD_ROOT/work/cf-deployments
-      export GENESIS_ENVIRONMENT=ci-baseline-cats
-      export vault=/secret/ci/baseline/cats/cf
-      export credhub=/snw-genesis-ci-bosh/ci-baseline-cats-cf
+      export GENESIS_ENVIRONMENT=ci-cats
+      export vault=/secret/ci/cats/cf
+      export credhub=/snw-genesis-ci-bosh/ci-cats-cf
 
       credhub login --server $CREDHUB_URL --username $CREDHUB_USER --password $CREDHUB_PASSWORD --skip-tls-validation
     ;;

@@ -8,14 +8,14 @@ kit:
     - cf-deployment/operations/enable-service-discovery
 
 genesis:
-  env:   ci-baseline-cats
+  env:   ci-cats
   bosh_env:  snw-genesis-ci
 
 params:
   disk_type: default
   base_domain:  10.128.8.192.netip.cc
   postgres_vip: 10.128.8.193
-
+  availability_zones: [z1]
   haproxy_ips:
     - 10.128.8.192
 

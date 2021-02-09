@@ -87,7 +87,7 @@ meta:
         CREDHUB_URL:          (( grab meta.credhub.url))
         CREDHUB_USER:         (( grab meta.credhub.username))
         CREDHUB_PASSWORD:     (( grab meta.credhub.password))
-        DEPLOYMENT_NAMES:     ci-baseline-cats
+        DEPLOYMENT_NAMES:     ci-cats
         SKIP_CATS:            false
         FAILFAST:             true
         VERBOSE:              false

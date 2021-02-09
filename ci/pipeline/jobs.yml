@@ -122,10 +122,10 @@ jobs:
         CREDHUB_URL:          (( grab meta.credhub.url))
         CREDHUB_USER:         (( grab meta.credhub.username))
         CREDHUB_PASSWORD:     (( grab meta.credhub.password))
-        DEPLOYMENT_NAMES:     ci-baseline-cats
+        DEPLOYMENT_NAMES:     ci-cats
         SKIP_FRESH:           true
         SKIP_CLEAN:           true
-        SKIP_SMOKE_TESTS:     true
+        SKIP_SMOKE_TESTS:     false
   - do:
     - in_parallel:
         fail_fast: true
@@ -237,7 +237,7 @@ jobs:
         CREDHUB_URL:          (( grab meta.credhub.url))
         CREDHUB_USER:         (( grab meta.credhub.username))
         CREDHUB_PASSWORD:     (( grab meta.credhub.password))
-        DEPLOYMENT_NAMES:     ci-baseline-cats
+        DEPLOYMENT_NAMES:     ci-cats
         SKIP_FRESH:           true
         SKIP_DEPLOY:          true
         SKIP_SMOKE_TESTS:     true
