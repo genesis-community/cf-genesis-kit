@@ -15,7 +15,7 @@ params:
   disk_type: default
   base_domain:  10.128.8.192.netip.cc
   postgres_vip: 10.128.8.193
-  availability_zones: [z1]
+  # availability_zones: [z1]
   haproxy_ips:
     - 10.128.8.192
 
@@ -23,3 +23,5 @@ params:
   cf_edge_network: default
   cf_runtime_network: default
   cf_db_network: default
+
+  diego_cell_instances: 2
