@@ -1537,6 +1537,7 @@ instance_groups:
   update:
     serial: true
   vm_extensions:
+  - cf-router-network-properties
   - diego-ssh-proxy-network-properties
   vm_type: minimal
 - azs:
