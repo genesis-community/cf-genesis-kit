@@ -21,4 +21,5 @@ instance_groups:
   - name: ssh_proxy
     .: (( inject instance_groups.scheduler.jobs.ssh_proxy ))
   vm_extensions:
+    - (( append ))
     - diego-ssh-proxy-network-properties
