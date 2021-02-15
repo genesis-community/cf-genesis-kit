@@ -34,20 +34,6 @@ meta:
 params:
   cf_db_network: cf-db
 
-  # v1.x default vm types
-  adapter_vm_type:     (( grab params.syslogger_vm_type   || "syslogger"   ))
-  diego_api_vm_type:   (( grab params.bbs_vm_type         || "bbs"         ))
-  diego_cell_vm_type:  (( grab params.cell_vm_type        || "cell"        ))
-  log_api_vm_type:     (( grab params.loggregator_vm_type || "loggregator" ))
-  scheduler_vm_type:   (( grab params.diego_vm_type       || "diego"       ))
-  api_vm_type:         api
-  cell_vm_type:        cell
-  doppler_vm_type:     doppler
-  errand_vm_type:      errand
-  nats_vm_type:        nats
-  router_vm_type:      router
-  uaa_vm_type:         uaa
-
 instance_groups:
 # original has key key-2016-06
 - name: diego-api
