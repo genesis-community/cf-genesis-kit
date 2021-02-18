@@ -1,0 +1,8 @@
+bosh-variables:
+  cloud_controller_database_name:     (( grab params.ccdb_name           || meta.database_defaults.cloud_controller.name ))
+  uaa_database_name:                  (( grab params.uaadb_name          || meta.database_defaults.uaa.name ))
+  diego_database_name:                (( grab params.diegodb_name        || meta.database_defaults.diego.name ))
+  network_policy_database_name:       (( grab params.policyserverdb_name || meta.database_defaults.network_policy.name ))
+  network_connectivity_database_name: (( grab params.silkdb_name         || meta.database_defaults.network_connectivity.name ))
+  locket_database_name:               (( grab params.locketdb_name       || meta.database_defaults.locket.name ))
+  credhub_database_name:              (( grab params.credhubdb_name      || meta.database_defaults.credhub.name ))

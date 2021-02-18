@@ -31,6 +31,7 @@ cc_bridge_tps:
 cc_bulk_api_password: <!{credhub}:cc_bulk_api_password!>
 cc_database_password: <!{credhub}:cc_database_password!>
 cc_db_encryption_key: <!{credhub}:cc_db_encryption_key!>
+cc_directory_key: <!{credhub}:cc_directory_key!>
 cc_internal_api_password: <!{credhub}:cc_internal_api_password!>
 cc_logcache_tls:
   ca: <!{credhub}:cc_logcache_tls.ca!>

@@ -160,7 +160,6 @@ var _ = Describe("Interal Kit", func() {
 		RuntimeConfig: "dns",
 		CPI:           "aws",
 		Exodus:        "v1",
-		Focus:         true,
 	})
 	Test(Environment{
 		Name:          "upgraded-from-v1",
@@ -168,8 +167,14 @@ var _ = Describe("Interal Kit", func() {
 		RuntimeConfig: "dns",
 		CPI:           "aws",
 		Exodus:        "migrated",
-		Focus:         true,
 	})
+	Test(Environment{
+		Name:          "upgrade-from-v1-with-db-override-names",
+		CloudConfig:   "aws",
+		RuntimeConfig: "dns",
+		CPI:           "aws",
+		Exodus:        "migrated",
+	})	
 	// Test(Environment{
 	// 	Focus:       true,
 	// 	Name:        "nfs-volume-services",

@@ -213,7 +213,7 @@ addons:
         - deployment: upgraded-from-v1-cf
           domain: bosh
           instance_group: database
-          network: cf-core
+          network: cf-db
           query: '*'
       - domain: ssh-proxy.service.cf.internal
         targets:
@@ -265,9 +265,10 @@ exodus:
   cf-deployment-url: https://github.com/cloudfoundry/cf-deployment/releases/tag/v12.45.0
   cf-deployment-version: v12.45.0
   core_network: cf-core
-  db_network: cf-core
+  db_network: cf-db
   edge_network: cf-edge
   features: ssh-proxy-on-routers
+  migrated_v1_env: 1
   runtime_network: cf-runtime
   system_domain: system.cf.testing.examle
   system_org: system
@@ -306,7 +307,7 @@ instance_groups:
   stemcell: default
   update:
     serial: true
-  vm_type: minimal
+  vm_type: errand
 - azs:
   - z1
   - z2
@@ -348,7 +349,7 @@ instance_groups:
   networks:
   - name: cf-core
   stemcell: default
-  vm_type: minimal
+  vm_type: nats
 - azs:
   - z1
   - z2
@@ -376,7 +377,7 @@ instance_groups:
   networks:
   - name: cf-core
   stemcell: default
-  vm_type: minimal
+  vm_type: syslogger
 - azs:
   - z1
   instances: 1
@@ -442,12 +443,12 @@ instance_groups:
   - name: singleton-database
   name: database
   networks:
-  - name: cf-core
+  - name: cf-db
   persistent_disk_type: 10GB
   stemcell: default
   update:
     serial: true
-  vm_type: small
+  vm_type: postgres
 - azs:
   - z1
   - z2
@@ -468,7 +469,7 @@ instance_groups:
         enabled: true
       diego:
         bbs:
-          active_key_label: key-2016-06
+          active_key_label: key1
           auctioneer:
             ca_cert: <!{credhub}:diego_auctioneer_client.ca!>
             client_cert: <!{credhub}:diego_auctioneer_client.certificate!>
@@ -476,7 +477,7 @@ instance_groups:
           ca_cert: <!{credhub}:diego_bbs_server.ca!>
           detect_consul_cell_registrations: false
           encryption_keys:
-          - label: key-2016-06
+          - label: key1
             passphrase: <!{credhub}:diego_bbs_encryption_keys_passphrase!>
           rep:
             ca_cert: <!{credhub}:diego_rep_client.ca!>
@@ -568,7 +569,7 @@ instance_groups:
   stemcell: default
   update:
     serial: true
-  vm_type: small
+  vm_type: bbs
 - azs:
   - z1
   - z2
@@ -740,7 +741,7 @@ instance_groups:
   networks:
   - name: cf-core
   stemcell: default
-  vm_type: minimal
+  vm_type: uaa
 - azs:
   - z1
   instances: 1
@@ -783,7 +784,7 @@ instance_groups:
   stemcell: default
   update:
     serial: true
-  vm_type: small
+  vm_type: blobstore
 - azs:
   - z1
   - z2
@@ -801,6 +802,7 @@ instance_groups:
       cc:
         buildpacks:
           blobstore_type: webdav
+          buildpack_directory_key: upgraded-from-v1-cc-buildpacks-<!{credhub}:cc_directory_key!>
           webdav_config:
             blobstore_timeout: 5
             ca_cert: <!{credhub}:blobstore_tls.ca!>
@@ -824,6 +826,7 @@ instance_groups:
           docker_staging_stack: cflinuxfs3
         droplets:
           blobstore_type: webdav
+          droplet_directory_key: upgraded-from-v1-cc-droplets-<!{credhub}:cc_directory_key!>
           webdav_config:
             blobstore_timeout: 5
             ca_cert: <!{credhub}:blobstore_tls.ca!>
@@ -865,6 +868,7 @@ instance_groups:
           private_key: <!{credhub}:cc_tls.private_key!>
           public_cert: <!{credhub}:cc_tls.certificate!>
         packages:
+          app_package_directory_key: upgraded-from-v1-cc-app-packages-<!{credhub}:cc_directory_key!>
           blobstore_type: webdav
           webdav_config:
             blobstore_timeout: 5
@@ -879,6 +883,7 @@ instance_groups:
           private_key: <!{credhub}:cc_public_tls.private_key!>
         resource_pool:
           blobstore_type: webdav
+          resource_directory_key: upgraded-from-v1-cc-resources-<!{credhub}:cc_directory_key!>
           webdav_config:
             blobstore_timeout: 5
             ca_cert: <!{credhub}:blobstore_tls.ca!>
@@ -1108,7 +1113,7 @@ instance_groups:
     serial: true
   vm_extensions:
   - 50GB_ephemeral_disk
-  vm_type: small
+  vm_type: api
 - azs:
   - z1
   - z2
@@ -1434,7 +1439,7 @@ instance_groups:
   update:
     serial: true
   vm_extensions: []
-  vm_type: minimal
+  vm_type: diego
 - azs:
   - z1
   - z2
@@ -1528,7 +1533,7 @@ instance_groups:
   vm_extensions:
   - cf-router-network-properties
   - diego-ssh-proxy-network-properties
-  vm_type: minimal
+  vm_type: router
 - azs:
   - z1
   - z2
@@ -1564,7 +1569,7 @@ instance_groups:
   stemcell: default
   vm_extensions:
   - cf-tcp-router-network-properties
-  vm_type: minimal
+  vm_type: router
 - azs:
   - z1
   - z2
@@ -1660,7 +1665,7 @@ instance_groups:
   networks:
   - name: cf-core
   stemcell: default
-  vm_type: minimal
+  vm_type: doppler
 - azs:
   - z1
   - z2
@@ -1808,7 +1813,7 @@ instance_groups:
   stemcell: default
   vm_extensions:
   - 100GB_ephemeral_disk
-  vm_type: small-highmem
+  vm_type: cell
 - azs:
   - z1
   - z2
@@ -1911,7 +1916,7 @@ instance_groups:
   stemcell: default
   update:
     serial: true
-  vm_type: minimal
+  vm_type: loggregator
 - azs:
   - z1
   - z2
@@ -1993,7 +1998,7 @@ instance_groups:
   networks:
   - name: cf-core
   stemcell: default
-  vm_type: minimal
+  vm_type: errand
 manifest_version: v12.45.0
 name: upgraded-from-v1-cf
 releases:

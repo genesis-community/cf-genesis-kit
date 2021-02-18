@@ -354,11 +354,14 @@ for want in $GENESIS_REQUESTED_FEATURES; do
       databases+=( "$want" )
       manifest+=( "cf-deployment/operations/use-postgres.yml" )
       if want_feature '+override-db-names' ; then
-        manifest+=( \
-          "operations/db-override-names.yml" \
-          "operations/db-override-postgres-names.yml" \
-          "overlay/db/internal-overrides.yml" \
-        )
+	manifest+=( \
+	  "operations/db-override-names.yml" \
+	  "operations/db-override-postgres-names.yml" \
+	  "overlay/db/internal-overrides.yml" \
+	  )
+	if want_feature '+migrated-v1-env' ; then
+	    manifest+=( "overlay/addons/migration-db-override-names.yml" )
+	fi
       fi
       ;;
 
@@ -366,11 +369,14 @@ for want in $GENESIS_REQUESTED_FEATURES; do
       databases+=( "$want" )
       manifest+=( "overlay/db/local-mysql-db.yml" )
       if want_feature '+override-db-names' ; then
-        manifest+=( \
-          "operations/db-override-names.yml" \
-          "operations/db-override-mysql-names.yml" \
-          "overlay/db/internal-overrides.yml" \
-        )
+	manifest+=( \
+	  "operations/db-override-names.yml" \
+	  "operations/db-override-mysql-names.yml" \
+	  "overlay/db/internal-overrides.yml" \
+	  )
+	if want_feature '+migrated-v1-env' ; then
+	    manifest+=( "overlay/addons/migration-db-override-names.yml" )
+	fi
       fi
       ;;
 
