@@ -279,7 +279,7 @@ instance_groups:
 - azs:
   - z1
   - z2
-  instances: 1
+  instances: 29
   jobs:
   - name: smoke_tests
     properties:
@@ -304,11 +304,11 @@ instance_groups:
   stemcell: default
   update:
     serial: true
-  vm_type: minimal
+  vm_type: custom_smoke_tests_vm
 - azs:
   - z1
   - z2
-  instances: 2
+  instances: 24
   jobs:
   - name: nats
     properties:
@@ -344,11 +344,11 @@ instance_groups:
   networks:
   - name: cf-core
   stemcell: default
-  vm_type: minimal
+  vm_type: custom_nats_vm
 - azs:
   - z1
   - z2
-  instances: 2
+  instances: 12
   jobs:
   - name: adapter
     properties:
@@ -370,10 +370,10 @@ instance_groups:
   networks:
   - name: cf-core
   stemcell: default
-  vm_type: minimal
+  vm_type: custom_adapter_vm
 - azs:
   - z1
-  instances: 1
+  instances: 17
   jobs:
   - name: postgres
     properties:
@@ -441,11 +441,11 @@ instance_groups:
   stemcell: default
   update:
     serial: true
-  vm_type: small
+  vm_type: custom_database_vm
 - azs:
   - z1
   - z2
-  instances: 2
+  instances: 18
   jobs:
   - name: cfdot
     properties:
@@ -560,11 +560,11 @@ instance_groups:
   stemcell: default
   update:
     serial: true
-  vm_type: small
+  vm_type: custom_diego_api_vm
 - azs:
   - z1
   - z2
-  instances: 2
+  instances: 31
   jobs:
   - name: uaa
     properties:
@@ -730,10 +730,10 @@ instance_groups:
   networks:
   - name: cf-core
   stemcell: default
-  vm_type: minimal
+  vm_type: custom_uaa_vm
 - azs:
   - z1
-  instances: 1
+  instances: 28
   jobs:
   - name: blobstore
     properties:
@@ -773,11 +773,11 @@ instance_groups:
   stemcell: default
   update:
     serial: true
-  vm_type: small
+  vm_type: custom_singleton_blobstore_vm
 - azs:
   - z1
   - z2
-  instances: 2
+  instances: 14
   jobs:
   - name: cloud_controller_ng
     properties:
@@ -1096,11 +1096,11 @@ instance_groups:
     serial: true
   vm_extensions:
   - 50GB_ephemeral_disk
-  vm_type: small
+  vm_type: custom_api_vm
 - azs:
   - z1
   - z2
-  instances: 2
+  instances: 15
   jobs:
   - name: cloud_controller_worker
     properties:
@@ -1180,11 +1180,11 @@ instance_groups:
   networks:
   - name: cf-core
   stemcell: default
-  vm_type: minimal
+  vm_type: custom_cc_worker_vm
 - azs:
   - z1
   - z2
-  instances: 2
+  instances: 27
   jobs:
   - name: cfdot
     properties:
@@ -1419,11 +1419,11 @@ instance_groups:
     serial: true
   vm_extensions:
   - diego-ssh-proxy-network-properties
-  vm_type: minimal
+  vm_type: custom_scheduler_vm
 - azs:
   - z1
   - z2
-  instances: 2
+  instances: 26
   jobs:
   - name: gorouter
     properties:
@@ -1477,11 +1477,11 @@ instance_groups:
     serial: true
   vm_extensions:
   - cf-router-network-properties
-  vm_type: minimal
+  vm_type: custom_router_vm
 - azs:
   - z1
   - z2
-  instances: 2
+  instances: 30
   jobs:
   - name: tcp_router
     properties:
@@ -1511,11 +1511,11 @@ instance_groups:
   stemcell: default
   vm_extensions:
   - cf-tcp-router-network-properties
-  vm_type: minimal
+  vm_type: custom_tcp_router_vm
 - azs:
   - z1
   - z2
-  instances: 4
+  instances: 20
   jobs:
   - name: doppler
     properties:
@@ -1605,11 +1605,11 @@ instance_groups:
   networks:
   - name: cf-core
   stemcell: default
-  vm_type: minimal
+  vm_type: custom_doppler_vm
 - azs:
   - z1
   - z2
-  instances: 3
+  instances: 19
   jobs:
   - name: cflinuxfs3-rootfs-setup
     properties:
@@ -1751,11 +1751,11 @@ instance_groups:
   stemcell: default
   vm_extensions:
   - 100GB_ephemeral_disk
-  vm_type: small-highmem
+  vm_type: custom_diego_cell_vm
 - azs:
   - z1
   - z2
-  instances: 2
+  instances: 23
   jobs:
   - consumes:
       doppler:
@@ -1852,11 +1852,11 @@ instance_groups:
   stemcell: default
   update:
     serial: true
-  vm_type: minimal
+  vm_type: custom_log_api_vm
 - azs:
   - z1
   - z2
-  instances: 2
+  instances: 16
   jobs:
   - name: credhub
     properties:
@@ -1916,11 +1916,11 @@ instance_groups:
   networks:
   - name: cf-core
   stemcell: default
-  vm_type: minimal
+  vm_type: custom_credhub_vm
 - azs:
   - z1
   - z2
-  instances: 1
+  instances: 25
   jobs:
   - name: rotate_cc_database_key
     properties: {}
@@ -1930,7 +1930,7 @@ instance_groups:
   networks:
   - name: cf-core
   stemcell: default
-  vm_type: minimal
+  vm_type: custom_rotate_cc_database_key_vm
 manifest_version: v12.45.0
 name: override-vm-types-and-counts-cf
 releases:
