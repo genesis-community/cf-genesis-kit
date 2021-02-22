@@ -1,0 +1,3 @@
+instance_groups:
+- name: tcp-router
+- (( delete "tcp-router" ))

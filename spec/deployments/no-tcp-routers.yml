@@ -1,0 +1,14 @@
+---
+kit:
+  name:    dev
+  version: 2.0.3
+  features:
+    - no-tcp-routers
+
+
+genesis:
+  env:         no-tcp-routers
+
+params:
+  base_domain: cf.testing.example
+
