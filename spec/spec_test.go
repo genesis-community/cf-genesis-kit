@@ -130,6 +130,18 @@ var _ = Describe("Interal Kit", func() {
 		RuntimeConfig: "dns",
 		CPI:           "aws",
 	})
+	Test(Environment{
+		Name:          "no-tcp-routers",
+		CloudConfig:   "aws",
+		RuntimeConfig: "dns",
+		CPI:           "aws",
+	})
+	Test(Environment{
+		Name:          "router-synergy",
+		CloudConfig:   "aws",
+		RuntimeConfig: "dns",
+		CPI:           "aws",
+	})
 	// Test(Environment{
 	// 	Focus:       true,
 	// 	Name:        "nfs-volume-services",
