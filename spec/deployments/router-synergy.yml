@@ -1,0 +1,21 @@
+---
+kit:
+  name:    dev
+  version: 2.0.0
+  features:
+    - small-footprint
+    - ssh-proxy-on-routers
+    - haproxy
+    - self-signed
+    - tls
+    - no-tcp-routers
+    - cf-deployment/operations/enable-service-discovery
+
+genesis:
+  env:         router-synergy
+
+params:
+  base_domain: cf.testing.example
+  haproxy_ips: test-ha-proxy-ips
+  availability_zones: [ us-west-2a, us-west-2b, us-west-2c ]
+

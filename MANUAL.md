@@ -63,6 +63,7 @@ General:
   - `migrated-v1-env` - Fix the database names after having migrated from v1 kit.
   - `no-nats-tls` - Nats over TLS was not part of cf-deployment v12.45, but has been turned on by default unless using bare mode.  Set this feature to disable it.
   - `ssh-proxy-on-routers` - moves the ssh-proxy from scheduler instance group to the router instance group, placing it on the edge network, and enabling scaling via scaling the routers.
+  - `no-tcp-routers` - removes the tcp-router instance group and associated resource allocations for systems that don't need tcp routes.
 
 Database related - choose one:
   - `postgres-db` - Use an external postgres instance to host persistent data.
