@@ -71,7 +71,7 @@ setup-cli)
   cf plugins
   ;;
 
-smoke-tests)
+smoketest | smoke-tests)
   "$GENESIS_BOSH_COMMAND" -e "$BOSH_ENVIRONMENT" -d "$BOSH_DEPLOYMENT" run-errand smoke_tests
   ;;
 
