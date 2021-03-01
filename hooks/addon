@@ -12,7 +12,7 @@ list() {
   echo "                    helps to manage multiple Cloud Foundries from a"
   echo "                    single jumpbox."
   echo
-  echo "  smoketest         Run the smoke tests errand on the first vm in the"
+  echo "  smoke-tests         Run the smoke tests errand on the first vm in the"
   echo "                    api instance group."
 }
 
@@ -71,7 +71,7 @@ setup-cli)
   cf plugins
   ;;
 
-smoketest)
+smoke-tests)
   "$GENESIS_BOSH_COMMAND" -e "$BOSH_ENVIRONMENT" -d "$BOSH_DEPLOYMENT" run-errand smoke_tests
   ;;
 
