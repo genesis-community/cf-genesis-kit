@@ -26,7 +26,6 @@ bail() {
 test -n "${REPO_ROOT:-}"      || bail "REPO_ROOT must be set to the full path to the Git repository."
 test -n "${RELEASE_ROOT:-}"   || bail "RELEASE_ROOT must be set to the output directory where release artifacts should go."
 test -n "${KIT_SHORTNAME:-}"  || bail "KIT_SHORTNAME must be set to the short name of this kit."
-test -n "${BRANCH:-}"         || bail "BRANCH must be set to the git branch you pulled the Git repository from."
 test -n "${GITHUB_OWNER:-}"   || bail "GITHUB_OWNER must be set to the name of the Github user or organization that owns the Git repository."
 test -n "${VERSION_FROM:-}"   || bail "VERSION_FROM must be set to the path of the input version file."
 test -n "${GIT_EMAIL:-}"      || bail "GIT_EMAIL must be set to an email address to use for Git commits."
@@ -35,26 +34,6 @@ test -n "${GIT_NAME:-}"       || bail "GIT_NAME must be set to something; it wil
 test -f "${VERSION_FROM}"     || bail "Version file (${VERSION_FROM}) not found."
 VERSION=$(cat ${VERSION_FROM})
 test -n "${VERSION}"          || bail "Version file (${VERSION_FROM}) was empty."
-
-# TODO: because release_notes creation happens in `generate-release-notes` we can get rid of this.
-# and if this is created the compile kit will not succeed due to non commited file
-# if [[ ! -f ${REPO_ROOT}/ci/release_notes.md ]]; then
-#   echo >&2
-#   echo >&2 "#################################################"
-#   echo >&2
-#   echo >&2 "ci/release_notes.md not found."
-#   echo >&2 "Did you forget to write them?"
-#   echo >&2
-#   echo >&2 "Ah well, happens to the best of us."
-#   echo >&2 "We'll make do with what we've got, but please"
-#   echo >&2 "don't forget to write them on GitHub!"
-#   echo >&2
-#   echo >&2 "#################################################"
-#   echo >&2
-
-#   mkdir -p ${REPO_ROOT}/ci
-#   echo "_no release notes were written for this release._" > ${REPO_ROOT}/ci/release_notes.md
-# fi
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
@@ -72,25 +51,26 @@ echo "v${VERSION}"      > ${RELEASE_ROOT}/tag
 echo "v${VERSION}"      > ${RELEASE_ROOT}/name
 mv $REPO_ROOT/*.tar.gz    ${RELEASE_ROOT}/artifacts
 
-# Clean release-notes
-git clone -b ${BRANCH} git-ci pushme
-echo -e "\n" > pushme/ci/release_notes.md
-echo -e "## Version: ${VERSION}" > pushme/ci/version
-
 cat > ${RELEASE_ROOT}/notification <<EOF
 <!here> New ${KIT_SHORTNAME} v${VERSION} released!
 EOF
-
 
 header "Updating Git repository..."
 git config --global user.name  "${GIT_NAME}"
 git config --global user.email "${GIT_EMAIL}"
 
-pushd pushme
- git merge --no-edit ${BRANCH}
- git add -A
- git status
- git commit -m "release v${VERSION}"
+pushd git
+  # Clean release-notes
+  echo -e "\n" > pushme/ci/release_notes.md
+  echo -e "## Version: ${VERSION}" > ci/version
+  git add -A
+  git status
+  git commit -m "release v${VERSION}"
+popd
+
+header "Merge develop into master"
+pushd git-main
+  git pull ../git -X theirs --no-edit
 popd
 
 cat > ${NOTIFICATION_OUT:-notifications}/message <<EOS

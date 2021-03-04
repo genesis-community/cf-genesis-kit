@@ -28,7 +28,8 @@ meta:
   github:
     owner:        genesis-community
     repo:         cf-genesis-kit
-    branch:       master
+    branch:       develop
+    main-branch:  main
     private_key:  ((github.private_key))
     access_token: ((github.access_token))
 
