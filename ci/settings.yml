@@ -1,12 +1,13 @@
 ---
 meta:
   kit:             cf
+  pipeline:        cf-v2.0.x-genesis-kit
   release:         CF Genesis Kit
   target:          pipes@genesis
   url:             https://pipes.starkandwayne.com
   exposed:         yes
-  version_file:    version
-  initial_version: 2.1.0
+  version_file:    version-v2.0.x
+  initial_version: 2.0.3
 
   bosh:
     uri:      ((bosh.uri))
@@ -30,8 +31,8 @@ meta:
   github:
     owner:        genesis-community
     repo:         cf-genesis-kit
-    branch:       develop
-    main-branch:  main
+    branch:       v2.0.x-develop
+    main-branch:  v2.0.x-main
     private_key:  ((github.private_key))
     access_token: ((github.access_token))
 
