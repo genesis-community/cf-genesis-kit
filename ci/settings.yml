@@ -1,10 +1,12 @@
 ---
 meta:
-  kit:     cf
-  release: CF Genesis Kit
-  target:  pipes@genesis
-  url:     https://pipes.starkandwayne.com
-  exposed: yes
+  kit:             cf
+  release:         CF Genesis Kit
+  target:          pipes@genesis
+  url:             https://pipes.starkandwayne.com
+  exposed:         yes
+  version_file:    version
+  initial_version: 2.1.0
 
   bosh:
     uri:      ((bosh.uri))
