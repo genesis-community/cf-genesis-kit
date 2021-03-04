@@ -380,7 +380,6 @@ jobs:
         VERSION_FROM: version/number
         RELEASE_ROOT: gh
         NOTIFICATION_OUT: notifications
-        BRANCH:        (( grab meta.github.branch ))
         GITHUB_OWNER:  (( grab meta.github.owner ))
         GIT_EMAIL:     (( grab meta.git.email ))
         GIT_NAME:      (( grab meta.git.name ))
@@ -388,7 +387,12 @@ jobs:
     - put: git
       params:
         merge: true
-        repository: pushme
+        repository: git
+    - put: git-main
+      params:
+        merge: true
+        tag: gh/tag
+        repository: git-main
     - put: github
       params:
         name:   gh/name
