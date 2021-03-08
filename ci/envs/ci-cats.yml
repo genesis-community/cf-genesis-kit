@@ -4,7 +4,7 @@ kit:
     - haproxy
     - tls
     - self-signed
-    - small-footprint
+    # - small-footprint
     - cf-deployment/operations/enable-service-discovery
 
 genesis:
