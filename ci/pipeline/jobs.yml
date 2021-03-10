@@ -137,90 +137,90 @@ jobs:
           params:
             .: (( inject meta.jobs.cats.params ))
             RUN_CATS: include_apps
-        # - task: cats-detect
-        #   file: git-ci/ci/tasks/cats/task.yml
-        #   attempts: 5
-        #   params:
-        #     .: (( inject meta.jobs.cats.params ))
-        #     RUN_CATS: include_detect
-        # - task: cats-routing
-        #   file: git-ci/ci/tasks/cats/task.yml
-        #   attempts: 5
-        #   params:
-        #     .: (( inject meta.jobs.cats.params ))
-        #     RUN_CATS: include_routing
-        # - task: cats-backend-compability
-        #   file: git-ci/ci/tasks/cats/task.yml
-        #   attempts: 5
-        #   params:
-        #     .: (( inject meta.jobs.cats.params ))
-        #     RUN_CATS: include_backend_compatibility
-        # - task: cats-internet-dependent
-        #   file: git-ci/ci/tasks/cats/task.yml
-        #   attempts: 5
-        #   params:
-        #     .: (( inject meta.jobs.cats.params ))
-        #     RUN_CATS: include_internet_dependent
+        - task: cats-detect
+          file: git-ci/ci/tasks/cats/task.yml
+          attempts: 5
+          params:
+            .: (( inject meta.jobs.cats.params ))
+            RUN_CATS: include_detect
+        - task: cats-routing
+          file: git-ci/ci/tasks/cats/task.yml
+          attempts: 5
+          params:
+            .: (( inject meta.jobs.cats.params ))
+            RUN_CATS: include_routing
+        - task: cats-backend-compability
+          file: git-ci/ci/tasks/cats/task.yml
+          attempts: 5
+          params:
+            .: (( inject meta.jobs.cats.params ))
+            RUN_CATS: include_backend_compatibility
+        - task: cats-internet-dependent
+          file: git-ci/ci/tasks/cats/task.yml
+          attempts: 5
+          params:
+            .: (( inject meta.jobs.cats.params ))
+            RUN_CATS: include_internet_dependent
         # - task: cats-route-services
         #   file: git-ci/ci/tasks/cats/task.yml
         #   attempts: 5
         #   params:
         #     .: (( inject meta.jobs.cats.params ))
         #     RUN_CATS: include_route_services
-        # - task: cats-sec-grps
-        #   file: git-ci/ci/tasks/cats/task.yml
-        #   attempts: 5
-        #   params:
-        #     .: (( inject meta.jobs.cats.params ))
-        #     RUN_CATS: include_security_groups
-        # - task: cats-services
-        #   file: git-ci/ci/tasks/cats/task.yml
-        #   attempts: 5
-        #   params:
-        #     .: (( inject meta.jobs.cats.params ))
-        #     RUN_CATS: include_services
-        # - task: cats-ssh
-        #   file: git-ci/ci/tasks/cats/task.yml
-        #   attempts: 5
-        #   params:
-        #     .: (( inject meta.jobs.cats.params ))
-        #     RUN_CATS: include_ssh
-        # - task: cats-sso
-        #   file: git-ci/ci/tasks/cats/task.yml
-        #   attempts: 5
-        #   params:
-        #     .: (( inject meta.jobs.cats.params ))
-        #     RUN_CATS: include_sso
-        # - task: cats-tasks
-        #   file: git-ci/ci/tasks/cats/task.yml
-        #   attempts: 5
-        #   params:
-        #     .: (( inject meta.jobs.cats.params ))
-        #     RUN_CATS: include_tasks
-        # - task: cats-v3
-        #   file: git-ci/ci/tasks/cats/task.yml
-        #   attempts: 5
-        #   params:
-        #     .: (( inject meta.jobs.cats.params ))
-        #     RUN_CATS: include_v3
-        # - task: cats-deployments
-        #   file: git-ci/ci/tasks/cats/task.yml
-        #   attempts: 5
-        #   params:
-        #     .: (( inject meta.jobs.cats.params ))
-        #     RUN_CATS: include_deployments
-        # - task: cats-service_discovery
-        #   file: git-ci/ci/tasks/cats/task.yml
-        #   attempts: 5
-        #   params:
-        #     .: (( inject meta.jobs.cats.params ))
-        #     RUN_CATS: include_service_discovery
-        # - task: cats-capi_no_bridge
-        #   file: git-ci/ci/tasks/cats/task.yml
-        #   attempts: 5
-        #   params:
-        #     .: (( inject meta.jobs.cats.params ))
-        #     RUN_CATS: include_capi_no_bridge
+        - task: cats-sec-grps
+          file: git-ci/ci/tasks/cats/task.yml
+          attempts: 5
+          params:
+            .: (( inject meta.jobs.cats.params ))
+            RUN_CATS: include_security_groups
+        - task: cats-services
+          file: git-ci/ci/tasks/cats/task.yml
+          attempts: 5
+          params:
+            .: (( inject meta.jobs.cats.params ))
+            RUN_CATS: include_services
+        - task: cats-ssh
+          file: git-ci/ci/tasks/cats/task.yml
+          attempts: 5
+          params:
+            .: (( inject meta.jobs.cats.params ))
+            RUN_CATS: include_ssh
+        - task: cats-sso
+          file: git-ci/ci/tasks/cats/task.yml
+          attempts: 5
+          params:
+            .: (( inject meta.jobs.cats.params ))
+            RUN_CATS: include_sso
+        - task: cats-tasks
+          file: git-ci/ci/tasks/cats/task.yml
+          attempts: 5
+          params:
+            .: (( inject meta.jobs.cats.params ))
+            RUN_CATS: include_tasks
+        - task: cats-v3
+          file: git-ci/ci/tasks/cats/task.yml
+          attempts: 5
+          params:
+            .: (( inject meta.jobs.cats.params ))
+            RUN_CATS: include_v3
+        - task: cats-deployments
+          file: git-ci/ci/tasks/cats/task.yml
+          attempts: 5
+          params:
+            .: (( inject meta.jobs.cats.params ))
+            RUN_CATS: include_deployments
+        - task: cats-service_discovery
+          file: git-ci/ci/tasks/cats/task.yml
+          attempts: 5
+          params:
+            .: (( inject meta.jobs.cats.params ))
+            RUN_CATS: include_service_discovery
+        - task: cats-capi_no_bridge
+          file: git-ci/ci/tasks/cats/task.yml
+          attempts: 5
+          params:
+            .: (( inject meta.jobs.cats.params ))
+            RUN_CATS: include_capi_no_bridge
     - task: cleanup-enviorment
       file: git-ci/ci/tasks/test-flight/task.yml
       params:

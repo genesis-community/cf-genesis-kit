@@ -91,7 +91,7 @@ meta:
         SKIP_CATS:            false
         FAILFAST:             true
         VERBOSE:              false
-        CATS_NODES:           1
+        CATS_NODES:           6
 
 
 
