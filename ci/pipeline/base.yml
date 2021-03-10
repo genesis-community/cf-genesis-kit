@@ -101,6 +101,7 @@ groups:
     - spec-tests
     - spec-check
     - testflight
+    - upgrade-test
     - cats-tests
     - pre
     - rc

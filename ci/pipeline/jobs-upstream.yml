@@ -28,3 +28,150 @@ jobs:
         message: tests job '$BUILD_JOB_NAME' failed.
         ok:      no
         link:    (( grab meta.shout.links.build ))
+
+- name: cats-tests
+  public: true
+  serial: true
+  serial_groups: [genesis-ci]
+  plan:
+  - do:
+    - in_parallel:
+      - { get: git, trigger: true,  passed: [spec-tests] }
+      - { get: git-ci }
+      - { get: cats }
+    - task: testflights
+      file: git-ci/ci/tasks/test-flight/task.yml
+      params:
+        GENESIS_HONOR_ENV:    "1"
+        GIT_NAME:             (( grab meta.git.name ))
+        GIT_EMAIL:            (( grab meta.git.email ))
+        VAULT_URI:            (( grab meta.vault.url ))
+        VAULT_TOKEN:          (( grab meta.vault.token ))
+        KIT_SHORTNAME:        (( grab meta.kit ))
+        BOSH_ENVIRONMENT:     (( grab meta.bosh.uri ))
+        BOSH_CA_CERT:         (( grab meta.bosh.cacert ))
+        BOSH_CLIENT:          (( grab meta.bosh.username ))
+        BOSH_CLIENT_SECRET:   (( grab meta.bosh.password ))
+        CREDHUB_URL:          (( grab meta.credhub.url))
+        CREDHUB_USER:         (( grab meta.credhub.username))
+        CREDHUB_PASSWORD:     (( grab meta.credhub.password))
+        DEPLOYMENT_NAMES:     ci-cats
+        SKIP_FRESH:           true
+        SKIP_CLEAN:           true
+        SKIP_SMOKE_TESTS:     false
+  - do:
+    - in_parallel:
+        fail_fast: true
+        limit: 1
+        steps:
+        - task: cats-apps
+          file: git-ci/ci/tasks/cats/task.yml
+          attempts: 5
+          params:
+            .: (( inject meta.jobs.cats.params ))
+            RUN_CATS: include_apps
+        - task: cats-detect
+          file: git-ci/ci/tasks/cats/task.yml
+          attempts: 5
+          params:
+            .: (( inject meta.jobs.cats.params ))
+            RUN_CATS: include_detect
+        - task: cats-routing
+          file: git-ci/ci/tasks/cats/task.yml
+          attempts: 5
+          params:
+            .: (( inject meta.jobs.cats.params ))
+            RUN_CATS: include_routing
+        - task: cats-backend-compability
+          file: git-ci/ci/tasks/cats/task.yml
+          attempts: 5
+          params:
+            .: (( inject meta.jobs.cats.params ))
+            RUN_CATS: include_backend_compatibility
+        - task: cats-internet-dependent
+          file: git-ci/ci/tasks/cats/task.yml
+          attempts: 5
+          params:
+            .: (( inject meta.jobs.cats.params ))
+            RUN_CATS: include_internet_dependent
+        # - task: cats-route-services
+        #   file: git-ci/ci/tasks/cats/task.yml
+        #   attempts: 5
+        #   params:
+        #     .: (( inject meta.jobs.cats.params ))
+        #     RUN_CATS: include_route_services
+        - task: cats-sec-grps
+          file: git-ci/ci/tasks/cats/task.yml
+          attempts: 5
+          params:
+            .: (( inject meta.jobs.cats.params ))
+            RUN_CATS: include_security_groups
+        - task: cats-services
+          file: git-ci/ci/tasks/cats/task.yml
+          attempts: 5
+          params:
+            .: (( inject meta.jobs.cats.params ))
+            RUN_CATS: include_services
+        - task: cats-ssh
+          file: git-ci/ci/tasks/cats/task.yml
+          attempts: 5
+          params:
+            .: (( inject meta.jobs.cats.params ))
+            RUN_CATS: include_ssh
+        - task: cats-sso
+          file: git-ci/ci/tasks/cats/task.yml
+          attempts: 5
+          params:
+            .: (( inject meta.jobs.cats.params ))
+            RUN_CATS: include_sso
+        - task: cats-tasks
+          file: git-ci/ci/tasks/cats/task.yml
+          attempts: 5
+          params:
+            .: (( inject meta.jobs.cats.params ))
+            RUN_CATS: include_tasks
+        - task: cats-v3
+          file: git-ci/ci/tasks/cats/task.yml
+          attempts: 5
+          params:
+            .: (( inject meta.jobs.cats.params ))
+            RUN_CATS: include_v3
+        - task: cats-deployments
+          file: git-ci/ci/tasks/cats/task.yml
+          attempts: 5
+          params:
+            .: (( inject meta.jobs.cats.params ))
+            RUN_CATS: include_deployments
+        - task: cats-service_discovery
+          file: git-ci/ci/tasks/cats/task.yml
+          attempts: 5
+          params:
+            .: (( inject meta.jobs.cats.params ))
+            RUN_CATS: include_service_discovery
+        - task: cats-capi_no_bridge
+          file: git-ci/ci/tasks/cats/task.yml
+          attempts: 5
+          params:
+            .: (( inject meta.jobs.cats.params ))
+            RUN_CATS: include_capi_no_bridge
+    - task: cleanup-enviorment
+      file: git-ci/ci/tasks/test-flight/task.yml
+      params:
+        GENESIS_HONOR_ENV: "1"
+        GIT_NAME:             (( grab meta.git.name ))
+        GIT_EMAIL:            (( grab meta.git.email ))
+        VAULT_URI:            (( grab meta.vault.url ))
+        VAULT_TOKEN:          (( grab meta.vault.token ))
+        KIT_SHORTNAME:        (( grab meta.kit ))
+        BOSH_ENVIRONMENT:     (( grab meta.bosh.uri ))
+        BOSH_CA_CERT:         (( grab meta.bosh.cacert ))
+        BOSH_CLIENT:          (( grab meta.bosh.username ))
+        BOSH_CLIENT_SECRET:   (( grab meta.bosh.password ))
+        CREDHUB_URL:          (( grab meta.credhub.url))
+        CREDHUB_USER:         (( grab meta.credhub.username))
+        CREDHUB_PASSWORD:     (( grab meta.credhub.password))
+        DEPLOYMENT_NAMES:     ci-cats
+        SKIP_FRESH:           true
+        SKIP_DEPLOY:          true
+        SKIP_SMOKE_TESTS:     true
+        SKIP_CLEAN:           false

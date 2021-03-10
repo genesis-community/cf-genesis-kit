@@ -1,0 +1,14 @@
+resources:
+  - name: cf-deployment
+    type: git
+    check_every: 1h
+    source:
+      uri:    https://github.com/cloudfoundry/cf-deployment.git
+      tag_filter: "v*"
+
+  - name: cats
+    type: git
+    check_every: 1h
+    source:
+      uri:         https://github.com/cloudfoundry/cf-acceptance-tests
+      tag_filter: "v*"
