@@ -7,7 +7,7 @@ image_resource:
     repository: starkandwayne/concourse
 
 inputs:
-- name: git-main
+- name: git-latest-tag
   path: kit
 - name: git-ci
 
