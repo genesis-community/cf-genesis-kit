@@ -4,7 +4,7 @@ set -e
 set -o pipefail
 
 pushd cf-deployment
-  version=$(cat .git/ref)
+  version=$(cat .git/ref | cut -b 2- )
 popd
 
 pushd git > /dev/null
@@ -27,11 +27,11 @@ pushd git > /dev/null
   pushd spec > /dev/null
     # TODO: remove spec/{credhub,vault} if needed? because this will regenerate vault.
     rm -rf results/
-    ginkgo
+    ginkgo -p
   popd
 
   git add cf-deployment
   git add spec/
-  git commit -m "Update cf-deployment to $version"
+  git commit -m "Update cf-deployment to v$version"
 
 popd > /dev/null
