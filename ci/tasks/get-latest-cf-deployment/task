@@ -17,10 +17,9 @@ fi
 echo "CHECKING git status"
 git status
 
-echo "MERGE cf-deployment repo"
-rm -r cf-deployment
-cp -r ../cf-deployment .
-rm -rf cf-deployment/{ci}
+version=$(cat cf-deployment/version)
+echo "Bump CF deployment to $version"
+../git-ci/ci/scripts/pull-upstream $version
 
 echo "recreate spec-test results to validate: the cf-deployment update "
 pushd spec > /dev/null
@@ -31,6 +30,6 @@ popd
 
 git add cf-deployment
 git add spec/
-git commit -m "Update to cloudfoundry/cf-deployment@$ref"
+git commit -m "Update cf-deployment to $version"
 
 popd > /dev/null
