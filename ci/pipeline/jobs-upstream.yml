@@ -8,7 +8,7 @@ jobs:
       - { get: git, trigger: false, passed: [spec-tests] }
       - { get: git-ci, trigger: false}
       - { get: cf-deployment, trigger: true }
-    - task: cf-deployment
+    - task: update-cf-deployment
       file: git-ci/ci/tasks/get-latest-cf-deployment/task.yml
     - put: git
       params:

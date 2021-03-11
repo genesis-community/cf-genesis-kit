@@ -3,8 +3,8 @@
 set -e
 set -o pipefail
 
-ref=$(cat cf-deployment/.git/ref | cut -c1-8)
-
+pushd cf-deployment
+version=$(cat cf-deployment/.git/ref)
 pushd git > /dev/null
 
 if [[ -z $(git config --global user.email) ]]; then
@@ -17,7 +17,6 @@ fi
 echo "CHECKING git status"
 git status
 
-version=$(cat cf-deployment/version)
 echo "Bump CF deployment to $version"
 ../git-ci/ci/scripts/pull-upstream $version
 
