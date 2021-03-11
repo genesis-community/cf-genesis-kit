@@ -25,9 +25,7 @@ files=(
 
 set -ue
 # go to base directory
-basepath="$( cd "$(dirname "$0")/../" >/dev/null 2>&1 ; pwd -P )"
-cd "$basepath"
-[[ -d "$upstream_dir" ]] || error "Could not find upstream directory '$upstream_dir' under base path $basepath"
+[[ -d "$upstream_dir" ]] || error "Could not find upstream directory '$upstream_dir' under base path $PWD"
 
 workdir=$(mktemp -d 2>/dev/null || mktemp -d -t 'mytmpdir')
 [[ -n "$workdir" ]] && [[ -d "$workdir" ]] || error "Failed to make work directory"
