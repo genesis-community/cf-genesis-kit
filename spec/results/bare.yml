@@ -335,7 +335,7 @@ exodus:
   - system.cf.testing.examle
   apps_domain: system.cf.testing.examle
   base_domain: cf.testing.examle
-  cf-deployment-date: 2021-Mar-11 15:09:10 UTC
+  cf-deployment-date: 2021-Mar-11 16:27:59 UTC
   cf-deployment-url: https://github.com/cloudfoundry/cf-deployment/releases/tag/v16.7.0
   cf-deployment-version: 16.7.0
   core_network: cf-core
