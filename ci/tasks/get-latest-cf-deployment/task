@@ -30,8 +30,9 @@ pushd git > /dev/null
     ginkgo -p
   popd
 
-  git add cf-deployment
+  git add cf-deployment/
   git add spec/
+  git add overlay/upstream_version.yml
   git commit -m "Update cf-deployment to v$version"
 
 popd > /dev/null
