@@ -11,8 +11,8 @@ version="${1:-}"
 
 #Config
 upstream_name="cf-deployment"
-upstream_path="https://github.com/cloudfoundry/${upstream_name}/archive/v${version}.tar.gz"
-upstream_url="https://github.com/cloudfoundry/${upstream_name}/releases/tag/v${version}"
+upstream_path="https://github.com/cloudfoundry/${upstream_name}/archive/${version}.tar.gz"
+upstream_url="https://github.com/cloudfoundry/${upstream_name}/releases/tag/${version}"
 upstream_file="${upstream_name}-${version}.tar.gz"
 upstream_dir="$upstream_name"
 files=(
@@ -25,15 +25,13 @@ files=(
 
 set -ue
 # go to base directory
-basepath="$( cd "$(dirname "$0")/../" >/dev/null 2>&1 ; pwd -P )"
-cd "$basepath"
-[[ -d "$upstream_dir" ]] || error "Could not find upstream directory '$upstream_dir' under base path $basepath"
+[[ -d "$upstream_dir" ]] || error "Could not find upstream directory '$upstream_dir' under base path $PWD"
 
 workdir=$(mktemp -d 2>/dev/null || mktemp -d -t 'mytmpdir')
 [[ -n "$workdir" ]] && [[ -d "$workdir" ]] || error "Failed to make work directory"
 
 file="$workdir/$upstream_file"
-echo "Fetching ${upstream_name} v${version} release from cloudfoundry Github organization}"
+echo "Fetching ${upstream_name} ${version} release from cloudfoundry Github organization}"
 
 curl -sSL -o "$file" "$upstream_path" > /dev/null
 if ! [[ -f "$file" ]] ; then
