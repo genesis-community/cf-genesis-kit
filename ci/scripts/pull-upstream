@@ -55,6 +55,7 @@ for f in "${files[@]}" ; do
 done
 
 ts="$(date -u +"%Y-%b-%d %H:%M:%S %Z")"
+echo "bumping overlay/upstream_version.yml"
 cat > overlay/upstream_version.yml <<EOF
 exodus:
   ${upstream_name}-version: $version
