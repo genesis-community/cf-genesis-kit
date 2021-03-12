@@ -58,7 +58,7 @@ for DEPLOYMENT_NAME in $DEPLOYMENT_NAMES; do
     genesis add-secrets ${DEPLOYMENT_NAME}
 
     # get and upload stemcell version if needed (handled by bosh cli if version and name are supplied)
-    stemcell_version=$(genesis manifest ${DEPLOYMENT_NAME} | spruce json | .stemcells[0].version)
+    stemcell_version=$(genesis manifest ${DEPLOYMENT_NAME} | jq. spruce json | jq -r .stemcells[0].version)
     bosh upload-stemcell "https://bosh.io/d/stemcells/bosh-vsphere-esxi-ubuntu-xenial-go_agent?v=${stemcell_version}" --version ${stemcell_version} --name bosh-vsphere-esxi-ubuntu-xenial-go_agent
 
     genesis deploy -y ${DEPLOYMENT_NAME}
