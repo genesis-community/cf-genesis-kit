@@ -177,7 +177,7 @@ addons:
           domain: bosh
           instance_group: scheduler
           network: cf-core
-          query: '*'
+          query: q-s4
       - domain: bbs.service.cf.internal
         targets:
         - deployment: bare-cf
@@ -185,13 +185,6 @@ addons:
           instance_group: diego-api
           network: cf-core
           query: q-s4
-      - domain: bits.service.cf.internal
-        targets:
-        - deployment: bare-cf
-          domain: bosh
-          instance_group: bits
-          network: cf-core
-          query: '*'
       - domain: blobstore.service.cf.internal
         targets:
         - deployment: bare-cf

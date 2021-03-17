@@ -177,7 +177,7 @@ addons:
           domain: bosh
           instance_group: scheduler
           network: cf-core
-          query: '*'
+          query: q-s4
       - domain: bbs.service.cf.internal
         targets:
         - deployment: loggregator-forwarder-agent-cf
@@ -185,13 +185,6 @@ addons:
           instance_group: diego-api
           network: cf-core
           query: q-s4
-      - domain: bits.service.cf.internal
-        targets:
-        - deployment: loggregator-forwarder-agent-cf
-          domain: bosh
-          instance_group: bits
-          network: cf-core
-          query: '*'
       - domain: blobstore.service.cf.internal
         targets:
         - deployment: loggregator-forwarder-agent-cf
@@ -336,7 +329,6 @@ exodus:
   apps_domain: run.cf.testing.examle
   base_domain: cf.testing.examle
   cf-deployment-date: 2021-Mar-11 16:27:59 UTC
-  cf-deployment-hotfixes: true
   cf-deployment-url: https://github.com/cloudfoundry/cf-deployment/releases/tag/v16.7.0
   cf-deployment-version: 16.7.0
   core_network: cf-core
@@ -2077,9 +2069,9 @@ releases:
   url: https://bosh.io/d/github.com/pivotal-cf/credhub-release?v=2.9.0
   version: 2.9.0
 - name: diego
-  sha1: fbf8ebfeda1f326f5d6834b9a621b88a548e06e3
-  url: https://bosh.io/d/github.com/cloudfoundry/diego-release?v=2.48.0
-  version: 2.48.0
+  sha1: 5e8e6600cc6cf69dd25ce76bda6a144cc00bfdd7
+  url: https://bosh.io/d/github.com/cloudfoundry/diego-release?v=2.49.0
+  version: 2.49.0
 - name: dotnet-core-buildpack
   sha1: 67750e38b7ede093b4551ee7c78b3a55677d0f75
   url: https://bosh.io/d/github.com/cloudfoundry/dotnet-core-buildpack-release?v=2.3.24
@@ -2105,9 +2097,9 @@ releases:
   url: https://bosh.io/d/github.com/cloudfoundry/metrics-discovery-release?v=3.0.3
   version: 3.0.3
 - name: nats
-  sha1: e6c50707e2dc7330b7dfa3fcf1a0df06918ced07
-  url: https://bosh.io/d/github.com/cloudfoundry/nats-release?v=38
-  version: "38"
+  sha1: 269e60d95ec9694e6807a7f8e32634c7e2651232
+  url: https://bosh.io/d/github.com/cloudfoundry/nats-release?v=39
+  version: "39"
 - name: nginx-buildpack
   sha1: 4b68784ba88bea02b77620e96745c44a876eb7b5
   url: https://bosh.io/d/github.com/cloudfoundry/nginx-buildpack-release?v=1.1.21
@@ -2133,9 +2125,9 @@ releases:
   url: https://bosh.io/d/github.com/cloudfoundry/python-buildpack-release?v=1.7.32
   version: 1.7.32
 - name: routing
-  sha1: 537d8303a083fb4efa5dadf24411fa4758e25b68
-  url: https://bosh.io/d/github.com/cloudfoundry/routing-release?v=0.208.0
-  version: 0.208.0
+  sha1: 121f4bd24103b87f20b863e42d0a0e45aa32f6a5
+  url: https://bosh.io/d/github.com/cloudfoundry/routing-release?v=0.212.0
+  version: 0.212.0
 - name: ruby-buildpack
   sha1: d76692dc9582e8dd3604e124031f7ce549ef42ef
   url: https://bosh.io/d/github.com/cloudfoundry/ruby-buildpack-release?v=1.8.33
