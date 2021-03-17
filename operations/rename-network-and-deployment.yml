@@ -135,7 +135,7 @@
       domain: bosh
   - domain: auctioneer.service.cf.internal
     targets:
-    - query: '*'
+    - query: 'q-s4'
       instance_group: scheduler
       deployment: ((deployment_name))
       network: ((cf_core_network))
@@ -144,13 +144,6 @@
     targets:
     - query: 'q-s4'
       instance_group: diego-api
-      deployment: ((deployment_name))
-      network: ((cf_core_network))
-      domain: bosh
-  - domain: bits.service.cf.internal
-    targets:
-    - query: '*'
-      instance_group: bits
       deployment: ((deployment_name))
       network: ((cf_core_network))
       domain: bosh
