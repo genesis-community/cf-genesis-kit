@@ -59,9 +59,9 @@ header "Updating Git repository..."
 git config --global user.name  "${GIT_NAME}"
 git config --global user.email "${GIT_EMAIL}"
 
-pushd git
+pushd git-ci
   # Clean release-notes
-  echo -e "\n" > pushme/ci/release_notes.md
+  echo -e "\n" > ci/release_notes.md
   echo -e "## Version: ${VERSION}" > ci/version
   git add -A
   git status
@@ -70,8 +70,11 @@ popd
 
 header "Merge develop into master"
 pushd git-main
+  git pull ../git-ci -X theirs --no-edit
   git pull ../git -X theirs --no-edit
 popd
+
+
 
 cat > ${NOTIFICATION_OUT:-notifications}/message <<EOS
 New ${KIT_SHORTNAME} Genesis Kit v${VERSION} released. <https://github.com/${GITHUB_OWNER}/${KIT_SHORTNAME}-genesis-kit/releases/tag/v${VERSION}|Release notes>.

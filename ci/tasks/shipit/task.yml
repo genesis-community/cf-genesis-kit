@@ -10,11 +10,13 @@ inputs:
 - name: version
 - name: git
 - name: git-ci
+- name: git-main
 
 outputs:
 - name: gh
 - name: notifications
-- name: pushme
+- name: git-main
+- name: git-ci
 
 params:
   REPO_ROOT:        git

@@ -302,7 +302,7 @@ jobs:
     - put: git
       params:
         merge: true
-        repository: git
+        repository: git-ci
     - put: git-main
       params:
         merge: true
