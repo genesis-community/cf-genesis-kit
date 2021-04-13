@@ -1,9 +1,9 @@
 # Cloud Foundry Genesis Kit Manual
 
 The **Cloud Foundry Genesis Kit** deploys a single instance of
-Cloud Foundry.  As of v2.0.0, this is now based on [cf-deployment][cf-deployment]]
+Cloud Foundry.  As of v2.0.0, this is now based on [cf-deployment][cf-deployment]
 
-[cf-deplyment]: https://https://github.com/cloudfoundry/cf-deployment
+[cf-deployment]: https://https://github.com/cloudfoundry/cf-deployment
 
 # Requirements
 
