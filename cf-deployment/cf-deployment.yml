@@ -1,6 +1,6 @@
 ---
 name: cf
-manifest_version: v16.11.0
+manifest_version: v16.12.0
 update:
   canaries: 1
   canary_watch_time: 30000-1200000
@@ -2830,4 +2830,4 @@ releases:
 stemcells:
 - alias: default
   os: ubuntu-xenial
-  version: "621.117"
+  version: "621.123"
