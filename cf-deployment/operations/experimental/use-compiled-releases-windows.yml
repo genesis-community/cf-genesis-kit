@@ -9,9 +9,9 @@
   path: /releases/name=garden-runc
   value:
     name: garden-runc
-    sha1: 8589619bb08625a2a54d1af4df3540ce893c0ff3
-    url: https://bosh.io/d/github.com/cloudfoundry/garden-runc-release?v=1.19.21
-    version: 1.19.21
+    sha1: dbdcf0fdbe31243ffa03e922605ffa6ace79a59b
+    url: https://bosh.io/d/github.com/cloudfoundry/garden-runc-release?v=1.19.23
+    version: 1.19.23
 - type: replace
   path: /releases/name=loggregator-agent
   value:

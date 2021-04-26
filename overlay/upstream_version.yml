@@ -1,4 +1,4 @@
 exodus:
-  cf-deployment-version: 16.12.0
-  cf-deployment-date:    2021-Apr-19 18:20:12 UTC
-  cf-deployment-url:     https://github.com/cloudfoundry/cf-deployment/releases/tag/v16.12.0
+  cf-deployment-version: 16.13.0
+  cf-deployment-date:    2021-Apr-26 23:08:27 UTC
+  cf-deployment-url:     https://github.com/cloudfoundry/cf-deployment/releases/tag/v16.13.0
