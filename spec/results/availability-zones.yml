@@ -328,9 +328,9 @@ exodus:
   - run.cf.testing.examle
   apps_domain: run.cf.testing.examle
   base_domain: cf.testing.examle
-  cf-deployment-date: 2021-Apr-26 23:08:27 UTC
-  cf-deployment-url: https://github.com/cloudfoundry/cf-deployment/releases/tag/v16.13.0
-  cf-deployment-version: 16.13.0
+  cf-deployment-date: 2021-Apr-30 23:27:39 UTC
+  cf-deployment-url: https://github.com/cloudfoundry/cf-deployment/releases/tag/v16.14.0
+  cf-deployment-version: 16.14.0
   core_network: cf-core
   db_network: cf-core
   edge_network: cf-edge
@@ -2032,7 +2032,7 @@ instance_groups:
   - name: cf-core
   stemcell: default
   vm_type: minimal
-manifest_version: v16.13.0
+manifest_version: v16.14.0
 name: availability-zones-cf
 releases:
 - name: binary-buildpack
@@ -2158,7 +2158,7 @@ releases:
 stemcells:
 - alias: default
   os: ubuntu-xenial
-  version: "621.123"
+  version: "621.125"
 update:
   canaries: 1
   canary_watch_time: 30000-1200000
