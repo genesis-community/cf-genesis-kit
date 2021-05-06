@@ -8,6 +8,14 @@ bosh-variables:
     aws_secret_access_key: ((blobstore_secret_access_key))
     region: (( grab params.blobstore_s3_region ))
 
+# Per https://docs.aws.amazon.com/AmazonS3/latest/userguide/bucketnamingrules.html a key cannot
+# contain upper case so override here to exclude upper case
+variables:
+- name: cc_directory_key
+  type: password
+  options:
+    exclude_upper: true
+
 # Credhub Secrets
 #   blobstore_access_key_id
 #   blobstore_secret_access_key
