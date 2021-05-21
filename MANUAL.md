@@ -96,6 +96,12 @@ runtime config.
     is `delete-create`, but it can also be set to `create-swap-delete` to
     minimize downtime.
 
+  - `ca_validity_period` - Validity period of generated X.509 CA Certificates, expressed in years (#y), months (#m), days (#d) or hours (#h)
+    *Default:* `10y`
+  - `cert_validity_period` - Validity period of generated X.509 Certificates, expressed in years (#y), months (#m), days (#d) or hours (#h)
+    *Default:* `1y`
+
+
     [2]: (#branding)
 
 ## Deployment Parameters

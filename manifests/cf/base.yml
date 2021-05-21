@@ -46,7 +46,7 @@ params:
 
   skip_ssl_validation:  false
 
-  ca_validity_period:   1y
+  ca_validity_period:   10y
   cert_validity_period: 1y
 
   log_level: info

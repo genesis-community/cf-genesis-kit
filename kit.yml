@@ -24,12 +24,12 @@ certificates:
   base:
     application/certs:
       ca:
-        valid_for: 1y
+        valid_for: ${params.ca_validity_period}
         names:     [ "appRootCA" ]
 
     diego_instance_identity/certs:
       ca:
-        valid_for: 1y
+        valid_for: ${params.ca_validity_period}
         names:     [ "instanceIdentityCA" ]
         signed_by: "base.application/certs.ca"
         # This is suppose to be signed by application/certs/ca, but that is not
@@ -38,74 +38,74 @@ certificates:
 
     cf_internal/certs:
       ca:  # this is known as 'service_cf_internal_ca' in cf-deployment
-        valid_for: 1y
+        valid_for: ${params.ca_validity_period}
         names:     [ "internalCA" ]
 
       # This was under separate features blobstore-webdav.blobstore.certs.server
       # and  local-blobstore.blobstore.certs.server, but is suppose to be signed
       # by the cf_internal cert, so had to be moved here
       blobstore_tls:
-        valid_for: 1y
+        valid_for: ${params.cert_validity_period}
         names:     [ "blobstore.service.cf.internal" ]
 
       cc_bridge_cc_uploader:
-        valid_for: 1y
+        valid_for: ${params.cert_validity_period}
         names:     [ "cc_uploader" ]
         usage:     [ client_auth ]
       cc_bridge_cc_uploader_server:
-        valid_for: 1y
+        valid_for: ${params.cert_validity_period}
         names:     [ "cc-uploader.service.cf.internal" ]
         usage:     [ server_auth ]
       cc_bridge_tps:
-        valid_for: 1y
+        valid_for: ${params.cert_validity_period}
         names:     [ "tps_watcher" ]
         usage:     [ client_auth ]
       cc_tls:
-        valid_for: 1y
+        valid_for: ${params.cert_validity_period}
         names:     [ "cloud-controller-ng.service.cf.internal" ]
         usage:     [ server_auth, client_auth ]
       cc_public_tls:
-        valid_for: 1y
+        valid_for: ${params.cert_validity_period}
         names:     [ "api.${params.system_domain}",
                      "cloud-controller-ng.service.cf.internal" ]
 
       diego_auctioneer_client: #was diego/certs/auctioneer_client
-        valid_for: 1y
+        valid_for: ${params.cert_validity_period}
         names:     [ "auctioneer client" ]
         usage:     [ client_auth ]
       diego_auctioneer_server: #was diego/certs/auctioneer
-        valid_for: 1y
+        valid_for: ${params.cert_validity_period}
         names:     [ "auctioneer.service.cf.internal",
                      "*.auctioneer.service.cf.internal"]
         usage:     [ server_auth ]
 
       diego_bbs_client: #was diego/certs/bbs_client
-        valid_for: 1y
+        valid_for: ${params.cert_validity_period}
         names:     [ "bbs client" ]
         usage:     [ client_auth ]
       diego_bbs_server: #was diego/certs/bbs
-        valid_for: 1y
+        valid_for: ${params.cert_validity_period}
         names:     [ "bbs.service.cf.internal",
                      "*.bbs.service.cf.internal" ]
         usage:     [ server_auth, client_auth ]
 
       diego_locket_client: #was diego/certs/bbs_client
-        valid_for: 1y
+        valid_for: ${params.cert_validity_period}
         names:     [ "locket client" ]
         usage:     [ client_auth ]
       diego_locket_server: #was diego/certs/bbs
-        valid_for: 1y
+        valid_for: ${params.cert_validity_period}
         names:     [ "locket.service.cf.internal",
                      "*.locket.service.cf.internal",
                      "127.0.0.1" ]
         usage:     [ server_auth ]
 
       diego_rep_client: #was diego/certs/rep_client
-        valid_for: 1y
+        valid_for: ${params.cert_validity_period}
         names:     [ "rep client" ]
         usage:     [ client_auth ]
       diego_rep_agent_v2: #was diego/certs/rep
-        valid_for: 1y
+        valid_for: ${params.cert_validity_period}
         names:     [ "cell.service.cf.internal",
                      "*.cell.service.cf.internal",
                      "127.0.0.1",
@@ -113,170 +113,170 @@ certificates:
         usage:     [ server_auth, client_auth ]
 
       gorouter_backend_tls:
-        valid_for: 1y
+        valid_for: ${params.cert_validity_period}
         names:     [ "gorouter_backend_tls",
                     "gorouter.service.cf.internal" ]
         usage:     [ client_auth ]
 
       logcache_ssl:
-        valid_for: 1y
+        valid_for: ${params.cert_validity_period}
         names:     [ "log-cache",
                       "log-cache.${params.system_domain}",
                      "*.log-cache.${params.system_domain}" ]
       loggregator_rlp_gateway_tls:
-        valid_for: 1y
+        valid_for: ${params.cert_validity_period}
         names:     [ "log-stream.${params.system_domain}",
                      "log-api.service.cf.internal" ]
       loggregator_rlp_gateway_tls_cc:
-        valid_for: 1y
+        valid_for: ${params.cert_validity_period}
         names:     [ "rlp-gateway" ]
         usage:     [ client_auth ]
       loggregator_tls_cc_tc:
-        valid_for: 1y
+        valid_for: ${params.cert_validity_period}
         names:     [ "trafficcontroller" ]
         usage:     [ client_auth ]
       loggregator_trafficcontroller_tls:
-        valid_for: 1y
+        valid_for: ${params.cert_validity_period}
         names:     [ "doppler.${params.system_domain}",
                      "log-api.service.cf.internal" ]
       scheduler_api_tls:
-        valid_for: 1y
+        valid_for: ${params.cert_validity_period}
         names:     [ "ss-scheduler" ]
         usage:     [ server_auth, client_auth ]
 
       ssh_proxy_backends_tls: #was diego/certs/ssh_proxy_backend_tls
-        valid_for: 1y
+        valid_for: ${params.cert_validity_period}
         names:     [ "ssh_proxy_backend_tls",
                     "ssh-proxy.service.cf.internal" ]
         usage:     [ client_auth ]
 
     log_cache/certs:
       ca:
-        valid_for: 1y
+        valid_for: ${params.ca_validity_period}
         names:     [ "log-cache" ]
       server:
-        valid_for: 1y
+        valid_for: ${params.cert_validity_period}
         names:     [ "log-cache",
                      "log_cache",
                      "logcache" ]
         usage:     [ server_auth, client_auth ]
       cc_logcache_tls:
-        valid_for: 1y
+        valid_for: ${params.cert_validity_period}
         names:     [ "cloud-controller-ng.service.cf.internal",
                      "api.${params.system_domain}" ]
       proxy_tls:
-        valid_for: 1y
+        valid_for: ${params.cert_validity_period}
         names:     [ "localhost" ]
 
     loggregator/certs:
       ca:
-        valid_for: 1y
+        valid_for: ${params.ca_validity_period}
         names:     [ "loggregatorCA" ]
       loggregator_tls_statsdinjector:
-        valid_for: 1y
+        valid_for: ${params.cert_validity_period}
         names:     [ "statsdinjector" ]
         usage:     [ client_auth ]
       loggregator_tls_agent:
-        valid_for: 1y
+        valid_for: ${params.cert_validity_period}
         names:     [ "metron" ]
         usage:     [ server_auth, client_auth ]
       loggregator_tls_doppler:
-        valid_for: 1y
+        valid_for: ${params.cert_validity_period}
         names:     [ "doppler" ]
         usage:     [ server_auth, client_auth ]
       loggregator_tls_tc:
-        valid_for: 1y
+        valid_for: ${params.cert_validity_period}
         names:     [ "trafficcontroller" ]
         usage:     [ server_auth, client_auth ]
       loggregator_tls_rlp:
-        valid_for: 1y
+        valid_for: ${params.cert_validity_period}
         names:     [ "reverselogproxy" ]
         usage:     [ server_auth, client_auth ]
       loggregator_tls_rlp_gateway:
-        valid_for: 1y
+        valid_for: ${params.cert_validity_period}
         names:     [ "rlp_gateway" ]
         usage:     [ client_auth ]
       adapter_rlp_tls:
-        valid_for: 1y
+        valid_for: ${params.cert_validity_period}
         names:     [ "ss-adapter-rlp" ]
         usage:     [ server_auth, client_auth ]
       adapter_tls:
-        valid_for: 1y
+        valid_for: ${params.cert_validity_period}
         names:     [ "ss-adapter" ]
         usage:     [ server_auth, client_auth ]
       scheduler_client_tls:
-        valid_for: 1y
+        valid_for: ${params.cert_validity_period}
         names:     [ "ss-scheduler" ]
         usage:     [ client_auth ]
       logs_provider:
-        valid_for: 1y
+        valid_for: ${params.cert_validity_period}
         names:     [ "log-cache" ]
         usage:     [ server_auth, client_auth ]
 
     metrics/certs: #was prometheus/certs/...
       ca:
-        valid_for: 1y
+        valid_for: ${params.ca_validity_period}
         names:     [ "metricScraperCA" ]
       forwarder_agent_metrics_tls:
-        valid_for: 1y
+        valid_for: ${params.cert_validity_period}
         names:     [ "forwarder_agent_metrics" ]
         usage:     [ server_auth ]
       log_cache_metrics_tls:
-        valid_for: 1y
+        valid_for: ${params.cert_validity_period}
         names:     [ "log_cache_metrics" ]
         usage:     [ server_auth ]
       log_cache_cf_auth_proxy_metrics_tls:
-        valid_for: 1y
+        valid_for: ${params.cert_validity_period}
         names:     [ "log_cache_cf_auth_proxy_metrics" ]
         usage:     [ server_auth ]
       log_cache_gateway_metrics_tls:
-        valid_for: 1y
+        valid_for: ${params.cert_validity_period}
         names:     [ "log_cache_gateway_metrics" ]
         usage:     [ server_auth ]
       loggregator_agent_metrics_tls:
-        valid_for: 1y
+        valid_for: ${params.cert_validity_period}
         names:     [ "loggregator_agent_metrics" ]
         usage:     [ server_auth ]
       loggr_udp_forwarder_tls:
-        valid_for: 1y
+        valid_for: ${params.cert_validity_period}
         names:     [ "loggr_udp_forwarder_metrics" ]
         usage:     [ server_auth ]
       prom_scraper_scrape_tls:
-        valid_for: 1y
+        valid_for: ${params.cert_validity_period}
         names:     [ "prom_scraper" ]
         usage:     [ client_auth ]
       prom_scraper_metrics_tls:
-        valid_for: 1y
+        valid_for: ${params.cert_validity_period}
         names:     [ "prom_scraper_metrics" ]
         usage:     [ server_auth ]
       rlp_gateway_metrics_tls:
-        valid_for: 1y
+        valid_for: ${params.cert_validity_period}
         names:     [ "rlp_gateway_metrics" ]
         usage:     [ server_auth ]
 
     network_policy/certs:
       ca:
-        valid_for: 1y
+        valid_for: ${params.ca_validity_period}
         names:     [ "networkPolicyCA" ]
       client:
-        valid_for: 1y
+        valid_for: ${params.cert_validity_period}
         names:     [ "clientName" ]
         usage:     [ client_auth ]
       server:
-        valid_for: 1y
+        valid_for: ${params.cert_validity_period}
         names:     [ "policy-server.service.cf.internal" ]
         usage:     [ server_auth ]
       server_external:  #new
-        valid_for: 1y
+        valid_for: ${params.cert_validity_period}
         names:     [ "api.${params.system_domain}" ]
         usage:     [ server_auth ]
 
     router/certs:
       ca:
-        valid_for: 1y
+        valid_for: ${params.ca_validity_period}
         names:     [ "routerCA" ]
       ssl:
-        valid_for: 1y
+        valid_for: ${params.cert_validity_period}
         names:     [ "routerSSL",
                       "${params.system_domain}",
                       "*.${params.system_domain}" ]
@@ -284,49 +284,49 @@ certificates:
 
     silk/certs:
       ca:
-        valid_for: 1y
+        valid_for: ${params.ca_validity_period}
         names:     [ "silk-ca" ]
       controller:  #was server
-        valid_for: 1y
+        valid_for: ${params.cert_validity_period}
         names:     [ "silk-controller.service.cf.internal" ]
         usage:     [ server_auth ]
       daemon:      #was client
-        valid_for: 1y
+        valid_for: ${params.cert_validity_period}
         names:     [ "silk-daemon" ]
         usage:     [ client_auth ]
 
     uaa/certs:
       ca:
-        valid_for: 1y
+        valid_for: ${params.ca_validity_period}
         names:     [ "uaaCA" ]
       login_saml:
-        valid_for: 1y
+        valid_for: ${params.cert_validity_period}
         names:     [ "uaa_login_saml" ]
       ssl:
-        valid_for: 1y
+        valid_for: ${params.cert_validity_period}
         names:     [ "uaa.service.cf.internal" ]
 
   dns-service-discovery:
     cf_app_sd/certs: # was service-disco
       ca:
-        valid_for: 1y
+        valid_for: ${params.ca_validity_period}
         names:     [ "service-discovery-controller.service.cf.internal" ]
       server:
-        valid_for: 1y
+        valid_for: ${params.cert_validity_period}
         names:     [ "service-discovery-controller.service.cf.internal" ]
         usage:     [ server_auth ]
       client:
-        valid_for: 1y
+        valid_for: ${params.cert_validity_period}
         names:     [ "service-discovery-controller.service.cf.internal" ]
         usage:     [ client_auth ]
 
   self-signed:
     haproxy:
       ca:
-        valid_for: 1y
+        valid_for: ${params.ca_validity_period}
         names:     [ "haProxyCA" ]
       ssl:
-        valid_for: 1y
+        valid_for: ${params.cert_validity_period}
         names:     [ "*.${params.base_domain}",
                      "*.${params.system_domain}",
                      "*.${params.apps_domain}",
@@ -336,62 +336,62 @@ certificates:
   autoscaler:
     autoscaler/certs:
       ca:
-        valid_for: 1y
+        valid_for: ${params.ca_validity_period}
         names:     [ "autoscalerCA" ]
       scheduler_client:
-        valid_for: 1y
+        valid_for: ${params.cert_validity_period}
         names:     [ "scheduler client" ]
       scheduler_server:
-        valid_for: 1y
+        valid_for: ${params.cert_validity_period}
         names:     [ "autoscalerscheduler.service.cf.internal" ]
       servicebroker_client:
-        valid_for: 1y
+        valid_for: ${params.cert_validity_period}
         names:     [ "servicebroker client" ]
       servicebroker_public:
-        valid_for: 1y
+        valid_for: ${params.cert_validity_period}
         names:     [ "autoscalerservicebroker.${params.system_domain}" ]
       servicebroker_server:
-        valid_for: 1y
+        valid_for: ${params.cert_validity_period}
         names:     [ "servicebroker.service.cf.internal" ]
       apiserver_client:
-        valid_for: 1y
+        valid_for: ${params.cert_validity_period}
         names:     [ "apiserver client" ]
       apiserver_public:
-        valid_for: 1y
+        valid_for: ${params.cert_validity_period}
         names:     [ "autoscaler.${params.system_domain}" ]
       apiserver_server:
-        valid_for: 1y
+        valid_for: ${params.cert_validity_period}
         names:     [ "apiserver.service.cf.internal" ]
       metricscollector_client:
-        valid_for: 1y
+        valid_for: ${params.cert_validity_period}
         names:     [ "metricscollector client" ]
       metricscollector_server:
-        valid_for: 1y
+        valid_for: ${params.cert_validity_period}
         names:     [ "metricscollector.service.cf.internal" ]
       scalingengine_client:
-        valid_for: 1y
+        valid_for: ${params.cert_validity_period}
         names:     [ "scalingengine client" ]
       scalingengine_server:
-        valid_for: 1y
+        valid_for: ${params.cert_validity_period}
         names:     [ "scalingengine.service.cf.internal" ]
       eventgenerator_server:
-        valid_for: 1y
+        valid_for: ${params.cert_validity_period}
         names:     [ "eventgenerator.service.cf.internal" ]
       eventgenerator_client:
-        valid_for: 1y
+        valid_for: ${params.cert_validity_period}
         names:     [ "eventgenerator client" ]
 
   routing-api:
     routing_api/certs:
       ca:
-        valid_for: 1y
+        valid_for: ${params.ca_validity_period}
         names:     [ "routing_api" ]
       client:
-        valid_for: 1y
+        valid_for: ${params.cert_validity_period}
         names:     [ "routing-api-client" ]
         usage:     [ client_auth ]
       server:
-        valid_for: 1y
+        valid_for: ${params.cert_validity_period}
         names:     [ "routing-api.service.cf.internal" ]
         usage:     [ server_auth ]
 
