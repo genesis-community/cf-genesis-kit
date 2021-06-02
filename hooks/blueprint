@@ -3,24 +3,6 @@ set -eu
 
 declare -a merge
 
-validate_features nfs-volume-services small-footprint \
-                  local-db local-ha-db mysql-db postgres-db \
-                  db-internal-postgres db-external-mysql db-external-postgres \
-                  aws-blobstore azure-blobstore gcp-blobstore local-blobstore \
-                  blobstore-aws blobstore-azure blobstore-gcp blobstore-webdav \
-                  haproxy tls self-signed \
-                  shield-dbs shield-blobstore \
-                  minimum-vms \
-                  autoscaler autoscaler-postgres \
-                  haproxy-tls haproxy-notls omit-haproxy \
-                  migrate-1.3-without-consul \
-                  container-routing-integrity \
-                  native-garden-runc \
-                  loggregator-forwarder-agent \
-                  cflinuxfs2 \
-                  app-bosh-dns dns-service-discovery \
-                  routing-api
-
 merge=( manifests/cf/base.yml
         manifests/cf/releases.yml
         manifests/cf/buildpacks.yml
@@ -266,6 +248,27 @@ fi
 if [[ $database -gt 1 ]]; then
   echo >&2 "You have enabled more than one Database feature flag."
   exit 1
+fi
+
+  #######  ########   ######     ######## #### ##       ########  ######  
+##     ## ##     ## ##    ##    ##        ##  ##       ##       ##    ## 
+##     ## ##     ## ##          ##        ##  ##       ##       ##       
+##     ## ########   ######     ######    ##  ##       ######    ######  
+##     ## ##              ##    ##        ##  ##       ##             ## 
+##     ## ##        ##    ##    ##        ##  ##       ##       ##    ## 
+ #######  ##         ######     ##       #### ######## ########  ######  
+
+opsdir="ops"
+[[ -n "${PREVIOUS_ENV:-}" ]] && opsdir=".genesis/cached/${PREVIOUS_ENV}/$opsdir"
+
+if [[ -f "$GENESIS_ROOT/${opsdir}/$want.yml" ]] ; then
+  merge+=( "$GENESIS_ROOT/${opsdir}/$want.yml" )
+elif [[ -f "$GENESIS_ROOT/ops/$want.yml" ]] ; then
+  merge+=( "$GENESIS_ROOT/ops/$want.yml" )
+else
+  abort=1
+  describe >&2 \
+    "#R{[ERROR]} The #c{$want} feature is invalid. See the manual for list of valid features."
 fi
 
 vault="secret/$GENESIS_VAULT_PREFIX"
