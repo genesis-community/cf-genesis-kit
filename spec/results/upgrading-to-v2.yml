@@ -318,7 +318,7 @@ instance_groups:
       nats:
         hostname: nats.service.cf.internal
         password: <!{credhub}:nats_password!>
-        user: nats
+        user: nats_user
     provides:
       nats:
         as: nats
@@ -337,7 +337,7 @@ instance_groups:
             private_key: <!{credhub}:nats_server_cert.private_key!>
         hostname: nats.service.cf.internal
         password: <!{credhub}:nats_password!>
-        user: nats
+        user: nats_user
     provides:
       nats-tls:
         as: nats-tls
@@ -864,7 +864,7 @@ instance_groups:
           private_key: <!{credhub}:cc_tls.private_key!>
           public_cert: <!{credhub}:cc_tls.certificate!>
         packages:
-          app_package_directory_key: upgrading-to-v2-cc-app-packages-<!{credhub}:cc_directory_key!>
+          app_package_directory_key: upgrading-to-v2-cc-packages-<!{credhub}:cc_directory_key!>
           blobstore_type: webdav
           webdav_config:
             blobstore_timeout: 5

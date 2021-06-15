@@ -76,176 +76,176 @@ addons:
       aliases:
       - domain: _.cell.service.cf.internal
         targets:
-        - deployment: upgrade-from-v1-with-db-override-names-cf
+        - deployment: upgrading-to-v2-with-204-overrides-cf
           domain: bosh
           instance_group: diego-cell
           network: cf-runtime
           query: _
-        - deployment: upgrade-from-v1-with-db-override-names-cf
+        - deployment: upgrading-to-v2-with-204-overrides-cf
           domain: bosh
           instance_group: windows2012R2-cell
           network: cf-runtime
           query: _
-        - deployment: upgrade-from-v1-with-db-override-names-cf
+        - deployment: upgrading-to-v2-with-204-overrides-cf
           domain: bosh
           instance_group: windows2016-cell
           network: cf-runtime
           query: _
-        - deployment: upgrade-from-v1-with-db-override-names-cf
+        - deployment: upgrading-to-v2-with-204-overrides-cf
           domain: bosh
           instance_group: isolated-diego-cell
           network: cf-runtime
           query: _
       - domain: auctioneer.service.cf.internal
         targets:
-        - deployment: upgrade-from-v1-with-db-override-names-cf
+        - deployment: upgrading-to-v2-with-204-overrides-cf
           domain: bosh
           instance_group: scheduler
           network: cf-core
           query: '*'
       - domain: bbs.service.cf.internal
         targets:
-        - deployment: upgrade-from-v1-with-db-override-names-cf
+        - deployment: upgrading-to-v2-with-204-overrides-cf
           domain: bosh
           instance_group: diego-api
           network: cf-core
           query: q-s4
       - domain: bits.service.cf.internal
         targets:
-        - deployment: upgrade-from-v1-with-db-override-names-cf
+        - deployment: upgrading-to-v2-with-204-overrides-cf
           domain: bosh
           instance_group: bits
           network: cf-core
           query: '*'
       - domain: blobstore.service.cf.internal
         targets:
-        - deployment: upgrade-from-v1-with-db-override-names-cf
+        - deployment: upgrading-to-v2-with-204-overrides-cf
           domain: bosh
           instance_group: singleton-blobstore
           network: cf-core
           query: '*'
       - domain: cc-uploader.service.cf.internal
         targets:
-        - deployment: upgrade-from-v1-with-db-override-names-cf
+        - deployment: upgrading-to-v2-with-204-overrides-cf
           domain: bosh
           instance_group: api
           network: cf-core
           query: '*'
       - domain: cloud-controller-ng.service.cf.internal
         targets:
-        - deployment: upgrade-from-v1-with-db-override-names-cf
+        - deployment: upgrading-to-v2-with-204-overrides-cf
           domain: bosh
           instance_group: api
           network: cf-core
           query: '*'
       - domain: credhub.service.cf.internal
         targets:
-        - deployment: upgrade-from-v1-with-db-override-names-cf
+        - deployment: upgrading-to-v2-with-204-overrides-cf
           domain: bosh
           instance_group: credhub
           network: cf-core
           query: '*'
       - domain: doppler.service.cf.internal
         targets:
-        - deployment: upgrade-from-v1-with-db-override-names-cf
+        - deployment: upgrading-to-v2-with-204-overrides-cf
           domain: bosh
           instance_group: doppler
           network: cf-core
           query: '*'
       - domain: file-server.service.cf.internal
         targets:
-        - deployment: upgrade-from-v1-with-db-override-names-cf
+        - deployment: upgrading-to-v2-with-204-overrides-cf
           domain: bosh
           instance_group: api
           network: cf-core
           query: '*'
       - domain: gorouter.service.cf.internal
         targets:
-        - deployment: upgrade-from-v1-with-db-override-names-cf
+        - deployment: upgrading-to-v2-with-204-overrides-cf
           domain: bosh
           instance_group: router
           network: cf-edge
           query: '*'
       - domain: locket.service.cf.internal
         targets:
-        - deployment: upgrade-from-v1-with-db-override-names-cf
+        - deployment: upgrading-to-v2-with-204-overrides-cf
           domain: bosh
           instance_group: diego-api
           network: cf-core
           query: '*'
       - domain: loggregator-trafficcontroller.service.cf.internal
         targets:
-        - deployment: upgrade-from-v1-with-db-override-names-cf
+        - deployment: upgrading-to-v2-with-204-overrides-cf
           domain: bosh
           instance_group: log-api
           network: cf-core
           query: '*'
       - domain: policy-server.service.cf.internal
         targets:
-        - deployment: upgrade-from-v1-with-db-override-names-cf
+        - deployment: upgrading-to-v2-with-204-overrides-cf
           domain: bosh
           instance_group: api
           network: cf-core
           query: '*'
       - domain: reverse-log-proxy.service.cf.internal
         targets:
-        - deployment: upgrade-from-v1-with-db-override-names-cf
+        - deployment: upgrading-to-v2-with-204-overrides-cf
           domain: bosh
           instance_group: log-api
           network: cf-core
           query: '*'
       - domain: routing-api.service.cf.internal
         targets:
-        - deployment: upgrade-from-v1-with-db-override-names-cf
+        - deployment: upgrading-to-v2-with-204-overrides-cf
           domain: bosh
           instance_group: api
           network: cf-core
           query: '*'
       - domain: silk-controller.service.cf.internal
         targets:
-        - deployment: upgrade-from-v1-with-db-override-names-cf
+        - deployment: upgrading-to-v2-with-204-overrides-cf
           domain: bosh
           instance_group: diego-api
           network: cf-core
           query: '*'
       - domain: sql-db.service.cf.internal
         targets:
-        - deployment: upgrade-from-v1-with-db-override-names-cf
+        - deployment: upgrading-to-v2-with-204-overrides-cf
           domain: bosh
           instance_group: database
           network: cf-db
           query: '*'
       - domain: ssh-proxy.service.cf.internal
         targets:
-        - deployment: upgrade-from-v1-with-db-override-names-cf
+        - deployment: upgrading-to-v2-with-204-overrides-cf
           domain: bosh
           instance_group: router
           network: cf-core
           query: '*'
       - domain: tps.service.cf.internal
         targets:
-        - deployment: upgrade-from-v1-with-db-override-names-cf
+        - deployment: upgrading-to-v2-with-204-overrides-cf
           domain: bosh
           instance_group: scheduler
           network: cf-core
           query: '*'
       - domain: uaa.service.cf.internal
         targets:
-        - deployment: upgrade-from-v1-with-db-override-names-cf
+        - deployment: upgrading-to-v2-with-204-overrides-cf
           domain: bosh
           instance_group: uaa
           network: cf-core
           query: '*'
       - domain: nats.service.cf.internal
         targets:
-        - deployment: upgrade-from-v1-with-db-override-names-cf
+        - deployment: upgrading-to-v2-with-204-overrides-cf
           domain: bosh
           instance_group: nats
           network: cf-core
           query: '*'
       - domain: _.nats.service.cf.internal
         targets:
-        - deployment: upgrade-from-v1-with-db-override-names-cf
+        - deployment: upgrading-to-v2-with-204-overrides-cf
           domain: bosh
           instance_group: nats
           network: cf-core
@@ -267,13 +267,13 @@ exodus:
   core_network: cf-core
   db_network: cf-db
   edge_network: cf-edge
-  features: ssh-proxy-on-routers,local-postgres-db
+  features: ssh-proxy-on-routers,local-postgres-db,v2-nats-credentials
   migrated_v1_env: 1
   runtime_network: cf-runtime
   system_domain: system.cf.testing.examle
   system_org: system
   system_space: system
-  vaulted_uaa_clients: /secret/upgrade/from/v1/with/db/override/names/cf/uaa/client_secrets:firehose
+  vaulted_uaa_clients: /secret/upgrading/to/v2/with/204/overrides/cf/uaa/client_secrets:firehose
 features:
   randomize_az_placement: true
 instance_groups:
@@ -281,7 +281,6 @@ instance_groups:
   - z1
   - z2
   - z3
-  - z4
   instances: 1
   jobs:
   - name: smoke_tests
@@ -312,7 +311,6 @@ instance_groups:
   - z1
   - z2
   - z3
-  - z4
   instances: 2
   jobs:
   - name: nats
@@ -320,7 +318,7 @@ instance_groups:
       nats:
         hostname: nats.service.cf.internal
         password: <!{credhub}:nats_password!>
-        user: nats_user
+        user: nats
     provides:
       nats:
         as: nats
@@ -339,7 +337,7 @@ instance_groups:
             private_key: <!{credhub}:nats_server_cert.private_key!>
         hostname: nats.service.cf.internal
         password: <!{credhub}:nats_password!>
-        user: nats_user
+        user: nats
     provides:
       nats-tls:
         as: nats-tls
@@ -354,7 +352,6 @@ instance_groups:
   - z1
   - z2
   - z3
-  - z4
   instances: 2
   jobs:
   - name: adapter
@@ -438,6 +435,8 @@ instance_groups:
           password: <!{credhub}:credhub_database_password!>
           tag: admin
     release: postgres
+  - name: migrate-postgres
+    release: migrate-postgres
   migrated_from:
   - name: postgres
   - name: singleton-database
@@ -453,7 +452,6 @@ instance_groups:
   - z1
   - z2
   - z3
-  - z4
   instances: 2
   jobs:
   - name: cfdot
@@ -574,7 +572,6 @@ instance_groups:
   - z1
   - z2
   - z3
-  - z4
   instances: 2
   jobs:
   - name: uaa
@@ -789,7 +786,6 @@ instance_groups:
   - z1
   - z2
   - z3
-  - z4
   instances: 2
   jobs:
   - name: cloud_controller_ng
@@ -798,11 +794,11 @@ instance_groups:
       - run.cf.testing.examle
       app_ssh:
         host_key_fingerprint: <!{credhub}:diego_ssh_proxy_host_key.public_key_fingerprint!>
-      build: cf-genesis-kit v2.0.3
+      build: cf-genesis-kit v2.0.4
       cc:
         buildpacks:
           blobstore_type: webdav
-          buildpack_directory_key: upgrade-from-v1-with-db-override-names-cc-buildpacks-<!{credhub}:cc_directory_key!>
+          buildpack_directory_key: upgrading-to-v2-with-204-overrides-cc-buildpacks-<!{credhub}:cc_directory_key!>
           webdav_config:
             blobstore_timeout: 5
             ca_cert: <!{credhub}:blobstore_tls.ca!>
@@ -826,7 +822,7 @@ instance_groups:
           docker_staging_stack: cflinuxfs3
         droplets:
           blobstore_type: webdav
-          droplet_directory_key: upgrade-from-v1-with-db-override-names-cc-droplets-<!{credhub}:cc_directory_key!>
+          droplet_directory_key: upgrading-to-v2-with-204-overrides-cc-droplets-<!{credhub}:cc_directory_key!>
           webdav_config:
             blobstore_timeout: 5
             ca_cert: <!{credhub}:blobstore_tls.ca!>
@@ -868,7 +864,7 @@ instance_groups:
           private_key: <!{credhub}:cc_tls.private_key!>
           public_cert: <!{credhub}:cc_tls.certificate!>
         packages:
-          app_package_directory_key: upgrade-from-v1-with-db-override-names-cc-packages-<!{credhub}:cc_directory_key!>
+          app_package_directory_key: upgrading-to-v2-with-204-overrides-cc-app-packages-<!{credhub}:cc_directory_key!>
           blobstore_type: webdav
           webdav_config:
             blobstore_timeout: 5
@@ -883,7 +879,7 @@ instance_groups:
           private_key: <!{credhub}:cc_public_tls.private_key!>
         resource_pool:
           blobstore_type: webdav
-          resource_directory_key: upgrade-from-v1-with-db-override-names-cc-resources-<!{credhub}:cc_directory_key!>
+          resource_directory_key: upgrading-to-v2-with-204-overrides-cc-resources-<!{credhub}:cc_directory_key!>
           webdav_config:
             blobstore_timeout: 5
             ca_cert: <!{credhub}:blobstore_tls.ca!>
@@ -931,7 +927,7 @@ instance_groups:
       credhub_api:
         ca_cert: <!{credhub}:credhub_tls.ca!>
       description: Use `genesis info` on environment file for more details
-      name: Cloud Foundry (upgrade-from-v1-with-db-override-names)
+      name: Cloud Foundry (upgrading-to-v2-with-204-overrides)
       router:
         route_services_secret: <!{credhub}:router_route_services_secret!>
       routing_api:
@@ -1118,7 +1114,6 @@ instance_groups:
   - z1
   - z2
   - z3
-  - z4
   instances: 2
   jobs:
   - name: cloud_controller_worker
@@ -1204,7 +1199,6 @@ instance_groups:
   - z1
   - z2
   - z3
-  - z4
   instances: 2
   jobs:
   - name: cfdot
@@ -1444,7 +1438,6 @@ instance_groups:
   - z1
   - z2
   - z3
-  - z4
   instances: 2
   jobs:
   - name: gorouter
@@ -1538,7 +1531,6 @@ instance_groups:
   - z1
   - z2
   - z3
-  - z4
   instances: 2
   jobs:
   - name: tcp_router
@@ -1574,7 +1566,6 @@ instance_groups:
   - z1
   - z2
   - z3
-  - z4
   instances: 4
   jobs:
   - name: doppler
@@ -1670,7 +1661,6 @@ instance_groups:
   - z1
   - z2
   - z3
-  - z4
   instances: 3
   jobs:
   - name: cflinuxfs3-rootfs-setup
@@ -1807,6 +1797,8 @@ instance_groups:
         key: <!{credhub}:loggr_udp_forwarder_tls.private_key!>
         server_name: loggr_udp_forwarder_metrics
     release: loggregator-agent
+  migrated_from:
+  - name: cell
   name: diego-cell
   networks:
   - name: cf-runtime
@@ -1818,7 +1810,6 @@ instance_groups:
   - z1
   - z2
   - z3
-  - z4
   instances: 2
   jobs:
   - consumes:
@@ -1921,7 +1912,6 @@ instance_groups:
   - z1
   - z2
   - z3
-  - z4
   instances: 2
   jobs:
   - name: credhub
@@ -1987,7 +1977,6 @@ instance_groups:
   - z1
   - z2
   - z3
-  - z4
   instances: 1
   jobs:
   - name: rotate_cc_database_key
@@ -2000,7 +1989,7 @@ instance_groups:
   stemcell: default
   vm_type: errand
 manifest_version: v12.45.0
-name: upgrade-from-v1-with-db-override-names-cf
+name: upgrading-to-v2-with-204-overrides-cf
 releases:
 - name: binary-buildpack
   sha1: 0269a613be68f988682bbf56504b78477965b1c4
@@ -2130,6 +2119,10 @@ releases:
   sha1: 4488d08ff54117a9d904f6e2f27c82c1cf4c910e
   url: https://bosh.io/d/github.com/cloudfoundry/postgres-release?v=41
   version: "41"
+- name: migrate-postgres
+  sha1: b66d02413a3745b23c4b55897019a9d24967b564
+  url: https://github.com/rkoster/migrate-postgres-boshrelease/releases/download/v1.0.1/migrate-postgres-1.0.1.tgz
+  version: 1.0.1
 stemcells:
 - alias: default
   os: ubuntu-xenial
