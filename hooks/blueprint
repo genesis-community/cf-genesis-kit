@@ -224,7 +224,7 @@ for want in $GENESIS_REQUESTED_FEATURES; do
     bare|partitioned-network|haproxy|tls|no-nats-tls|self-signed) features+=( "$want" ) ;;
     minio-blobstore|aws-blobstore|aws-blobstore-iam|azure-blobstore|gcp-blobstore|gcp-use-access-key) features+=( "$want" ) ;;
     nfs-volume-services|enable-service-discovery|ssh-proxy-on-routers|no-tcp-routers) features+=( "$want" ) ;;
-    app-autoscaler-integration|prometheus-integration) features+=( "$want" ) ;;
+    app-autoscaler-integration|prometheus-integration|v2-nats-credentials) features+=( "$want" ) ;;
     +migrated-v1-env|+override-db-names) features+=( "$want" ) ;;
     v1-vm-types|no-v1-vm-types)
       : # no-op, dealt with above
@@ -442,6 +442,10 @@ fi
 if ! want_feature "bare" ; then
 
   want_feature "no-nats-tls" || manifest+=( "overlay/nats-tls.yml" )
+  if want_feature '+migrated-v1-env' && ! want_feature 'v2-nats-credentials'; then
+    manifest+=( "overlay/addons/migration-v1-nats-credentials.yml" )
+    want_feature "no-nats-tls" ||  manifest+=( "addons/migration-v1-nats-credentials-tls.yml" )
+  fi
 
   # Handle ssl validation
   skip_ssl_validation="$(jq -r '.skip_ssl_validation' <(echo "$params"))"
