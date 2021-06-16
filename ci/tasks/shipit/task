@@ -61,7 +61,7 @@ git config --global user.email "${GIT_EMAIL}"
 
 pushd git
   # Clean release-notes
-  echo -e "\n" > pushme/ci/release_notes.md
+  echo -e "\n" > ci/release_notes.md
   echo -e "## Version: ${VERSION}" > ci/version
   git add -A
   git status

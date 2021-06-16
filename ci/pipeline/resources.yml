@@ -9,10 +9,10 @@ resources:
     type: git
     check_every: 24h
     source:
-      uri:         (( grab meta.github.uri ))
-      branch:      (( grab meta.github.branch ))
-      private_key: (( grab meta.github.private_key ))
-      ignore_paths: [ci/*]
+      uri:          (( grab meta.github.uri ))
+      branch:       (( grab meta.github.branch ))
+      private_key:  (( grab meta.github.private_key ))
+      ignore_paths: ["ci/*[^md]"]
 
   - name: git-main
     type: git
