@@ -450,17 +450,70 @@ following:
   - `errand_vm_type` - What type of VM to deploy for the
     smoke-tests errand.  Defaults to `errand`. Recommend `1 cpu / 2g mem`.
 
-  - `schedulet_vm_type` - What type of VM to deploy for the Diego
+    Note: The known errands are `smoke-tests` and `rotate-cc-database-key`.
+    If you need to change just one of these, you can use
+    `<errand_type_with_underscores_replacing_dashes>_vm_type`
+
+  - `scheduler_vm_type` - What type of VM to deploy for the Diego
     orchestration nodes (not the cells, the auctioneers). (`diego_instances`
     from v1.x will be translated to this value during deployment)
     Recommend `2 cpu / 4g mem`.
 
-  - `tcp_router_instances` - What type of VM to deploy for the TCP router nodes.
-    Recommend `1 cpu / 2g mem`.
+  - `tcp_router_vm_type` - What type of VM to deploy for the TCP router nodes.
+    Recommend `1 cpu / 2g mem`. 
 
   - `uaa_vm_type` - What type of VM to deploy for the nodes in
     the UAA cluster.
     Recommend `2 cpu / 4g mem`.
+
+*Note:*  For known instance groups, the underscores are automatically converted
+to hyphens to determine the matching `instance_group` for the specified
+`*_vm_type` params.  For user specified, you must specify the hyphen or
+underscore as used in the `instance_group`.
+
+Known instance groups are:
+  adapter, api, cc-worker, credhub, database, diego-api, diego-cell, doppler,
+  errand, haproxy, log-api, nats, rotate-cc-database-key, router, scheduler,
+  singleton-blobstore, smoke-tests, tcp-router, and uaa
+
+
+### Special Considerations for Migrating from v1.x
+
+For environments that were migrated from v1.x version of the kit, the features
+`v1-vm-type` will be automatically turned on, which will use the same VM types
+as was used in the v1.x versions of the kit, or as close to possible.  This
+allows you to use your existing cloud config and tuning.  Where the instance
+group name changes, it will use the vm type that the instance group was
+migrated from.
+
+The exceptions are `tcp-router`, which will use the `router` vm type, and
+`cc-worker` and `credhub`, which continue to use `minimum` as there was no
+prevous instance group for these functions.
+
+If you want to use the de facto vm types after migration, you can specify the
+`no-v1-vm-types` feature.
+
+The vm types are as follows:
+
+| v2 instance group | prevous (v1) instance group | vm type |
+=============================================================
+| adapter | syslogger | syslogger |
+| api | api | api |
+| cc-worker | - | minimal |
+| credhub | - | minimal |
+| database | postgres | postgres |
+| diego-api | bbs | bbs |
+| diego-cell | cell | cell |
+| doppler | doppler | doppler |
+| log-api | loggregator | loggregator |
+| nats | nats | nats |
+| rotate-cc-database-key | - | errand |
+| router | router | router |
+| scheduler | diego | diego |
+| singleton-blobstore | blobstore | blobstore |
+| smoke-tests | smoke-tests | errand |
+| tcp-router | -  | router |
+| uaa | uaa | uaa |
 
 
 ## Networking Parameters
@@ -714,9 +767,9 @@ of the above databases, by replacing `password` with the above params.  Any
 parameter not overridden will use the default name and user, and the common
 host and port.
 
-### Special Database Consideration when Upgrading from v1.10.1
+### Special Database Consideration when Upgrading from v1.10.x
 
-Upgrading from 1.10.1 will result in a slightly different experience.
+Upgrading from 1.10.x will result in a slightly different experience.
 Existing local PostgreSQL databases will be renamed to match the expected
 names for upstream `cf-deployment`, *EXCEPT* in the case where the names have
 been overridden with v1.x parameters for setting the database name.

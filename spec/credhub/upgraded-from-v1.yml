@@ -1,0 +1,333 @@
+adapter_rlp_tls:
+  ca: <!{credhub}:adapter_rlp_tls.ca!>
+  certificate: <!{credhub}:adapter_rlp_tls.certificate!>
+  private_key: <!{credhub}:adapter_rlp_tls.private_key!>
+adapter_tls:
+  ca: <!{credhub}:adapter_tls.ca!>
+  certificate: <!{credhub}:adapter_tls.certificate!>
+  private_key: <!{credhub}:adapter_tls.private_key!>
+application_ca:
+  ca: <!{credhub}:application_ca.ca!>
+  certificate: <!{credhub}:application_ca.certificate!>
+  private_key: <!{credhub}:application_ca.private_key!>
+blobstore_admin_users_password: <!{credhub}:blobstore_admin_users_password!>
+blobstore_secure_link_secret: <!{credhub}:blobstore_secure_link_secret!>
+blobstore_tls:
+  ca: <!{credhub}:blobstore_tls.ca!>
+  certificate: <!{credhub}:blobstore_tls.certificate!>
+  private_key: <!{credhub}:blobstore_tls.private_key!>
+cc_bridge_cc_uploader:
+  ca: <!{credhub}:cc_bridge_cc_uploader.ca!>
+  certificate: <!{credhub}:cc_bridge_cc_uploader.certificate!>
+  private_key: <!{credhub}:cc_bridge_cc_uploader.private_key!>
+cc_bridge_cc_uploader_server:
+  ca: <!{credhub}:cc_bridge_cc_uploader_server.ca!>
+  certificate: <!{credhub}:cc_bridge_cc_uploader_server.certificate!>
+  private_key: <!{credhub}:cc_bridge_cc_uploader_server.private_key!>
+cc_bridge_tps:
+  ca: <!{credhub}:cc_bridge_tps.ca!>
+  certificate: <!{credhub}:cc_bridge_tps.certificate!>
+  private_key: <!{credhub}:cc_bridge_tps.private_key!>
+cc_bulk_api_password: <!{credhub}:cc_bulk_api_password!>
+cc_database_password: <!{credhub}:cc_database_password!>
+cc_db_encryption_key: <!{credhub}:cc_db_encryption_key!>
+cc_directory_key: <!{credhub}:cc_directory_key!>
+cc_internal_api_password: <!{credhub}:cc_internal_api_password!>
+cc_logcache_tls:
+  ca: <!{credhub}:cc_logcache_tls.ca!>
+  certificate: <!{credhub}:cc_logcache_tls.certificate!>
+  private_key: <!{credhub}:cc_logcache_tls.private_key!>
+cc_public_tls:
+  ca: <!{credhub}:cc_public_tls.ca!>
+  certificate: <!{credhub}:cc_public_tls.certificate!>
+  private_key: <!{credhub}:cc_public_tls.private_key!>
+cc_staging_upload_password: <!{credhub}:cc_staging_upload_password!>
+cc_tls:
+  ca: <!{credhub}:cc_tls.ca!>
+  certificate: <!{credhub}:cc_tls.certificate!>
+  private_key: <!{credhub}:cc_tls.private_key!>
+cf_admin_password: <!{credhub}:cf_admin_password!>
+cf_bosh_password: <!{credhub}:cf_bosh_password!>
+cf_mysql_mysql_admin_password: <!{credhub}:cf_mysql_mysql_admin_password!>
+cf_mysql_mysql_cluster_health_password: <!{credhub}:cf_mysql_mysql_cluster_health_password!>
+cf_mysql_mysql_galera_healthcheck_endpoint_password: <!{credhub}:cf_mysql_mysql_galera_healthcheck_endpoint_password!>
+cf_mysql_mysql_galera_healthcheck_password: <!{credhub}:cf_mysql_mysql_galera_healthcheck_password!>
+cf_mysql_proxy_api_password: <!{credhub}:cf_mysql_proxy_api_password!>
+credhub_admin_client_secret: <!{credhub}:credhub_admin_client_secret!>
+credhub_ca:
+  ca: <!{credhub}:credhub_ca.ca!>
+  certificate: <!{credhub}:credhub_ca.certificate!>
+  private_key: <!{credhub}:credhub_ca.private_key!>
+credhub_database_password: <!{credhub}:credhub_database_password!>
+credhub_encryption_password: <!{credhub}:credhub_encryption_password!>
+credhub_tls:
+  ca: <!{credhub}:credhub_tls.ca!>
+  certificate: <!{credhub}:credhub_tls.certificate!>
+  private_key: <!{credhub}:credhub_tls.private_key!>
+diego_auctioneer_client:
+  ca: <!{credhub}:diego_auctioneer_client.ca!>
+  certificate: <!{credhub}:diego_auctioneer_client.certificate!>
+  private_key: <!{credhub}:diego_auctioneer_client.private_key!>
+diego_auctioneer_server:
+  ca: <!{credhub}:diego_auctioneer_server.ca!>
+  certificate: <!{credhub}:diego_auctioneer_server.certificate!>
+  private_key: <!{credhub}:diego_auctioneer_server.private_key!>
+diego_bbs_client:
+  ca: <!{credhub}:diego_bbs_client.ca!>
+  certificate: <!{credhub}:diego_bbs_client.certificate!>
+  private_key: <!{credhub}:diego_bbs_client.private_key!>
+diego_bbs_encryption_keys_passphrase: <!{credhub}:diego_bbs_encryption_keys_passphrase!>
+diego_bbs_server:
+  ca: <!{credhub}:diego_bbs_server.ca!>
+  certificate: <!{credhub}:diego_bbs_server.certificate!>
+  private_key: <!{credhub}:diego_bbs_server.private_key!>
+diego_database_password: <!{credhub}:diego_database_password!>
+diego_instance_identity_ca:
+  ca: <!{credhub}:diego_instance_identity_ca.ca!>
+  certificate: <!{credhub}:diego_instance_identity_ca.certificate!>
+  private_key: <!{credhub}:diego_instance_identity_ca.private_key!>
+diego_locket_client:
+  ca: <!{credhub}:diego_locket_client.ca!>
+  certificate: <!{credhub}:diego_locket_client.certificate!>
+  private_key: <!{credhub}:diego_locket_client.private_key!>
+diego_locket_server:
+  ca: <!{credhub}:diego_locket_server.ca!>
+  certificate: <!{credhub}:diego_locket_server.certificate!>
+  private_key: <!{credhub}:diego_locket_server.private_key!>
+diego_rep_agent_v2:
+  ca: <!{credhub}:diego_rep_agent_v2.ca!>
+  certificate: <!{credhub}:diego_rep_agent_v2.certificate!>
+  private_key: <!{credhub}:diego_rep_agent_v2.private_key!>
+diego_rep_client:
+  ca: <!{credhub}:diego_rep_client.ca!>
+  certificate: <!{credhub}:diego_rep_client.certificate!>
+  private_key: <!{credhub}:diego_rep_client.private_key!>
+diego_ssh_proxy_host_key:
+  private_key: <!{credhub}:diego_ssh_proxy_host_key.private_key!>
+  public_key: <!{credhub}:diego_ssh_proxy_host_key.public_key!>
+  public_key_fingerprint: <!{credhub}:diego_ssh_proxy_host_key.public_key_fingerprint!>
+forwarder_agent_metrics_tls:
+  ca: <!{credhub}:forwarder_agent_metrics_tls.ca!>
+  certificate: <!{credhub}:forwarder_agent_metrics_tls.certificate!>
+  private_key: <!{credhub}:forwarder_agent_metrics_tls.private_key!>
+gorouter_backend_tls:
+  ca: <!{credhub}:gorouter_backend_tls.ca!>
+  certificate: <!{credhub}:gorouter_backend_tls.certificate!>
+  private_key: <!{credhub}:gorouter_backend_tls.private_key!>
+locket_database_password: <!{credhub}:locket_database_password!>
+log_cache:
+  ca: <!{credhub}:log_cache.ca!>
+  certificate: <!{credhub}:log_cache.certificate!>
+  private_key: <!{credhub}:log_cache.private_key!>
+log_cache_ca:
+  ca: <!{credhub}:log_cache_ca.ca!>
+  certificate: <!{credhub}:log_cache_ca.certificate!>
+  private_key: <!{credhub}:log_cache_ca.private_key!>
+log_cache_cf_auth_proxy_metrics_tls:
+  ca: <!{credhub}:log_cache_cf_auth_proxy_metrics_tls.ca!>
+  certificate: <!{credhub}:log_cache_cf_auth_proxy_metrics_tls.certificate!>
+  private_key: <!{credhub}:log_cache_cf_auth_proxy_metrics_tls.private_key!>
+log_cache_gateway_metrics_tls:
+  ca: <!{credhub}:log_cache_gateway_metrics_tls.ca!>
+  certificate: <!{credhub}:log_cache_gateway_metrics_tls.certificate!>
+  private_key: <!{credhub}:log_cache_gateway_metrics_tls.private_key!>
+log_cache_metrics_tls:
+  ca: <!{credhub}:log_cache_metrics_tls.ca!>
+  certificate: <!{credhub}:log_cache_metrics_tls.certificate!>
+  private_key: <!{credhub}:log_cache_metrics_tls.private_key!>
+log_cache_proxy_tls:
+  ca: <!{credhub}:log_cache_proxy_tls.ca!>
+  certificate: <!{credhub}:log_cache_proxy_tls.certificate!>
+  private_key: <!{credhub}:log_cache_proxy_tls.private_key!>
+log_cache_to_loggregator_agent:
+  ca: <!{credhub}:log_cache_to_loggregator_agent.ca!>
+  certificate: <!{credhub}:log_cache_to_loggregator_agent.certificate!>
+  private_key: <!{credhub}:log_cache_to_loggregator_agent.private_key!>
+logcache_ssl:
+  ca: <!{credhub}:logcache_ssl.ca!>
+  certificate: <!{credhub}:logcache_ssl.certificate!>
+  private_key: <!{credhub}:logcache_ssl.private_key!>
+loggr_udp_forwarder_tls:
+  ca: <!{credhub}:loggr_udp_forwarder_tls.ca!>
+  certificate: <!{credhub}:loggr_udp_forwarder_tls.certificate!>
+  private_key: <!{credhub}:loggr_udp_forwarder_tls.private_key!>
+loggregator_agent_metrics_tls:
+  ca: <!{credhub}:loggregator_agent_metrics_tls.ca!>
+  certificate: <!{credhub}:loggregator_agent_metrics_tls.certificate!>
+  private_key: <!{credhub}:loggregator_agent_metrics_tls.private_key!>
+loggregator_ca:
+  ca: <!{credhub}:loggregator_ca.ca!>
+  certificate: <!{credhub}:loggregator_ca.certificate!>
+  private_key: <!{credhub}:loggregator_ca.private_key!>
+loggregator_rlp_gateway:
+  ca: <!{credhub}:loggregator_rlp_gateway.ca!>
+  certificate: <!{credhub}:loggregator_rlp_gateway.certificate!>
+  private_key: <!{credhub}:loggregator_rlp_gateway.private_key!>
+loggregator_rlp_gateway_tls:
+  ca: <!{credhub}:loggregator_rlp_gateway_tls.ca!>
+  certificate: <!{credhub}:loggregator_rlp_gateway_tls.certificate!>
+  private_key: <!{credhub}:loggregator_rlp_gateway_tls.private_key!>
+loggregator_rlp_gateway_tls_cc:
+  ca: <!{credhub}:loggregator_rlp_gateway_tls_cc.ca!>
+  certificate: <!{credhub}:loggregator_rlp_gateway_tls_cc.certificate!>
+  private_key: <!{credhub}:loggregator_rlp_gateway_tls_cc.private_key!>
+loggregator_tls_agent:
+  ca: <!{credhub}:loggregator_tls_agent.ca!>
+  certificate: <!{credhub}:loggregator_tls_agent.certificate!>
+  private_key: <!{credhub}:loggregator_tls_agent.private_key!>
+loggregator_tls_cc_tc:
+  ca: <!{credhub}:loggregator_tls_cc_tc.ca!>
+  certificate: <!{credhub}:loggregator_tls_cc_tc.certificate!>
+  private_key: <!{credhub}:loggregator_tls_cc_tc.private_key!>
+loggregator_tls_doppler:
+  ca: <!{credhub}:loggregator_tls_doppler.ca!>
+  certificate: <!{credhub}:loggregator_tls_doppler.certificate!>
+  private_key: <!{credhub}:loggregator_tls_doppler.private_key!>
+loggregator_tls_rlp:
+  ca: <!{credhub}:loggregator_tls_rlp.ca!>
+  certificate: <!{credhub}:loggregator_tls_rlp.certificate!>
+  private_key: <!{credhub}:loggregator_tls_rlp.private_key!>
+loggregator_tls_statsdinjector:
+  ca: <!{credhub}:loggregator_tls_statsdinjector.ca!>
+  certificate: <!{credhub}:loggregator_tls_statsdinjector.certificate!>
+  private_key: <!{credhub}:loggregator_tls_statsdinjector.private_key!>
+loggregator_tls_tc:
+  ca: <!{credhub}:loggregator_tls_tc.ca!>
+  certificate: <!{credhub}:loggregator_tls_tc.certificate!>
+  private_key: <!{credhub}:loggregator_tls_tc.private_key!>
+loggregator_trafficcontroller_tls:
+  ca: <!{credhub}:loggregator_trafficcontroller_tls.ca!>
+  certificate: <!{credhub}:loggregator_trafficcontroller_tls.certificate!>
+  private_key: <!{credhub}:loggregator_trafficcontroller_tls.private_key!>
+logs_provider:
+  ca: <!{credhub}:logs_provider.ca!>
+  certificate: <!{credhub}:logs_provider.certificate!>
+  private_key: <!{credhub}:logs_provider.private_key!>
+metric_scraper_ca:
+  ca: <!{credhub}:metric_scraper_ca.ca!>
+  certificate: <!{credhub}:metric_scraper_ca.certificate!>
+  private_key: <!{credhub}:metric_scraper_ca.private_key!>
+nats_ca:
+  ca: <!{credhub}:nats_ca.ca!>
+  certificate: <!{credhub}:nats_ca.certificate!>
+  private_key: <!{credhub}:nats_ca.private_key!>
+nats_client_cert:
+  ca: <!{credhub}:nats_client_cert.ca!>
+  certificate: <!{credhub}:nats_client_cert.certificate!>
+  private_key: <!{credhub}:nats_client_cert.private_key!>
+nats_password: <!{credhub}:nats_password!>
+nats_server_cert:
+  ca: <!{credhub}:nats_server_cert.ca!>
+  certificate: <!{credhub}:nats_server_cert.certificate!>
+  private_key: <!{credhub}:nats_server_cert.private_key!>
+network_connectivity_database_password: <!{credhub}:network_connectivity_database_password!>
+network_policy_ca:
+  ca: <!{credhub}:network_policy_ca.ca!>
+  certificate: <!{credhub}:network_policy_ca.certificate!>
+  private_key: <!{credhub}:network_policy_ca.private_key!>
+network_policy_client:
+  ca: <!{credhub}:network_policy_client.ca!>
+  certificate: <!{credhub}:network_policy_client.certificate!>
+  private_key: <!{credhub}:network_policy_client.private_key!>
+network_policy_database_password: <!{credhub}:network_policy_database_password!>
+network_policy_server:
+  ca: <!{credhub}:network_policy_server.ca!>
+  certificate: <!{credhub}:network_policy_server.certificate!>
+  private_key: <!{credhub}:network_policy_server.private_key!>
+network_policy_server_external:
+  ca: <!{credhub}:network_policy_server_external.ca!>
+  certificate: <!{credhub}:network_policy_server_external.certificate!>
+  private_key: <!{credhub}:network_policy_server_external.private_key!>
+prom_scraper_metrics_tls:
+  ca: <!{credhub}:prom_scraper_metrics_tls.ca!>
+  certificate: <!{credhub}:prom_scraper_metrics_tls.certificate!>
+  private_key: <!{credhub}:prom_scraper_metrics_tls.private_key!>
+prom_scraper_scrape_tls:
+  ca: <!{credhub}:prom_scraper_scrape_tls.ca!>
+  certificate: <!{credhub}:prom_scraper_scrape_tls.certificate!>
+  private_key: <!{credhub}:prom_scraper_scrape_tls.private_key!>
+rlp_gateway_metrics_tls:
+  ca: <!{credhub}:rlp_gateway_metrics_tls.ca!>
+  certificate: <!{credhub}:rlp_gateway_metrics_tls.certificate!>
+  private_key: <!{credhub}:rlp_gateway_metrics_tls.private_key!>
+router_ca:
+  ca: <!{credhub}:router_ca.ca!>
+  certificate: <!{credhub}:router_ca.certificate!>
+  private_key: <!{credhub}:router_ca.private_key!>
+router_route_services_secret: <!{credhub}:router_route_services_secret!>
+router_ssl:
+  ca: <!{credhub}:router_ssl.ca!>
+  certificate: <!{credhub}:router_ssl.certificate!>
+  private_key: <!{credhub}:router_ssl.private_key!>
+router_status_password: <!{credhub}:router_status_password!>
+routing_api_ca:
+  ca: <!{credhub}:routing_api_ca.ca!>
+  certificate: <!{credhub}:routing_api_ca.certificate!>
+  private_key: <!{credhub}:routing_api_ca.private_key!>
+routing_api_database_password: <!{credhub}:routing_api_database_password!>
+routing_api_tls:
+  ca: <!{credhub}:routing_api_tls.ca!>
+  certificate: <!{credhub}:routing_api_tls.certificate!>
+  private_key: <!{credhub}:routing_api_tls.private_key!>
+routing_api_tls_client:
+  ca: <!{credhub}:routing_api_tls_client.ca!>
+  certificate: <!{credhub}:routing_api_tls_client.certificate!>
+  private_key: <!{credhub}:routing_api_tls_client.private_key!>
+scheduler_api_tls:
+  ca: <!{credhub}:scheduler_api_tls.ca!>
+  certificate: <!{credhub}:scheduler_api_tls.certificate!>
+  private_key: <!{credhub}:scheduler_api_tls.private_key!>
+scheduler_client_tls:
+  ca: <!{credhub}:scheduler_client_tls.ca!>
+  certificate: <!{credhub}:scheduler_client_tls.certificate!>
+  private_key: <!{credhub}:scheduler_client_tls.private_key!>
+service_cf_internal_ca:
+  ca: <!{credhub}:service_cf_internal_ca.ca!>
+  certificate: <!{credhub}:service_cf_internal_ca.certificate!>
+  private_key: <!{credhub}:service_cf_internal_ca.private_key!>
+silk_ca:
+  ca: <!{credhub}:silk_ca.ca!>
+  certificate: <!{credhub}:silk_ca.certificate!>
+  private_key: <!{credhub}:silk_ca.private_key!>
+silk_controller:
+  ca: <!{credhub}:silk_controller.ca!>
+  certificate: <!{credhub}:silk_controller.certificate!>
+  private_key: <!{credhub}:silk_controller.private_key!>
+silk_daemon:
+  ca: <!{credhub}:silk_daemon.ca!>
+  certificate: <!{credhub}:silk_daemon.certificate!>
+  private_key: <!{credhub}:silk_daemon.private_key!>
+ssh_proxy_backends_tls:
+  ca: <!{credhub}:ssh_proxy_backends_tls.ca!>
+  certificate: <!{credhub}:ssh_proxy_backends_tls.certificate!>
+  private_key: <!{credhub}:ssh_proxy_backends_tls.private_key!>
+uaa_admin_client_secret: <!{credhub}:uaa_admin_client_secret!>
+uaa_ca:
+  ca: <!{credhub}:uaa_ca.ca!>
+  certificate: <!{credhub}:uaa_ca.certificate!>
+  private_key: <!{credhub}:uaa_ca.private_key!>
+uaa_clients_cc-routing_secret: <!{credhub}:uaa_clients_cc-routing_secret!>
+uaa_clients_cc-service-dashboards_secret: <!{credhub}:uaa_clients_cc-service-dashboards_secret!>
+uaa_clients_cc_service_key_client_secret: <!{credhub}:uaa_clients_cc_service_key_client_secret!>
+uaa_clients_cf_smoke_tests_secret: <!{credhub}:uaa_clients_cf_smoke_tests_secret!>
+uaa_clients_cloud_controller_username_lookup_secret: <!{credhub}:uaa_clients_cloud_controller_username_lookup_secret!>
+uaa_clients_doppler_secret: <!{credhub}:uaa_clients_doppler_secret!>
+uaa_clients_gorouter_secret: <!{credhub}:uaa_clients_gorouter_secret!>
+uaa_clients_network_policy_secret: <!{credhub}:uaa_clients_network_policy_secret!>
+uaa_clients_routing_api_client_secret: <!{credhub}:uaa_clients_routing_api_client_secret!>
+uaa_clients_ssh-proxy_secret: <!{credhub}:uaa_clients_ssh-proxy_secret!>
+uaa_clients_tcp_emitter_secret: <!{credhub}:uaa_clients_tcp_emitter_secret!>
+uaa_clients_tcp_router_secret: <!{credhub}:uaa_clients_tcp_router_secret!>
+uaa_database_password: <!{credhub}:uaa_database_password!>
+uaa_default_encryption_passphrase: <!{credhub}:uaa_default_encryption_passphrase!>
+uaa_jwt_signing_key:
+  private_key: <!{credhub}:uaa_jwt_signing_key.private_key!>
+  public_key: <!{credhub}:uaa_jwt_signing_key.public_key!>
+uaa_login_saml:
+  ca: <!{credhub}:uaa_login_saml.ca!>
+  certificate: <!{credhub}:uaa_login_saml.certificate!>
+  private_key: <!{credhub}:uaa_login_saml.private_key!>
+uaa_ssl:
+  ca: <!{credhub}:uaa_ssl.ca!>
+  certificate: <!{credhub}:uaa_ssl.certificate!>
+  private_key: <!{credhub}:uaa_ssl.private_key!>

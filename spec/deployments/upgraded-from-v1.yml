@@ -1,0 +1,14 @@
+---
+kit:
+  name:    dev
+  version: 2.0.3
+  features:
+    - ssh-proxy-on-routers
+
+genesis:
+  env:         upgraded-from-v1
+
+params:
+  base_domain: cf.testing.examle
+
+  availability_zones: [ z1, z2, z3, z4 ]
