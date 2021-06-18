@@ -441,7 +441,7 @@ if ! want_feature "bare" ; then
   want_feature "no-nats-tls" || manifest+=( "overlay/nats-tls.yml" )
   if want_feature '+migrated-v1-env' && ! want_feature 'v2-nats-credentials'; then
     manifest+=( "overlay/addons/migration-v1-nats-credentials.yml" )
-    want_feature "no-nats-tls" ||  manifest+=( "addons/migration-v1-nats-credentials-tls.yml" )
+    want_feature "no-nats-tls" ||  manifest+=( "overlay/addons/migration-v1-nats-credentials-tls.yml" )
   fi
 
   # Handle ssl validation
