@@ -366,10 +366,10 @@ for want in $GENESIS_REQUESTED_FEATURES; do
       databases+=( "$want" )
       manifest+=( "overlay/db/local-mysql-db.yml" )
       if want_feature '+override-db-names' ; then
-      manifest+=( \
-        "operations/db-override-names.yml" \
-        "operations/db-override-mysql-names.yml" \
-        "overlay/db/internal-overrides.yml" \
+        manifest+=( \
+          "operations/db-override-names.yml" \
+          "operations/db-override-mysql-names.yml" \
+          "overlay/db/internal-overrides.yml" \
         )
         if want_feature '+migrated-v1-env' ; then
           manifest+=( "overlay/addons/migration-db-override-names.yml" )
@@ -555,7 +555,6 @@ EOF
   )"
   if [[ -n "$instance_types" ]] ; then
     used=''
-
     types_op_file="operations/dynamic/instance_types.yml"
     echo "--- # Dynamically created instance type overrides" > "$types_op_file"
     while read -r inst_grp type; do
