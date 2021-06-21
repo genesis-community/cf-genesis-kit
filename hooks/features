@@ -10,5 +10,8 @@ if [[ $migrated_v1_env != "1" ]] ; then
     migrated_v1_env=1
   fi
 fi
-[[ -n "${migrated_v1_env:-}" ]] && echo "+migrated-v1-env"
+if [[ -n "${migrated_v1_env:-}" ]] ; then
+  echo "+migrated-v1-env"
+  want_feature no-v1-vm-types || echo "v1-vm-types"
+fi
 exit 0

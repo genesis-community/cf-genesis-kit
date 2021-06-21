@@ -1,0 +1,11 @@
+---
+kit:
+  name:    dev
+  version: 2.0.3
+  features: []
+
+genesis:
+  env:         upgrading-to-v2
+
+params:
+  base_domain: cf.testing.example
