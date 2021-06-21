@@ -1,0 +1,19 @@
+---
+kit:
+  name:    dev
+  version: 2.0.4
+  features:
+    - ssh-proxy-on-routers
+    - local-postgres-db
+    - v2-nats-credentials # Use v2 nats name - added in v2.0.4
+
+genesis:
+  env:         upgrading-to-v2-with-204-overrides
+
+params:
+  base_domain: cf.testing.examle
+
+# Override blobstore bucket to use v2 naming - added in v2.0.4
+meta:
+  blobstore_bucket_path:
+    app-packages: (( concat meta.blobstore_bucket_prefix "-app-packages-" meta.blobstore_bucket_suffix ))

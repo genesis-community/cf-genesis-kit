@@ -1,0 +1,41 @@
+---
+# v1.x default vm types
+instance_groups:
+- name: adapter
+  vm_type: syslogger
+- name: diego-api
+  vm_type: bbs
+- name: diego-cell
+  vm_type: cell
+- name: log-api
+  vm_type: loggregator
+- name: scheduler
+  vm_type: diego
+- name: api
+  vm_type: api
+- name: doppler
+  vm_type: doppler
+- name: nats
+  vm_type: nats
+- name: router
+  vm_type: router
+- name: tcp-router
+  vm_type: router
+- name: uaa
+  vm_type: uaa
+- name: singleton-blobstore
+  vm_type: blobstore
+- name: database
+  vm_type: postgres
+- name: smoke-tests
+  vm_type: errand
+
+# Not originally in v1
+
+- name: cc-worker
+  vm_type: minimal
+- name: rotate-cc-database-key
+  vm_type: errand
+- name: credhub
+  vm_type: minimal
+
