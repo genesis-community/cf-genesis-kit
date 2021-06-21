@@ -8,6 +8,15 @@
 
     Fixes spelling of scheduler in MANUAL.MD
 
+* Environments migrated from v1.x now correctly retain the original NATS user
+  credentials.  Upstream used a different username, and as such, when
+  upgrading to v2.0.x, there was a loss of connectivity to NATS.  Migrated
+  environments now retain the original v1.x username.
+
+  If you have already upgraded your environment from v1.x to 2.0.x, you can
+  specify feature `v2-nats-credentials` to prevent NATS username from
+  switching back and causing further availability outage during deployment.
+
 Bug Fixes:
 
 * Environments migrated from v1.x were suppose to retain the blobstore name
