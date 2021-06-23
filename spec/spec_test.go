@@ -142,6 +142,53 @@ var _ = Describe("Interal Kit", func() {
 		RuntimeConfig: "dns",
 		CPI:           "aws",
 	})
+	Test(Environment{
+		Name:          "override-vm-types-and-counts",
+		CloudConfig:   "aws",
+		RuntimeConfig: "dns",
+		CPI:           "aws",
+	})
+	Test(Environment{
+		Name:          "override-vm-types-and-counts-old-names",
+		CloudConfig:   "aws",
+		RuntimeConfig: "dns",
+		CPI:           "aws",
+	})
+	Test(Environment{
+		Name:          "upgrading-to-v2",
+		CloudConfig:   "aws",
+		RuntimeConfig: "dns",
+		CPI:           "aws",
+		Exodus:        "v1",
+	})
+	Test(Environment{
+		Name:          "upgraded-from-v1",
+		CloudConfig:   "aws",
+		RuntimeConfig: "dns",
+		CPI:           "aws",
+		Exodus:        "migrated",
+	})
+	Test(Environment{
+		Name:          "upgrade-from-v1-with-db-override-names",
+		CloudConfig:   "aws",
+		RuntimeConfig: "dns",
+		CPI:           "aws",
+		Exodus:        "migrated",
+	})
+	Test(Environment{
+		Name:          "upgrading-to-v2-with-204-overrides",
+		CloudConfig:   "aws",
+		RuntimeConfig: "dns",
+		CPI:           "aws",
+		Exodus:        "v1",
+	})
+	Test(Environment{
+		Name:          "upgraded-from-v1-with-204-overrides",
+		CloudConfig:   "aws",
+		RuntimeConfig: "dns",
+		CPI:           "aws",
+		Exodus:        "migrated",
+	})
 	// Test(Environment{
 	// 	Focus:       true,
 	// 	Name:        "nfs-volume-services",

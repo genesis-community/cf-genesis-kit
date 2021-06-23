@@ -73,6 +73,11 @@ if ! want_feature "bare" ; then
     "overlay/uaa-branding.yml" \
   )
 
+  # Change vm types - must be done before operations delete unused instance_types
+  if want_feature v1-vm-types ; then
+    manifest+=( "overlay/addons/v1-vm-types.yml" )
+  fi
+
   # Deal with availability zones - has to be done to core instance groups
   # before they potentially get removed by further features
   if [[ $cpi == 'azure' ]] || want_feature "small-footprint" || \
@@ -216,8 +221,11 @@ for want in $GENESIS_REQUESTED_FEATURES; do
     bare|partitioned-network|haproxy|tls|no-nats-tls|self-signed) features+=( "$want" ) ;;
     minio-blobstore|aws-blobstore|aws-blobstore-iam|azure-blobstore|gcp-blobstore|gcp-use-access-key) features+=( "$want" ) ;;
     nfs-volume-services|enable-service-discovery|ssh-proxy-on-routers|no-tcp-routers) features+=( "$want" ) ;;
-    app-autoscaler-integration|prometheus-integration) features+=( "$want" ) ;;
+    app-autoscaler-integration|prometheus-integration|v2-nats-credentials) features+=( "$want" ) ;;
     +migrated-v1-env|+override-db-names) features+=( "$want" ) ;;
+    v1-vm-types|no-v1-vm-types)
+      : # no-op, dealt with above
+      ;;
     cf-deployment/*)
       if [[ -f "$want.yml" ]] ; then
         features+=( "$want" )
@@ -348,6 +356,9 @@ for want in $GENESIS_REQUESTED_FEATURES; do
           "operations/db-override-postgres-names.yml" \
           "overlay/db/internal-overrides.yml" \
         )
+        if want_feature '+migrated-v1-env' ; then
+          manifest+=( "overlay/addons/migration-db-override-names.yml" )
+        fi
       fi
       ;;
 
@@ -360,6 +371,9 @@ for want in $GENESIS_REQUESTED_FEATURES; do
           "operations/db-override-mysql-names.yml" \
           "overlay/db/internal-overrides.yml" \
         )
+        if want_feature '+migrated-v1-env' ; then
+          manifest+=( "overlay/addons/migration-db-override-names.yml" )
+        fi
       fi
       ;;
 
@@ -425,6 +439,10 @@ fi
 if ! want_feature "bare" ; then
 
   want_feature "no-nats-tls" || manifest+=( "overlay/nats-tls.yml" )
+  if want_feature '+migrated-v1-env' && ! want_feature 'v2-nats-credentials'; then
+    manifest+=( "overlay/addons/migration-v1-nats-credentials.yml" )
+    want_feature "no-nats-tls" ||  manifest+=( "overlay/addons/migration-v1-nats-credentials-tls.yml" )
+  fi
 
   # Handle ssl validation
   skip_ssl_validation="$(jq -r '.skip_ssl_validation' <(echo "$params"))"
@@ -472,29 +490,54 @@ if ! want_feature "bare" ; then
     counts_op_file="operations/dynamic/instance_counts.yml"
     echo "--- # Dynamically created instance count overrides" > "$counts_op_file"
     while read -r inst_grp count; do
+      [[ $inst_grp == "errand" ]]      && continue # dealt with above
       [[ $inst_grp == "haproxy" ]]     && continue # dealt with elsewhere
       [[ $inst_grp == "cell" ]]        && inst_grp="diego_cell" && echo >&2 "WARNING: params.cell_instances has been translated as params.diego_cell_instances";
       [[ $inst_grp == "diego" ]]       && inst_grp="scheduler" && echo >&2 "WARNING: params.diego_instances has been translated as params.scheduler_instances";
       [[ $inst_grp == "bbs" ]]         && inst_grp="diego_api" && echo >&2 "WARNING: params.bbs_instances has been translated as params.diego_api_instances";
       [[ $inst_grp == "loggregator" ]] && inst_grp="log_api" && echo >&2 "WARNING: params.loggregator_instances has been translated as params.log_api_instances";
       [[ $inst_grp == "syslogger" ]]   && inst_grp="adapter" && echo >&2 "WARNING: params.syslogger_instances has been translated as params.adapter_instances";
+      [[ $inst_grp == "postgres" ]]    && inst_grp="database" && echo >&2 "WARNING: params.postgres_instances has been translated as params.database_instances";
+      [[ $inst_grp == "blobstore" ]]   && inst_grp="singleton-blobstore" && echo >&2 "WARNING: params.blobstore_instances has been translated as params.singleton_blobstore_instances";
 
-      inst_grp="$(echo "$inst_grp" | tr _ -)" # convert any _ into -
-      if [[ $inst_grp =~ ^(nats|diego-cell|diego-api|uaa|scheduler|router|api|cc-worker|adapter|doppler|log-api|tcp-router|credhub)$ ]] ; then
-        cat <<EOF >> "$counts_op_file"
+      dashed_inst_grp="$(echo "$inst_grp" | tr _ -)" # convert any _ into -
+      found=''
+      if [[ $dashed_inst_grp =~ ^(adapter|api|cc-worker|credhub|database|diego-(api|cell)|doppler|errand|haproxy|log-api|nats|rotate-cc-database-key|(tcp-)?router|scheduler|singleton-blobstore|smoke-tests|uaa)$ ]] ; then
+        inst_grp="$dashed_inst_grp";
+        found=1
+      fi
+      cat <<EOF >> "$counts_op_file"
   - type: replace
     path: /instance_groups/name=${inst_grp}/instances
     value: ${count}
 EOF
-        used="$used $inst_grp"
-      else
-        bail \
-          "#R{[ERROR]} No such instance group $inst_grp - cannot change instance counts to $count." \
-          "        Valid instance groups are:" \
-          "          nats, diego-cell, diego-api, uaa, scheduler, router, api, cc-worker, adapter," \
-          "          doppler, log-api, tcp-router, credhub, haproxy"
+      used="$(echo "$used"; echo "$inst_grp")"
+      if [[ -z "$found" ]] ; then
+        describe >&2 \
+          "#R{[WARNING]} Unknown instance group $inst_grp - this may be bug in your environment files." \
+          "        Expected instance groups are:" \
+          "          adapter, api, cc-worker, credhub, database, diego-api, diego-cell, doppler," \
+          "          errand, haproxy, log-api, nats, rotate-cc-database-key, router, scheduler," \
+          "          singleton-blobstore, smoke-tests, tcp-router, and uaa" ""
       fi
     done < <(echo "$instance_group_counts")
+
+    # Deal with errand meta-type
+    errand_instances="$(echo "$params" | jq -r '.errand_instances//""')"
+    if [[ -n "$errand_instances" ]] ;then
+      for errand_name in smoke-tests rotate-cc-database-key ; do
+        if ! echo "$used" | grep "^$errand_name\$" &>/dev/null; then
+          cat <<EOF >> "$counts_op_file"
+  - type: replace
+    path: /instance_groups/name=${errand_name}/instances
+    value: ${errand_instances}
+EOF
+          used="$(echo "$used";echo "$errand_name")"
+        fi
+      done
+    fi
+
+    # Check for dups
     dups="$(echo "$used"|sort|uniq -d)";
     if [[ -n "$dups" ]] ; then
       bail \
@@ -515,29 +558,54 @@ EOF
     types_op_file="operations/dynamic/instance_types.yml"
     echo "--- # Dynamically created instance type overrides" > "$types_op_file"
     while read -r inst_grp type; do
+      [[ $inst_grp == "errand" ]]      && continue # dealt with below
       [[ $inst_grp == "haproxy" ]]     && continue # dealt with elsewhere
       [[ $inst_grp == "cell" ]]        && inst_grp="diego_cell" && echo >&2 "WARNING: params.cell_vm_type has been translated as params.diego_cell_vm_type";
       [[ $inst_grp == "diego" ]]       && inst_grp="scheduler" && echo >&2 "WARNING: params.diego_vm_type has been translated as params.scheduler_vm_type";
       [[ $inst_grp == "bbs" ]]         && inst_grp="diego_api" && echo >&2 "WARNING: params.bbs_vm_type has been translated as params.diego_api_vm_type";
       [[ $inst_grp == "loggregator" ]] && inst_grp="log_api" && echo >&2 "WARNING: params.loggregator_vm_type has been translated as params.log_api_vm_type";
       [[ $inst_grp == "syslogger" ]]   && inst_grp="adapter" && echo >&2 "WARNING: params.syslogger_vm_type has been translated as params.adapter_vm_type";
+      [[ $inst_grp == "postgres" ]]    && inst_grp="database" && echo >&2 "WARNING: params.postgres_vm_type has been translated as params.database_vm_type";
+      [[ $inst_grp == "blobstore" ]]   && inst_grp="singleton-blobstore" && echo >&2 "WARNING: params.blobstore_vm_type has been translated as params.singleton_blobstore_vm_type";
 
-      inst_grp="$(echo "$inst_grp" | tr _ -)" # convert any _ into -
-      if [[ $inst_grp =~ ^(nats|diego-cell|diego-api|uaa|scheduler|router|api|cc-worker|adapter|doppler|log-api|tcp-router|credhub|errand)$ ]] ; then
-        cat <<EOF >> "$types_op_file"
+      dashed_inst_grp="$(echo "$inst_grp" | tr _ -)" # convert any _ into -
+      found=''
+      if [[ $dashed_inst_grp =~ ^(adapter|api|cc-worker|credhub|database|diego-(api|cell)|doppler|errand|haproxy|log-api|nats|rotate-cc-database-key|(tcp-)?router|scheduler|singleton-blobstore|smoke-tests|uaa)$ ]] ; then
+        inst_grp="$dashed_inst_grp";
+        found=1
+      fi
+      cat <<EOF >> "$types_op_file"
   - type: replace
     path: /instance_groups/name=${inst_grp}/vm_type
     value: ${type}
 EOF
-        used="$(echo "$used";echo "$inst_grp")"
-      else
-        bail \
-          "#R{[ERROR]} No such instance group $inst_grp - cannot change instance type to $type." \
-          "        Valid instance groups are:" \
-          "          nats, diego-cell, diego-api, uaa, scheduler, router, api, cc-worker, adapter," \
-          "          doppler, log-api, tcp-router, credhub, haproxy, errand"
+      used="$(echo "$used";echo "$inst_grp")"
+      if [[ -z "$found" ]] ; then
+        describe >&2 \
+          "#R{[WARNING]} Unknown instance group $inst_grp - this may be bug in your environment files." \
+          "        Expected instance groups are:" \
+          "          adapter, api, cc-worker, credhub, database, diego-api, diego-cell, doppler," \
+          "          errand, haproxy, log-api, nats, rotate-cc-database-key, router, scheduler," \
+          "          singleton-blobstore, smoke-tests, tcp-router, and uaa" ""
       fi
     done < <(echo "$instance_types")
+
+    # Deal with errand meta-type
+    errand_vm_type="$(echo "$params" | jq -r '.errand_vm_type//""')"
+    if [[ -n "$errand_vm_type" ]] ;then
+      for errand_name in smoke-tests rotate-cc-database-key ; do
+        if ! echo "$used" | grep "^$errand_name\$" &>/dev/null ; then
+          cat <<EOF >> "$types_op_file"
+  - type: replace
+    path: /instance_groups/name=${errand_name}/vm_type
+    value: ${errand_vm_type}
+EOF
+          used="$(echo "$used";echo "$errand_name")"
+        fi
+      done
+    fi
+
+    # Check for dups
     dups="$(echo "$used"|sort|uniq -d)";
     if [[ -n "$dups" ]] ; then
       bail \

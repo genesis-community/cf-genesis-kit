@@ -1,0 +1,34 @@
+---
+kit:
+  name:    dev
+  version: 2.0.3
+  features: []
+
+genesis:
+  env:         override-vm-types-and-counts-old-names
+
+params:
+  base_domain: cf.testing.example
+
+  syslogger_instances: 12
+  postgres_instances: 17
+  bbs_instances: 18
+  cell_instances: 19
+  loggregator_instances: 23
+  diego_instances: 27
+  blobstore_instances: 28
+
+  syslogger_vm_type: custom_adapter_vm
+  postgres_vm_type: custom_database_vm
+  bbs_vm_type: custom_diego_api_vm
+  cell_vm_type: custom_diego_cell_vm
+  loggregator_vm_type: custom_log_api_vm
+  diego_vm_type: custom_scheduler_vm
+  blobstore_vm_type: custom_singleton_blobstore_vm
+
+  # Test errand meta-group
+  errand_instances: 3
+  smoke_tests_instances: 29
+  errand_vm_type: custom_errand_vm
+  rotate_cc_database_key_vm_type: custom_rotate_cc_database_key_vm
+  
