@@ -2110,8 +2110,6 @@ instance_groups:
   - name: cf-core
   stemcell: default
   vm_type: errand
-- name: adapter
-  vm_type: syslogger
 manifest_version: v16.15.0
 name: upgraded-from-v1-with-204-overrides-cf
 releases:
