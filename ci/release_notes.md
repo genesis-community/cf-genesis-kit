@@ -8,6 +8,9 @@
 
     Fixes spelling of scheduler in MANUAL.MD
 
+- Removes references to adapter/syslogger instances/vms.
+   -This has been merged with syslog jobs as of cf-deployment v15.7.0, and implemented in v2.1.0 of this kit
+
 Bug Fixes:
 
 * Environments migrated from v1.x were suppose to retain the blobstore name
