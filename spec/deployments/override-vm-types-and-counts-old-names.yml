@@ -10,7 +10,6 @@ genesis:
 params:
   base_domain: cf.testing.example
 
-  syslogger_instances: 12
   postgres_instances: 17
   bbs_instances: 18
   cell_instances: 19
@@ -18,7 +17,6 @@ params:
   diego_instances: 27
   blobstore_instances: 28
 
-  syslogger_vm_type: custom_adapter_vm
   postgres_vm_type: custom_database_vm
   bbs_vm_type: custom_diego_api_vm
   cell_vm_type: custom_diego_cell_vm

@@ -1,15 +1,15 @@
-adapter_rlp_tls:
-  ca: <!{credhub}:adapter_rlp_tls.ca!>
-  certificate: <!{credhub}:adapter_rlp_tls.certificate!>
-  private_key: <!{credhub}:adapter_rlp_tls.private_key!>
-adapter_tls:
-  ca: <!{credhub}:adapter_tls.ca!>
-  certificate: <!{credhub}:adapter_tls.certificate!>
-  private_key: <!{credhub}:adapter_tls.private_key!>
 application_ca:
   ca: <!{credhub}:application_ca.ca!>
   certificate: <!{credhub}:application_ca.certificate!>
   private_key: <!{credhub}:application_ca.private_key!>
+binding_cache_api_tls:
+  ca: <!{credhub}:binding_cache_api_tls.ca!>
+  certificate: <!{credhub}:binding_cache_api_tls.certificate!>
+  private_key: <!{credhub}:binding_cache_api_tls.private_key!>
+binding_cache_tls:
+  ca: <!{credhub}:binding_cache_tls.ca!>
+  certificate: <!{credhub}:binding_cache_tls.certificate!>
+  private_key: <!{credhub}:binding_cache_tls.private_key!>
 blobstore_admin_users_password: <!{credhub}:blobstore_admin_users_password!>
 blobstore_secure_link_secret: <!{credhub}:blobstore_secure_link_secret!>
 blobstore_tls:
@@ -47,7 +47,18 @@ cc_tls:
   certificate: <!{credhub}:cc_tls.certificate!>
   private_key: <!{credhub}:cc_tls.private_key!>
 cf_admin_password: <!{credhub}:cf_admin_password!>
-cf_bosh_password: <!{credhub}:cf_bosh_password!>
+cf_app_sd_ca:
+  ca: <!{credhub}:cf_app_sd_ca.ca!>
+  certificate: <!{credhub}:cf_app_sd_ca.certificate!>
+  private_key: <!{credhub}:cf_app_sd_ca.private_key!>
+cf_app_sd_client_tls:
+  ca: <!{credhub}:cf_app_sd_client_tls.ca!>
+  certificate: <!{credhub}:cf_app_sd_client_tls.certificate!>
+  private_key: <!{credhub}:cf_app_sd_client_tls.private_key!>
+cf_app_sd_server_tls:
+  ca: <!{credhub}:cf_app_sd_server_tls.ca!>
+  certificate: <!{credhub}:cf_app_sd_server_tls.certificate!>
+  private_key: <!{credhub}:cf_app_sd_server_tls.private_key!>
 cf_mysql_mysql_admin_password: <!{credhub}:cf_mysql_mysql_admin_password!>
 cf_mysql_mysql_cluster_health_password: <!{credhub}:cf_mysql_mysql_cluster_health_password!>
 cf_mysql_mysql_galera_healthcheck_endpoint_password: <!{credhub}:cf_mysql_mysql_galera_healthcheck_endpoint_password!>
@@ -147,6 +158,10 @@ logcache_ssl:
   ca: <!{credhub}:logcache_ssl.ca!>
   certificate: <!{credhub}:logcache_ssl.certificate!>
   private_key: <!{credhub}:logcache_ssl.private_key!>
+loggr_syslog_binding_cache_metrics_tls:
+  ca: <!{credhub}:loggr_syslog_binding_cache_metrics_tls.ca!>
+  certificate: <!{credhub}:loggr_syslog_binding_cache_metrics_tls.certificate!>
+  private_key: <!{credhub}:loggr_syslog_binding_cache_metrics_tls.private_key!>
 loggr_udp_forwarder_tls:
   ca: <!{credhub}:loggr_udp_forwarder_tls.ca!>
   certificate: <!{credhub}:loggr_udp_forwarder_tls.certificate!>
@@ -207,6 +222,14 @@ metric_scraper_ca:
   ca: <!{credhub}:metric_scraper_ca.ca!>
   certificate: <!{credhub}:metric_scraper_ca.certificate!>
   private_key: <!{credhub}:metric_scraper_ca.private_key!>
+metrics_agent_tls:
+  ca: <!{credhub}:metrics_agent_tls.ca!>
+  certificate: <!{credhub}:metrics_agent_tls.certificate!>
+  private_key: <!{credhub}:metrics_agent_tls.private_key!>
+metrics_discovery_metrics_tls:
+  ca: <!{credhub}:metrics_discovery_metrics_tls.ca!>
+  certificate: <!{credhub}:metrics_discovery_metrics_tls.certificate!>
+  private_key: <!{credhub}:metrics_discovery_metrics_tls.private_key!>
 nats_ca:
   ca: <!{credhub}:nats_ca.ca!>
   certificate: <!{credhub}:nats_ca.certificate!>
@@ -215,6 +238,14 @@ nats_client_cert:
   ca: <!{credhub}:nats_client_cert.ca!>
   certificate: <!{credhub}:nats_client_cert.certificate!>
   private_key: <!{credhub}:nats_client_cert.private_key!>
+nats_internal_ca:
+  ca: <!{credhub}:nats_internal_ca.ca!>
+  certificate: <!{credhub}:nats_internal_ca.certificate!>
+  private_key: <!{credhub}:nats_internal_ca.private_key!>
+nats_internal_cert:
+  ca: <!{credhub}:nats_internal_cert.ca!>
+  certificate: <!{credhub}:nats_internal_cert.certificate!>
+  private_key: <!{credhub}:nats_internal_cert.private_key!>
 nats_password: <!{credhub}:nats_password!>
 nats_server_cert:
   ca: <!{credhub}:nats_server_cert.ca!>
@@ -273,14 +304,10 @@ routing_api_tls_client:
   ca: <!{credhub}:routing_api_tls_client.ca!>
   certificate: <!{credhub}:routing_api_tls_client.certificate!>
   private_key: <!{credhub}:routing_api_tls_client.private_key!>
-scheduler_api_tls:
-  ca: <!{credhub}:scheduler_api_tls.ca!>
-  certificate: <!{credhub}:scheduler_api_tls.certificate!>
-  private_key: <!{credhub}:scheduler_api_tls.private_key!>
-scheduler_client_tls:
-  ca: <!{credhub}:scheduler_client_tls.ca!>
-  certificate: <!{credhub}:scheduler_client_tls.certificate!>
-  private_key: <!{credhub}:scheduler_client_tls.private_key!>
+scrape_config_generator_metrics_tls:
+  ca: <!{credhub}:scrape_config_generator_metrics_tls.ca!>
+  certificate: <!{credhub}:scrape_config_generator_metrics_tls.certificate!>
+  private_key: <!{credhub}:scrape_config_generator_metrics_tls.private_key!>
 service_cf_internal_ca:
   ca: <!{credhub}:service_cf_internal_ca.ca!>
   certificate: <!{credhub}:service_cf_internal_ca.certificate!>
@@ -301,6 +328,14 @@ ssh_proxy_backends_tls:
   ca: <!{credhub}:ssh_proxy_backends_tls.ca!>
   certificate: <!{credhub}:ssh_proxy_backends_tls.certificate!>
   private_key: <!{credhub}:ssh_proxy_backends_tls.private_key!>
+syslog_agent_api_tls:
+  ca: <!{credhub}:syslog_agent_api_tls.ca!>
+  certificate: <!{credhub}:syslog_agent_api_tls.certificate!>
+  private_key: <!{credhub}:syslog_agent_api_tls.private_key!>
+syslog_agent_metrics_tls:
+  ca: <!{credhub}:syslog_agent_metrics_tls.ca!>
+  certificate: <!{credhub}:syslog_agent_metrics_tls.certificate!>
+  private_key: <!{credhub}:syslog_agent_metrics_tls.private_key!>
 uaa_admin_client_secret: <!{credhub}:uaa_admin_client_secret!>
 uaa_ca:
   ca: <!{credhub}:uaa_ca.ca!>

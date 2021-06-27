@@ -1,8 +1,6 @@
 ---
 # v1.x default vm types
 instance_groups:
-- name: adapter
-  vm_type: syslogger
 - name: diego-api
   vm_type: bbs
 - name: diego-cell

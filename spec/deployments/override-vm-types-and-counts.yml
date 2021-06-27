@@ -10,7 +10,6 @@ genesis:
 params:
   base_domain: cf.testing.example
 
-  adapter_instances: 12
   api_instances: 14
   cc_worker_instances: 15
   credhub_instances: 16
@@ -29,7 +28,6 @@ params:
   tcp_router_instances: 30
   uaa_instances: 31
 
-  adapter_vm_type: custom_adapter_vm
   api_vm_type: custom_api_vm
   cc_worker_vm_type: custom_cc_worker_vm
   credhub_vm_type: custom_credhub_vm

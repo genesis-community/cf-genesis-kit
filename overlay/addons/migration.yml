@@ -34,20 +34,6 @@ meta:
 params:
   cf_db_network: cf-db
 
-  # v1.x default vm types
-  adapter_vm_type:     (( grab params.syslogger_vm_type   || "syslogger"   ))
-  diego_api_vm_type:   (( grab params.bbs_vm_type         || "bbs"         ))
-  diego_cell_vm_type:  (( grab params.cell_vm_type        || "cell"        ))
-  log_api_vm_type:     (( grab params.loggregator_vm_type || "loggregator" ))
-  scheduler_vm_type:   (( grab params.diego_vm_type       || "diego"       ))
-  api_vm_type:         api
-  cell_vm_type:        cell
-  doppler_vm_type:     doppler
-  errand_vm_type:      errand
-  nats_vm_type:        nats
-  router_vm_type:      router
-  uaa_vm_type:         uaa
-
 instance_groups:
 # original has key key-2016-06
 - name: diego-api
@@ -74,11 +60,3 @@ instance_groups:
         packages:
           app_package_directory_key: (( grab meta.blobstore_bucket_path.app-packages ))
 
-bosh-variables:
-  cloud_controller_database_name:     (( grab params.ccdb_name           || meta.database_defaults.cloud_controller.name ))
-  uaa_database_name:                  (( grab params.uaadb_name          || meta.database_defaults.uaa.name ))
-  diego_database_name:                (( grab params.diegodb_name        || meta.database_defaults.diego.name ))
-  network_policy_database_name:       (( grab params.policyserverdb_name || meta.database_defaults.network_policy.name ))
-  network_connectivity_database_name: (( grab params.silkdb_name         || meta.database_defaults.network_connectivity.name ))
-  locket_database_name:               (( grab params.locketdb_name       || meta.database_defaults.locket.name ))
-  credhub_database_name:              (( grab params.credhubdb_name      || meta.database_defaults.credhub.name ))

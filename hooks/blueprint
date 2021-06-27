@@ -496,13 +496,12 @@ if ! want_feature "bare" ; then
       [[ $inst_grp == "diego" ]]       && inst_grp="scheduler" && echo >&2 "WARNING: params.diego_instances has been translated as params.scheduler_instances";
       [[ $inst_grp == "bbs" ]]         && inst_grp="diego_api" && echo >&2 "WARNING: params.bbs_instances has been translated as params.diego_api_instances";
       [[ $inst_grp == "loggregator" ]] && inst_grp="log_api" && echo >&2 "WARNING: params.loggregator_instances has been translated as params.log_api_instances";
-      [[ $inst_grp == "syslogger" ]]   && inst_grp="adapter" && echo >&2 "WARNING: params.syslogger_instances has been translated as params.adapter_instances";
       [[ $inst_grp == "postgres" ]]    && inst_grp="database" && echo >&2 "WARNING: params.postgres_instances has been translated as params.database_instances";
       [[ $inst_grp == "blobstore" ]]   && inst_grp="singleton-blobstore" && echo >&2 "WARNING: params.blobstore_instances has been translated as params.singleton_blobstore_instances";
 
       dashed_inst_grp="$(echo "$inst_grp" | tr _ -)" # convert any _ into -
       found=''
-      if [[ $dashed_inst_grp =~ ^(adapter|api|cc-worker|credhub|database|diego-(api|cell)|doppler|errand|haproxy|log-api|nats|rotate-cc-database-key|(tcp-)?router|scheduler|singleton-blobstore|smoke-tests|uaa)$ ]] ; then
+      if [[ $dashed_inst_grp =~ ^(api|cc-worker|credhub|database|diego-(api|cell)|doppler|errand|haproxy|log-api|nats|rotate-cc-database-key|(tcp-)?router|scheduler|singleton-blobstore|smoke-tests|uaa)$ ]] ; then
         inst_grp="$dashed_inst_grp";
         found=1
       fi
@@ -516,7 +515,7 @@ EOF
         describe >&2 \
           "#R{[WARNING]} Unknown instance group $inst_grp - this may be bug in your environment files." \
           "        Expected instance groups are:" \
-          "          adapter, api, cc-worker, credhub, database, diego-api, diego-cell, doppler," \
+          "          api, cc-worker, credhub, database, diego-api, diego-cell, doppler," \
           "          errand, haproxy, log-api, nats, rotate-cc-database-key, router, scheduler," \
           "          singleton-blobstore, smoke-tests, tcp-router, and uaa" ""
       fi
@@ -564,13 +563,12 @@ EOF
       [[ $inst_grp == "diego" ]]       && inst_grp="scheduler" && echo >&2 "WARNING: params.diego_vm_type has been translated as params.scheduler_vm_type";
       [[ $inst_grp == "bbs" ]]         && inst_grp="diego_api" && echo >&2 "WARNING: params.bbs_vm_type has been translated as params.diego_api_vm_type";
       [[ $inst_grp == "loggregator" ]] && inst_grp="log_api" && echo >&2 "WARNING: params.loggregator_vm_type has been translated as params.log_api_vm_type";
-      [[ $inst_grp == "syslogger" ]]   && inst_grp="adapter" && echo >&2 "WARNING: params.syslogger_vm_type has been translated as params.adapter_vm_type";
       [[ $inst_grp == "postgres" ]]    && inst_grp="database" && echo >&2 "WARNING: params.postgres_vm_type has been translated as params.database_vm_type";
       [[ $inst_grp == "blobstore" ]]   && inst_grp="singleton-blobstore" && echo >&2 "WARNING: params.blobstore_vm_type has been translated as params.singleton_blobstore_vm_type";
 
       dashed_inst_grp="$(echo "$inst_grp" | tr _ -)" # convert any _ into -
       found=''
-      if [[ $dashed_inst_grp =~ ^(adapter|api|cc-worker|credhub|database|diego-(api|cell)|doppler|errand|haproxy|log-api|nats|rotate-cc-database-key|(tcp-)?router|scheduler|singleton-blobstore|smoke-tests|uaa)$ ]] ; then
+      if [[ $dashed_inst_grp =~ ^(api|cc-worker|credhub|database|diego-(api|cell)|doppler|errand|haproxy|log-api|nats|rotate-cc-database-key|(tcp-)?router|scheduler|singleton-blobstore|smoke-tests|uaa)$ ]] ; then
         inst_grp="$dashed_inst_grp";
         found=1
       fi
@@ -584,7 +582,7 @@ EOF
         describe >&2 \
           "#R{[WARNING]} Unknown instance group $inst_grp - this may be bug in your environment files." \
           "        Expected instance groups are:" \
-          "          adapter, api, cc-worker, credhub, database, diego-api, diego-cell, doppler," \
+          "          api, cc-worker, credhub, database, diego-api, diego-cell, doppler," \
           "          errand, haproxy, log-api, nats, rotate-cc-database-key, router, scheduler," \
           "          singleton-blobstore, smoke-tests, tcp-router, and uaa" ""
       fi

@@ -360,10 +360,6 @@ Some of these features may return in latter v2.x releases, but for the v2.0.0 re
 
   Defaults are as per `cf-deployment`
 
-  - `adapter_instances` - How many scalable syslog VMs to deploy.
-    (`syslogger_instances` from v1.x will be translated to this value during
-    deployment)
-
   - `api_instances` - How many Cloud Controller API nodes to deploy
 
   - `cc_worker_instances` - How many cc-worker nodes to deploy.
@@ -404,11 +400,6 @@ Some of these features may return in latter v2.x releases, but for the v2.0.0 re
 Upstream `cf-deployments` only supports three vm types: minimum, small and
 small-highmem.  To fine-tune these vms for each instance type, you can use the
 following:
-
-  - `adapter_vm_type` - What type of VM to deploy for the scalable syslog
-    adapter. (`syslogger_vm_type` from v1.x will be translated to this value
-    during deployment).
-    Recommend `1 cpu / 2g mem`.
 
   - `api_vm_type` - What type of VM to deploy for the nodes in
     the Cloud Controller API cluster.  Defaults to `api`.
@@ -472,7 +463,7 @@ to hyphens to determine the matching `instance_group` for the specified
 underscore as used in the `instance_group`.
 
 Known instance groups are:
-  adapter, api, cc-worker, credhub, database, diego-api, diego-cell, doppler,
+  api, cc-worker, credhub, database, diego-api, diego-cell, doppler,
   errand, haproxy, log-api, nats, rotate-cc-database-key, router, scheduler,
   singleton-blobstore, smoke-tests, tcp-router, and uaa
 
@@ -497,7 +488,6 @@ The vm types are as follows:
 
 | v2 instance group | prevous (v1) instance group | vm type |
 =============================================================
-| adapter | syslogger | syslogger |
 | api | api | api |
 | cc-worker | - | minimal |
 | credhub | - | minimal |
