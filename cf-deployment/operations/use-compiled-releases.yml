@@ -92,32 +92,32 @@
   path: /releases/name=diego
   value:
     name: diego
-    sha1: 162111997aadeb1a76150aabff7df33ac865ef98
+    sha1: 6ec8fecf81fc6edda36f6da9dac139e858d8892e
     stemcell:
       os: ubuntu-xenial
       version: "621.5"
-    url: https://storage.googleapis.com/cf-deployment-compiled-releases/diego-2.50.0-ubuntu-xenial-621.5-20210429-143616-115791066.tgz
-    version: 2.50.0
+    url: https://storage.googleapis.com/cf-deployment-compiled-releases/diego-2.51.0-ubuntu-xenial-621.5-20210716-151520-075347976.tgz
+    version: 2.51.0
 - type: replace
   path: /releases/name=dotnet-core-buildpack
   value:
     name: dotnet-core-buildpack
-    sha1: cde5233703d144a358a08cb17d6cd83b27b45a24
+    sha1: 902772f0c86415e580b234e989d65152cbc71728
     stemcell:
       os: ubuntu-xenial
       version: "621.5"
-    url: https://storage.googleapis.com/cf-deployment-compiled-releases/dotnet-core-buildpack-2.3.31-ubuntu-xenial-621.5-20210628-183712-430643367.tgz
-    version: 2.3.31
+    url: https://storage.googleapis.com/cf-deployment-compiled-releases/dotnet-core-buildpack-2.3.32-ubuntu-xenial-621.5-20210715-230217-640293736.tgz
+    version: 2.3.32
 - type: replace
   path: /releases/name=garden-runc
   value:
     name: garden-runc
-    sha1: ffae39bd61062ce5367b556ae60a105dcaa32d64
+    sha1: 1b35537ca9c14fb4cf4f5106d15fb90f465ac512
     stemcell:
       os: ubuntu-xenial
       version: "621.5"
-    url: https://storage.googleapis.com/cf-deployment-compiled-releases/garden-runc-1.19.28-ubuntu-xenial-621.5-20210527-162930-160787212.tgz
-    version: 1.19.28
+    url: https://storage.googleapis.com/cf-deployment-compiled-releases/garden-runc-1.19.29-ubuntu-xenial-621.5-20210715-164611-21182919.tgz
+    version: 1.19.29
 - type: replace
   path: /releases/name=go-buildpack
   value:
@@ -182,82 +182,82 @@
   path: /releases/name=nginx-buildpack
   value:
     name: nginx-buildpack
-    sha1: 4a0d897d449c3d7f3503d074e45ce2494871f0da
+    sha1: 5927102fe03bba757a8611b6287ec42267b0d165
     stemcell:
       os: ubuntu-xenial
       version: "621.5"
-    url: https://storage.googleapis.com/cf-deployment-compiled-releases/nginx-buildpack-1.1.29-ubuntu-xenial-621.5-20210702-194733-069048132.tgz
-    version: 1.1.29
+    url: https://storage.googleapis.com/cf-deployment-compiled-releases/nginx-buildpack-1.1.30-ubuntu-xenial-621.5-20210715-213029-794016262.tgz
+    version: 1.1.30
 - type: replace
   path: /releases/name=nodejs-buildpack
   value:
     name: nodejs-buildpack
-    sha1: da3eec7d35ce0f4c98b391e59a17d95cde462e7e
+    sha1: 84f3c66f55dade91deacc7ccc7bde5a16c2534ad
     stemcell:
       os: ubuntu-xenial
       version: "621.5"
-    url: https://storage.googleapis.com/cf-deployment-compiled-releases/nodejs-buildpack-1.7.56-ubuntu-xenial-621.5-20210702-195301-494126983.tgz
-    version: 1.7.56
+    url: https://storage.googleapis.com/cf-deployment-compiled-releases/nodejs-buildpack-1.7.57-ubuntu-xenial-621.5-20210716-165053-494761055.tgz
+    version: 1.7.57
 - type: replace
   path: /releases/name=php-buildpack
   value:
     name: php-buildpack
-    sha1: 02e662e2740c03b1394dc67a855b43824266cef3
+    sha1: 2ea3bbca5de43919677a458f2000c65082231997
     stemcell:
       os: ubuntu-xenial
       version: "621.5"
-    url: https://storage.googleapis.com/cf-deployment-compiled-releases/php-buildpack-4.4.43-ubuntu-xenial-621.5-20210702-194435-15654254.tgz
-    version: 4.4.43
+    url: https://storage.googleapis.com/cf-deployment-compiled-releases/php-buildpack-4.4.44-ubuntu-xenial-621.5-20210715-225748-372090449.tgz
+    version: 4.4.44
 - type: replace
   path: /releases/name=pxc
   value:
     name: pxc
-    sha1: fc6d034371c55722f0bc74c93dcde17e5f719f17
+    sha1: 3dceba82d76dc1725db9d0ab9015d130f07cf829
     stemcell:
       os: ubuntu-xenial
       version: "621.5"
-    url: https://storage.googleapis.com/cf-deployment-compiled-releases/pxc-0.35.0-ubuntu-xenial-621.5-20210513-201255-797594155.tgz
-    version: 0.35.0
+    url: https://storage.googleapis.com/cf-deployment-compiled-releases/pxc-0.36.0-ubuntu-xenial-621.5-20210707-205903-272136572.tgz
+    version: 0.36.0
 - type: replace
   path: /releases/name=python-buildpack
   value:
     name: python-buildpack
-    sha1: af16ae902d2c0658d364daa84a33a8b920eb38ba
+    sha1: 524109219d9cec3f2e177db53a81530e5844bba7
     stemcell:
       os: ubuntu-xenial
       version: "621.5"
-    url: https://storage.googleapis.com/cf-deployment-compiled-releases/python-buildpack-1.7.42-ubuntu-xenial-621.5-20210617-011839-840095536.tgz
-    version: 1.7.42
+    url: https://storage.googleapis.com/cf-deployment-compiled-releases/python-buildpack-1.7.43-ubuntu-xenial-621.5-20210715-213202-491585249.tgz
+    version: 1.7.43
 - type: replace
   path: /releases/name=r-buildpack
   value:
     name: r-buildpack
-    sha1: a2d687f3f0bd88522a4abdd1a30e81ffe8912e08
+    sha1: d683b699d11bedbb1aee382f9b6c2e82ec05b455
     stemcell:
       os: ubuntu-xenial
       version: "621.5"
-    url: https://storage.googleapis.com/cf-deployment-compiled-releases/r-buildpack-1.1.19-ubuntu-xenial-621.5-20210628-171154-704290392.tgz
-    version: 1.1.19
+    url: https://storage.googleapis.com/cf-deployment-compiled-releases/r-buildpack-1.1.20-ubuntu-xenial-621.5-20210715-230115-512185806.tgz
+    version: 1.1.20
 - type: replace
   path: /releases/name=routing
   value:
     name: routing
-    sha1: 6270a1da21e986a2e26bd38613e28b9748e62919
+    sha1: ffd2b019cdeb68d5f345ecb8db51175d9319e5ae
     stemcell:
       os: ubuntu-xenial
       version: "621.5"
-    url: https://storage.googleapis.com/cf-deployment-compiled-releases/routing-0.216.0-ubuntu-xenial-621.5-20210622-212911-242788417.tgz
-    version: 0.216.0
+    url: https://storage.googleapis.com/cf-deployment-compiled-releases/routing-0.217.0-ubuntu-xenial-621.5-20210714-220137-872498244.tgz
+    version: 0.217.0
 - type: replace
   path: /releases/name=ruby-buildpack
   value:
     name: ruby-buildpack
-    sha1: b685a545b250b2ad444feba7e3fe368bdbc367a0
+    sha1: 87bbdd966a3a6c69c9bc522ee42f083170152111
     stemcell:
       os: ubuntu-xenial
       version: "621.5"
-    url: https://storage.googleapis.com/cf-deployment-compiled-releases/ruby-buildpack-1.8.42-ubuntu-xenial-621.5-20210628-170912-642259781.tgz
-    version: 1.8.42
+    url: https://storage.googleapis.com/cf-deployment-compiled-releases/ruby-buildpack-1.8.43-ubuntu-xenial-621.5-20210715-213113-843437348.tgz
+    version: 1.8.43
 - type: replace
   path: /releases/name=silk
   value:
@@ -272,12 +272,12 @@
   path: /releases/name=staticfile-buildpack
   value:
     name: staticfile-buildpack
-    sha1: 211829ce69ac1fd13d5825f6910fc39be87db21a
+    sha1: ec9256433089238c01f01ae5369704e9240d4090
     stemcell:
       os: ubuntu-xenial
       version: "621.5"
-    url: https://storage.googleapis.com/cf-deployment-compiled-releases/staticfile-buildpack-1.5.23-ubuntu-xenial-621.5-20210702-194535-004747902.tgz
-    version: 1.5.23
+    url: https://storage.googleapis.com/cf-deployment-compiled-releases/staticfile-buildpack-1.5.24-ubuntu-xenial-621.5-20210715-213037-091242323.tgz
+    version: 1.5.24
 - type: replace
   path: /releases/name=statsd-injector
   value:
