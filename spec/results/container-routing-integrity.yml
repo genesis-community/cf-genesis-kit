@@ -335,9 +335,9 @@ exodus:
   - run.cf.testing.examle
   apps_domain: run.cf.testing.examle
   base_domain: cf.testing.examle
-  cf-deployment-date: 2021-Jul-22 15:08:36 UTC
-  cf-deployment-url: https://github.com/cloudfoundry/cf-deployment/releases/tag/v16.20.0
-  cf-deployment-version: 16.20.0
+  cf-deployment-date: 2021-Jul-24 01:35:33 UTC
+  cf-deployment-url: https://github.com/cloudfoundry/cf-deployment/releases/tag/v16.21.0
+  cf-deployment-version: 16.21.0
   core_network: cf-core
   db_network: cf-core
   edge_network: cf-edge
@@ -2048,7 +2048,7 @@ instance_groups:
   - name: cf-core
   stemcell: default
   vm_type: minimal
-manifest_version: v16.20.0
+manifest_version: v16.21.0
 name: container-routing-integrity-cf
 releases:
 - name: binary-buildpack
@@ -2060,9 +2060,9 @@ releases:
   url: https://bosh.io/d/github.com/cloudfoundry/bpm-release?v=1.1.13
   version: 1.1.13
 - name: capi
-  sha1: 29c20e6dd26a0747f32367fba3bb0b285e72bda3
-  url: https://bosh.io/d/github.com/cloudfoundry/capi-release?v=1.111.0
-  version: 1.111.0
+  sha1: b2597282eb999c2dfa10d31e879d262ecee16e25
+  url: https://bosh.io/d/github.com/cloudfoundry/capi-release?v=1.112.0
+  version: 1.112.0
 - name: cf-networking
   sha1: 2425b762f651878d3e188178a289f94b9655d3c1
   url: https://bosh.io/d/github.com/cloudfoundry/cf-networking-release?v=2.38.0
@@ -2096,9 +2096,9 @@ releases:
   url: https://bosh.io/d/github.com/cloudfoundry/go-buildpack-release?v=1.9.34
   version: 1.9.34
 - name: java-buildpack
-  sha1: 4ac3b555394cc545437daeffeaecfb47309378b2
-  url: https://bosh.io/d/github.com/cloudfoundry/java-buildpack-release?v=4.39
-  version: "4.39"
+  sha1: 5d0c3b2d5f275080cbc98c3b4d5eeb802686e7d4
+  url: https://bosh.io/d/github.com/cloudfoundry/java-buildpack-release?v=4.40
+  version: "4.40"
 - name: loggregator
   sha1: 9eb81ddf174e826a5f4e59bc4dc6bda9007495eb
   url: https://bosh.io/d/github.com/cloudfoundry/loggregator-release?v=106.6.0
@@ -2128,9 +2128,9 @@ releases:
   url: https://bosh.io/d/github.com/cloudfoundry/php-buildpack-release?v=4.4.44
   version: 4.4.44
 - name: pxc
-  sha1: ebdc4ff485957f48ba195e81d946494fdd156c77
-  url: https://bosh.io/d/github.com/cloudfoundry-incubator/pxc-release?v=0.36.0
-  version: 0.36.0
+  sha1: 2ac061032029b951c379b1138496242faddeb2c6
+  url: https://bosh.io/d/github.com/cloudfoundry-incubator/pxc-release?v=0.37.0
+  version: 0.37.0
 - name: python-buildpack
   sha1: c71808916454dee5388216dd6f6027825d6b001b
   url: https://bosh.io/d/github.com/cloudfoundry/python-buildpack-release?v=1.7.43

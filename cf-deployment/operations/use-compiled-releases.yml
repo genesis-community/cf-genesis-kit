@@ -32,12 +32,12 @@
   path: /releases/name=capi
   value:
     name: capi
-    sha1: 6005348e1413f001178477a6a880533b78652b8d
+    sha1: 6c4f4f08ec8f880a1b1c0b858672fe046cd9e830
     stemcell:
       os: ubuntu-xenial
       version: "621.5"
-    url: https://storage.googleapis.com/cf-deployment-compiled-releases/capi-1.111.0-ubuntu-xenial-621.5-20210525-202503-902677907.tgz
-    version: 1.111.0
+    url: https://storage.googleapis.com/cf-deployment-compiled-releases/capi-1.112.0-ubuntu-xenial-621.5-20210722-003520-730888157.tgz
+    version: 1.112.0
 - type: replace
   path: /releases/name=cf-cli
   value:
@@ -132,12 +132,12 @@
   path: /releases/name=java-buildpack
   value:
     name: java-buildpack
-    sha1: 0d6bc62d9b7fe53c608580fbff8834338bc3a64e
+    sha1: 267c7e642361284ad147d248a7f3ed224529593b
     stemcell:
       os: ubuntu-xenial
       version: "621.5"
-    url: https://storage.googleapis.com/cf-deployment-compiled-releases/java-buildpack-4.39-ubuntu-xenial-621.5-20210528-174540-154042171.tgz
-    version: "4.39"
+    url: https://storage.googleapis.com/cf-deployment-compiled-releases/java-buildpack-4.40-ubuntu-xenial-621.5-20210723-192052-735221596.tgz
+    version: "4.40"
 - type: replace
   path: /releases/name=log-cache
   value:
@@ -212,12 +212,12 @@
   path: /releases/name=pxc
   value:
     name: pxc
-    sha1: 3dceba82d76dc1725db9d0ab9015d130f07cf829
+    sha1: 65494cd0bb224204c08ec1ff5f8e5397256f3e9a
     stemcell:
       os: ubuntu-xenial
       version: "621.5"
-    url: https://storage.googleapis.com/cf-deployment-compiled-releases/pxc-0.36.0-ubuntu-xenial-621.5-20210707-205903-272136572.tgz
-    version: 0.36.0
+    url: https://storage.googleapis.com/cf-deployment-compiled-releases/pxc-0.37.0-ubuntu-xenial-621.5-20210722-003726-023869971.tgz
+    version: 0.37.0
 - type: replace
   path: /releases/name=python-buildpack
   value:
