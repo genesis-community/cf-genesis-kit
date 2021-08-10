@@ -1,6 +1,6 @@
 ---
 name: cf
-manifest_version: v16.21.0
+manifest_version: v16.22.0
 update:
   canaries: 1
   canary_watch_time: 30000-1200000
@@ -2736,9 +2736,9 @@ releases:
   version: 41.0.2
   sha1: b1eb4efe1f88367708ac8cbb08dc78a09dde9c4b
 - name: cflinuxfs3
-  url: https://bosh.io/d/github.com/cloudfoundry/cflinuxfs3-release?v=0.249.0
-  version: 0.249.0
-  sha1: 9356c8e074f02eccdd54d06403073db5fcc1db10
+  url: https://bosh.io/d/github.com/cloudfoundry/cflinuxfs3-release?v=0.251.0
+  version: 0.251.0
+  sha1: 9bb7e0ec5c6c846e7c789a13e258f4ab8ef01570
 - name: credhub
   url: https://bosh.io/d/github.com/pivotal-cf/credhub-release?v=2.9.0
   version: 2.9.0
@@ -2760,9 +2760,9 @@ releases:
   version: 1.9.34
   sha1: 1de9abfa410e02e161f6d89eeaef227a67598b76
 - name: java-buildpack
-  url: https://bosh.io/d/github.com/cloudfoundry/java-buildpack-release?v=4.40
-  version: "4.40"
-  sha1: 5d0c3b2d5f275080cbc98c3b4d5eeb802686e7d4
+  url: https://bosh.io/d/github.com/cloudfoundry/java-buildpack-release?v=4.41
+  version: "4.41"
+  sha1: 8011b1fa28ea099077ab51a7c74a6b0e4150c828
 - name: loggregator
   url: https://bosh.io/d/github.com/cloudfoundry/loggregator-release?v=106.6.0
   version: 106.6.0
@@ -2800,9 +2800,9 @@ releases:
   version: 1.7.43
   sha1: c71808916454dee5388216dd6f6027825d6b001b
 - name: routing
-  url: https://bosh.io/d/github.com/cloudfoundry/routing-release?v=0.218.0
-  version: 0.218.0
-  sha1: d8915aab439c3e385d7f31dd8fe985b64fbb3016
+  url: https://bosh.io/d/github.com/cloudfoundry/routing-release?v=0.221.0
+  version: 0.221.0
+  sha1: accad1fe9072e96477d3632dc8584e30c243c3ba
 - name: ruby-buildpack
   url: https://bosh.io/d/github.com/cloudfoundry/ruby-buildpack-release?v=1.8.43
   version: 1.8.43
@@ -2820,9 +2820,9 @@ releases:
   version: 1.11.16
   sha1: 4ca93a4ab1a65a2b7cb2c84d27b6cbd725a914a9
 - name: uaa
-  url: https://bosh.io/d/github.com/cloudfoundry/uaa-release?v=75.5.0
-  version: 75.5.0
-  sha1: 6f8eb66775f558b64f158ed6f2f6d4490fbfdbf5
+  url: https://bosh.io/d/github.com/cloudfoundry/uaa-release?v=75.6.0
+  version: 75.6.0
+  sha1: c18f6f7f73a33be685aa832bab84594e193acd67
 - name: loggregator-agent
   url: https://bosh.io/d/github.com/cloudfoundry/loggregator-agent-release?v=6.3.3
   version: 6.3.3

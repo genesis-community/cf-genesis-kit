@@ -72,12 +72,12 @@
   path: /releases/name=cflinuxfs3
   value:
     name: cflinuxfs3
-    sha1: 80c3a8eb2f8bd5589424f358fd19a6702e6db2fc
+    sha1: 58d19065c74d52548648d740017f4f073462c9ac
     stemcell:
       os: ubuntu-xenial
       version: "621.5"
-    url: https://storage.googleapis.com/cf-deployment-compiled-releases/cflinuxfs3-0.249.0-ubuntu-xenial-621.5-20210630-035515-063071815.tgz
-    version: 0.249.0
+    url: https://storage.googleapis.com/cf-deployment-compiled-releases/cflinuxfs3-0.251.0-ubuntu-xenial-621.5-20210731-015802-310970453.tgz
+    version: 0.251.0
 - type: replace
   path: /releases/name=credhub
   value:
@@ -132,12 +132,12 @@
   path: /releases/name=java-buildpack
   value:
     name: java-buildpack
-    sha1: 267c7e642361284ad147d248a7f3ed224529593b
+    sha1: b5a6c83dc12a2e68939132914add2024f3ee2e8a
     stemcell:
       os: ubuntu-xenial
       version: "621.5"
-    url: https://storage.googleapis.com/cf-deployment-compiled-releases/java-buildpack-4.40-ubuntu-xenial-621.5-20210723-192052-735221596.tgz
-    version: "4.40"
+    url: https://storage.googleapis.com/cf-deployment-compiled-releases/java-buildpack-4.41-ubuntu-xenial-621.5-20210809-172414-830204596.tgz
+    version: "4.41"
 - type: replace
   path: /releases/name=log-cache
   value:
@@ -242,12 +242,12 @@
   path: /releases/name=routing
   value:
     name: routing
-    sha1: 1c185ab0ae5298b2e46491369219011a684b930a
+    sha1: d056e40829bcf73c9922a41b5864cb7035f81962
     stemcell:
       os: ubuntu-xenial
       version: "621.5"
-    url: https://storage.googleapis.com/cf-deployment-compiled-releases/routing-0.218.0-ubuntu-xenial-621.5-20210719-225832-089138531.tgz
-    version: 0.218.0
+    url: https://storage.googleapis.com/cf-deployment-compiled-releases/routing-0.221.0-ubuntu-xenial-621.5-20210810-002718-609650283.tgz
+    version: 0.221.0
 - type: replace
   path: /releases/name=ruby-buildpack
   value:
@@ -292,12 +292,12 @@
   path: /releases/name=uaa
   value:
     name: uaa
-    sha1: cd026ac58d40f847cf45552a7df008b59d4ba44c
+    sha1: 4e04477f3328783b0c9edd610f16478f03d7bc1f
     stemcell:
       os: ubuntu-xenial
       version: "621.5"
-    url: https://storage.googleapis.com/cf-deployment-compiled-releases/uaa-75.5.0-ubuntu-xenial-621.5-20210718-165532-138508691.tgz
-    version: 75.5.0
+    url: https://storage.googleapis.com/cf-deployment-compiled-releases/uaa-75.6.0-ubuntu-xenial-621.5-20210805-173156-817307218.tgz
+    version: 75.6.0
 - type: replace
   path: /releases/name=metrics-discovery
   value:

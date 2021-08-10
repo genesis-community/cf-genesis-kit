@@ -337,9 +337,9 @@ exodus:
   - run.cf.testing.examle
   apps_domain: run.cf.testing.examle
   base_domain: cf.testing.examle
-  cf-deployment-date: 2021-Jul-24 01:35:33 UTC
-  cf-deployment-url: https://github.com/cloudfoundry/cf-deployment/releases/tag/v16.21.0
-  cf-deployment-version: 16.21.0
+  cf-deployment-date: 2021-Aug-10 22:56:03 UTC
+  cf-deployment-url: https://github.com/cloudfoundry/cf-deployment/releases/tag/v16.22.0
+  cf-deployment-version: 16.22.0
   core_network: cf-core
   db_network: cf-core
   edge_network: cf-edge
@@ -2059,7 +2059,7 @@ instance_groups:
   - name: cf-core
   stemcell: default
   vm_type: minimal
-manifest_version: v16.21.0
+manifest_version: v16.22.0
 name: app-autoscaler-integration-cf
 releases:
 - name: binary-buildpack
@@ -2083,9 +2083,9 @@ releases:
   url: https://bosh.io/d/github.com/cloudfoundry/cf-smoke-tests-release?v=41.0.2
   version: 41.0.2
 - name: cflinuxfs3
-  sha1: 9356c8e074f02eccdd54d06403073db5fcc1db10
-  url: https://bosh.io/d/github.com/cloudfoundry/cflinuxfs3-release?v=0.249.0
-  version: 0.249.0
+  sha1: 9bb7e0ec5c6c846e7c789a13e258f4ab8ef01570
+  url: https://bosh.io/d/github.com/cloudfoundry/cflinuxfs3-release?v=0.251.0
+  version: 0.251.0
 - name: credhub
   sha1: 36d3a92588c33bc3a7ce54cd4714c96cc7d1bee2
   url: https://bosh.io/d/github.com/pivotal-cf/credhub-release?v=2.9.0
@@ -2107,9 +2107,9 @@ releases:
   url: https://bosh.io/d/github.com/cloudfoundry/go-buildpack-release?v=1.9.34
   version: 1.9.34
 - name: java-buildpack
-  sha1: 5d0c3b2d5f275080cbc98c3b4d5eeb802686e7d4
-  url: https://bosh.io/d/github.com/cloudfoundry/java-buildpack-release?v=4.40
-  version: "4.40"
+  sha1: 8011b1fa28ea099077ab51a7c74a6b0e4150c828
+  url: https://bosh.io/d/github.com/cloudfoundry/java-buildpack-release?v=4.41
+  version: "4.41"
 - name: loggregator
   sha1: 9eb81ddf174e826a5f4e59bc4dc6bda9007495eb
   url: https://bosh.io/d/github.com/cloudfoundry/loggregator-release?v=106.6.0
@@ -2147,9 +2147,9 @@ releases:
   url: https://bosh.io/d/github.com/cloudfoundry/python-buildpack-release?v=1.7.43
   version: 1.7.43
 - name: routing
-  sha1: d8915aab439c3e385d7f31dd8fe985b64fbb3016
-  url: https://bosh.io/d/github.com/cloudfoundry/routing-release?v=0.218.0
-  version: 0.218.0
+  sha1: accad1fe9072e96477d3632dc8584e30c243c3ba
+  url: https://bosh.io/d/github.com/cloudfoundry/routing-release?v=0.221.0
+  version: 0.221.0
 - name: ruby-buildpack
   sha1: 9ba29d917457c7ea202f00a33e8c538dacc5bfce
   url: https://bosh.io/d/github.com/cloudfoundry/ruby-buildpack-release?v=1.8.43
@@ -2167,9 +2167,9 @@ releases:
   url: https://bosh.io/d/github.com/cloudfoundry/statsd-injector-release?v=1.11.16
   version: 1.11.16
 - name: uaa
-  sha1: 6f8eb66775f558b64f158ed6f2f6d4490fbfdbf5
-  url: https://bosh.io/d/github.com/cloudfoundry/uaa-release?v=75.5.0
-  version: 75.5.0
+  sha1: c18f6f7f73a33be685aa832bab84594e193acd67
+  url: https://bosh.io/d/github.com/cloudfoundry/uaa-release?v=75.6.0
+  version: 75.6.0
 - name: loggregator-agent
   sha1: e8386f41e967cc609a3e9a1d6ecf674c3c903fb3
   url: https://bosh.io/d/github.com/cloudfoundry/loggregator-agent-release?v=6.3.3
