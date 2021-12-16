@@ -74,10 +74,10 @@ releases:
     url:     (( concat "https://bosh.io/d/github.com/cloudfoundry/cf-syslog-drain-release?v=" releases.cf-syslog-drain.version ))
     sha1:    98a18dcff81a983c95b8ce5c0a41b5627f4314ac
 
-  - name:    uaa
-    version: "74.13.0"
+  - name:    "uaa"
+    version: "75.12.0"
     url:     (( concat "https://bosh.io/d/github.com/cloudfoundry/uaa-release?v=" releases.uaa.version ))
-    sha1:    2eef558edc434d240d43ae255b59b10754d4785e
+    sha1:    "246eb67541ec9addfca32c64a8320de603e48487"
 
   - name:    silk
     version: "2.27.0"
@@ -88,4 +88,3 @@ releases:
     version: "0.0.3"
     url:     (( concat "https://bosh.io/d/github.com/cloudfoundry/bosh-dns-aliases-release?v=" releases.bosh-dns-aliases.version ))
     sha1:    b0d0a0350ed87f1ded58b2ebb469acea0e026ccc
-
