@@ -260,6 +260,7 @@ exodus:
   - run.cf.testing.examle
   apps_domain: run.cf.testing.examle
   base_domain: cf.testing.examle
+  bosh: blobstore-minio
   cf-deployment-date: 2020-Oct-08 14:08:11 UTC
   cf-deployment-hotfixes: true
   cf-deployment-url: https://github.com/cloudfoundry/cf-deployment/releases/tag/v12.45.0
@@ -268,10 +269,12 @@ exodus:
   db_network: cf-core
   edge_network: cf-edge
   features: minio-blobstore
+  is_director: false
   runtime_network: cf-runtime
   system_domain: system.cf.testing.examle
   system_org: system
   system_space: system
+  use_create_env: false
   vaulted_uaa_clients: /secret/blobstore/minio/cf/uaa/client_secrets:firehose
 features:
   randomize_az_placement: true

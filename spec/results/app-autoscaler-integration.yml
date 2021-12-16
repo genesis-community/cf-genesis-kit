@@ -262,6 +262,7 @@ exodus:
   - run.cf.testing.examle
   apps_domain: run.cf.testing.examle
   base_domain: cf.testing.examle
+  bosh: app-autoscaler-integration
   cf-deployment-date: 2020-Oct-08 14:08:11 UTC
   cf-deployment-hotfixes: true
   cf-deployment-url: https://github.com/cloudfoundry/cf-deployment/releases/tag/v12.45.0
@@ -270,6 +271,7 @@ exodus:
   db_network: cf-core
   edge_network: cf-edge
   features: app-autoscaler-integration
+  is_director: false
   loggregator_ca: <!{credhub}:loggregator_ca.certificate!>
   loggregator_tls_agent_cert: <!{credhub}:loggregator_tls_agent.certificate!>
   loggregator_tls_agent_key: <!{credhub}:loggregator_tls_agent.private_key!>
@@ -279,6 +281,7 @@ exodus:
   system_domain: system.cf.testing.examle
   system_org: system
   system_space: system
+  use_create_env: false
   vaulted_uaa_clients: /secret/app/autoscaler/integration/cf/uaa/client_secrets:firehose
 features:
   randomize_az_placement: true
