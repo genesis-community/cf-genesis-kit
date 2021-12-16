@@ -1970,9 +1970,9 @@ releases:
   url: https://bosh.io/d/github.com/cloudfoundry/cflinuxfs3-release?v=0.175.0
   version: 0.175.0
 - name: credhub
-  sha1: c45af16ed393bb3cf061b8749e3ee4cae74ce995
-  url: https://bosh.io/d/github.com/pivotal-cf/credhub-release?v=2.6.0
-  version: 2.6.0
+  sha1: 5ee5ca91b37afffa33dde0dcb34fcb6b284095f6
+  url: https://bosh.io/d/github.com/pivotal-cf/credhub-release?v=2.11.0
+  version: 2.11.0
 - name: diego
   sha1: fbf8ebfeda1f326f5d6834b9a621b88a548e06e3
   url: https://bosh.io/d/github.com/cloudfoundry/diego-release?v=2.48.0
@@ -2046,9 +2046,9 @@ releases:
   url: https://bosh.io/d/github.com/cloudfoundry/statsd-injector-release?v=1.11.15
   version: 1.11.15
 - name: uaa
-  sha1: ad4967615f2321648372497402ca6359ab8ba0df
-  url: https://bosh.io/d/github.com/cloudfoundry/uaa-release?v=74.17.0
-  version: 74.17.0
+  sha1: 246eb67541ec9addfca32c64a8320de603e48487
+  url: https://bosh.io/d/github.com/cloudfoundry/uaa-release?v=75.12.0
+  version: 75.12.0
 - name: loggregator-agent
   sha1: 1a5596b3f9155841e0bb227d8a2f8d8118f5100f
   url: https://bosh.io/d/github.com/cloudfoundry/loggregator-agent-release?v=5.3.8

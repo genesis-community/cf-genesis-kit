@@ -14,6 +14,14 @@ releases:
   url: https://bosh.io/d/github.com/cloudfoundry/routing-release?v=0.208.0
   version: 0.208.0
   sha1: 537d8303a083fb4efa5dadf24411fa4758e25b68
+- name: "uaa"
+  version: "75.12.0"
+  url: "https://bosh.io/d/github.com/cloudfoundry/uaa-release?v=75.12.0"
+  sha1: "246eb67541ec9addfca32c64a8320de603e48487"
+- name: "credhub"
+  version: "2.11.0"
+  url: "https://bosh.io/d/github.com/pivotal-cf/credhub-release?v=2.11.0"
+  sha1: "5ee5ca91b37afffa33dde0dcb34fcb6b284095f6"
 
 exodus:
   cf-deployment-hotfixes: true
