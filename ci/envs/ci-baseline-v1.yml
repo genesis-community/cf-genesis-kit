@@ -13,8 +13,8 @@ kit:
     - autoscaler
 
 genesis:
-  env:   ci-baseline-v1
-  bosh:  snw-genesis-ci
+  env:      ci-baseline-v1
+  bosh_env: snw-genesis-ci
 
 params:
   cf_public_ips:
