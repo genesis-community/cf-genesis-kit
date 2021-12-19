@@ -68,6 +68,7 @@ header "Assembling Github Release Artifacts..."
 mkdir -p ${RELEASE_ROOT}/artifacts
 echo "v${VERSION}"                         > ${RELEASE_ROOT}/tag
 echo "v${VERSION}"                         > ${RELEASE_ROOT}/name
+echo "$BRANCH"                             > ${RELEASE_ROOT}/branch
 mv git/*.tar.gz                              ${RELEASE_ROOT}/artifacts
 mv ${REPO_ROOT}/ci/release_notes.md          ${RELEASE_ROOT}/notes.md
 cat > ${RELEASE_ROOT}/notification <<EOF
