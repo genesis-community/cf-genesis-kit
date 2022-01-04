@@ -75,9 +75,9 @@ releases:
     sha1:    98a18dcff81a983c95b8ce5c0a41b5627f4314ac
 
   - name:    "uaa"
-    version: "75.12.0"
+    version: "75.13.0"
     url:     (( concat "https://bosh.io/d/github.com/cloudfoundry/uaa-release?v=" releases.uaa.version ))
-    sha1:    "246eb67541ec9addfca32c64a8320de603e48487"
+    sha1:    "63750fa3fde9e8a325efc1edd613da58bb92a85b"
 
   - name:    silk
     version: "2.27.0"
