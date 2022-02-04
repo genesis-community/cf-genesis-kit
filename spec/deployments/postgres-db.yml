@@ -17,4 +17,3 @@ params:
   bbsdb_host: test bbsdb-host
   bbsdb_user: test-bbsdb-user
   bbsdb_password: test-bbsdb-password
-
