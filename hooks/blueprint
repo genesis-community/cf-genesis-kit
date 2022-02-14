@@ -89,6 +89,9 @@ if ! want_feature "bare" ; then
   fi
   manifest+=( "operations/custom-azs.yml" )
 
+  # Temporary override of specific releases - FIXME when upstream catches up
+  manifest+=(  "overlay/override-releases.yml" )
+
 fi
 
 version=""
