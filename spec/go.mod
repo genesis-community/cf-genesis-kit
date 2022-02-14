@@ -1,6 +1,6 @@
 module github.com/genesis-community/cf-genesis-kit/spec
 
-go 1.14
+go 1.16
 
 require (
 	github.com/alecthomas/participle v0.4.4 // indirect
