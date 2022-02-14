@@ -213,7 +213,7 @@
   value:
     alias: windows2019
     os: windows2019
-    version: "2019.38"
+    version: "2019.40"
 - path: /instance_groups/name=api/jobs/name=cloud_controller_ng/properties/cc/stacks/name=windows2016?
   type: replace
   value:
@@ -253,9 +253,9 @@
   type: replace
   value:
     name: hwc-buildpack
-    sha1: e44b8a476e2e651942e80a8bbdc312a80044eccb
-    url: https://bosh.io/d/github.com/cloudfoundry-incubator/hwc-buildpack-release?v=3.1.18
-    version: 3.1.18
+    sha1: d23998512071991a9b85470661b77f9be3d41bc8
+    url: https://bosh.io/d/github.com/cloudfoundry-incubator/hwc-buildpack-release?v=3.1.19
+    version: 3.1.19
 - path: /releases/name=winc?
   type: replace
   value:
