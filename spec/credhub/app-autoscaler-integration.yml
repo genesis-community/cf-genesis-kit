@@ -145,6 +145,10 @@ log_cache_metrics_tls:
   ca: <!{credhub}:log_cache_metrics_tls.ca!>
   certificate: <!{credhub}:log_cache_metrics_tls.certificate!>
   private_key: <!{credhub}:log_cache_metrics_tls.private_key!>
+log_cache_nozzle_metrics_tls:
+  ca: <!{credhub}:log_cache_nozzle_metrics_tls.ca!>
+  certificate: <!{credhub}:log_cache_nozzle_metrics_tls.certificate!>
+  private_key: <!{credhub}:log_cache_nozzle_metrics_tls.private_key!>
 log_cache_proxy_tls:
   ca: <!{credhub}:log_cache_proxy_tls.ca!>
   certificate: <!{credhub}:log_cache_proxy_tls.certificate!>
