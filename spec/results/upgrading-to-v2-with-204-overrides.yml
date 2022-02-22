@@ -2254,8 +2254,8 @@ releases:
   version: 1.0.1
 stemcells:
 - alias: default
-  os: ubuntu-xenial
-  version: "621.125"
+  os: ubuntu-bionic
+  version: "1.54"
 update:
   canaries: 1
   canary_watch_time: 30000-1200000
