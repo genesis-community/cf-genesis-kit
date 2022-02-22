@@ -2861,5 +2861,5 @@ releases:
   sha1: c3d11f473d4518505e2a671d8ad6a553e1b1c1ca
 stemcells:
 - alias: default
-  os: ubuntu-xenial
-  version: "621.125"
+  os: ubuntu-bionic
+  version: "1.54"
