@@ -56,6 +56,7 @@ General:
   - `compiled-releases` - Use pre-compiled releases to speed up initial deploy time (alias of upstream `cf-deployment/operations/use-compiled-releases`).
   - `small-footprint` - Use the minimal number of vms and only 1 az to deploy cf.
   - `nfs-volume-services` - Alias of `cf-deployment/operations/enable-nfs-volume-service`
+  - `smb-volume-services` - Adds support for SMB Volumes.
   - `enable-service-discovery` - Enables bosh-dns support on diego cells.
   - `app-autoscaler-integration` - Add a uaa client for the app autoscaler (must be deployed via [cf-app-autoscaler-genesis-kit](https://github.com/genesis-community/cf-app-autoscaler-genesis-kit)).
   - `prometheus-integration` - Configure cf to export to prometheus (must deployed via [prometheus-genesis-kit](https://github.com/genesis-community/prometheus-genesis-kit)).
@@ -838,6 +839,13 @@ NFS volumes provided by the NFS Volume Services Broker.
 
 There are currently no parameters defined for this feature.
 
+## SMB Volume Services
+
+The `smb-volume-services` feature adds a volume driver to the
+Cloud Foundry Diego cells, to allow application instances to mount
+SMB volumes provided by the SMB Volume Services Broker.
+
+There are currently no parameters defined for this feature.
 
 # Zero-downtime App Deployments
 
