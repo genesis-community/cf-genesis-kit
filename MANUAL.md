@@ -298,9 +298,10 @@ These params need to be set when activating features:
     | `credhubdb_user` | Name of the Credhub database user | `credhubadmin` |
   
   - **windows-diego-cells**:
-  | param | description | default |
-  | `windows_diego_cell_vm_type` | Windows Diego cell VM Type | `small-highmem` |
-  | `windows_diego_cell_instances`| Windows Diego Cell Instance Count | `1` |
+    | param | description | default |
+    | --- | --- | ---- |
+    | `windows_diego_cell_vm_type` | Windows Diego cell VM Type | `small-highmem` |
+    | `windows_diego_cell_instances`| Windows Diego Cell Instance Count | `1` |
 
 # Retired Parameters (from v1.x)
 
