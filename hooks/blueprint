@@ -407,6 +407,11 @@ for want in $GENESIS_REQUESTED_FEATURES; do
         "cf-deployment/operations/use-online-windows2019fs.yml" \
         "cf-deployment/operations/use-latest-windows2019-stemcell.yml" \
       )
+      if want_feature "compiled-releases"; then
+        manifests+=( \
+          "cf-deployment/operations/experimental/use-compiled-releases-windows.yml" \
+        )
+      fi
       if ! want_feature "bare" ; then
         manifest+=( \
           "overlay/windows.yml" \

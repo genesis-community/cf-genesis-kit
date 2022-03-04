@@ -2,5 +2,5 @@ instance_groups:
 - name: windows2019-cell
   vm_type: (( grab params.windows_diego_cell_vm_type || "small-highmem" ))
   networks: ((cf_runtime_network))
-  instances: (( grab params.windows_diego_cell_count || "1"))
+  instances: (( grab params.windows_diego_cell_instances || "1"))
   azs: (( grab meta.azs ))
