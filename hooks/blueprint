@@ -389,7 +389,15 @@ for want in $GENESIS_REQUESTED_FEATURES; do
     small-footprint)
       : ;; # already dealt with
     nfs-volume-services)
-      manifest+=( "cf-deployment/operations/enable-nfs-volume-service.yml" );;
+      manifest+=( \
+        "cf-deployment/operations/enable-nfs-volume-service.yml" \
+      )
+      if ! want_feature "bare" ; then
+        manifest+=( \
+          "overlay/addons/nfs-volume-service.yml" \
+        )
+      fi
+      ;;
     enable-service-discovery)
       manifest+=( "overlay/enable-service-discovery.yml" ) ;;
     app-autoscaler-integration)
