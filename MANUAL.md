@@ -847,6 +847,14 @@ NFS volumes provided by the NFS Volume Services Broker.
 There are currently no parameters defined for this feature.
 
 
+## SMB Volume Services
+
+The `smb-volume-services` feature adds a volume driver to the
+Cloud Foundry Diego cells, to allow application instances to mount
+SMB volumes provided by the SMB Volume Services Broker.
+
+There are currently no parameters defined for this feature.
+
 # Zero-downtime App Deployments
 
 This kit allows for using the v3 api's [Zero Downtime (ZDT) deployments](https://docs.cloudfoundry.org/devguide/deploy-apps/rolling-deploy.html) via the
