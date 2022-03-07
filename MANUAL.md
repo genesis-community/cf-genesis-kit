@@ -64,6 +64,8 @@ General:
   - `no-nats-tls` - Nats over TLS was not part of cf-deployment v12.45, but has been turned on by default unless using bare mode.  Set this feature to disable it.
   - `ssh-proxy-on-routers` - moves the ssh-proxy from scheduler instance group to the router instance group, placing it on the edge network, and enabling scaling via scaling the routers.
   - `no-tcp-routers` - removes the tcp-router instance group and associated resource allocations for systems that don't need tcp routes.
+  - `windows-diego-cells` - Adds Windows Diego cell functionality.
+
 
 Database related - choose one:
   - `postgres-db` - Use an external postgres instance to host persistent data.
@@ -295,6 +297,12 @@ These params need to be set when activating features:
     | `locketdb_user` | Name of the Locket database user | `locketadmin` |
     | `credhubdb_name` | Name of the Credhub database | `credhubdb` |
     | `credhubdb_user` | Name of the Credhub database user | `credhubadmin` |
+
+  - **windows-diego-cells**:
+    | param | description | default |
+    | --- | --- | ---- |
+    | `windows_diego_cell_vm_type` | Windows Diego cell VM Type | `small-highmem` |
+    | `windows_diego_cell_instances`| Windows Diego Cell Instance Count | `1` |
 
 # Retired Parameters (from v1.x)
 
