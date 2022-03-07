@@ -223,8 +223,9 @@ for want in $GENESIS_REQUESTED_FEATURES; do
     local-postgres-db|local-mysql-db|mysql-db|postgres-db) db_specified=1; features+=( "$want" ) ;;
     bare|partitioned-network|haproxy|tls|no-nats-tls|self-signed) features+=( "$want" ) ;;
     minio-blobstore|aws-blobstore|aws-blobstore-iam|azure-blobstore|gcp-blobstore|gcp-use-access-key) features+=( "$want" ) ;;
-    nfs-volume-services|enable-service-discovery|ssh-proxy-on-routers|no-tcp-routers) features+=( "$want" ) ;;
+    nfs-volume-services|enable-service-discovery|ssh-proxy-on-routers|no-tcp-routers|smb-volume-services) features+=( "$want" ) ;;
     app-autoscaler-integration|prometheus-integration|v2-nats-credentials) features+=( "$want" ) ;;
+    windows-diego-cells) features+=( "$want" ) ;;
     +migrated-v1-env|+override-db-names) features+=( "$want" ) ;;
     v1-vm-types|no-v1-vm-types)
       : # no-op, dealt with above
@@ -390,6 +391,16 @@ for want in $GENESIS_REQUESTED_FEATURES; do
       : ;; # already dealt with
     nfs-volume-services)
       manifest+=( "cf-deployment/operations/enable-nfs-volume-service.yml" );;
+    smb-volume-services)
+      manifest+=( \
+        "cf-deployment/operations/enable-smb-volume-service.yml" \
+      )
+      if ! want_feature "bare" ; then
+        manifest+=( \
+          "overlay/addons/smb-volume-service.yml" \
+        )
+      fi
+    ;;
     enable-service-discovery)
       manifest+=( "overlay/enable-service-discovery.yml" ) ;;
     app-autoscaler-integration)
@@ -400,6 +411,23 @@ for want in $GENESIS_REQUESTED_FEATURES; do
       manifest+=( "overlay/addons/ssh-proxy-on-routers.yml" ) ;;
     no-tcp-routers)
       manifest+=( "overlay/addons/no-tcp-routers.yml" ) ;;
+    windows-diego-cells)
+      manifest+=( \
+        "cf-deployment/operations/windows2019-cell.yml" \
+        "cf-deployment/operations/use-online-windows2019fs.yml" \
+        "cf-deployment/operations/use-latest-windows2019-stemcell.yml" \
+      )
+      if want_feature "compiled-releases"; then
+        manifests+=( \
+          "cf-deployment/operations/experimental/use-compiled-releases-windows.yml" \
+        )
+      fi
+      if ! want_feature "bare" ; then
+        manifest+=( \
+          "overlay/windows.yml" \
+        )
+      fi
+      ) ;;
     +migrated-v1-env)
       manifest+=( "overlay/addons/migration.yml" ) ;;
 
