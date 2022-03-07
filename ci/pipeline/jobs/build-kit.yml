@@ -1,0 +1,36 @@
+jobs:
+- name: build-kit
+  public: true
+  serial: false
+  plan:
+  - do:
+    - in_parallel:
+      - { get: version, params: {pre: rc} }
+      - { get: git, trigger: true }
+      - { get: git-ci }
+    - task: build-kit
+      file: git-ci/ci/tasks/build-kit.yml
+      params:
+        KIT_SHORTNAME:        (( grab meta.kit ))
+        VAULT_URI:            (( grab meta.vault.url ))
+        VAULT_TOKEN:          (( grab meta.vault.token ))
+    - put: build
+      params:
+        file: build/*.tar.gz
+        acl: public-read
+    - put: version
+      params: {file: version/number}
+    on_success:
+      put: notify
+      params:
+        topic:   (( concat meta.shout.topic "-$BUILD_JOB_NAME" ))
+        message: prerelease build for '$BUILD_JOB_NAME' succeeded.
+        ok:      yes
+        link:    (( grab meta.shout.links.build ))
+    on_failure:
+      put: notify
+      params:
+        topic:   (( concat meta.shout.topic "-$BUILD_JOB_NAME" ))
+        message: prerelease build for '$BUILD_JOB_NAME' failed.
+        ok:      no
+        link:    (( grab meta.shout.links.build ))

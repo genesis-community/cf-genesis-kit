@@ -1,0 +1,135 @@
+jobs:
+- name: acceptance-tests
+  public: true
+  serial: true
+  serial_groups: [testing]
+  plan:
+  - do:
+    - in_parallel:
+      - { get: version,    passed: [spec-check, spec-tests]}
+      - { get: build,      passed: [spec-check, spec-tests], trigger: true }
+      - { get: spec-check, passed: [spec-check]}
+      - { get: git,        passed: [spec-check, spec-tests]}
+      - { get: git-ci }
+      - { get: cats }
+    - task: testflights
+      file: git-ci/ci/tasks/deploy.yml
+      params:
+        .: (( inject meta.task_connectivity_params ))
+        DEPLOY_ENV:           (( concat "ci-" meta.iaas "-cats" ))
+        KIT_SHORTNAME:        (( grab meta.kit ))
+        SKIP_FRESH:           false
+        SKIP_CLEAN:           true
+        SKIP_SMOKE_TESTS:     false
+  - do:
+    - in_parallel:
+        fail_fast: true
+        limit: 1
+        steps:
+        - task: cats-apps
+          file: git-ci/ci/tasks/cats.yml
+          attempts: 5
+          params:
+            .: (( inject meta.cats_params ))
+            RUN_CATS: include_apps
+        - task: cats-detect
+          file: git-ci/ci/tasks/cats.yml
+          attempts: 5
+          params:
+            .: (( inject meta.cats_params ))
+            RUN_CATS: include_detect
+        - task: cats-routing
+          file: git-ci/ci/tasks/cats.yml
+          attempts: 5
+          params:
+            .: (( inject meta.cats_params ))
+            RUN_CATS: include_routing
+        - task: cats-backend-compability
+          file: git-ci/ci/tasks/cats.yml
+          attempts: 5
+          params:
+            .: (( inject meta.cats_params ))
+            RUN_CATS: include_backend_compatibility
+        - task: cats-internet-dependent
+          file: git-ci/ci/tasks/cats.yml
+          attempts: 5
+          params:
+            .: (( inject meta.cats_params ))
+            RUN_CATS: include_internet_dependent
+        # - task: cats-route-services
+        #   file: git-ci/ci/tasks/cats.yml
+        #   attempts: 5
+        #   params:
+        #     .: (( inject meta.cats_params ))
+        #     RUN_CATS: include_route_services
+        - task: cats-sec-grps
+          file: git-ci/ci/tasks/cats.yml
+          attempts: 5
+          params:
+            .: (( inject meta.cats_params ))
+            RUN_CATS: include_security_groups
+        - task: cats-services
+          file: git-ci/ci/tasks/cats.yml
+          attempts: 5
+          params:
+            .: (( inject meta.cats_params ))
+            RUN_CATS: include_services
+        - task: cats-ssh
+          file: git-ci/ci/tasks/cats.yml
+          attempts: 5
+          params:
+            .: (( inject meta.cats_params ))
+            RUN_CATS: include_ssh
+        - task: cats-sso
+          file: git-ci/ci/tasks/cats.yml
+          attempts: 5
+          params:
+            .: (( inject meta.cats_params ))
+            RUN_CATS: include_sso
+        - task: cats-tasks
+          file: git-ci/ci/tasks/cats.yml
+          attempts: 5
+          params:
+            .: (( inject meta.cats_params ))
+            RUN_CATS: include_tasks
+        - task: cats-v3
+          file: git-ci/ci/tasks/cats.yml
+          attempts: 5
+          params:
+            .: (( inject meta.cats_params ))
+            RUN_CATS: include_v3
+        - task: cats-deployments
+          file: git-ci/ci/tasks/cats.yml
+          attempts: 5
+          params:
+            .: (( inject meta.cats_params ))
+            RUN_CATS: include_deployments
+        - task: cats-service_discovery
+          file: git-ci/ci/tasks/cats.yml
+          attempts: 5
+          params:
+            .: (( inject meta.cats_params ))
+            RUN_CATS: include_service_discovery
+        - task: cats-capi_no_bridge
+          file: git-ci/ci/tasks/cats.yml
+          attempts: 5
+          params:
+            .: (( inject meta.cats_params ))
+            RUN_CATS: include_capi_no_bridge
+    - task: cleanup-enviorment
+      file: git-ci/ci/tasks/deploy.yml
+      params:
+        .: (( inject meta.task_connectivity_params ))
+        DEPLOY_ENV:           (( concat "ci-" meta.iaas "-cats" ))
+        KIT_SHORTNAME:        (( grab meta.kit ))
+        SKIP_FRESH:           true
+        SKIP_DEPLOY:          true
+        SKIP_SMOKE_TESTS:     true
+        SKIP_CLEAN:           false
+    on_failure:
+      put: notify
+      params:
+        topic:   (( concat meta.shout.topic "-$BUILD_JOB_NAME" ))
+        message: release candidate job 'pre' failed (which is unusual).
+        ok:      no
+        link:    (( grab meta.shout.links.build ))

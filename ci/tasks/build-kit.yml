@@ -1,0 +1,21 @@
+---
+platform: linux
+
+image_resource:
+  type: registry-image
+  source:
+    repository: starkandwayne/genesis
+
+inputs:
+- name: version
+- name: git
+- name: git-ci
+
+outputs:
+- name: build
+
+params:
+  GENESIS_HONOR_ENV: 1
+
+run:
+  path: git-ci/ci/scripts/build-kit

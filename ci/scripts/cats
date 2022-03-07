@@ -1,17 +1,50 @@
 #!/bin/bash
+set -e
+
+export GIT_NAME="${GIT_NAME:-"Stark & Wayne CI Bot"}"
+export GIT_EMAIL="${GIT_EMAIL:-"ci@starkandwayne.com"}"
+
+header() {
+  echo
+  echo "================================================================================"
+  echo "$1"
+  echo "--------------------------------------------------------------------------------"
+  echo
+}
+
+bail() {
+  echo >&2 "$*  Did you misconfigure Concourse?"
+  exit 2
+}
+
+
+test -n "${KIT_SHORTNAME:-}"      || bail "KIT_SHORTNAME must be set to the short name of this kit."
+test -n "${VAULT_URI:-}"          || bail "VAULT_URI must be set to the Vault connection address - suggest using ((vault.url))"
+test -n "${VAULT_TOKEN:-}"        || bail "VAULT_TOKEN must be set to a valid token to connect to the Vault - suggest using ((vault.token))"
+test -n "${BOSH_ENVIRONMENT:-}"   || bail "BOSH_ENVIRONMENT must be set to BOSH directory URL - suggest using ((bosh.uri))"
+test -n "${BOSH_CA_CERT:-}"       || bail "BOSH_CA_CERT must be set to the BOSH CA Cert - suggest using ((bosh.ca))"
+test -n "${BOSH_CLIENT:-}"        || bail "BOSH_CLIENT must be set to BOSH Client user - suggest using ((bosh.username))"
+test -n "${BOSH_CLIENT_SECRET:-}" || bail "BOSH_CLIENT_SECRET must be set to BOSH Client secret - suggest using ((bosh.password))"
+test -n "${CREDHUB_URL:-}"        || bail "CREDHUB_URL must be set to Credhub URL - suggest using ((bosh.credhub_url))"
+test -n "${CREDHUB_USER:-}"       || bail "CREDHUB_USER must be set to Credhub username - suggest using ((bosh.credhub_username))"
+test -n "${CREDHUB_PASSWORD:-}"   || bail "CREDHUB_PASSWORD must be set to Credhub password - suggest using ((bosh.credhub_password))"
+
+test -f "${VERSION_FROM}"         || bail "Version file (${VERSION_FROM}) not found."
+VERSION=$(cat "${VERSION_FROM}")
+test -n "${VERSION}"              || bail "Version file (${VERSION_FROM}) was empty."
 
 function lookup(){
   genesis -C "$GENESIS_ROOT" lookup "$GENESIS_ENVIRONMENT" "$@"
 }
 function run_local(){
-  export tmpdir=$(mktemp -d -t cats.XXXXXXXXXX)
-  trap "rm -rf ${tmpdir}" EXIT
+  export tmpdir="$(mktemp -d -t cats.XXXXXXXXXX)"
+  trap "rm -rf '${tmpdir}'" EXIT
   echo "REPO: $CATS_GIT_SSH_URL VERSION: $VERSION"
-  git clone ${CATS_GIT_SSH_URL} ${tmpdir}
-  pushd ${tmpdir}
-    git checkout ${VERSION}
+  git clone "${CATS_GIT_SSH_URL}" "${tmpdir}"
+  pushd "${tmpdir}" &>/dev/null
+    git checkout "${VERSION}"
     git submodule update --init
-  popd
+  popd &>/dev/null
 }
 function run_cats(){
   case $1 in
@@ -22,60 +55,72 @@ function run_cats(){
       RUN_CATS=""
     ;;
     "--deployment-dir")
-      echo "FOUND DEPL. DIR FLAG"
+      echo "Running CATS from deployment dir $2"
       export BUILD_ROOT=$2
-      export GENESIS_ROOT=$BUILD_ROOT/work/cf-deployments
+      export GENESIS_ROOT="$BUILD_ROOT/work/cf-deployments"
       export GENESIS_ENVIRONMENT=ci-cats
       export vault=/secret/ci/cats/cf
       export credhub=/snw-genesis-ci-bosh/ci-cats-cf
 
-      credhub login --server $CREDHUB_URL --username $CREDHUB_USER --password $CREDHUB_PASSWORD --skip-tls-validation
+      credhub login --server "$CREDHUB_URL" --username "$CREDHUB_USER" --password "$CREDHUB_PASSWORD" --skip-tls-validation
     ;;
   esac
   echo "$GENESIS_ROOT"
   base=$(lookup params.base_domain)
-  system_domain=$(lookup params.system_domain system.$base)
+  system_domain="$(lookup params.system_domain system.$base)"
   export API_URL=api.$system_domain
-  export ADMIN_PASSWORD=$(credhub get -q -n $credhub/cf_admin_password)
+  export ADMIN_PASSWORD="$(credhub get -q -n $credhub/cf_admin_password)"
   export APP_DOMAINS_0=run.$base
   case $RUN_CATS in
     "include_container_networking")
-      sed -i "s#include_security_groups:.*#include_security_groups: true#g" ../git-ci/ci/scripts/cats.yml
+      sed -i "s#include_security_groups:.*#include_security_groups: true#g" ../git-ci/ci/envs/cats.yml
     ;;
     "include_deployments")
-      sed -i "s#include_v3:.*#include_v3: true#g" ../git-ci/ci/scripts/cats.yml
+      sed -i "s#include_v3:.*#include_v3: true#g" ../git-ci/ci/envs/cats.yml
     ;;
     "include_service_instance_sharing")
-      sed -i "s#include_services:.*#include_services: true#g" ../git-ci/ci/scripts/cats.yml
+      sed -i "s#include_services:.*#include_services: true#g" ../git-ci/ci/envs/cats.yml
     ;;
     "include_sso")
-      sed -i "s#include_services:.*#include_services: true#g" ../git-ci/ci/scripts/cats.yml
+      sed -i "s#include_services:.*#include_services: true#g" ../git-ci/ci/envs/cats.yml
     ;;
     "include_tasks")
-      sed -i "s#include_v3:.*#include_v3: true#g" ../git-ci/ci/scripts/cats.yml
+      sed -i "s#include_v3:.*#include_v3: true#g" ../git-ci/ci/envs/cats.yml
     ;;
     "include_zipkin")
-      sed -i "s#include_routing:.*#include_routing: true#g" ../git-ci/ci/scripts/cats.yml
+      sed -i "s#include_routing:.*#include_routing: true#g" ../git-ci/ci/envs/cats.yml
     ;;
   esac
   if [[ ${RUN_LOCAL} ]]; then
-    echo "RUNNING LOCALLY"
+    echo "Running CATS locally..."
     run_local
   else
-    sed -i "s#${RUN_CATS}:.*#${RUN_CATS}: true#g" ../git-ci/ci/scripts/cats.yml
+    sed -i "s#${RUN_CATS}:.*#${RUN_CATS}: true#g" ../git-ci/ci/envs/cats.yml
     tmpdir="$BUILD_ROOT/cats"
   fi
   export CONFIG=${tmpdir}/config.json
-  spruce merge ../git-ci/ci/scripts/cats.yml | spruce json | jq '.' > ${CONFIG}
-  pushd ${tmpdir}
-  FAILFAST_FLAG=""
-  VERBOSE_FLAG=""
-  if [[ ${FAILFAST}=="true" ]];then
-    FAILFAST_FLAG="--failFast"
-  fi
-  if [[ ${VERBOSE}=="true" ]];then
-    VERBOSE_FLAG="-v"
-  fi
-  echo "RUNNING CATS WITH NODES: ${CATS_NODES:-4} ${VERBOSE_FLAG} ${FAILFAST_FLAG}"
-  ./bin/test -nodes=${CATS_NODES:-4} ${VERBOSE_FLAG} $FAILFAST_FLAG
+  spruce merge ../git-ci/ci/envs/cats.yml | spruce json | jq '.' > "${CONFIG}"
+  pushd "${tmpdir}" &>/dev/null
+    FAILFAST_FLAG=""
+    VERBOSE_FLAG=""
+    if [[ ${FAILFAST} == "true" ]] ; then
+      FAILFAST_FLAG="--failFast"
+    fi
+    if [[ ${VERBOSE} == "true" ]] ; then
+      VERBOSE_FLAG="-v"
+    fi
+    echo "RUNNING CATS WITH NODES: ${CATS_NODES:-4} ${VERBOSE_FLAG} ${FAILFAST_FLAG}"
+    ./bin/test -nodes=${CATS_NODES:-4} ${VERBOSE_FLAG} ${FAILFAST_FLAG}
+  popd &>/dev/null
 }
+
+ROOT_DIR="$(pwd)"
+
+header "Configure Github and Vault access"
+git config --global user.name  "$GIT_NAME"
+git config --global user.email "$GIT_EMAIL"
+safe target da-vault "$VAULT_URI" -k
+echo "$VAULT_TOKEN" | safe auth token
+safe read secret/handshake
+
+run_cats --deployment-dir "$ROOT_DIR"

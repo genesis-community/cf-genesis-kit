@@ -1,0 +1,8 @@
+resources:
+  - name: upstream
+    type: git
+    check_every: 168h
+    source:
+      uri:    (( grab meta.upstream.url ))
+      branch: master
+      ignore_paths: [ci/*]

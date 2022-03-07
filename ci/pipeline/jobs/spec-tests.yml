@@ -1,0 +1,23 @@
+jobs:
+- name: spec-tests
+  public: true
+  serial: false
+  plan:
+  - do:
+    - in_parallel:
+      - { get: build,   passed: [build-kit], trigger: true}
+      - { get: version, passed: [build-kit]}
+      - { get: git,     passed: [build-kit]}
+      - { get: git-ci }
+      - { get: git-latest-tag }
+    - task: spec-tests
+      file: git-ci/ci/tasks/spec-tests.yml
+      attempts: 2
+    on_failure:
+      put: notify
+      params:
+        topic:   (( concat meta.shout.topic "-$BUILD_JOB_NAME" ))
+        message: tests job '$BUILD_JOB_NAME' failed.
+        ok:      no
+        link:    (( grab meta.shout.links.build ))
+

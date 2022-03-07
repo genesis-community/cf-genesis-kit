@@ -1,0 +1,7 @@
+resources:
+  - name: cats
+    type: git
+    check_every: 24h
+    source:
+      uri:         https://github.com/cloudfoundry/cf-acceptance-tests
+      tag_filter: "v*"

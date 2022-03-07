@@ -1,0 +1,19 @@
+---
+platform: linux
+
+image_resource:
+  type: registry-image
+  source:
+    repository: starkandwayne/concourse-go
+    tag: '1.16'
+
+inputs:
+  - name: git-ci
+  - name: git
+  - name: upstream
+
+outputs:
+  - name: git
+
+run:
+  path: git-ci/ci/scripts/get-latest-upstream

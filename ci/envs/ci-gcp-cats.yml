@@ -1,0 +1,17 @@
+---
+genesis:
+  env:   ci-vsphere-cats
+
+params:
+  disk_type:            default
+  base_domain:          (( concat meta._ip_prefix "8.192.netip.cc" ))
+  postgres_vip:         (( concat meta._ip_prefix "8.193" ))
+  haproxy_instances:    1
+  haproxy_ips:          [ (( concat meta._ip_prefix "8.192" )) ]
+  diego_cell_instances: 4
+
+  cf_core_network:      default
+  cf_edge_network:      default
+  cf_runtime_network:   default
+  cf_db_network:        default
+

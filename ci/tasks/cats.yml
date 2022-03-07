@@ -1,0 +1,26 @@
+---
+platform: linux
+
+image_resource:
+  type: docker-image
+  source:
+    repository: starkandwayne/concourse-go
+    tag: '1.14'
+
+inputs:
+- name: git
+  path: kit
+- name: git-ci
+- name: cats
+- name: work
+
+run:
+  path: git-ci/ci/scripts/cats
+
+params:
+  GENESIS_HONOR_ENV:    1
+  SKIP_CATS:            false
+  FAILFAST:             true
+  VERBOSE:              false
+  CATS_NODES:           2
+  RUN_CATS:             nul

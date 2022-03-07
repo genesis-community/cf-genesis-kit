@@ -1,0 +1,16 @@
+---
+kit:
+  features:
+    - ((append))
+    - small-footprint
+
+genesis:
+  env:   ci-vsphere-baseline
+
+params:
+  disk_type:          default
+  base_domain:        (( concat meta._ip_prefix "9.10.netip.cc" ))
+  postgres_vip:       (( concat meta._ip_prefix "9.9" ))
+  availability_zones: [z1]
+  haproxy_ips:        [ (( concat meta._ip_prefix "9.10" )) ]
+  haproxy_ips:        [10.128.9.10]
