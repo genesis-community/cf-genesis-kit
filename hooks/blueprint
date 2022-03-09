@@ -435,7 +435,7 @@ for want in $GENESIS_REQUESTED_FEATURES; do
           "overlay/windows.yml" \
         )
       fi
-      ) ;;
+      ;;
     +migrated-v1-env)
       manifest+=( "overlay/addons/migration.yml" ) ;;
 
