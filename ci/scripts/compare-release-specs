@@ -54,7 +54,8 @@ done <<<"$(diff -p <(echo "$prev_rel_names") <(echo "$curr_rel_names") | grep '^
 unchanged=()
 changed=()
 while IFS='' read -r rel; do
-  prev_ver="$(echo "$prev_releases" | jq -r --arg r "$rel" '.releases[] | select(.name == $r) | .version' )"
+  prev_ver="$(echo "$prev_releases" | jq -r --arg r "$rel" '(.releases[] | select(.name == $r) | .version ) // "--none--" ' )"
+  if [[ "$prev_ver" == "--none--" ]] ; then continue ; fi
   curr_ver="$(echo "$curr_releases" | jq -r --arg r "$rel" '.releases[] | select(.name == $r) | .version' )"
   if [[ "$prev_ver" == "$curr_ver" ]] ; then
     unchanged+=( "$rel $curr_ver" )
