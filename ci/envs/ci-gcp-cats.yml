@@ -1,6 +1,6 @@
 ---
 genesis:
-  env:   ci-vsphere-cats
+  env:   ci-gcp-cats
 
 params:
   disk_type:            default

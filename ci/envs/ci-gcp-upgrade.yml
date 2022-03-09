@@ -5,7 +5,7 @@ kit:
     - small-footprint
 
 genesis:
-  env:   ci-vsphere-baseline
+  env:   ci-gcp-baseline
 
 params:
   disk_type:          default
