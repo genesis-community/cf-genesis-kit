@@ -21,7 +21,7 @@ has_feature() {
 }
 
 is_proto() {
-	has_feature $1 'proto' # This will need to be changed in v2.8.0
+	has_feature "$1" 'proto' # This will need to be changed in v2.8.0
 }
 
 cleanup_environment() {
@@ -63,7 +63,7 @@ cleanup() {
 		else
 
 			(
-				eval "$(genesis bosh --connect "${deployment}")"
+				eval "$(genesis bosh --connect "${deployment}" 2>/dev/null)"
 				cleanup_deployment "$deployment-${KIT_SHORTNAME}"
 			)
 		fi
@@ -78,8 +78,8 @@ use JSON::PP qw/encode_json/;
 print encode_json(\%ENV);
 EOF
 chmod +x "get-env.pl"
-vault_path="$(genesis sh "${DEPLOY_ENV}" -s "$(pwd)/get-env.pl" | grep '^{' | jq -r '.GENESIS_SECRETS_BASE')"
-exodus_path="$(genesis sh "${DEPLOY_ENV}" -s "$(pwd)/get-env.pl" | grep '^{' | jq -r '.GENESIS_EXODUS_BASE')"
+vault_path="$(genesis sh "${DEPLOY_ENV}" -s "$(pwd)/get-env.pl" 2>/dev/null | grep '^{' | jq -r '.GENESIS_SECRETS_BASE')"
+exodus_path="$(genesis sh "${DEPLOY_ENV}" -s "$(pwd)/get-env.pl" 2>/dev/null | grep '^{' | jq -r '.GENESIS_EXODUS_BASE')"
 vault_path="${vault_path%/}" # trim any trailing slash
 # -----
 
@@ -106,20 +106,19 @@ if [[ "$SKIP_REPLACE_SECRETS" == "false" ]] ; then
 		safe rm -rf "$exodus_path" && true
 
 	# Remove credhub values
-	if ! is_proto ; then (
-		bosh_env="$(genesis lookup "$deployment" genesis | jq -r '.bosh_env // .env')"
+	if ! is_proto "$DEPLOY_ENV" ; then (
+		bosh_env="$(genesis lookup "$deployment" genesis 2>/dev/null | jq -r '.bosh_env // .env')"
 		[[ "$bosh_env" =~ / ]] || bosh_env="${bosh_env}/bosh"
 
-		bosh_exodus="$(genesis lookup --exodus-for "$bosh_env" . "{}")"
+		bosh_exodus="$(genesis lookup --exodus-for "$bosh_env" "$DEPLOY_ENV" . "{}" 2>/dev/null)"
 		CREDHUB_SERVER="$(jq -r '.credhub_url // ""' <<<"$bosh_exodus")"
 		if [[ -n "$CREDHUB_SERVER" ]] ; then
-			echo "Attempting to remove credhub secrets under /${bosh_env/\//-}/${DEPLOYMENT_NAME}-${KIT_SHORTNAME}/"
+			echo "Attempting to remove credhub secrets under /${bosh_env/\//-}/${DEPLOY_ENV}-${KIT_SHORTNAME}/"
 			CREDHUB_CLIENT="$(jq -r '.credhub_username // ""' <<<"$bosh_exodus")"
 			CREDHUB_SECRET="$(jq -r '.credhub_password // ""' <<<"$bosh_exodus")"
-			CREDHUB_CA_CERT="$(jq -r '.credhub_ca_cert // ""' <<<"$bosh_exodus")"
+			CREDHUB_CA_CERT="$(jq -r '"\(.credhub_ca_cert)\(.ca_cert)"' <<<"$bosh_exodus")"
 			export CREDHUB_SERVER CREDHUB_CLIENT CREDHUB_SECRET CREDHUB_CA_CERT
-			credhub login && \
-			credhub delete -p "/${bosh_env/\//-}/${DEPLOYMENT_NAME}-${KIT_SHORTNAME}/"
+			credhub delete -p "/${bosh_env/\//-}/${DEPLOY_ENV}-${KIT_SHORTNAME}/"
 		fi
 	) ; fi
 
@@ -174,12 +173,17 @@ if [[ "$SKIP_DEPLOY" == "false" ]]; then
 	esac
 
 	if [[ -n "$stemcell_iaas" ]] ; then
-		stemcell_data="$(genesis lookup --manifest "${DEPLOY_ENV}" stemcells)"
+		stemcell_data="$(genesis lookup --merged "${DEPLOY_ENV}" stemcells)"
 		stemcell_os="$(jq -r '.[0].os' <<<"$stemcell_data")"
 		stemcell_version="$(jq -r '.[0].version' <<<"$stemcell_data")"
-		stemcell_name="bosh-${stemcell_iaas} -${stemcell_os}-go_agent"
-		bosh upload-stemcell "https://bosh.io/d/stemcells/$stemcell_name?v=${stemcell_version}" \
-			--version "${stemcell_version}" --name "$stemcell_name"
+		stemcell_name="bosh-${stemcell_iaas}-${stemcell_os}-go_agent"
+		if ! genesis bosh "$DEPLOY_ENV" stemcells 2>/dev/null \
+		   | grep "^${stemcell_name}" \
+		   | awk '{print $2}' | sed -e 's/\*//' \
+		   | grep "^$stemcell_version\$" ; then
+			genesis bosh "$DEPLOY_ENV" upload-stemcell "https://bosh.io/d/stemcells/$stemcell_name?v=${stemcell_version}" \
+				--version "${stemcell_version}" --name "$stemcell_name"
+		fi
 	fi
 
 	genesis deploy -y "${DEPLOY_ENV}"
