@@ -221,7 +221,7 @@ sub calculate_software_updates {
 			} else {
 				$type = 'source';
 			}
-			my @prefixes = defined($upstream->{$section}{$name}{tag_prefix}) ? ($upstream->{$section}{$name}{tag_prefix}) : ('v','')
+			my @prefixes = defined($upstream->{$section}{$name}{tag_prefix}) ? ($upstream->{$section}{$name}{tag_prefix}) : ('v','');
 
 			$found{$section} ||= {};
 			unless (defined($found{$section}{"$name/$version"})) {
