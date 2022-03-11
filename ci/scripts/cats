@@ -110,9 +110,5 @@ test -n "${CREDHUB_CLIENT:-}"     || bail "CREDHUB_CLIENT must be set to Credhub
 test -n "${CREDHUB_SECRET:-}"     || bail "CREDHUB_SECRET must be set to Credhub password - missing from $bosh_env deployment exodus data"
 test -n "${CREDHUB_CA_CERT:-}"    || bail "CREDHUB_CA_CERT must be set to Credhub ca_cert and UAA ca_cert password - missing from $bosh_env deployment exodus data"
 
-test -f "${VERSION_FROM}"         || bail "Version file (${VERSION_FROM}) not found."
-VERSION=$(cat "${VERSION_FROM}")
-test -n "${VERSION}"              || bail "Version file (${VERSION_FROM}) was empty."
-
 cd git
 run_cats --deployment-dir "$ROOT_DIR"
