@@ -144,7 +144,7 @@ sub get_releases {
 
 my @months = qw(ignored January February March April May June July August September October November December);
 sub github {
-	my ($org, $repo, $tag, $type) = @_;
+	my ($org, $repo, $tag, $type, $orig_url) = @_;
 	my ($url, $day, $mon, $year);
 
 	# Try release
@@ -192,7 +192,6 @@ sub calculate_software_updates {
 	delete $upstream->{sections};
 
 	my %found;
-	my %changed;
 	print STDERR "  - retrieving release details:\n";
 	for my $name (uniq(keys %$release_candidate_releases, keys %$last_release_releases)) {
 
@@ -200,53 +199,60 @@ sub calculate_software_updates {
 		my @old_versions = keys %{$last_release_releases->{$name}||{}};
 
 		#There should never be more than one version in a release
-		bail(
-			"Somehow there are multiple versions of %s (%s) in release candidate",
-			$name, join(', ',@new_versions)
-		) if (@new_versions > 1);
-		bail(
-			"Somehow there are multiple versions of %s (%s) in last release (%s)",
-			$name, join(', ',@old_versions), get_latest_commit_tag($last_path)
-		) if (@old_versions > 1);
+		# bail(
+		# 	"Somehow there are multiple versions of %s (%s) in release candidate",
+		# 	$name, join(', ',@new_versions)
+		# ) if (@new_versions > 1);
+		# bail(
+		# 	"Somehow there are multiple versions of %s (%s) in last release (%s)",
+		# 	$name, join(', ',@old_versions), get_latest_commit_tag($last_path)
+		# ) if (@old_versions > 1);
 		
-		my $version = $new_versions[0];
-		next unless $version;
-		$changed{$name} = ($version ne $old_versions[0]);
+		next unless scalar(@new_versions);
+		for my $version (@new_versions) {
 
-		my $section = (grep {defined($upstream->{$_}{$name})} keys(%$upstream))[0] || '-';
-		for my $url (@{$release_candidate_releases->{$name}{$version} || []}) {
-			my ($type,$target);
-			if ($url =~ /$name-$version-([^-]*(?:-[^0-9][^-]*)*)-(\d*(?:\.\d*)*)-/) {
-				$type = 'compiled';
-				$target = "$1\@$2";
-			} else {
-				$type = 'source';
-			}
-			my @prefixes = defined($upstream->{$section}{$name}{tag_prefix}) ? ($upstream->{$section}{$name}{tag_prefix}) : ('v','');
-
-			$found{$section} ||= {};
-			unless (defined($found{$section}{"$name/$version"})) {
-				my ($date,$release_url);
-				for my $prefix (@prefixes) {
-					($date,$release_url) = github(
-						$upstream->{$section}{$name}{org},
-						$upstream->{$section}{$name}{repo},
-						$prefix.$version,
-						$upstream->{$section}{$name}{type},
-						$upstream->{$section}{$name}{url}
-					);
-					last if $release_url;
+			my $section = (grep {defined($upstream->{$_}{$name})} keys(%$upstream))[0] || '-';
+			for my $url (@{$release_candidate_releases->{$name}{$version} || []}) {
+				my ($type,$target);
+				if ($url =~ /$name-$version-([^-]*(?:-[^0-9][^-]*)*)-(\d*(?:\.\d*)*)-/) {
+					$type = 'compiled';
+					$target = "$1\@$2";
+				} else {
+					$type = 'source';
 				}
-				$found{$section}{"$name/$version"} = {
-					name => $name,
-					version => $version,
-					url => $release_url,
-					date => $date,
-					form => []
-				};
+				my @prefixes = defined($upstream->{$section}{$name}{tag_prefix}) ? ($upstream->{$section}{$name}{tag_prefix}) : ('v','');
+
+				$found{$section} ||= {};
+				unless (defined($found{$section}{"$name/$version"})) {
+					my ($date,$release_url);
+					if ($upstream->{$section}{$name}{org} && $upstream->{$section}{$name}{repo}) {
+						for my $prefix (@prefixes) {
+							($date,$release_url) = github(
+								$upstream->{$section}{$name}{org},
+								$upstream->{$section}{$name}{repo},
+								$prefix.$version,
+								$upstream->{$section}{$name}{type},
+								$upstream->{$section}{$name}{url}
+							);
+							last if $release_url;
+						}
+					} else {
+						$date = "";
+						$release_url = "";
+					}
+					$found{$section}{"$name/$version"} = {
+						name => $name,
+						version => $version,
+						url => $release_url,
+						date => $date,
+						form => [],
+						label => $upstream->{$section}{$name}{label},
+						changed => ! grep {$version eq $_} @old_versions,
+					};
+				}
+				push(@{$found{$section}{"$name/$version"}{form}}, "compiled: $target") if $type eq 'compiled';
+				push(@{$found{$section}{"$name/$version"}{form}}, "source") if $type eq 'source';
 			}
-			push(@{$found{$section}{"$name/$version"}{form}}, "compiled: $target") if $type eq 'compiled';
-			push(@{$found{$section}{"$name/$version"}{form}}, "source") if $type eq 'source';
 		}
 	}
 
@@ -268,7 +274,7 @@ sub calculate_software_updates {
 				$c->{url} ? sprintf("[%s](%s)", $c->{version}, $c->{url}) : $c->{version},
 				$c->{date},
 				join("<br>", sort @{$c->{form}}),
-				$changed{$c->{name}} ? "X" : ""
+				$c->{changed} ? "X" : ""
 			);
 		}
 	}
