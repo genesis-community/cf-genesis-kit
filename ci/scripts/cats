@@ -17,6 +17,30 @@ bail() {
   exit 2
 }
 
+# Get BOSH/CREDHUB envs
+
+bosh_env="$(genesis lookup "$deployment" genesis 2>/dev/null | jq -r '.bosh_env // .env')"
+[[ "$bosh_env" =~ / ]] || bosh_env="${bosh_env}/bosh"
+
+bosh_exodus="$(genesis lookup --exodus-for "$bosh_env" "$DEPLOY_ENV" . "{}" 2>/dev/null)"
+BOSH_ENVIRONMENT="$(  jq -r '.url // ""' <<<"$bosh_exodus")"
+BOSH_CLIENT="$(       jq -r '.admin_username // ""' <<<"$bosh_exodus")"
+BOSH_CLIENT_SECRET="$(jq -r '.admin_password // ""' <<<"$bosh_exodus")"
+BOSH_CA_CERT="$(      jq -r '.ca_cert // ""' <<<"$bosh_exodus")"
+export BOSH_ENVIRONMENT BOSH_CLIENT BOSH_CLIENT_SECRET BOSH_CA_CERT
+
+CREDHUB_SERVER="$(    jq -r '.credhub_url // ""' <<<"$bosh_exodus")"
+if [[ -n "$CREDHUB_SERVER" ]] ; then
+  echo
+  echo "Attempting to remove credhub secrets under /${bosh_env/\//-}/${DEPLOY_ENV}-${KIT_SHORTNAME}/"
+  CREDHUB_CLIENT="$( jq -r '.credhub_username // ""' <<<"$bosh_exodus")"
+  CREDHUB_SECRET="$( jq -r '.credhub_password // ""' <<<"$bosh_exodus")"
+  CREDHUB_CA_CERT="$(jq -r '"\(.credhub_ca_cert)\(.ca_cert)"' <<<"$bosh_exodus")"
+  export CREDHUB_SERVER CREDHUB_CLIENT CREDHUB_SECRET CREDHUB_CA_CERT
+  credhub delete -p "/${bosh_env/\//-}/${DEPLOY_ENV}-${KIT_SHORTNAME}/"
+  echo
+fi
+
 
 test -n "${KIT_SHORTNAME:-}"      || bail "KIT_SHORTNAME must be set to the short name of this kit."
 test -n "${VAULT_URI:-}"          || bail "VAULT_URI must be set to the Vault connection address - suggest using ((vault.url))"
