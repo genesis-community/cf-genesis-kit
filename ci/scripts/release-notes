@@ -13,10 +13,10 @@ sub header {
 }
 
 sub bail {
-	print "\n";
-	printf @_;
-  print STDERR "Did you misconfigure Concourse?\n\n";
-  exit 2;
+	print STDERR "\n";
+	printf STDERR @_;
+	print STDERR "\nDid you misconfigure Concourse?\n\n";
+	exit 2;
 }
 
 sub uniq {
@@ -147,26 +147,32 @@ sub github {
 	my ($org, $repo, $tag, $type) = @_;
 	my ($url, $day, $mon, $year);
 	if ($type eq 'release') {
+	# Try release
+	my $lookup_url="https://api.github.com/repos/$org/$repo/releases";
+	my $out = qx(curl -Ls -u "$ENV{GITHUB_ACCESS_TOKEN}:" "$lookup_url" | jq -r --arg t "$tag" '.[] | select(.tag_name == \$t)');
+	if ($out) {
 		printf STDERR "    - $org/$repo release $tag\n";
-		my $lookup_url="https://api.github.com/repos/$org/$repo/releases";
-		my $out = qx(curl -Ls -u "$ENV{GITHUB_ACCESS_TOKEN}:" "$lookup_url" | jq -r --arg t "$tag" '.[] | select(.tag_name == \$t)');
-		return ("Tag $tag not found",'') unless $out;
 		my $data = decode_json($out);
 		$url = $data->{html_url} || '';
 		return ('-', $url) unless $data->{published_at};
 		($year, $mon, $day) = ($data->{published_at} =~ m/^(\d{4})-(\d{2})-(\d{2})/);
-	} elsif ($type eq 'commit') {
-		printf STDERR "    - $org/$repo tag $tag\n";
+	} else {
 		my $lookup_url="https://api.github.com/repos/$org/$repo/tags";
 		my $out = qx(curl -Ls -u "$ENV{GITHUB_ACCESS_TOKEN}:" "$lookup_url");
-		my $tags = decode_json($out);
-		my $target_tag = (grep {$_->{name} eq $tag} @$tags)[0];
-		return ("Tag $tag not found",''); # TBD...
-		my $commit_url = $target_tag->{commit}{url};
-		$out = qx(curl -Ls -u "$ENV{GITHUB_ACCESS_TOKEN}:" "$commit_url");
-		my $data = decude_json($out);
-		(my $url = $data->{html_url}) =~ s#/commit/#/tree/#;
-		($year, $mon, $day) = ($data->{commit}{author}{date} =~ m/^(\d{4})-(\d{2})-(\d{2})/);
+		if ($out) {
+			printf STDERR "    - $org/$repo tag $tag\n";
+			my $tags = decode_json($out);
+			my $target_tag = (grep {$_->{name} eq $tag} @$tags)[0];
+			return ("Tag $tag not found",''); # TBD...
+			my $commit_url = $target_tag->{commit}{url};
+			$out = qx(curl -Ls -u "$ENV{GITHUB_ACCESS_TOKEN}:" "$commit_url");
+			my $data = decode_json($out);
+			(my $url = $data->{html_url}) =~ s#/commit/#/tree/#;
+			($year, $mon, $day) = ($data->{commit}{author}{date} =~ m/^(\d{4})-(\d{2})-(\d{2})/);
+		} else {
+			printf STDERR "    - $org/$repo version $tag not found!";
+			return ("Tag $tag not found",'') unless $out;
+		}
 	}
 	return ("$day $months[$mon] $year", $url);
 }
@@ -215,17 +221,21 @@ sub calculate_software_updates {
 			} else {
 				$type = 'source';
 			}
-			my $tag = (defined($upstream->{$section}{$name}{tag_prefix}) ? $upstream->{$section}{$name}{tag_prefix} : 'v').$version;
+			my @prefixes = defined($upstream->{$section}{$name}{tag_prefix}) ? ($upstream->{$section}{$name}{tag_prefix}) : ('v','')
 
 			$found{$section} ||= {};
 			unless (defined($found{$section}{"$name/$version"})) {
-				my ($date,$release_url) = github(
-					$upstream->{$section}{$name}{org},
-					$upstream->{$section}{$name}{repo},
-					$tag,
-					$upstream->{$section}{$name}{type},
-					$upstream->{$section}{$name}{url}
-				);
+				my ($date,$release_url);
+				for my $prefix (@prefixes) {
+					($date,$release_url) = github(
+						$upstream->{$section}{$name}{org},
+						$upstream->{$section}{$name}{repo},
+						$prefix.$version,
+						$upstream->{$section}{$name}{type},
+						$upstream->{$section}{$name}{url}
+					);
+					last if $release_url;
+				}
 				$found{$section}{"$name/$version"} = {
 					name => $name,
 					version => $version,
