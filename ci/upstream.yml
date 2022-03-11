@@ -1,0 +1,149 @@
+sections:
+  - name:  core
+    label: Cloud Foundry Components
+  - name:  buildpacks
+    label: Buildpacks 
+
+core:
+  bpm:
+    org:  cloudfoundry
+    repo: bpm-release
+    type: release
+  capi:
+    org:  cloudfoundry
+    repo: capi-release
+    type: release
+  cf-networking:
+    org:  cloudfoundry
+    repo: cf-networking-release
+    type: release
+  cf-smoke-tests:
+    org:  cloudfoundry
+    repo: cf-smoke-tests-release
+    type: release
+  cflinuxfs3:
+    org:  cloudfoundry
+    repo: cflinuxfs3-release
+    type: release
+  cf-cli:
+    org:  bosh-packages
+    repo: cf-cli-release
+    type: release
+  diego:
+    org:  cloudfoundry
+    repo: diego-release
+    type: release
+  garden-runc:
+    org:  cloudfoundry
+    repo: garden-runc-release
+    type: release
+  loggregator:
+    org:  cloudfoundry
+    repo: loggregator-release
+    type: release
+  loggregator-agent:
+    org:  cloudfoundry
+    repo: loggregator-agent-release
+    type: release
+  log-cache:
+    org:  cloudfoundry
+    repo: log-cache-release
+    type: release
+  nats:
+    org:  cloudfoundry
+    repo: nats-release
+    type: release
+  routing:
+    org:  cloudfoundry
+    repo: routing-release
+    type: release
+  statsd-injector:
+    org:  cloudfoundry
+    repo: statsd-injector-release
+    type: release
+  cf-syslog-drain:
+    org:  cloudfoundry
+    repo: cf-syslog-drain-release
+    type: release
+  uaa:
+    org:  cloudfoundry
+    repo: uaa-release
+    type: release
+  silk:
+    org:  cloudfoundry
+    repo: silk-release
+    type: release
+  bosh-dns-aliases:
+    org:  cloudfoundry
+    repo: bosh-dns-aliases-release
+    type: release
+  cflinuxfs2:
+    org:  cloudfoundry
+    repo: cflinuxfs2-release
+    type: release
+  app-autoscaler:
+    org:  cloudfoundry-incubator
+    repo: app-autoscaler-release
+    type: release
+  nfs-volume:
+    org:  cloudfoundry
+    repo: nfs-volume-release
+    type: release
+  mapfs:
+    org:  cloudfoundry
+    repo: mapfs-release
+    type: release
+  postgres:
+    org:  cloudfoundry-community
+    repo: postgres-boshrelease
+    type: release
+  haproxy:
+    org:  cloudfoundry-incubator
+    repo: haproxy-boshrelease
+    type: release
+
+buildpacks:
+  binary:
+    org:  cloudfoundry
+    repo: binary-buildpack-release
+    type: release
+  dotnet-core:
+    org:  cloudfoundry
+    repo: dotnet-core-buildpack-release
+    type: release
+  go:
+    org:  cloudfoundry
+    repo: go-buildpack-release
+    type: release
+  java:
+    org:  cloudfoundry
+    repo: java-buildpack-release
+    type: release
+  nginx:
+    org:  cloudfoundry
+    repo: nginx-buildpack-release
+    type: release
+  nodejs:
+    org:  cloudfoundry
+    repo: nodejs-buildpack-release
+    type: release
+  php:
+    org:  cloudfoundry
+    repo: php-buildpack-release
+    type: release
+  python:
+    org:  cloudfoundry
+    repo: python-buildpack-release
+    type: release
+  r:
+    org:  cloudfoundry
+    repo: r-buildpack-release
+    type: release
+  ruby:
+    org:  cloudfoundry
+    repo: ruby-buildpack-release
+    type: release
+  staticfile:
+    org:  cloudfoundry
+    repo: staticfile-buildpack-release
+    type: release
