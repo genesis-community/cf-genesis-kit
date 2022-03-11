@@ -60,13 +60,27 @@ remigrate)
   ;;
 
 setup-cli)
+
+	force=0
+	while test $# -gt 0 ; do
+		case "$1" in
+			-f) force=1;;
+			-*) describe "#R{[ERROR]} Bad option $1: expecting -f" && exit 1 ;;
+			*)  describe "#R{[ERROR]} setup-cli does not take any arguments" && exit 1;;
+		esac
+		shift
+	done
   if ! cf list-plugin-repos | grep -q CF-Community; then
     describe 'Adding #G{Cloud Foundry Community} plugins repository...'
     cf add-plugin-repo CF-Community http://plugins.cloudfoundry.org
   fi
   if ! cf plugins | grep -q '^cf-targets'; then
     describe 'Installing the #C{cf-targets} plugin...'
-    cf install-plugin -r CF-Community Targets
+		cmd=( cf install-plugin -r CF-Community Targets )
+		if [[ "$force" == "1" ]] ; then
+			cmd+=( -f )
+		fi
+    "${cmd[@]}"
   fi
   cf plugins
   ;;
