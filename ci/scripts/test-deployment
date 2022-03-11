@@ -196,11 +196,6 @@ if [[ "$SKIP_DEPLOY" == "false" ]]; then
 	fi
 
 	genesis info "${DEPLOY_ENV}"
-
-	header "Validating addons..."
-	genesis "do" "${DEPLOY_ENV}" -- setup-cli -f
-	genesis "do" "${DEPLOY_ENV}" -- login
-
 	if ! is_proto "$DEPLOY_ENV" ; then
 		genesis bosh "${DEPLOY_ENV}" instances --ps
 	fi
@@ -208,6 +203,11 @@ if [[ "$SKIP_DEPLOY" == "false" ]]; then
 fi
 
 if [[ "$SKIP_SMOKE_TESTS" == "false" ]]; then
+	header "Validating addons..."
+	genesis "do" "${DEPLOY_ENV}" -- setup-cli -f
+	genesis "do" "${DEPLOY_ENV}" -- login
+
+	header "Running smoke tests..."
 	genesis "do" "${DEPLOY_ENV}" -- smoketest
 else
 	echo "Skipping smoke_tests"
