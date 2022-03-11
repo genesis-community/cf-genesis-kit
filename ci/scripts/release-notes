@@ -146,7 +146,7 @@ my @months = qw(ignored January February March April May June July August Septem
 sub github {
 	my ($org, $repo, $tag, $type) = @_;
 	my ($url, $day, $mon, $year);
-	if ($type eq 'release') {
+
 	# Try release
 	my $lookup_url="https://api.github.com/repos/$org/$repo/releases";
 	my $out = qx(curl -Ls -u "$ENV{GITHUB_ACCESS_TOKEN}:" "$lookup_url" | jq -r --arg t "$tag" '.[] | select(.tag_name == \$t)');
@@ -157,6 +157,7 @@ sub github {
 		return ('-', $url) unless $data->{published_at};
 		($year, $mon, $day) = ($data->{published_at} =~ m/^(\d{4})-(\d{2})-(\d{2})/);
 	} else {
+		# Next try tag
 		my $lookup_url="https://api.github.com/repos/$org/$repo/tags";
 		my $out = qx(curl -Ls -u "$ENV{GITHUB_ACCESS_TOKEN}:" "$lookup_url");
 		if ($out) {
