@@ -5,7 +5,7 @@ kit:
     - small-footprint
 
 genesis:
-  env:   ci-gcp-baseline
+  env:   ci-gcp-upgrade
 
 params:
   disk_type:          default

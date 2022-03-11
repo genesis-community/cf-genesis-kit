@@ -51,7 +51,8 @@ cleanup_deployment() {
 	$BOSH -n -d "${deployment}" delete-deployment
 
 	for disk in $($BOSH disks --orphaned | grep "${deployment}" | awk '{print $1}'); do
-		echo "	- removing disk $disk"
+		echo
+		echo "Removing disk $disk"
 		$BOSH -n delete-disk "$disk"
 	done
 }
@@ -60,13 +61,10 @@ cleanup() {
 	for deployment in "$@"; do
 		if is_proto "$deployment" ; then
 			cleanup_environment "$deployment"
-		else
-
-			(
-				eval "$(genesis bosh --connect "${deployment}" 2>/dev/null)"
-				cleanup_deployment "$deployment-${KIT_SHORTNAME}"
-			)
-		fi
+		else ( # run in a subshell to prevent pollution
+			eval "$(genesis bosh --connect "${deployment}" 2>/dev/null)"
+			cleanup_deployment "$deployment-${KIT_SHORTNAME}"
+		); fi
 	done
 }
 
@@ -113,12 +111,14 @@ if [[ "$SKIP_REPLACE_SECRETS" == "false" ]] ; then
 		bosh_exodus="$(genesis lookup --exodus-for "$bosh_env" "$DEPLOY_ENV" . "{}" 2>/dev/null)"
 		CREDHUB_SERVER="$(jq -r '.credhub_url // ""' <<<"$bosh_exodus")"
 		if [[ -n "$CREDHUB_SERVER" ]] ; then
+			echo
 			echo "Attempting to remove credhub secrets under /${bosh_env/\//-}/${DEPLOY_ENV}-${KIT_SHORTNAME}/"
 			CREDHUB_CLIENT="$(jq -r '.credhub_username // ""' <<<"$bosh_exodus")"
 			CREDHUB_SECRET="$(jq -r '.credhub_password // ""' <<<"$bosh_exodus")"
 			CREDHUB_CA_CERT="$(jq -r '"\(.credhub_ca_cert)\(.ca_cert)"' <<<"$bosh_exodus")"
 			export CREDHUB_SERVER CREDHUB_CLIENT CREDHUB_SECRET CREDHUB_CA_CERT
 			credhub delete -p "/${bosh_env/\//-}/${DEPLOY_ENV}-${KIT_SHORTNAME}/"
+			echo
 		fi
 	) ; fi
 
