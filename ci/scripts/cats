@@ -106,8 +106,8 @@ test -n "${BOSH_CA_CERT:-}"       || bail "BOSH_CA_CERT must be set to the BOSH 
 test -n "${BOSH_CLIENT:-}"        || bail "BOSH_CLIENT must be set to BOSH Client user - missing from $bosh_env deployment exodus data"
 test -n "${BOSH_CLIENT_SECRET:-}" || bail "BOSH_CLIENT_SECRET must be set to BOSH Client secret - missing from $bosh_env deployment exodus data"
 test -n "${CREDHUB_SERVER:-}"     || bail "CREDHUB_SERVER must be set to Credhub URL - missing from $bosh_env deployment exodus data"
-test -n "${CREDHUB_USER:-}"       || bail "CREDHUB_USER must be set to Credhub username - missing from $bosh_env deployment exodus data"
-test -n "${CREDHUB_PASSWORD:-}"   || bail "CREDHUB_PASSWORD must be set to Credhub password - missing from $bosh_env deployment exodus data"
+test -n "${CREDHUB_CLIENT:-}"     || bail "CREDHUB_CLIENT must be set to Credhub username - missing from $bosh_env deployment exodus data"
+test -n "${CREDHUB_SECRET:-}"     || bail "CREDHUB_SECRET must be set to Credhub password - missing from $bosh_env deployment exodus data"
 test -n "${CREDHUB_CA_CERT:-}"    || bail "CREDHUB_CA_CERT must be set to Credhub ca_cert and UAA ca_cert password - missing from $bosh_env deployment exodus data"
 
 test -f "${VERSION_FROM}"         || bail "Version file (${VERSION_FROM}) not found."
