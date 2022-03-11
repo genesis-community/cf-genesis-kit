@@ -3,11 +3,10 @@ kit:
   name:    dev
   version: 2.0.0
   features:
-    - aws-blobstore
+    - compiled-releases
 
 genesis:
-  env:         blobstore-aws
+  env: compiled-releases
 
 params:
   base_domain: cf.testing.examle
-  blobstore_s3_region: blobstore-s3-region

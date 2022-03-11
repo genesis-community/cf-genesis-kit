@@ -1,0 +1,14 @@
+---
+# There are no compiled versions of these releases, but we have to override
+# them, so we're overriding them with source releases.
+releases:
+- name: "credhub"
+  version: "2.11.1"
+  url: "https://bosh.io/d/github.com/pivotal-cf/credhub-release?v=2.11.1"
+  sha1: "f5b5ce04eee1251d352f337a6ecb794c4dba8a39"
+- name: "uaa"
+  version: "75.14.0"
+  url: "https://bosh.io/d/github.com/cloudfoundry/uaa-release?v=75.14.0"
+  sha1: "57ffc783177cbca45a983cc573b591b636d0c0bf"
+exodus:
+  cf-deployment-hotfixes: true

@@ -189,6 +189,13 @@ var _ = Describe("Interal Kit", func() {
 		CPI:           "aws",
 		Exodus:        "migrated",
 	})
+	Test(Environment{
+		Name:          "compiled-releases",
+		CloudConfig:   "aws",
+		RuntimeConfig: "dns",
+		CPI:           "aws",
+		Focus:         true,
+	})
 	// Test(Environment{
 	// 	Focus:       true,
 	// 	Name:        "nfs-volume-services",

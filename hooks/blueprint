@@ -89,8 +89,8 @@ if ! want_feature "bare" ; then
   fi
   manifest+=( "operations/custom-azs.yml" )
 
-  # Temporary override of specific releases - FIXME when upstream catches up
-  manifest+=(  "overlay/override-releases.yml" )
+  # Temporary override of specific releases - keep but leave empty when upstream catches up
+  manifest+=(  "overlay/override-releases/static.yml" )
 
 fi
 
@@ -386,7 +386,10 @@ for want in $GENESIS_REQUESTED_FEATURES; do
     #
 
     compiled-releases)
-      manifest+=( "cf-deployment/operations/use-compiled-releases.yml" ) ;;
+      manifest+=( \
+        "cf-deployment/operations/use-compiled-releases.yml" \
+        "overlay/override-releases/compiled.yml"
+      ) ;;
     small-footprint)
       : ;; # already dealt with
     nfs-volume-services)
@@ -424,10 +427,12 @@ for want in $GENESIS_REQUESTED_FEATURES; do
         "cf-deployment/operations/windows2019-cell.yml" \
         "cf-deployment/operations/use-online-windows2019fs.yml" \
         "cf-deployment/operations/use-latest-windows2019-stemcell.yml" \
+        "overlay/override-releases/static-windows.yml" \
       )
       if want_feature "compiled-releases"; then
         manifests+=( \
           "cf-deployment/operations/experimental/use-compiled-releases-windows.yml" \
+          "overlay/override-releases/compiled-windows.yml" \
         )
       fi
       if ! want_feature "bare" ; then
