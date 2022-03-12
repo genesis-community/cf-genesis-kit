@@ -144,12 +144,26 @@ sub get_releases {
 
 my @months = qw(ignored January February March April May June July August September October November December);
 sub github {
-	my ($org, $repo, $tag, $type, $orig_url) = @_;
-	my ($url, $day, $mon, $year);
+	my ($org, $repo, $versions, $type, $orig_url) = @_;
+	my ($url, $day, $mon, $year, $out, $tag);
 
-	# Try release
+	unless ($org && $repo) {
+		if ($orig_url =~ m|https://bosh.io/d/github.com/([^/]*)/([^/]*)\?v=(.*)$|) {
+			$org = $1;
+			$repo = $2;
+		} elsif ($orig_url =~ m|https://github.com/([^/]*)/([^/]*)/releases|) {
+			$org = $1;
+			$repo = $2;
+		}
+		return ("-","-") unless ($org && $repo);
+	}
+
+	# Try release - the preferred method
 	my $lookup_url="https://api.github.com/repos/$org/$repo/releases";
-	my $out = qx(curl -Ls -u "$ENV{GITHUB_ACCESS_TOKEN}:" "$lookup_url" | jq -r --arg t "$tag" '.[] | select(.tag_name == \$t)');
+	for $tag (@$versions) {
+		$out = qx(curl -Ls -u "$ENV{GITHUB_ACCESS_TOKEN}:" "$lookup_url" | jq -r --arg t "$tag" '.[] | select(.tag_name == \$t)');
+		last if $out;
+	}
 	if ($out) {
 		printf STDERR "    - $org/$repo release $tag\n";
 		my $data = decode_json($out);
@@ -159,20 +173,26 @@ sub github {
 	} else {
 		# Next try tag
 		my $lookup_url="https://api.github.com/repos/$org/$repo/tags";
-		my $out = qx(curl -Ls -u "$ENV{GITHUB_ACCESS_TOKEN}:" "$lookup_url");
+		$out = qx(curl -Ls -u "$ENV{GITHUB_ACCESS_TOKEN}:" "$lookup_url");
+		my $target_tag;
 		if ($out) {
-			printf STDERR "    - $org/$repo tag $tag\n";
 			my $tags = decode_json($out);
-			my $target_tag = (grep {$_->{name} eq $tag} @$tags)[0];
-			return ("Tag $tag not found",''); # TBD...
+			for $tag (@$versions) {
+				$target_tag = (grep {$_->{name} eq $tag} @$tags)[0];
+				last if $target_tag;
+			}
+		}
+		if ($target_tag) {
+			printf STDERR "    - $org/$repo tag $tag\n";
 			my $commit_url = $target_tag->{commit}{url};
 			$out = qx(curl -Ls -u "$ENV{GITHUB_ACCESS_TOKEN}:" "$commit_url");
 			my $data = decode_json($out);
 			(my $url = $data->{html_url}) =~ s#/commit/#/tree/#;
 			($year, $mon, $day) = ($data->{commit}{author}{date} =~ m/^(\d{4})-(\d{2})-(\d{2})/);
+
 		} else {
 			printf STDERR "    - $org/$repo version $tag not found!";
-			return ("Tag $tag not found",'') unless $out;
+			return ('-','-'); 
 		}
 	}
 	return ("$day $months[$mon] $year", $url);
@@ -224,22 +244,13 @@ sub calculate_software_updates {
 
 				$found{$section} ||= {};
 				unless (defined($found{$section}{"$name/$version"})) {
-					my ($date,$release_url);
-					if ($upstream->{$section}{$name}{org} && $upstream->{$section}{$name}{repo}) {
-						for my $prefix (@prefixes) {
-							($date,$release_url) = github(
-								$upstream->{$section}{$name}{org},
-								$upstream->{$section}{$name}{repo},
-								$prefix.$version,
-								$upstream->{$section}{$name}{type},
-								$upstream->{$section}{$name}{url}
-							);
-							last if $release_url;
-						}
-					} else {
-						$date = "";
-						$release_url = "";
-					}
+					my ($date,$release_url) = github(
+						$upstream->{$section}{$name}{org},
+						$upstream->{$section}{$name}{repo},
+						[map {$_.$version} @prefixes],
+						$upstream->{$section}{$name}{type},
+						$url
+					);
 					$found{$section}{"$name/$version"} = {
 						name => $name,
 						version => $version,
