@@ -9,7 +9,6 @@ image_resource:
 
 inputs:
 - name: git
-  path: kit
 - name: git-ci
 - name: cats
 - name: work

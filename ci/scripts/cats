@@ -22,35 +22,36 @@ run_cats() {
   echo "Running CATS from deployment dir $2"
 
   base=$(lookup params.base_domain)
-  system_domain="$(lookup params.system_domain system.$base)"
+  system_domain="$(lookup params.system_domain "system.$base")"
+  ADMIN_PASSWORD="$(credhub get -q -n "$credhub_path/cf_admin_password")"
   export API_URL=api.$system_domain
-  export ADMIN_PASSWORD="$(credhub get -q -n $credhub_path/cf_admin_password)"
+  export ADMIN_PASSWORD
   export APP_DOMAINS_0=run.$base
   case $RUN_CATS in
     "include_container_networking")
-      sed -i "s#include_security_groups:.*#include_security_groups: true#g" ../git-ci/ci/envs/cats.yml
+      sed -i "s#include_security_groups:.*#include_security_groups: true#g" "$CI_DIR/cats.yml"
     ;;
     "include_deployments")
-      sed -i "s#include_v3:.*#include_v3: true#g" ../git-ci/ci/envs/cats.yml
+      sed -i "s#include_v3:.*#include_v3: true#g" "$CI_DIR/cats.yml"
     ;;
     "include_service_instance_sharing")
-      sed -i "s#include_services:.*#include_services: true#g" ../git-ci/ci/envs/cats.yml
+      sed -i "s#include_services:.*#include_services: true#g" "$CI_DIR/cats.yml"
     ;;
     "include_sso")
-      sed -i "s#include_services:.*#include_services: true#g" ../git-ci/ci/envs/cats.yml
+      sed -i "s#include_services:.*#include_services: true#g" "$CI_DIR/cats.yml"
     ;;
     "include_tasks")
-      sed -i "s#include_v3:.*#include_v3: true#g" ../git-ci/ci/envs/cats.yml
+      sed -i "s#include_v3:.*#include_v3: true#g" "$CI_DIR/cats.yml"
     ;;
     "include_zipkin")
-      sed -i "s#include_routing:.*#include_routing: true#g" ../git-ci/ci/envs/cats.yml
+      sed -i "s#include_routing:.*#include_routing: true#g" "$CI_DIR/cats.yml"
     ;;
   esac
 
-  sed -i "s#${RUN_CATS}:.*#${RUN_CATS}: true#g" ../git-ci/ci/envs/cats.yml
+  sed -i "s#${RUN_CATS}:.*#${RUN_CATS}: true#g" "$CI_DIR/cats.yml"
   tmpdir="$ROOT_DIR/cats"
   export CONFIG=${tmpdir}/config.json
-  spruce merge $CI_DIR/cats.yml | spruce json | jq '.' > "${CONFIG}"
+  spruce merge "$CI_DIR/cats.yml" | spruce json | jq '.' > "${CONFIG}"
   pushd "${tmpdir}" &>/dev/null
     FAILFAST_FLAG=""
     VERBOSE_FLAG=""
