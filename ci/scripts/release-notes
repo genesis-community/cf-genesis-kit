@@ -155,12 +155,13 @@ sub github {
 			$org = $1;
 			$repo = $2;
 		}
-		return ("-","-") unless ($org && $repo);
+		return ("-","") unless ($org && $repo);
 	}
 
 	# Try release - the preferred method
 	my $lookup_url="https://api.github.com/repos/$org/$repo/releases";
-	for $tag (@$versions) {
+	for (@$versions) {
+		$tag = $_;
 		$out = qx(curl -Ls -u "$ENV{GITHUB_ACCESS_TOKEN}:" "$lookup_url" | jq -r --arg t "$tag" '.[] | select(.tag_name == \$t)');
 		last if $out;
 	}
@@ -177,7 +178,8 @@ sub github {
 		my $target_tag;
 		if ($out) {
 			my $tags = decode_json($out);
-			for $tag (@$versions) {
+			for (@$versions) {
+				$tag = $_;
 				$target_tag = (grep {$_->{name} eq $tag} @$tags)[0];
 				last if $target_tag;
 			}
@@ -191,8 +193,8 @@ sub github {
 			($year, $mon, $day) = ($data->{commit}{author}{date} =~ m/^(\d{4})-(\d{2})-(\d{2})/);
 
 		} else {
-			printf STDERR "    - $org/$repo version $tag not found!";
-			return ('-','-'); 
+			printf STDERR "    - $org/$repo version $tag not found!\n";
+			return ('-','');
 		}
 	}
 	return ("$day $months[$mon] $year", $url);
