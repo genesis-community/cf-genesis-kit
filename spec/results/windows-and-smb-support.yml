@@ -2490,7 +2490,7 @@ releases:
 - name: windows-resize-root-disk
   sha1: 8fe1adc3b6b6b68d8a370c576f649929f5452c6a
   url: https://github.com/starkandwayne/windows-resize-root-disk/releases/download/v1.0/windows-resize-root-disk-release-1.0.tgz
-  version: 1
+  version: "1.0"
 - name: smb-volume
   sha1: a73587cd607cf44f8c5acf191616cdb8d4d5cda7
   url: https://bosh.io/d/github.com/cloudfoundry/smb-volume-release?v=3.1.0
