@@ -136,7 +136,10 @@ if [[ "${#changed[@]}" -gt 0 && -n "${changed[0]}" ]] ; then
     reponame=$(echo "${repo}" | grep github | cut -d "/" -f4-5)
     set -e
     if [[ -n ${reponame}  ]]; then
-      branch=$(curl --silent -L -H "Accept: application/vnd.github.v3+json" "https://api.github.com/repos/${reponame}" | jq -r .default_branch)
+      cmd=( curl --silent -L -H "Accept: application/vnd.github.v3+json" )
+      [[ -n "$GITHUB_AUTH_TOKEN" ]] && cmd+=( -H "Authorization: token $GITHUB_AUTH_TOKEN" )
+      cmd+=( "https://api.github.com/repos/${reponame}" )
+      branch=$( "${cmd[@]}" | jq -r .default_branch)
     else
       branch="master"
     fi
