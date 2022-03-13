@@ -5,110 +5,49 @@ sections:
     label: Buildpacks 
 
 core:
-  bpm:
-    org:  cloudfoundry
-    repo: bpm-release
-  capi:
-    org:  cloudfoundry
-    repo: capi-release
-  cf-networking:
-    org:  cloudfoundry
-    repo: cf-networking-release
-  cf-smoke-tests:
-    org:  cloudfoundry
-    repo: cf-smoke-tests-release
-  cflinuxfs3:
-    org:  cloudfoundry
-    repo: cflinuxfs3-release
-  cf-cli:
-    org:  bosh-packages
-    repo: cf-cli-release
-  diego:
-    org:  cloudfoundry
-    repo: diego-release
-  garden-runc:
-    org:  cloudfoundry
-    repo: garden-runc-release
-  loggregator:
-    org:  cloudfoundry
-    repo: loggregator-release
-  loggregator-agent:
-    org:  cloudfoundry
-    repo: loggregator-agent-release
-  log-cache:
-    org:  cloudfoundry
-    repo: log-cache-release
-  nats:
-    org:  cloudfoundry
-    repo: nats-release
-  routing:
-    org:  cloudfoundry
-    repo: routing-release
-  statsd-injector:
-    org:  cloudfoundry
-    repo: statsd-injector-release
-  cf-syslog-drain:
-    org:  cloudfoundry
-    repo: cf-syslog-drain-release
-  uaa:
-    org:  cloudfoundry
-    repo: uaa-release
-  silk:
-    org:  cloudfoundry
-    repo: silk-release
-  bosh-dns-aliases:
-    org:  cloudfoundry
-    repo: bosh-dns-aliases-release
-  cflinuxfs2:
-    org:  cloudfoundry
-    repo: cflinuxfs2-release
-  app-autoscaler:
-    org:  cloudfoundry-incubator
-    repo: app-autoscaler-release
-  nfs-volume:
-    org:  cloudfoundry
-    repo: nfs-volume-release
-  mapfs:
-    org:  cloudfoundry
-    repo: mapfs-release
-  postgres:
-    org:  cloudfoundry-community
-    repo: postgres-boshrelease
-  haproxy:
-    org:  cloudfoundry-incubator
-    repo: haproxy-boshrelease
+  app-autoscaler: {}
+  bpm: {}
+  bosh-dns-aliases: {}
+  capi: {}
+  cf-cli: {}
+  cf-networking: {}
+  cf-smoke-tests: {}
+  cf-syslog-drain: {}
+  cflinuxfs2: {}
+  cflinuxfs3: {}
+  credhub: {}
+  diego: {}
+  garden-runc: {}
+  haproxy: {}
+  loggregator: {}
+  loggregator-agent: {}
+  log-cache: {}
+  mapfs: {}
+  metrics-discovery: {}
+  nats: {}
+  nfs-volume: {}
+  postgres: {}
+  pxc: {}
+  routing: {}
+  statsd-injector: {}
+  uaa: {}
+  silk: {}
+  smb-volume: {}
+  windc: {}
+  windows-resize-root-disk: {}
+  windows-utilities: {}
+  windowsfs: {}
 
 buildpacks:
-  binary-buildpack:
-    org:  cloudfoundry
-    repo: binary-buildpack-release
-  dotnet-core-buildpack:
-    org:  cloudfoundry
-    repo: dotnet-core-buildpack-release
-  go-buildpack:
-    org:  cloudfoundry
-    repo: go-buildpack-release
-  java-buildpack:
-    org:  cloudfoundry
-    repo: java-buildpack-release
-  nginx-buildpack:
-    org:  cloudfoundry
-    repo: nginx-buildpack-release
-  nodejs-buildpack:
-    org:  cloudfoundry
-    repo: nodejs-buildpack-release
-  php-buildpack:
-    org:  cloudfoundry
-    repo: php-buildpack-release
-  python-buildpack:
-    org:  cloudfoundry
-    repo: python-buildpack-release
-  r-buildpack:
-    org:  cloudfoundry
-    repo: r-buildpack-release
-  ruby-buildpack:
-    org:  cloudfoundry
-    repo: ruby-buildpack-release
-  staticfile-buildpack:
-    org:  cloudfoundry
-    repo: staticfile-buildpack-release
+  binary-buildpack: {}
+  dotnet-core-buildpack: {}
+  go-buildpack: {}
+  hwc-buildpack: {}
+  java-buildpack: {}
+  nginx-buildpack: {}
+  nodejs-buildpack: {}
+  php-buildpack: {}
+  python-buildpack: {}
+  r-buildpack: {}
+  ruby-buildpack: {}
+  staticfile-buildpack: {}

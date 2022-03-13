@@ -189,7 +189,7 @@ sub github {
 			my $commit_url = $target_tag->{commit}{url};
 			$out = qx(curl -Ls -u "$ENV{GITHUB_ACCESS_TOKEN}:" "$commit_url");
 			my $data = decode_json($out);
-			(my $url = $data->{html_url}) =~ s#/commit/#/tree/#;
+			($url = $data->{html_url}) =~ s#/commit/#/tree/#;
 			($year, $mon, $day) = ($data->{commit}{author}{date} =~ m/^(\d{4})-(\d{2})-(\d{2})/);
 
 		} else {
@@ -243,13 +243,14 @@ sub calculate_software_updates {
 					$type = 'source';
 				}
 				my @prefixes = defined($upstream->{$section}{$name}{tag_prefix}) ? ($upstream->{$section}{$name}{tag_prefix}) : ('v','');
+				my @suffixes = ($version =~ /^\d+$/) ? ('','.0','.0.0') : ('');
 
 				$found{$section} ||= {};
 				unless (defined($found{$section}{"$name/$version"})) {
 					my ($date,$release_url) = github(
 						$upstream->{$section}{$name}{org},
 						$upstream->{$section}{$name}{repo},
-						[map {$_.$version} @prefixes],
+						[map {my $p = $_; map {$p.$version.$_} @suffixes} @prefixes],
 						$upstream->{$section}{$name}{type},
 						$url
 					);
