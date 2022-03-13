@@ -11,6 +11,6 @@ instance_groups:
 
 releases:
 - name: windows-resize-root-disk
-  version: 1.0
+  version: "1.0"
   sha1: 8fe1adc3b6b6b68d8a370c576f649929f5452c6a
   url: https://github.com/starkandwayne/windows-resize-root-disk/releases/download/v1.0/windows-resize-root-disk-release-1.0.tgz

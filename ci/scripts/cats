@@ -93,12 +93,11 @@ export BOSH_ENVIRONMENT BOSH_CLIENT BOSH_CLIENT_SECRET BOSH_CA_CERT
 CREDHUB_SERVER="$(    jq -r '.credhub_url // ""' <<<"$bosh_exodus")"
 if [[ -n "$CREDHUB_SERVER" ]] ; then
   echo
-  echo "Attempting to remove credhub secrets under /${bosh_env/\//-}/${DEPLOY_ENV}-${KIT_SHORTNAME}/"
   CREDHUB_CLIENT="$( jq -r '.credhub_username // ""' <<<"$bosh_exodus")"
   CREDHUB_SECRET="$( jq -r '.credhub_password // ""' <<<"$bosh_exodus")"
   CREDHUB_CA_CERT="$(jq -r '"\(.credhub_ca_cert)\(.ca_cert)"' <<<"$bosh_exodus")"
   export CREDHUB_SERVER CREDHUB_CLIENT CREDHUB_SECRET CREDHUB_CA_CERT
-  credhub_path="/${bosh_env/\//-}/${DEPLOY_ENV}-${KIT_SHORTNAME}/"
+  credhub_path="/${bosh_env/\//-}/${DEPLOY_ENV}-${KIT_SHORTNAME}"
   echo
 fi
 

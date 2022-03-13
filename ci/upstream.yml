@@ -33,7 +33,7 @@ core:
   uaa: {}
   silk: {}
   smb-volume: {}
-  windc: {}
+  winc: {}
   windows-resize-root-disk: {}
   windows-utilities: {}
   windowsfs: {}
