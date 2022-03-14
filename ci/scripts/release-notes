@@ -211,6 +211,7 @@ sub calculate_software_updates {
 	printf STDERR "  - checking ci/upstream.yml for more details...\n";
 	my $upstream = LoadFile($FindBin::Bin."/../upstream.yml");
 	my $sections = $upstream->{sections} || [];
+	my $default_section = (map {$_->{name}} grep {$_->{default}} @$sections)[0] || '-';
 	delete $upstream->{sections};
 
 	my %found;
@@ -233,7 +234,7 @@ sub calculate_software_updates {
 		next unless scalar(@new_versions);
 		for my $version (@new_versions) {
 
-			my $section = (grep {defined($upstream->{$_}{$name})} keys(%$upstream))[0] || '-';
+			my $section = (grep {defined($upstream->{$_}{$name})} keys(%$upstream))[0] || $default_section;
 			for my $url (@{$release_candidate_releases->{$name}{$version} || []}) {
 				my ($type,$target);
 				if ($url =~ /$name-$version-([^-]*(?:-[^0-9][^-]*)*)-(\d*(?:\.\d*)*)-/) {
@@ -261,7 +262,9 @@ sub calculate_software_updates {
 						date => $date,
 						form => [],
 						label => $upstream->{$section}{$name}{label},
-						changed => ! grep {$version eq $_} @old_versions,
+						changed => (! scalar(@old_versions)) ? "NEW" :
+						           scalar(grep {$version eq $_} @old_versions) ? '' :
+						           sprintf('[X](## "was %s")', join(', ',@old_versions))
 					};
 				}
 				push(@{$found{$section}{"$name/$version"}{form}}, "compiled: $target") if $type eq 'compiled';
@@ -288,7 +291,7 @@ sub calculate_software_updates {
 				$c->{url} ? sprintf("[%s](%s)", $c->{version}, $c->{url}) : $c->{version},
 				$c->{date},
 				join("<br>", sort @{$c->{form}}),
-				$c->{changed} ? "X" : ""
+				$c->{changed}
 			);
 		}
 	}
