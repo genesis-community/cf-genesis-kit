@@ -7,6 +7,7 @@
 #
 # author:  James Hunt <james@niftylogic.com>
 # created: 2016-03-30
+# shellcheck disable=2291
 
 set -eu
 
@@ -59,11 +60,16 @@ echo "Environment OK"
 ###############################################################
 header "Assembling Github Release Artifacts..."
 mkdir -p "${RELEASE_ROOT}/artifacts"
-echo "v${VERSION} -> ${RELEASE_ROOT}/tag"
+echo "v${VERSION}"           "-> ${RELEASE_ROOT}/tag"
 echo "v${VERSION}"            > "${RELEASE_ROOT}/tag"
-echo "v${VERSION} -> ${RELEASE_ROOT}/name"
+echo "v${VERSION}"           "-> ${RELEASE_ROOT}/name"
 echo "v${VERSION}"            > "${RELEASE_ROOT}/name"
+if [[ -n "$PRERELEASE" ]] ; then
+  echo "$(cat git/.git/ref)" "-> ${RELEASE_ROOT}/commit (pre-release)"
+  cp    git/.git/ref            "${RELEASE_ROOT}/commit"
+fi
 cp -av "${BUILD_ROOT}"/*.tar.gz "${RELEASE_ROOT}/artifacts"
+
 if [[ -d spec-check ]] ; then
   if ! grep "No Spec Changes to Consider" spec-check/diff-* ; then
     echo spec-check/diff-* "-> ${RELEASE_ROOT}/artifacts/spec-diffs.html"

@@ -26,10 +26,11 @@ jobs:
 
     - put: github-prerelease
       params:
-        name:   gh/name
-        tag:    gh/tag
-        body:   gh/notes.md
-        globs:  [gh/artifacts/*]
+        name:      gh/name
+        tag:       gh/tag
+        body:      gh/notes.md
+        commitish: gh/commit
+        globs:     [gh/artifacts/*]
 
     on_failure:
       put: notify
