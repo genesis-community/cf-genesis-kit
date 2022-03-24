@@ -542,10 +542,11 @@ if ! want_feature "bare" ; then
       [[ $inst_grp == "loggregator" ]] && inst_grp="log_api" && echo >&2 "WARNING: params.loggregator_instances has been translated as params.log_api_instances";
       [[ $inst_grp == "postgres" ]]    && inst_grp="database" && echo >&2 "WARNING: params.postgres_instances has been translated as params.database_instances";
       [[ $inst_grp == "blobstore" ]]   && inst_grp="singleton-blobstore" && echo >&2 "WARNING: params.blobstore_instances has been translated as params.singleton_blobstore_instances";
+      [[ $inst_grp == "windows_diego_cell" ]]     && inst_grp="windows2019-cell" && echo >&2 "WARNING: params.windows_diego_cell_instances has been translated as params.windows2019-cell_instances";
 
       dashed_inst_grp="$(echo "$inst_grp" | tr _ -)" # convert any _ into -
       found=''
-      if [[ $dashed_inst_grp =~ ^(api|cc-worker|credhub|database|diego-(api|cell)|doppler|errand|haproxy|log-api|nats|rotate-cc-database-key|(tcp-)?router|scheduler|singleton-blobstore|smoke-tests|uaa)$ ]] ; then
+      if [[ $dashed_inst_grp =~ ^(api|cc-worker|credhub|database|diego-(api|cell)|doppler|errand|haproxy|log-api|nats|windows2019-cell|rotate-cc-database-key|(tcp-)?router|scheduler|singleton-blobstore|smoke-tests|uaa)$ ]] ; then
         inst_grp="$dashed_inst_grp";
         found=1
       fi
@@ -609,10 +610,11 @@ EOF
       [[ $inst_grp == "loggregator" ]] && inst_grp="log_api" && echo >&2 "WARNING: params.loggregator_vm_type has been translated as params.log_api_vm_type";
       [[ $inst_grp == "postgres" ]]    && inst_grp="database" && echo >&2 "WARNING: params.postgres_vm_type has been translated as params.database_vm_type";
       [[ $inst_grp == "blobstore" ]]   && inst_grp="singleton-blobstore" && echo >&2 "WARNING: params.blobstore_vm_type has been translated as params.singleton_blobstore_vm_type";
+      [[ $inst_grp == "windows_diego_cell" ]]     && inst_grp="windows2019-cell" && echo >&2 "WARNING: params.windows_diego_cell_vm_type has been translated as params.windows2019-cell_vm_type";
 
       dashed_inst_grp="$(echo "$inst_grp" | tr _ -)" # convert any _ into -
       found=''
-      if [[ $dashed_inst_grp =~ ^(api|cc-worker|credhub|database|diego-(api|cell)|doppler|errand|haproxy|log-api|nats|rotate-cc-database-key|(tcp-)?router|scheduler|singleton-blobstore|smoke-tests|uaa)$ ]] ; then
+      if [[ $dashed_inst_grp =~ ^(api|cc-worker|credhub|database|diego-(api|cell)|doppler|errand|haproxy|windows2019-cell|log-api|nats|rotate-cc-database-key|(tcp-)?router|scheduler|singleton-blobstore|smoke-tests|uaa)$ ]] ; then
         inst_grp="$dashed_inst_grp";
         found=1
       fi
@@ -628,7 +630,7 @@ EOF
           "        Expected instance groups are:" \
           "          api, cc-worker, credhub, database, diego-api, diego-cell, doppler," \
           "          errand, haproxy, log-api, nats, rotate-cc-database-key, router, scheduler," \
-          "          singleton-blobstore, smoke-tests, tcp-router, and uaa" ""
+          "          singleton-blobstore, smoke-tests, tcp-router, uaa, and windows2019-cell" ""
       fi
     done < <(echo "$instance_types")
 
