@@ -2140,7 +2140,7 @@ instance_groups:
 - azs:
   - z1
   - z2
-  instances: "1"
+  instances: 1
   jobs:
   - name: winc
     release: winc
@@ -2308,7 +2308,8 @@ instance_groups:
     properties: {}
     release: windows-resize-root-disk
   name: windows2019-cell
-  networks: cf-runtime
+  networks:
+  - name: cf-runtime
   stemcell: windows2019
   vm_extensions:
   - 100GB_ephemeral_disk
