@@ -17,6 +17,7 @@ inputs:
 
 outputs:
 - name: gh
+- name: git-main
 - name: notifications
 
 params:

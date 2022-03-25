@@ -2,7 +2,6 @@
 meta:
   kit:             cf
   release:         CF Genesis Kit
-  upstream_path:   cf-deployment
   target:          cloudpipes/genesis
   url:             https://cloudpipes.starkandwayne.com
   iaas:            gcp
