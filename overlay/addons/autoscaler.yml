@@ -7,6 +7,9 @@ exodus:
   loggregator_tls_rlp_key:    ((loggregator_tls_rlp.private_key))
   loggregator_tls_agent_cert: ((loggregator_tls_agent.certificate))
   loggregator_tls_agent_key:  ((loggregator_tls_agent.private_key))
+  loggregator_agent_metrics_tls_ca: ((loggregator_agent_metrics_tls.ca))
+  loggregator_agent_metrics_tls_certificate: ((loggregator_agent_metrics_tls.certificate))
+  loggregator_agent_metrics_tls_private_key: ((loggregator_agent_metrics_tls.private_key))
 
 instance_groups:
 - name: uaa
