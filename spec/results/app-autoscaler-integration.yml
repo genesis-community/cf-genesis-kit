@@ -352,6 +352,9 @@ exodus:
   loggregator_tls_agent_key: <!{credhub}:loggregator_tls_agent.private_key!>
   loggregator_tls_rlp_cert: <!{credhub}:loggregator_tls_rlp.certificate!>
   loggregator_tls_rlp_key: <!{credhub}:loggregator_tls_rlp.private_key!>
+  loggregator_agent_metrics_tls_ca: <!{credhub}:loggregator_agent_metrics_tls.ca!>
+  loggregator_agent_metrics_tls_certificate: <!{credhub}:loggregator_agent_metrics_tls.certificate!>
+  loggregator_agent_metrics_tls_private_key: <!{credhub}:loggregator_agent_metrics_tls.private_key!>
   runtime_network: cf-runtime
   system_domain: system.cf.testing.examle
   system_org: system
