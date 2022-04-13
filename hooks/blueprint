@@ -224,7 +224,7 @@ for want in $GENESIS_REQUESTED_FEATURES; do
     bare|partitioned-network|haproxy|tls|no-nats-tls|self-signed) features+=( "$want" ) ;;
     minio-blobstore|aws-blobstore|aws-blobstore-iam|azure-blobstore|gcp-blobstore|gcp-use-access-key) features+=( "$want" ) ;;
     nfs-volume-services|enable-service-discovery|ssh-proxy-on-routers|no-tcp-routers|smb-volume-services) features+=( "$want" ) ;;
-    app-autoscaler-integration|prometheus-integration|v2-nats-credentials) features+=( "$want" ) ;;
+    app-scheduler-integration|app-autoscaler-integration|prometheus-integration|v2-nats-credentials) features+=( "$want" ) ;;
     windows-diego-cells) features+=( "$want" ) ;;
     +migrated-v1-env|+override-db-names) features+=( "$want" ) ;;
     v1-vm-types|no-v1-vm-types)
@@ -416,6 +416,8 @@ for want in $GENESIS_REQUESTED_FEATURES; do
       manifest+=( "overlay/enable-service-discovery.yml" ) ;;
     app-autoscaler-integration)
       manifest+=( "overlay/addons/autoscaler.yml" ) ;;
+    app-scheduler-integration)
+      manifest+=( "overlay/addons/app-scheduler.yml" ) ;;
     prometheus-integration)
       manifest+=( "overlay/addons/prometheus.yml" ) ;;
     ssh-proxy-on-routers)
