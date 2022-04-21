@@ -1,4 +1,6 @@
 instance_groups:
 - name: smb-broker-push
-  networks: ((cf_runtime_network))
+  networks:
+  - ((replace))
+  - name: ((cf_runtime_network))
   azs: (( grab meta.azs )) 
