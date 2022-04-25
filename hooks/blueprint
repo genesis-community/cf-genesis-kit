@@ -223,7 +223,7 @@ for want in $GENESIS_REQUESTED_FEATURES; do
     local-postgres-db|local-mysql-db|mysql-db|postgres-db) db_specified=1; features+=( "$want" ) ;;
     bare|partitioned-network|haproxy|tls|no-nats-tls|self-signed) features+=( "$want" ) ;;
     minio-blobstore|aws-blobstore|aws-blobstore-iam|azure-blobstore|gcp-blobstore|gcp-use-access-key) features+=( "$want" ) ;;
-    nfs-volume-services|enable-service-discovery|ssh-proxy-on-routers|no-tcp-routers|smb-volume-services) features+=( "$want" ) ;;
+    nfs-volume-services|enable-service-discovery|ssh-proxy-on-routers|no-tcp-routers|smb-volume-services|smb-test-server) features+=( "$want" ) ;;
     app-scheduler-integration|app-autoscaler-integration|prometheus-integration|v2-nats-credentials) features+=( "$want" ) ;;
     windows-diego-cells) features+=( "$want" ) ;;
     +migrated-v1-env|+override-db-names) features+=( "$want" ) ;;
@@ -409,6 +409,16 @@ for want in $GENESIS_REQUESTED_FEATURES; do
       if ! want_feature "bare" ; then
         manifest+=( \
           "overlay/addons/smb-volume-service.yml" \
+        )
+      fi
+    ;;
+    smb-test-server)
+      manifest+=( \
+        "cf-deployment/operations/test/enable-smb-test-server.yml" \
+      )
+      if ! want_feature "bare" ; then
+        manifest+=( \
+          "overlay/addons/smb-test-server.yml" \
         )
       fi
     ;;
