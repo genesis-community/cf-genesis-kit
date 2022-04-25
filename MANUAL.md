@@ -855,6 +855,52 @@ SMB volumes provided by the SMB Volume Services Broker.
 
 There are currently no parameters defined for this feature.
 
+### SMB Volume Service Test Server
+
+To instruct BOSH to deploy the bundled SMB test server, we can
+add an ops file called `smb-volume-test-server`.
+
+Below is an example `ops/smb-volume-test-server.yml`. We can then
+instruct genesis to deploy it, by including `smb-volume-test-server`
+as a feature
+
+```
+- type: replace
+  path: /variables/-
+  value:
+    name: smb-test-server-password
+    type: password
+
+- type: replace
+  path: /instance_groups/-
+  value:
+    name: smbtestserver
+    azs: (( grab meta.azs ))
+    instances: 1
+    stemcell: default
+    vm_type: medium
+    persistent_disk_type: 10GB
+    networks:
+    - ((replace))
+    - name: ((cf_runtime_network))
+    jobs:
+    - name: smbtestserver
+      release: smb-volume
+      properties:
+        username: smbtestserver
+        password: ((smb-test-server-password))
+
+- type: replace
+  path: /addons/name=bosh-dns-aliases/jobs/name=bosh-dns-aliases/properties/aliases/domain=smbtestserver.service.cf.internal?
+  value:
+    domain: smbtestserver.service.cf.internal
+    targets:
+    - query: '*'
+      instance_group: smbtestserver
+      deployment: cf
+      network: default
+      domain: bosh
+```
 # Zero-downtime App Deployments
 
 This kit allows for using the v3 api's [Zero Downtime (ZDT) deployments](https://docs.cloudfoundry.org/devguide/deploy-apps/rolling-deploy.html) via the
