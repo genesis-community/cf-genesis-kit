@@ -221,7 +221,7 @@ for want in $GENESIS_REQUESTED_FEATURES; do
       features+=( "small-footprint" );
       ;;
     local-postgres-db|local-mysql-db|mysql-db|postgres-db) db_specified=1; features+=( "$want" ) ;;
-    bare|partitioned-network|haproxy|tls|no-nats-tls|self-signed) features+=( "$want" ) ;;
+    bare|partitioned-network|haproxy|tls|no-nats-tls|self-signed|isolation-segments) features+=( "$want" ) ;;
     minio-blobstore|aws-blobstore|aws-blobstore-iam|azure-blobstore|gcp-blobstore|gcp-use-access-key) features+=( "$want" ) ;;
     nfs-volume-services|enable-service-discovery|ssh-proxy-on-routers|no-tcp-routers|smb-volume-services) features+=( "$want" ) ;;
     app-scheduler-integration|app-autoscaler-integration|prometheus-integration|v2-nats-credentials) features+=( "$want" ) ;;
@@ -443,6 +443,8 @@ for want in $GENESIS_REQUESTED_FEATURES; do
         )
       fi
       ;;
+    isolation-segments)
+      manifest+=( isolation_segments(params) ) ;;
     +migrated-v1-env)
       manifest+=( "overlay/addons/migration.yml" ) ;;
 
@@ -671,5 +673,21 @@ if [[ -n "${version}" ]] && ! new_enough "${version}" "2.0.0-rc0"; then
   fi
   :
 fi
+
+isolation_segments(params)
+{
+  template=`cat ../operations/dynamic-templates/isolation-segment.yml`
+  # params are json, why?
+  segments="$(
+    echo "$params" | \
+    jq -r '.params.isolation_segments' \
+  )"
+
+  # iterate over params.isolation_segments[]
+  # create iso_group yml root element
+  ### add everything from params.isolation_segments[i] underneath tmp iso_group.yml
+  # add it to the manifest
+  # during eval and merge params are `grab`ed from iso_group and iso_group is pruned after
+}
 
 echo "${manifest[@]}"
