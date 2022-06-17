@@ -116,7 +116,15 @@ jobs:
           params:
             .: (( inject meta.cats_params ))
             RUN_CATS: include_capi_no_bridge
-    - task: cleanup-enviorment
+    on_failure:
+      put: notify
+      params:
+        topic:   (( concat meta.shout.topic "-$BUILD_JOB_NAME" ))
+        message: release candidate job 'pre' failed (which is unusual).
+        ok:      no
+        link:    (( grab meta.shout.links.build ))
+    ensure:
+      task: cleanup-enviorment
       file: git-ci/ci/tasks/deploy.yml
       params:
         .: (( inject meta.task_connectivity_params ))
@@ -126,10 +134,3 @@ jobs:
         SKIP_DEPLOY:          true
         SKIP_SMOKE_TESTS:     true
         SKIP_CLEAN:           false
-    on_failure:
-      put: notify
-      params:
-        topic:   (( concat meta.shout.topic "-$BUILD_JOB_NAME" ))
-        message: release candidate job 'pre' failed (which is unusual).
-        ok:      no
-        link:    (( grab meta.shout.links.build ))
