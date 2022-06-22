@@ -65,7 +65,8 @@ General:
   - `ssh-proxy-on-routers` - moves the ssh-proxy from scheduler instance group to the router instance group, placing it on the edge network, and enabling scaling via scaling the routers.
   - `no-tcp-routers` - removes the tcp-router instance group and associated resource allocations for systems that don't need tcp routes.
   - `windows-diego-cells` - Adds Windows Diego cell functionality.
-
+  - `isolation-segments` - enables usage of [isolation segments](https://docs.cloudfoundry.org/adminguide/routing-is.html#overview) using minimal configuration.
+//TODO: add isolation-segments description
 
 Database related - choose one:
   - `postgres-db` - Use an external postgres instance to host persistent data.

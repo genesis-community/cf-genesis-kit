@@ -1,0 +1,25 @@
+---
+kit:
+  name:    dev
+  version: 2.1.2
+  features:
+    - isolation-segments
+
+genesis:
+  env: isolation-segments
+
+params:
+  base_domain: cf.testing.example
+  isolation_segments:
+  - name: custom-params-group
+    azs:
+    - z1
+    instances: 1
+    vm_type: small-highmem
+    vm_extensions:
+    - 100GB_ephemeral_disk
+    network_name: ((cf_runtime_network))
+    stemcell: test
+  - name: default-params-group
+    azs:
+    - z1

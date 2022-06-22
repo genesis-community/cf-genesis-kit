@@ -1,121 +1,45 @@
----
-iso_group: ((prune))
----
-- type: replace
-  path: /instance_groups/-
-  value:
-    name: ((grab params.name))
-    ((grab params.azs))
-    instances: ((grab params.instances || 1))
-    vm_type: ((grab params.vm_type || minimal))
-    ((grab params.vm_extensions))
-    stemcell: ((grab params.stemcell || default))
-    networks:
-    - name: ((grab params.network_name || default ))
-    jobs:
-    - name: cflinuxfs3-rootfs-setup
-      release: cflinuxfs3
-      properties:
-        cflinuxfs3-rootfs:
-          trusted_certs:
-          - ((diego_instance_identity_ca.ca))
-          - ((credhub_tls.ca))
-          - ((uaa_ssl.ca))
-    - name: garden
-      release: garden-runc
-      properties:
-        garden:
-          containerd_mode: true
-          cleanup_process_dirs_on_wait: true
-          default_container_grace_time: 0
-          destroy_containers_on_start: true
-          graph_cleanup_threshold_in_mb: 0
-          deny_networks:
-          - 0.0.0.0/0
-        logging:
-          format:
-            timestamp: "rfc3339"
-    - name: rep
-      release: diego
-      properties:
-        bpm:
-          enabled: true
-        diego:
-          executor:
-            instance_identity_ca_cert: ((diego_instance_identity_ca.certificate))
-            instance_identity_key: ((diego_instance_identity_ca.private_key))
-          rep:
-            preloaded_rootfses:
-            - cflinuxfs3:/var/vcap/packages/cflinuxfs3/rootfs.tar
-            placement_tags:
-            - ((name))
-        containers:
-          proxy:
-            enabled: true
-            require_and_verify_client_certificates: true
-            trusted_ca_certificates:
-            - ((gorouter_backend_tls.ca))
-            - ((ssh_proxy_backends_tls.ca))
-            verify_subject_alt_name:
-            - gorouter.service.cf.internal
-            - ssh-proxy.service.cf.internal
-          trusted_ca_certificates:
-          - ((diego_instance_identity_ca.ca))
-          - ((credhub_tls.ca))
-          - ((uaa_ssl.ca))
-        enable_consul_service_registration: false
-        enable_declarative_healthcheck: true
-        loggregator:
-          use_v2_api: true
-          ca_cert: "((loggregator_tls_agent.ca))"
-          cert: "((loggregator_tls_agent.certificate))"
-          key: "((loggregator_tls_agent.private_key))"
-        tls:
-          ca_cert: "((diego_rep_agent_v2.ca))"
-          cert: "((diego_rep_agent_v2.certificate))"
-          key: "((diego_rep_agent_v2.private_key))"
-        logging:
-          format:
-            timestamp: "rfc3339"
-    - name: route_emitter
-      release: diego
-      properties:
-        bpm:
-          enabled: true
-        loggregator:
-          use_v2_api: true
-          ca_cert: "((loggregator_tls_agent.ca))"
-          cert: "((loggregator_tls_agent.certificate))"
-          key: "((loggregator_tls_agent.private_key))"
-        diego:
-          route_emitter:
-            local_mode: true
-            bbs:
-              ca_cert: "((diego_bbs_client.ca))"
-              client_cert: "((diego_bbs_client.certificate))"
-              client_key: "((diego_bbs_client.private_key))"
-        internal_routes:
-          enabled: true
-        logging:
-          format:
-            timestamp: "rfc3339"
-        tcp:
-          enabled: true
-        uaa:
-          ca_cert: "((uaa_ssl.ca))"
-          client_secret: "((uaa_clients_tcp_emitter_secret))"
----
-addons:
-- name: bosh-dns-aliases
+--- # cleanup-params-passed
+iso_group: (( prune ))
+--- # replace-instance-groups
+type: replace
+path: /instance_groups/-
+value:
+  name: (( grab iso_group.name ))
+  azs: (( grab iso_group.azs ))
+  instances: (( grab iso_group.instances || 1 ))
+  vm_type: (( grab iso_group.vm_type || minimal ))
+  vm_extensions: (( grab iso_group.vm_extensions))
+  stemcell: (( grab iso_group.stemcell || default ))
+  networks:
+  - name: (( grab iso_group.network_name || default ))
   jobs:
+  - name: rep
+    release: diego
+    properties:
+      bpm:
+        enabled: true
+      diego:
+        executor:
+          instance_identity_ca_cert: ((diego_instance_identity_ca.certificate))
+          instance_identity_key: ((diego_instance_identity_ca.private_key))
+        rep:
+          preloaded_rootfses:
+          - cflinuxfs3:/var/vcap/packages/cflinuxfs3/rootfs.tar
+          placement_tags:
+          - (( grab iso_group.name ))
+
+
+--- # bosh-dns-aliases
+addons:
+- jobs:
   - name: bosh-dns-aliases
     properties:
       aliases:
       - domain: _.cell.service.cf.internal
         targets:
-        - ((prepend))
+        - ((append))
         - deployment: ((deployment_name))
           domain: bosh
-          instance_group: (( grab params.name ))
-          network: (( grab params.network_name || default))
+          instance_group: (( grab iso_group.name ))
+          network: (( grab iso_group.network_name || default))
           query: _

@@ -1,0 +1,4 @@
+# This is a dynamically created file for setting isolation segments when
+# specified by `params.isolation_segments.*` entries.  It is created by the
+# hooks/blueprint script.
+---

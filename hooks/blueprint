@@ -42,6 +42,40 @@ switch_cf_version() {
   echo >&2
 }
 
+isolation_segments() {
+  template=`cat operations/dynamic-templates/isolation-segment.yml`
+  isoseg_dynamic="operations/dynamic/isolation_segments.yml"
+  segments="$(
+    echo "$1" | \
+    jq -r '.params.isolation_segments' \
+  )"
+
+# add this in that cat beneath
+#--- # group_params.yml
+#iso_group:
+#  name: iso-group
+#  azs:
+#  - z1
+#  vm_type: small-highmem
+#  vm_extensions:
+#  - 100GB_ephemeral_disk
+#  network_name: ((cf_runtime_network))
+#  stemcell: test
+
+
+  cat <<EOF >> "$isoseg_dynamic"
+---
+iso_group:
+params
+EOF
+  # iterate over params.isolation_segments[]
+  # create iso_group yml root element
+  ### add everything from params.isolation_segments[i] underneath tmp iso_group.yml
+  # add it to the manifest
+  # during eval and merge params are `grab`ed from iso_group and iso_group is pruned after
+}
+
+
 ### ============================================================================
 ### Main
 ### ============================================================================
@@ -444,7 +478,8 @@ for want in $GENESIS_REQUESTED_FEATURES; do
       fi
       ;;
     isolation-segments)
-      manifest+=( isolation_segments(params) ) ;;
+      isolation_segments "$params"
+      manifest+=( $isoseg_dynamic ) ;;
     +migrated-v1-env)
       manifest+=( "overlay/addons/migration.yml" ) ;;
 
@@ -673,21 +708,5 @@ if [[ -n "${version}" ]] && ! new_enough "${version}" "2.0.0-rc0"; then
   fi
   :
 fi
-
-isolation_segments(params)
-{
-  template=`cat ../operations/dynamic-templates/isolation-segment.yml`
-  # params are json, why?
-  segments="$(
-    echo "$params" | \
-    jq -r '.params.isolation_segments' \
-  )"
-
-  # iterate over params.isolation_segments[]
-  # create iso_group yml root element
-  ### add everything from params.isolation_segments[i] underneath tmp iso_group.yml
-  # add it to the manifest
-  # during eval and merge params are `grab`ed from iso_group and iso_group is pruned after
-}
 
 echo "${manifest[@]}"
