@@ -13,13 +13,14 @@ params:
   isolation_segments:
   - name: custom-params-group
     azs:
-    - z1
-    instances: 1
+    - custom-az
+    instances: 5
     vm_type: small-highmem
-    vm_extensions:
-    - 100GB_ephemeral_disk
     network_name: ((cf_runtime_network))
     stemcell: test
+    vm_extensions:
+    - 100GB_ephemeral_disk
+    - cf-router-network-properties
   - name: default-params-group
     azs:
     - z1

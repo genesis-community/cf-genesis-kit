@@ -186,7 +186,7 @@ addons:
         - deployment: isolation-segments-cf
           domain: bosh
           instance_group: default-params-group
-          network: cf-runtime
+          network: default
           query: _
       - domain: auctioneer.service.cf.internal
         targets:
@@ -2074,13 +2074,14 @@ instance_groups:
 - name: custom-params-group
   networks:
   - name: cf-runtime
-  instances: 1
+  instances: 5
   stemcell: test
   vm_type: small-highmem
   azs:
-  - z1
+  - custom-az
   vm_extensions:
   - 100GB_ephemeral_disk
+  - cf-router-network-properties
   jobs:
   - name: cflinuxfs3-rootfs-setup
     release: cflinuxfs3
@@ -2132,6 +2133,114 @@ instance_groups:
         rep:
           placement_tags:
           - custom-params-group
+          preloaded_rootfses:
+          - cflinuxfs3:/var/vcap/packages/cflinuxfs3/rootfs.tar
+      enable_consul_service_registration: false
+      enable_declarative_healthcheck: true
+      logging:
+        format:
+          timestamp: rfc3339
+      loggregator:
+        key: <!{credhub}:loggregator_tls_agent.private_key!>
+        ca_cert: <!{credhub}:loggregator_tls_agent.ca!>
+        cert: <!{credhub}:loggregator_tls_agent.certificate!>
+        use_v2_api: true
+      tls:
+        key: <!{credhub}:diego_rep_agent_v2.private_key!>
+        ca_cert: <!{credhub}:diego_rep_agent_v2.ca!>
+        cert: <!{credhub}:diego_rep_agent_v2.certificate!>
+  - name: route_emitter
+    release: diego
+    properties:
+      bpm:
+        enabled: true
+      diego:
+        route_emitter:
+          bbs:
+            ca_cert: <!{credhub}:diego_bbs_client.ca!>
+            client_cert: <!{credhub}:diego_bbs_client.certificate!>
+            client_key: <!{credhub}:diego_bbs_client.private_key!>
+          local_mode: true
+          nats:
+            tls:
+              client_cert: <!{credhub}:nats_client_cert.certificate!>
+              client_key: <!{credhub}:nats_client_cert.private_key!>
+              enabled: true
+      internal_routes:
+        enabled: true
+      logging:
+        format:
+          timestamp: rfc3339
+      loggregator:
+        key: <!{credhub}:loggregator_tls_agent.private_key!>
+        ca_cert: <!{credhub}:loggregator_tls_agent.ca!>
+        cert: <!{credhub}:loggregator_tls_agent.certificate!>
+        use_v2_api: true
+      tcp:
+        enabled: true
+      uaa:
+        ca_cert: <!{credhub}:uaa_ssl.ca!>
+        client_secret: <!{credhub}:uaa_clients_tcp_emitter_secret!>
+- name: default-params-group
+  networks:
+  - name: default
+  instances: 1
+  stemcell: default
+  vm_type: minimal
+  vm_extensions: []
+  azs:
+  - z1
+  jobs:
+  - name: cflinuxfs3-rootfs-setup
+    release: cflinuxfs3
+    properties:
+      cflinuxfs3-rootfs:
+        trusted_certs:
+        - <!{credhub}:diego_instance_identity_ca.ca!>
+        - <!{credhub}:credhub_tls.ca!>
+        - <!{credhub}:uaa_ssl.ca!>
+  - name: garden
+    release: garden-runc
+    provides:
+      iptables: nil
+    properties:
+      garden:
+        cleanup_process_dirs_on_wait: true
+        containerd_mode: true
+        default_container_grace_time: 0
+        deny_networks:
+        - 0.0.0.0/0
+        destroy_containers_on_start: true
+        graph_cleanup_threshold_in_mb: 0
+      logging:
+        format:
+          timestamp: rfc3339
+  - name: rep
+    release: diego
+    properties:
+      bpm:
+        enabled: true
+      containers:
+        proxy:
+          enabled: true
+          require_and_verify_client_certificates: true
+          trusted_ca_certificates:
+          - <!{credhub}:gorouter_backend_tls.ca!>
+          - <!{credhub}:ssh_proxy_backends_tls.ca!>
+          verify_subject_alt_name:
+          - gorouter.service.cf.internal
+          - ssh-proxy.service.cf.internal
+        trusted_ca_certificates:
+        - <!{credhub}:diego_instance_identity_ca.ca!>
+        - <!{credhub}:credhub_tls.ca!>
+        - <!{credhub}:uaa_ssl.ca!>
+      diego:
+        executor:
+          instance_identity_ca_cert: <!{credhub}:diego_instance_identity_ca.certificate!>
+          instance_identity_key: <!{credhub}:diego_instance_identity_ca.private_key!>
+        rep:
+          placement_tags:
+          - default-params-group
           preloaded_rootfses:
           - cflinuxfs3:/var/vcap/packages/cflinuxfs3/rootfs.tar
       enable_consul_service_registration: false

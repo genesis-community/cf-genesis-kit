@@ -1,13 +1,13 @@
 instance_groups:
 - ((append))
 - name: (( grab iso_group.name ))
-  azs: (( grab iso_group.azs ))
+  azs: (( grab iso_group.azs || "[]" ))
   instances: (( grab iso_group.instances || 1 ))
-  vm_type: (( grab iso_group.vm_type || minimal ))
-  vm_extensions: (( grab iso_group.vm_extensions))
-  stemcell: (( grab iso_group.stemcell || default ))
+  vm_type: (( grab iso_group.vm_type || "minimal" ))
+  vm_extensions: (( grab iso_group.vm_extensions || "[]" ))
+  stemcell: (( grab iso_group.stemcell || "default" ))
   networks:
-  - name: (( grab iso_group.network_name || default ))
+  - name: (( grab iso_group.network_name || "default" ))
   jobs:
   - name: cflinuxfs3-rootfs-setup
     release: cflinuxfs3
@@ -107,7 +107,6 @@ instance_groups:
       uaa:
         ca_cert: "((uaa_ssl.ca))"
         client_secret: "((uaa_clients_tcp_emitter_secret))"
-
 addons:
 - jobs:
   - name: bosh-dns-aliases
@@ -119,7 +118,7 @@ addons:
         - deployment: ((deployment_name))
           domain: bosh
           instance_group: (( grab iso_group.name ))
-          network: (( grab iso_group.network_name || default))
+          network: (( grab iso_group.network_name || "default" ))
           query: _
     release: bosh-dns-aliases
   name: bosh-dns-aliases
