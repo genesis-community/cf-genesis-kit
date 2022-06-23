@@ -2342,7 +2342,8 @@ instance_groups:
     release: cf-cli
   lifecycle: errand
   name: smb-broker-push
-  networks: cf-runtime
+  networks: 
+  - name: cf-runtime
   stemcell: default
   vm_type: minimal
 manifest_version: v16.25.0
