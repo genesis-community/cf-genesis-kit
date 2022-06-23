@@ -158,169 +158,179 @@ addons:
       aliases:
       - domain: _.cell.service.cf.internal
         targets:
-        - deployment: no-tcp-routers-cf
+        - deployment: isolation-segments-cf
           domain: bosh
           instance_group: diego-cell
           network: cf-runtime
           query: _
-        - deployment: no-tcp-routers-cf
+        - deployment: isolation-segments-cf
           domain: bosh
           instance_group: windows2012R2-cell
           network: cf-runtime
           query: _
-        - deployment: no-tcp-routers-cf
+        - deployment: isolation-segments-cf
           domain: bosh
           instance_group: windows2016-cell
           network: cf-runtime
           query: _
-        - deployment: no-tcp-routers-cf
+        - deployment: isolation-segments-cf
           domain: bosh
           instance_group: isolated-diego-cell
           network: cf-runtime
           query: _
+        - deployment: isolation-segments-cf
+          domain: bosh
+          instance_group: custom-params-group
+          network: cf-runtime
+          query: _
+        - deployment: isolation-segments-cf
+          domain: bosh
+          instance_group: default-params-group
+          network: cf-runtime
+          query: _
       - domain: auctioneer.service.cf.internal
         targets:
-        - deployment: no-tcp-routers-cf
+        - deployment: isolation-segments-cf
           domain: bosh
           instance_group: scheduler
           network: cf-core
           query: q-s4
       - domain: bbs.service.cf.internal
         targets:
-        - deployment: no-tcp-routers-cf
+        - deployment: isolation-segments-cf
           domain: bosh
           instance_group: diego-api
           network: cf-core
           query: q-s4
       - domain: blobstore.service.cf.internal
         targets:
-        - deployment: no-tcp-routers-cf
+        - deployment: isolation-segments-cf
           domain: bosh
           instance_group: singleton-blobstore
           network: cf-core
           query: '*'
       - domain: cc-uploader.service.cf.internal
         targets:
-        - deployment: no-tcp-routers-cf
+        - deployment: isolation-segments-cf
           domain: bosh
           instance_group: api
           network: cf-core
           query: '*'
       - domain: cloud-controller-ng.service.cf.internal
         targets:
-        - deployment: no-tcp-routers-cf
+        - deployment: isolation-segments-cf
           domain: bosh
           instance_group: api
           network: cf-core
           query: '*'
       - domain: credhub.service.cf.internal
         targets:
-        - deployment: no-tcp-routers-cf
+        - deployment: isolation-segments-cf
           domain: bosh
           instance_group: credhub
           network: cf-core
           query: '*'
       - domain: doppler.service.cf.internal
         targets:
-        - deployment: no-tcp-routers-cf
+        - deployment: isolation-segments-cf
           domain: bosh
           instance_group: doppler
           network: cf-core
           query: '*'
       - domain: file-server.service.cf.internal
         targets:
-        - deployment: no-tcp-routers-cf
+        - deployment: isolation-segments-cf
           domain: bosh
           instance_group: api
           network: cf-core
           query: '*'
       - domain: gorouter.service.cf.internal
         targets:
-        - deployment: no-tcp-routers-cf
+        - deployment: isolation-segments-cf
           domain: bosh
           instance_group: router
           network: cf-edge
           query: '*'
       - domain: locket.service.cf.internal
         targets:
-        - deployment: no-tcp-routers-cf
+        - deployment: isolation-segments-cf
           domain: bosh
           instance_group: diego-api
           network: cf-core
           query: '*'
       - domain: loggregator-trafficcontroller.service.cf.internal
         targets:
-        - deployment: no-tcp-routers-cf
+        - deployment: isolation-segments-cf
           domain: bosh
           instance_group: log-api
           network: cf-core
           query: '*'
       - domain: policy-server.service.cf.internal
         targets:
-        - deployment: no-tcp-routers-cf
+        - deployment: isolation-segments-cf
           domain: bosh
           instance_group: api
           network: cf-core
           query: '*'
       - domain: reverse-log-proxy.service.cf.internal
         targets:
-        - deployment: no-tcp-routers-cf
+        - deployment: isolation-segments-cf
           domain: bosh
           instance_group: log-api
           network: cf-core
           query: '*'
       - domain: routing-api.service.cf.internal
         targets:
-        - deployment: no-tcp-routers-cf
+        - deployment: isolation-segments-cf
           domain: bosh
           instance_group: api
           network: cf-core
           query: '*'
       - domain: silk-controller.service.cf.internal
         targets:
-        - deployment: no-tcp-routers-cf
+        - deployment: isolation-segments-cf
           domain: bosh
           instance_group: diego-api
           network: cf-core
           query: '*'
       - domain: sql-db.service.cf.internal
         targets:
-        - deployment: no-tcp-routers-cf
+        - deployment: isolation-segments-cf
           domain: bosh
           instance_group: database
           network: cf-core
           query: '*'
       - domain: ssh-proxy.service.cf.internal
         targets:
-        - deployment: no-tcp-routers-cf
+        - deployment: isolation-segments-cf
           domain: bosh
           instance_group: scheduler
           network: cf-core
           query: '*'
       - domain: tps.service.cf.internal
         targets:
-        - deployment: no-tcp-routers-cf
+        - deployment: isolation-segments-cf
           domain: bosh
           instance_group: scheduler
           network: cf-core
           query: '*'
       - domain: uaa.service.cf.internal
         targets:
-        - deployment: no-tcp-routers-cf
+        - deployment: isolation-segments-cf
           domain: bosh
           instance_group: uaa
           network: cf-core
           query: '*'
       - domain: nats.service.cf.internal
         targets:
-        - deployment: no-tcp-routers-cf
+        - deployment: isolation-segments-cf
           domain: bosh
           instance_group: nats
           network: cf-core
           query: '*'
       - domain: _.nats.service.cf.internal
         targets:
-        - deployment: no-tcp-routers-cf
+        - deployment: isolation-segments-cf
           domain: bosh
           instance_group: nats
           network: cf-core
@@ -335,7 +345,7 @@ exodus:
   - run.cf.testing.example
   apps_domain: run.cf.testing.example
   base_domain: cf.testing.example
-  bosh: no-tcp-routers
+  bosh: isolation-segments
   cf-deployment-date: 2022-Feb-14 03:48:47 UTC
   cf-deployment-hotfixes: true
   cf-deployment-url: https://github.com/cloudfoundry/cf-deployment/releases/tag/v16.25.0
@@ -343,14 +353,14 @@ exodus:
   core_network: cf-core
   db_network: cf-core
   edge_network: cf-edge
-  features: no-tcp-routers
+  features: isolation-segments
   is_director: false
   runtime_network: cf-runtime
   system_domain: system.cf.testing.example
   system_org: system
   system_space: system
   use_create_env: false
-  vaulted_uaa_clients: /secret/no/tcp/routers/cf/uaa/client_secrets:firehose
+  vaulted_uaa_clients: /secret/isolation/segments/cf/uaa/client_secrets:firehose
 features:
   randomize_az_placement: true
 instance_groups:
@@ -855,7 +865,7 @@ instance_groups:
       - run.cf.testing.example
       app_ssh:
         host_key_fingerprint: <!{credhub}:diego_ssh_proxy_host_key.public_key_fingerprint!>
-      build: cf-genesis-kit v2.0.3
+      build: cf-genesis-kit v2.1.2
       cc:
         buildpacks:
           blobstore_type: webdav
@@ -984,7 +994,7 @@ instance_groups:
       credhub_api:
         ca_cert: <!{credhub}:credhub_tls.ca!>
       description: Use `genesis info` on environment file for more details
-      name: Cloud Foundry (no-tcp-routers)
+      name: Cloud Foundry (isolation-segments)
       router:
         route_services_secret: <!{credhub}:router_route_services_secret!>
       routing_api:
@@ -1570,6 +1580,40 @@ instance_groups:
   vm_extensions:
   - cf-router-network-properties
   vm_type: minimal
+- name: tcp-router
+  networks:
+  - name: cf-edge
+  instances: 2
+  stemcell: default
+  vm_type: minimal
+  azs:
+  - z1
+  - z2
+  vm_extensions:
+  - cf-tcp-router-network-properties
+  jobs:
+  - name: tcp_router
+    release: routing
+    properties:
+      tcp_router:
+        oauth_secret: <!{credhub}:uaa_clients_tcp_router_secret!>
+        router_group: default-tcp
+      uaa:
+        ca_cert: <!{credhub}:uaa_ssl.ca!>
+        tls_port: 8443
+  - name: loggr-udp-forwarder
+    release: loggregator-agent
+    properties:
+      loggregator:
+        tls:
+          key: <!{credhub}:loggregator_tls_agent.private_key!>
+          ca: <!{credhub}:loggregator_tls_agent.ca!>
+          cert: <!{credhub}:loggregator_tls_agent.certificate!>
+      metrics:
+        key: <!{credhub}:loggr_udp_forwarder_tls.private_key!>
+        ca_cert: <!{credhub}:loggr_udp_forwarder_tls.ca!>
+        cert: <!{credhub}:loggr_udp_forwarder_tls.certificate!>
+        server_name: loggr_udp_forwarder_metrics
 - azs:
   - z1
   - z2
@@ -2027,8 +2071,117 @@ instance_groups:
   - name: cf-core
   stemcell: default
   vm_type: minimal
+- name: custom-params-group
+  networks:
+  - name: cf-runtime
+  instances: 1
+  stemcell: test
+  vm_type: small-highmem
+  azs:
+  - z1
+  vm_extensions:
+  - 100GB_ephemeral_disk
+  jobs:
+  - name: cflinuxfs3-rootfs-setup
+    release: cflinuxfs3
+    properties:
+      cflinuxfs3-rootfs:
+        trusted_certs:
+        - <!{credhub}:diego_instance_identity_ca.ca!>
+        - <!{credhub}:credhub_tls.ca!>
+        - <!{credhub}:uaa_ssl.ca!>
+  - name: garden
+    release: garden-runc
+    provides:
+      iptables: nil
+    properties:
+      garden:
+        cleanup_process_dirs_on_wait: true
+        containerd_mode: true
+        default_container_grace_time: 0
+        deny_networks:
+        - 0.0.0.0/0
+        destroy_containers_on_start: true
+        graph_cleanup_threshold_in_mb: 0
+      logging:
+        format:
+          timestamp: rfc3339
+  - name: rep
+    release: diego
+    properties:
+      bpm:
+        enabled: true
+      containers:
+        proxy:
+          enabled: true
+          require_and_verify_client_certificates: true
+          trusted_ca_certificates:
+          - <!{credhub}:gorouter_backend_tls.ca!>
+          - <!{credhub}:ssh_proxy_backends_tls.ca!>
+          verify_subject_alt_name:
+          - gorouter.service.cf.internal
+          - ssh-proxy.service.cf.internal
+        trusted_ca_certificates:
+        - <!{credhub}:diego_instance_identity_ca.ca!>
+        - <!{credhub}:credhub_tls.ca!>
+        - <!{credhub}:uaa_ssl.ca!>
+      diego:
+        executor:
+          instance_identity_ca_cert: <!{credhub}:diego_instance_identity_ca.certificate!>
+          instance_identity_key: <!{credhub}:diego_instance_identity_ca.private_key!>
+        rep:
+          placement_tags:
+          - custom-params-group
+          preloaded_rootfses:
+          - cflinuxfs3:/var/vcap/packages/cflinuxfs3/rootfs.tar
+      enable_consul_service_registration: false
+      enable_declarative_healthcheck: true
+      logging:
+        format:
+          timestamp: rfc3339
+      loggregator:
+        key: <!{credhub}:loggregator_tls_agent.private_key!>
+        ca_cert: <!{credhub}:loggregator_tls_agent.ca!>
+        cert: <!{credhub}:loggregator_tls_agent.certificate!>
+        use_v2_api: true
+      tls:
+        key: <!{credhub}:diego_rep_agent_v2.private_key!>
+        ca_cert: <!{credhub}:diego_rep_agent_v2.ca!>
+        cert: <!{credhub}:diego_rep_agent_v2.certificate!>
+  - name: route_emitter
+    release: diego
+    properties:
+      bpm:
+        enabled: true
+      diego:
+        route_emitter:
+          bbs:
+            ca_cert: <!{credhub}:diego_bbs_client.ca!>
+            client_cert: <!{credhub}:diego_bbs_client.certificate!>
+            client_key: <!{credhub}:diego_bbs_client.private_key!>
+          local_mode: true
+          nats:
+            tls:
+              client_cert: <!{credhub}:nats_client_cert.certificate!>
+              client_key: <!{credhub}:nats_client_cert.private_key!>
+              enabled: true
+      internal_routes:
+        enabled: true
+      logging:
+        format:
+          timestamp: rfc3339
+      loggregator:
+        key: <!{credhub}:loggregator_tls_agent.private_key!>
+        ca_cert: <!{credhub}:loggregator_tls_agent.ca!>
+        cert: <!{credhub}:loggregator_tls_agent.certificate!>
+        use_v2_api: true
+      tcp:
+        enabled: true
+      uaa:
+        ca_cert: <!{credhub}:uaa_ssl.ca!>
+        client_secret: <!{credhub}:uaa_clients_tcp_emitter_secret!>
 manifest_version: v16.25.0
-name: no-tcp-routers-cf
+name: isolation-segments-cf
 releases:
 - name: binary-buildpack
   sha1: 6e1ff3753ac5a86e968546222bbbaaba1264d938
