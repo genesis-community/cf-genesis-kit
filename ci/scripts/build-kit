@@ -1,5 +1,5 @@
 #!/bin/bash
-set -eu
+set -eux
 
 # Resource Directories
 export REPO_ROOT="git"
