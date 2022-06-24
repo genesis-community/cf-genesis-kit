@@ -2187,7 +2187,7 @@ instance_groups:
   instances: 1
   stemcell: default
   vm_type: minimal
-  vm_extensions: []
+  vm_extensions: "[]"
   azs:
   - z1
   jobs:
