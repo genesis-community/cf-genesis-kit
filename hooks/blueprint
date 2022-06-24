@@ -55,7 +55,6 @@ generate_dynamic_isolation_segments() {
     segment_tmp_file="operations/dynamic/isolation_segments_$group.yml"
     touch $segment_tmp_file
     cat operations/dynamic-templates/isolation-segment.yml > "$segment_tmp_file"
-    # TODO: Try to use the $group by indexing
     sed -i "" "s/params.isolation_segments.iso_group/params.isolation_segments.$group/g" $segment_tmp_file
     generated_segments+=("$segment_tmp_file")
   done
