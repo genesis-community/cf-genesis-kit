@@ -50,16 +50,14 @@ generate_dynamic_isolation_segments() {
 
   generated_segments=()
 
-  index=0
   for group in $isolation_groups; do
     seg=$(echo $1 | jq -r ".isolation_segments[] | select(.name==\"$group\")")
-    segment_tmp_file=$(echo $group | tr '-' '_')
-    declare ${segment_tmp_file}="operations/dynamic/isolation_segments_$group.yml"
-    touch ${!segment_tmp_file}
-    cat operations/dynamic-templates/isolation-segment.yml > "${!segment_tmp_file}"
-    sed -i "" "s/params.isolation_segments\[i\]/params.isolation_segments[$index]/g" ${!segment_tmp_file}
-    generated_segments+=("${!segment_tmp_file}")
-    index=$((index + 1))
+    segment_tmp_file="operations/dynamic/isolation_segments_$group.yml"
+    touch $segment_tmp_file
+    cat operations/dynamic-templates/isolation-segment.yml > "$segment_tmp_file"
+    # TODO: Try to use the $group by indexing
+    sed -i "" "s/params.isolation_segments.iso_group/params.isolation_segments.$group/g" $segment_tmp_file
+    generated_segments+=("$segment_tmp_file")
   done
 
   echo ${generated_segments[*]}
@@ -468,7 +466,7 @@ for want in $GENESIS_REQUESTED_FEATURES; do
       fi
       ;;
     isolation-segments)
-      manifest+=( $(generate_dynamic_isolation_segments $params) ) ;;
+      manifest+=( $(generate_dynamic_isolation_segments "$params") ) ;;
     +migrated-v1-env)
       manifest+=( "overlay/addons/migration.yml" ) ;;
 
