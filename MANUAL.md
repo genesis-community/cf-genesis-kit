@@ -65,7 +65,7 @@ General:
   - `ssh-proxy-on-routers` - moves the ssh-proxy from scheduler instance group to the router instance group, placing it on the edge network, and enabling scaling via scaling the routers.
   - `no-tcp-routers` - removes the tcp-router instance group and associated resource allocations for systems that don't need tcp routes.
   - `windows-diego-cells` - Adds Windows Diego cell functionality.
-
+  - `isolation-segments` - enables usage of [isolation segments](https://docs.cloudfoundry.org/adminguide/routing-is.html#overview) using minimal configuration.
 
 Database related - choose one:
   - `postgres-db` - Use an external postgres instance to host persistent data.
@@ -303,6 +303,17 @@ These params need to be set when activating features:
     | --- | --- | ---- |
     | `windows_diego_cell_vm_type` | Windows Diego cell VM Type | `small-highmem` |
     | `windows_diego_cell_instances`| Windows Diego Cell Instance Count | `1` |
+  
+  - **isolation-segments**:
+    | param | description | default |
+    | --- | --- | --- |
+    | `name` | (required) Name of the isolation segment and placement tag for cloud foundry | |
+    | `azs`| (required) Avaliability zones network configuration | |
+    | `instances`| Amount of VM instances to be created | `1` |
+    | `vm_type`| VM Type to be applied | `minimal` |
+    | `vm_extensions`| Extensions to be added to the created VM's | `[]` |
+    | `network_name`| Name of the network that VM's will be created with | `default` |
+    | `stemcell`| Name of the stemcell to be used | `default` |
 
 # Retired Parameters (from v1.x)
 

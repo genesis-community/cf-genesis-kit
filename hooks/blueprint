@@ -42,6 +42,27 @@ switch_cf_version() {
   echo >&2
 }
 
+generate_dynamic_isolation_segments() {
+  isolation_groups="$(
+    echo "$1" | \
+    jq -r '.isolation_segments[] | .name'
+  )"
+
+  generated_segments=()
+
+  for group in $isolation_groups; do
+    seg=$(echo $1 | jq -r ".isolation_segments[] | select(.name==\"$group\")")
+    segment_tmp_file="operations/dynamic/isolation_segments_$group.yml"
+    touch $segment_tmp_file
+    cat operations/dynamic-templates/isolation-segment.yml > "$segment_tmp_file"
+    sed -i "" "s/params.isolation_segments.iso_group/params.isolation_segments.$group/g" $segment_tmp_file
+    generated_segments+=("$segment_tmp_file")
+  done
+
+  echo ${generated_segments[*]}
+}
+
+
 ### ============================================================================
 ### Main
 ### ============================================================================
@@ -221,7 +242,7 @@ for want in $GENESIS_REQUESTED_FEATURES; do
       features+=( "small-footprint" );
       ;;
     local-postgres-db|local-mysql-db|mysql-db|postgres-db) db_specified=1; features+=( "$want" ) ;;
-    bare|partitioned-network|haproxy|tls|no-nats-tls|self-signed) features+=( "$want" ) ;;
+    bare|partitioned-network|haproxy|tls|no-nats-tls|self-signed|isolation-segments) features+=( "$want" ) ;;
     minio-blobstore|aws-blobstore|aws-blobstore-iam|azure-blobstore|gcp-blobstore|gcp-use-access-key) features+=( "$want" ) ;;
     nfs-volume-services|enable-service-discovery|ssh-proxy-on-routers|no-tcp-routers|smb-volume-services) features+=( "$want" ) ;;
     app-scheduler-integration|app-autoscaler-integration|prometheus-integration|v2-nats-credentials) features+=( "$want" ) ;;
@@ -432,7 +453,7 @@ for want in $GENESIS_REQUESTED_FEATURES; do
         "overlay/override-releases/static-windows.yml" \
       )
       if want_feature "compiled-releases"; then
-        manifests+=( \
+        manifest+=( \
           "cf-deployment/operations/experimental/use-compiled-releases-windows.yml" \
           "overlay/override-releases/compiled-windows.yml" \
         )
@@ -443,6 +464,8 @@ for want in $GENESIS_REQUESTED_FEATURES; do
         )
       fi
       ;;
+    isolation-segments)
+      manifest+=( $(generate_dynamic_isolation_segments "$params") ) ;;
     +migrated-v1-env)
       manifest+=( "overlay/addons/migration.yml" ) ;;
 
