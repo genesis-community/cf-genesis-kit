@@ -53,9 +53,8 @@ generate_dynamic_isolation_segments() {
   for group in $isolation_groups; do
     seg=$(echo $1 | jq -r ".isolation_segments[] | select(.name==\"$group\")")
     segment_tmp_file="operations/dynamic/isolation_segments_$group.yml"
-    touch $segment_tmp_file
     cat operations/dynamic-templates/isolation-segment.yml > "$segment_tmp_file"
-    sed -i "" "s/params.isolation_segments.iso_group/params.isolation_segments.$group/g" $segment_tmp_file
+    sed -i "" "s/params.isolation_segments.iso_group/params.isolation_segments.$group/g" "$segment_tmp_file"
     generated_segments+=("$segment_tmp_file")
   done
 
