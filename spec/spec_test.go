@@ -208,6 +208,7 @@ var _ = Describe("Interal Kit", func() {
 		CPI:           "aws", //"gcp",
 	})
 	Test(Environment{
+		Focus:         true,
 		Name:          "isolation-segments",
 		CloudConfig:   "aws",
 		RuntimeConfig: "dns",
