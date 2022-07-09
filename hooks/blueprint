@@ -48,17 +48,13 @@ generate_dynamic_isolation_segments() {
     jq -r '.isolation_segments[] | .name'
   )"
 
-  generated_segments=()
-
   for group in $isolation_groups; do
-    seg=$(echo $1 | jq -r ".isolation_segments[] | select(.name==\"$group\")")
     segment_tmp_file="operations/dynamic/isolation_segments_$group.yml"
-    cat operations/dynamic-templates/isolation-segment.yml > "$segment_tmp_file"
-    sed -i "" "s/params.isolation_segments.iso_group/params.isolation_segments.$group/g" "$segment_tmp_file"
-    generated_segments+=("$segment_tmp_file")
+    sed "s/params.isolation_segments.iso_group/params.isolation_segments.$group/g" \
+      < "operations/dynamic-templates/isolation-segment.yml" \
+      > "$segment_tmp_file"
+    echo "$segment_tmp_file"
   done
-
-  echo ${generated_segments[*]}
 }
 
 
@@ -464,7 +460,10 @@ for want in $GENESIS_REQUESTED_FEATURES; do
       fi
       ;;
     isolation-segments)
-      manifest+=( $(generate_dynamic_isolation_segments "$params") ) ;;
+      while read -r segment; do
+        manifest+=( "${segment}" )
+      done < <(generate_dynamic_isolation_segments "$params")
+      ;;
     +migrated-v1-env)
       manifest+=( "overlay/addons/migration.yml" ) ;;
 
