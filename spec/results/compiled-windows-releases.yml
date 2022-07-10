@@ -2342,7 +2342,7 @@ instance_groups:
     release: cf-cli
   lifecycle: errand
   name: smb-broker-push
-  networks: 
+  networks:
   - name: cf-runtime
   stemcell: default
   vm_type: minimal
@@ -2399,11 +2399,8 @@ releases:
   url: https://bosh.io/d/github.com/pivotal-cf/credhub-release?v=2.11.1
   version: 2.11.1
 - name: diego
-  sha1: e9e5a4bcdb41ef1b75011d9bd9ae1ace186c0510
-  stemcell:
-    os: ubuntu-xenial
-    version: "621.5"
-  url: https://storage.googleapis.com/cf-deployment-compiled-releases/diego-2.53.0-ubuntu-xenial-621.5-20210918-033819-066775025.tgz
+  sha1: 85f71928d7d0f89e04cdf386c2ab4c3d485fa468
+  url: https://bosh.io/d/github.com/cloudfoundry/diego-release?v=2.53.0
   version: 2.53.0
 - name: dotnet-core-buildpack
   sha1: 46b7b07e259a4a0c1f1c01ecb919c6a40c31343e
@@ -2413,11 +2410,8 @@ releases:
   url: https://storage.googleapis.com/cf-deployment-compiled-releases/dotnet-core-buildpack-2.3.34-ubuntu-xenial-621.5-20210902-161753-439994186.tgz
   version: 2.3.34
 - name: garden-runc
-  sha1: 7e5e48f6a9c1cdf4ed67b320ba3e5953716251d5
-  stemcell:
-    os: ubuntu-xenial
-    version: "621.5"
-  url: https://storage.googleapis.com/cf-deployment-compiled-releases/garden-runc-1.19.30-ubuntu-xenial-621.5-20210820-171741-866896742.tgz
+  sha1: d06a32a2e50faabd2df328619384089d9418f355
+  url: https://bosh.io/d/github.com/cloudfoundry/garden-runc-release?v=1.19.30
   version: 1.19.30
 - name: go-buildpack
   sha1: 52f23d15a3eba8e687ae5f783d96dcbcf7b78f8f
@@ -2441,11 +2435,8 @@ releases:
   url: https://storage.googleapis.com/cf-deployment-compiled-releases/loggregator-106.6.0-ubuntu-xenial-621.5-20210511-203806-611258205.tgz
   version: 106.6.0
 - name: metrics-discovery
-  sha1: 18c13cb8e2ef67798b93cac4abc69cc1040d0cec
-  stemcell:
-    os: ubuntu-xenial
-    version: "621.5"
-  url: https://storage.googleapis.com/cf-deployment-compiled-releases/metrics-discovery-3.0.6-ubuntu-xenial-621.5-20210615-231306-866442869.tgz
+  sha1: 073f13a065ca15e7c0c435ec71f88675f4e704d3
+  url: https://bosh.io/d/github.com/cloudfoundry/metrics-discovery-release?v=3.0.6
   version: 3.0.6
 - name: nats
   sha1: 3c01c52494f741905e699e524978e4d3c2c57207
@@ -2539,11 +2530,8 @@ releases:
   url: https://bosh.io/d/github.com/cloudfoundry/uaa-release?v=75.14.0
   version: 75.14.0
 - name: loggregator-agent
-  sha1: f4c33b0253f36aff880db3e619651389ce89e305
-  stemcell:
-    os: ubuntu-xenial
-    version: "621.5"
-  url: https://storage.googleapis.com/cf-deployment-compiled-releases/loggregator-agent-6.3.4-ubuntu-xenial-621.5-20210812-165634-782948492.tgz
+  sha1: 9dd3ad00fb49bebd8290fad8ce7b2e4992dac31f
+  url: https://bosh.io/d/github.com/cloudfoundry/loggregator-agent-release?v=6.3.4
   version: 6.3.4
 - name: log-cache
   sha1: 39f889529a74b48022df1eeba2ed4aa206fc8ec3
