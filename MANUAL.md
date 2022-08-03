@@ -56,6 +56,7 @@ General:
   - `compiled-releases` - Use pre-compiled releases to speed up initial deploy time (alias of upstream `cf-deployment/operations/use-compiled-releases`).
   - `small-footprint` - Use the minimal number of vms and only 1 az to deploy cf.
   - `nfs-volume-services` - Alias of `cf-deployment/operations/enable-nfs-volume-service`
+  - `nfs-ldap` - Use LDAP to access nfs volume services (Alias `cf-deployment/operations/enable-nfs-ldap`, required `nfs-volume-servies` feature)
   - `enable-service-discovery` - Enables bosh-dns support on diego cells.
   - `app-autoscaler-integration` - Add a uaa client for the app autoscaler (must be deployed via [cf-app-autoscaler-genesis-kit](https://github.com/genesis-community/cf-app-autoscaler-genesis-kit)).
   - `prometheus-integration` - Configure cf to export to prometheus (must deployed via [prometheus-genesis-kit](https://github.com/genesis-community/prometheus-genesis-kit)).
@@ -65,7 +66,7 @@ General:
   - `ssh-proxy-on-routers` - moves the ssh-proxy from scheduler instance group to the router instance group, placing it on the edge network, and enabling scaling via scaling the routers.
   - `no-tcp-routers` - removes the tcp-router instance group and associated resource allocations for systems that don't need tcp routes.
   - `windows-diego-cells` - Adds Windows Diego cell functionality.
-  - `isolation-segments` - enables usage of [isolation segments](https://docs.cloudfoundry.org/adminguide/routing-is.html#overview) using minimal configuration.
+  - `isolation-segments` - enables usage of [isolation segments](https://docs.cloudfoundry.org/adminguide/routing-is.html#overview) using minimal configuration.  Supports nfs-volume-services, nfs-ldap and smb-volume-services features.
 
 Database related - choose one:
   - `postgres-db` - Use an external postgres instance to host persistent data.
@@ -114,6 +115,7 @@ kit:
 
 ## Feature Params
 The following params are always included:
+
 | param | description | default |
 | --- | --- | --- |
 | `cf_core_network` | What network should be used for cf core-components? | `cf-core` |
@@ -126,7 +128,9 @@ The following params are always included:
 | `identity_description` | Identity description | `"Use 'genesis info' on environment file for more details"` |
 
 These params need to be set when activating features:
+
   - **aws-blobstore/aws-blobstore-iam**:
+    
     | param | description | default |
     | --- | --- | --- |
     | `blobstore_s3_region` | The s3 region of the blobstore | |
@@ -138,6 +142,7 @@ These params need to be set when activating features:
     | `blobstore_resources_directory` | Directory for the app packages | `blobstore_bucket_prefix` + `"-resources-"` + `blobstore_bucket_suffix` |
 
   - **minio-blobstore**:
+  
     | param | description | default |
     | --- | --- | --- |
     | `blobstore_minio_endpoint` | The URL (including protocol and option port) of the Minio endpoint of the blobstore | |
@@ -149,6 +154,7 @@ These params need to be set when activating features:
     | `blobstore_resources_directory` | Directory for the app packages | `blobstore_bucket_prefix` + `"-resources-"` + `blobstore_bucket_suffix` |
 
   - **azure-blobstore**:
+    
     | param | description | default |
     | --- | --- | --- |
     | `azure_environment` | What is environment where this blobstore exists? | `AzureCloud` |
@@ -160,11 +166,13 @@ These params need to be set when activating features:
     | `blobstore_resources_directory` | Directory for the app packages | `blobstore_bucket_prefix` + `"-resources-"` + `blobstore_bucket_suffix` |
 
   - **bare**:
+    
     | param | description | default |
     | --- | --- | --- |
     | `network` | What network should Cloud Foundry be deployed to? | `default` |
 
   - **external-mysql**:
+    
     | param | description | default |
     | --- | --- | --- |
     | `external_db_host` | The default host for your mysql db | |
@@ -211,6 +219,7 @@ These params need to be set when activating features:
     | `credhubdb_password` | The Credhub database password | `external_db_password` |
 
   - **external-postgres**:
+    
     | param | description | default |
     | --- | --- | --- |
     | `external_db_host` | The external host for your postgres db | |
@@ -257,6 +266,7 @@ These params need to be set when activating features:
     | `credhubdb_password` | The Credhub database password | `external_db_password` |
 
   - **haproxy**:
+    
     | param | description | default |
     | --- | --- | --- |
     | `internal_only_domains` | Internal only domains | `[]` |
@@ -268,17 +278,20 @@ These params need to be set when activating features:
     | `availability_zones` | What azs should haproxy be deployed to? | `[z1, z2, z3]` |
 
   - **haproxy** + **small-footprint**:
+    
     | param | description | default |
     | --- | --- | --- |
     | `haproxy_instances` | How many haproxy instances? | 1 |
 
   - **haproxy** + **tls**:
+    
     | param | description | default |
     | --- | --- | --- |
     | `disable_tls_10` | Disable tls 10? | `true` |
     | `disable_tls_11` | Disable tls 11? | `true` |
 
   - **override-db-names**:
+    
     | param | description | default |
     | --- | --- | --- |
     | `uaadb_name` | Name of the UAA database | `uuadb` |
@@ -299,21 +312,41 @@ These params need to be set when activating features:
     | `credhubdb_user` | Name of the Credhub database user | `credhubadmin` |
 
   - **windows-diego-cells**:
+    
     | param | description | default |
     | --- | --- | ---- |
     | `windows_diego_cell_vm_type` | Windows Diego cell VM Type | `small-highmem` |
     | `windows_diego_cell_instances`| Windows Diego Cell Instance Count | `1` |
   
   - **isolation-segments**:
-    | param | description | default |
-    | --- | --- | --- |
-    | `name` | (required) Name of the isolation segment and placement tag for cloud foundry | |
-    | `azs`| (required) Avaliability zones network configuration | |
-    | `instances`| Amount of VM instances to be created | `1` |
-    | `vm_type`| VM Type to be applied | `minimal` |
-    | `vm_extensions`| Extensions to be added to the created VM's | `[]` |
-    | `network_name`| Name of the network that VM's will be created with | `default` |
-    | `stemcell`| Name of the stemcell to be used | `default` |
+    
+    | param           | description                                                       | default |
+    | --------------- | ----------------------------------------------------------------- | ------- |
+    | `name`          | (required) Name of the isolation segment for cloud foundry        | |
+    | `azs`           | Avaliability zones network configuration                          | `[ z1, z2]` <sup>[1]</sup> |
+    | `instances`     | Amount of VM instances to be created                              | `1` |
+    | `vm_type`       | VM Type to be applied                                             | `small-highmem` <sup>[2]</sup> |
+    | `vm_extensions` | Extensions to be added to the created VM's                        | `[ 100GB_ephemeral_disk ]` |
+    | `network_name`  | Name of the network that VM's will be created with                | `default` <sup>[3]</sup> |
+    | `stemcell`      | Name of the stemcell to be used                                   | `default` |
+    | `tag`           | Name of the rep placement tag                                     | same as `name` param |
+    | `tags`          | List of rep placement tags (optional: overrides `tag` and `name`) | |
+    | `additional_trusted_certs` | List of additional trusted certs (optional)            | |
+
+    `[1]` The default azs are [z1,z2] unless migrating from cf kit v1.x, in
+    which case the default azs are [z1,z2,z3], or if the scale-to-single-az
+    feature is in use, in which case the default azs are [z1].  Setting
+    `params.availability_zones` will override the default availability zones
+    deployment-wide.
+
+    `[2]` The default vm_type for all diego-cell based instance groups can be
+    done by specifying `param.diego_cell_vm_type`
+
+    `[3]` The network name defaults to the `params.cf_runtime_network` when
+    using not using the base feature or if explicitly using the
+    partitioned-network feature.  If that parameter is not specified, it
+    defaults to `cf-runtime`.
+
 
 # Retired Parameters (from v1.x)
 
@@ -857,6 +890,34 @@ NFS volumes provided by the NFS Volume Services Broker.
 
 There are currently no parameters defined for this feature.
 
+## NFS LDAP
+
+The `nfs-ldap` feature extends the `nfs-volume-services` feature by
+providing LDAP integration.  It supports the folowing parameters:
+
+  - `nfs-ldap-service-user`:
+    - ldap service account user name
+    - required
+
+  - `nfs-ldap-host`:
+    - ldap server host name or ip address
+    - required
+
+  - `nfs-ldap-fqdn`:
+    - ldap fqdn for user records we will search against when looking up user uids
+    - required
+    - example: `cn=Users,dc=corp,dc=test,dc=com`
+
+  - `nfs-ldap-port`:
+    - ldap server port
+    - defaults to `389`
+
+  - `nfs-ldap-proto`:
+    - ldap server protocol
+    - defaults to `tcp`
+
+You also must set credhub secret `ldap-service-password` to password for the
+specified service user.
 
 ## SMB Volume Services
 

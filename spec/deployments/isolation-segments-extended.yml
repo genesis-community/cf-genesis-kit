@@ -4,12 +4,17 @@ kit:
   version: 2.1.2
   features:
     - isolation-segments
+    - nfs-volume-services
+    - nfs-ldap
 
 genesis:
-  env: isolation-segments
+  env: isolation-segments-extended
 
 params:
   base_domain: cf.testing.example
+  availability_zones: [zoneA, zoneB, zoneC, zoneD]
+  diego_cell_vm_type: xlarge
+  cf_runtime_network: cf-core
   isolation_segments:
   - name: custom-params-group
     azs:
@@ -17,6 +22,7 @@ params:
     instances: 5
     vm_type: small-highmem
     stemcell: test
+    tag: custom-iso-group
     vm_extensions:
     - 100GB_ephemeral_disk
     - cf-router-network-properties
@@ -24,6 +30,10 @@ params:
     azs:
     - z1
     network_name: default
-    additional_trusted_certs:
-    - ((some-strange-cert))
-    - ((another-cert-of-dubious-validity))
+    tags:
+    - default-iso-group
+    - default
+
+  nfs-ldap-fqdn: cn=Users,dc=corp,dc=test,dc=com
+  nfs-ldap-host: ldap.myhost.com
+  nfs-ldap-service-user: ldap-user

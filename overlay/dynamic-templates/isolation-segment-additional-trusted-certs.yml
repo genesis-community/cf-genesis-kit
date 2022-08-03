@@ -1,0 +1,18 @@
+meta:
+  __base_trusted_certs:
+    - ((diego_instance_identity_ca.ca))
+    - ((credhub_tls.ca))
+    - ((uaa_ssl.ca))
+  additional_trusted_certs: []
+
+instance_groups:
+- name: (( grab meta.name ))
+  jobs:
+  - name: cflinuxfs3-rootfs-setup
+    properties:
+      cflinuxfs3-rootfs:
+        trusted_certs: (( grab meta.__base_trusted_certs meta.additional_trusted_certs ))
+  - name: rep
+    properties:
+      containers:
+        trusted_ca_certificates: (( grab meta.__base_trusted_certs meta.additional_trusted_certs ))
