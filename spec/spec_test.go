@@ -211,6 +211,14 @@ var _ = Describe("Interal Kit", func() {
 		Name:          "isolation-segments",
 		CloudConfig:   "aws",
 		RuntimeConfig: "dns",
+		CredhubVars:   "isolation-segments-addl-certs",
+		CPI:           "aws",
+	})
+	Test(Environment{
+		Name:          "isolation-segments-extended",
+		CloudConfig:   "aws",
+		RuntimeConfig: "dns",
+		CredhubVars:   "isolation-segments-nfs",
 		CPI:           "aws",
 	})
 	// Test(Environment{

@@ -1,13 +1,18 @@
+meta:
+  __default_tags:
+  - (( grab meta.tag || meta.name ))
+  __default_vm_extentions:
+  - 100GB_ephemeral_disk
+
 instance_groups:
-- ((append))
-- name: (( grab params.isolation_segments.iso_group.name ))
-  azs: (( grab params.isolation_segments.iso_group.azs || "[]" ))
-  instances: (( grab params.isolation_segments.iso_group.instances || 1 ))
-  vm_type: (( grab params.isolation_segments.iso_group.vm_type || "minimal" ))
-  vm_extensions: (( grab params.isolation_segments.iso_group.vm_extensions || "[]" ))
-  stemcell: (( grab params.isolation_segments.iso_group.stemcell || "default" ))
+- name: (( grab meta.name ))
+  azs: (( grab meta.azs || "(( grab meta.azs ))" ))
+  instances: (( grab meta.instances || 1 ))
+  vm_type: (( grab meta.vm_type || "(( grab params.diego-cell_vm_type || params.diego_cell_vm_type || \"small-highmem\" ))" ))
+  vm_extensions: (( grab meta.vm_extensions || meta.__default_vm_extentions ))
+  stemcell: (( grab meta.stemcell || "default" ))
   networks:
-  - name: (( grab params.isolation_segments.iso_group.network_name || "default" ))
+  - name: (( grab meta.network_name || "default" ))
   jobs:
   - name: cflinuxfs3-rootfs-setup
     release: cflinuxfs3
@@ -45,8 +50,7 @@ instance_groups:
         rep:
           preloaded_rootfses:
           - cflinuxfs3:/var/vcap/packages/cflinuxfs3/rootfs.tar
-          placement_tags:
-          - (( grab params.isolation_segments.iso_group.name ))
+          placement_tags: (( grab meta.tags || meta.__default_tags ))
       containers:
         proxy:
           enabled: true
@@ -114,11 +118,11 @@ addons:
       aliases:
       - domain: _.cell.service.cf.internal
         targets:
-        - (( append ))
+        - (( defer append ))
         - deployment: ((deployment_name))
           domain: bosh
-          instance_group: (( grab params.isolation_segments.iso_group.name ))
-          network: (( grab params.isolation_segments.iso_group.network_name || "default" ))
+          instance_group: (( grab meta.name ))
+          network: (( grab meta.network_name || "default" ))
           query: _
     release: bosh-dns-aliases
   name: bosh-dns-aliases

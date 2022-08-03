@@ -43,17 +43,34 @@ switch_cf_version() {
 }
 
 generate_dynamic_isolation_segments() {
-  isolation_groups="$(
-    echo "$1" | \
-    jq -r '.isolation_segments[] | .name'
-  )"
+  isolation_groups="$(echo "$1" | jq -r '.isolation_segments[] | .name')"
+
+  iso_seg_merges=();
+  if ! want_feature "bare" || want_feature "partitioned-network" ; then
+    iso_seg_merges+=( overlay/dynamic-templates/isolation-segment-network.yml  )
+  fi
+  if want_feature "nfs-volume-services" ; then
+    iso_seg_merges+=( overlay/dynamic-templates/isolation-segment-nfs.yml )
+    if want_feature "nfs-ldap" ; then
+      iso_seg_merges+=( overlay/dynamic-templates/isolation-segment-nfs-ldap.yml )
+    fi
+  fi
+  if want_feature "smb-volume-services" ; then
+    iso_seg_merges+=( overlay/dynamic-templates/isolation-segment-nfs.yml )
+  fi
 
   for group in $isolation_groups; do
-    segment_tmp_file="operations/dynamic/isolation_segments_$group.yml"
-    sed "s/params.isolation_segments.iso_group/params.isolation_segments.$group/g" \
-      < "operations/dynamic-templates/isolation-segment.yml" \
-      > "$segment_tmp_file"
-    echo "$segment_tmp_file"
+    additional_trusted_certs=''
+    if jq -e --arg v "$group" '.isolation_segments[] | select( .name == $v ) | .additional_trusted_certs//[] | length > 0' <<<"$1" &>/dev/null  ; then 
+      additional_trusted_certs='overlay/dynamic-templates/isolation-segment-additional-trusted-certs.yml'
+    fi
+    dynamic_segment_fragment_file="overlay/dynamic/isolation_segments_$group.yml"
+    spruce merge --prune "meta" "overlay/dynamic-templates/isolation-segment.yml" \
+      ${iso_seg_merges[@]+"${iso_seg_merges[@]}"} $additional_trusted_certs \
+      <(echo "$1" | jq --arg v "$group" '.isolation_segments[] | select(.name == $v ) | {"meta": .}') \
+      <(echo '{"instance_groups": [ "((prepend))", "((defer append))" ]}') \
+      > "$dynamic_segment_fragment_file"
+    echo "$dynamic_segment_fragment_file"
   done
 }
 
@@ -236,10 +253,20 @@ for want in $GENESIS_REQUESTED_FEATURES; do
       # dealt with above, but kept for interoperability checks with other features
       features+=( "small-footprint" );
       ;;
+    nfs-volume-services|cf-deployments/operations/enable-nfs-volume-services) features+=( "nfs-volume-services" ) ;;
+    smb-volume-services|cf-deployments/operations/enable-smb-volume-services) features+=( "smb-volume-services" ) ;;
+    nfs-ldap|cf-deployments/operations/enable-nfs-ldap)
+      if ! want_feature 'nfs-volume-services' && ! want_feature "cf-deployments/operations/enable-nfs-volume-services" ; then
+        abort=1
+        describe >&2 \
+          "#R[ERROR]} Feature #c{$want} cannot be specified without feature #c{nfs-volume-services}"
+      fi
+      features+=( "nfs-ldap" )
+      ;;
     local-postgres-db|local-mysql-db|mysql-db|postgres-db) db_specified=1; features+=( "$want" ) ;;
     bare|partitioned-network|haproxy|tls|no-nats-tls|self-signed|isolation-segments) features+=( "$want" ) ;;
     minio-blobstore|aws-blobstore|aws-blobstore-iam|azure-blobstore|gcp-blobstore|gcp-use-access-key) features+=( "$want" ) ;;
-    nfs-volume-services|enable-service-discovery|ssh-proxy-on-routers|no-tcp-routers|smb-volume-services) features+=( "$want" ) ;;
+    enable-service-discovery|ssh-proxy-on-routers|no-tcp-routers) features+=( "$want" ) ;;
     app-scheduler-integration|app-autoscaler-integration|prometheus-integration|v2-nats-credentials) features+=( "$want" ) ;;
     windows-diego-cells) features+=( "$want" ) ;;
     +migrated-v1-env|+override-db-names) features+=( "$want" ) ;;
@@ -415,6 +442,12 @@ for want in $GENESIS_REQUESTED_FEATURES; do
       if ! want_feature "bare" ; then
         manifest+=( \
           "overlay/addons/nfs-volume-service.yml" \
+        )
+      fi
+      if want_feature "nfs-ldap" ; then
+        manifest+=( \
+          "cf-deployment/operations/enable-nfs-ldap.yml" \
+          "overlay/addons/nfs-ldap.yml" \
         )
       fi
       ;;

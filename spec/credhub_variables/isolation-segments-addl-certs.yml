@@ -1,0 +1,6 @@
+another-cert-of-dubious-validity: 
+  certificate: first-additional-test-ssl-cert
+  private_key: first-additional-test-ssl-private-key
+some-strange-cert:
+  certificate: second-additional-test-ssl-cert
+  private_key: second-additional-test-ssl-private-key

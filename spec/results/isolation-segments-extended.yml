@@ -158,179 +158,179 @@ addons:
       aliases:
       - domain: _.cell.service.cf.internal
         targets:
-        - deployment: isolation-segments-cf
+        - deployment: isolation-segments-extended-cf
           domain: bosh
           instance_group: diego-cell
-          network: cf-runtime
+          network: cf-core
           query: _
-        - deployment: isolation-segments-cf
+        - deployment: isolation-segments-extended-cf
           domain: bosh
           instance_group: windows2012R2-cell
-          network: cf-runtime
+          network: cf-core
           query: _
-        - deployment: isolation-segments-cf
+        - deployment: isolation-segments-extended-cf
           domain: bosh
           instance_group: windows2016-cell
-          network: cf-runtime
+          network: cf-core
           query: _
-        - deployment: isolation-segments-cf
+        - deployment: isolation-segments-extended-cf
           domain: bosh
           instance_group: isolated-diego-cell
-          network: cf-runtime
+          network: cf-core
           query: _
-        - deployment: isolation-segments-cf
+        - deployment: isolation-segments-extended-cf
           domain: bosh
           instance_group: custom-params-group
-          network: cf-runtime
+          network: cf-core
           query: _
-        - deployment: isolation-segments-cf
+        - deployment: isolation-segments-extended-cf
           domain: bosh
           instance_group: default-params-group
           network: default
           query: _
       - domain: auctioneer.service.cf.internal
         targets:
-        - deployment: isolation-segments-cf
+        - deployment: isolation-segments-extended-cf
           domain: bosh
           instance_group: scheduler
           network: cf-core
           query: q-s4
       - domain: bbs.service.cf.internal
         targets:
-        - deployment: isolation-segments-cf
+        - deployment: isolation-segments-extended-cf
           domain: bosh
           instance_group: diego-api
           network: cf-core
           query: q-s4
       - domain: blobstore.service.cf.internal
         targets:
-        - deployment: isolation-segments-cf
+        - deployment: isolation-segments-extended-cf
           domain: bosh
           instance_group: singleton-blobstore
           network: cf-core
           query: '*'
       - domain: cc-uploader.service.cf.internal
         targets:
-        - deployment: isolation-segments-cf
+        - deployment: isolation-segments-extended-cf
           domain: bosh
           instance_group: api
           network: cf-core
           query: '*'
       - domain: cloud-controller-ng.service.cf.internal
         targets:
-        - deployment: isolation-segments-cf
+        - deployment: isolation-segments-extended-cf
           domain: bosh
           instance_group: api
           network: cf-core
           query: '*'
       - domain: credhub.service.cf.internal
         targets:
-        - deployment: isolation-segments-cf
+        - deployment: isolation-segments-extended-cf
           domain: bosh
           instance_group: credhub
           network: cf-core
           query: '*'
       - domain: doppler.service.cf.internal
         targets:
-        - deployment: isolation-segments-cf
+        - deployment: isolation-segments-extended-cf
           domain: bosh
           instance_group: doppler
           network: cf-core
           query: '*'
       - domain: file-server.service.cf.internal
         targets:
-        - deployment: isolation-segments-cf
+        - deployment: isolation-segments-extended-cf
           domain: bosh
           instance_group: api
           network: cf-core
           query: '*'
       - domain: gorouter.service.cf.internal
         targets:
-        - deployment: isolation-segments-cf
+        - deployment: isolation-segments-extended-cf
           domain: bosh
           instance_group: router
           network: cf-edge
           query: '*'
       - domain: locket.service.cf.internal
         targets:
-        - deployment: isolation-segments-cf
+        - deployment: isolation-segments-extended-cf
           domain: bosh
           instance_group: diego-api
           network: cf-core
           query: '*'
       - domain: loggregator-trafficcontroller.service.cf.internal
         targets:
-        - deployment: isolation-segments-cf
+        - deployment: isolation-segments-extended-cf
           domain: bosh
           instance_group: log-api
           network: cf-core
           query: '*'
       - domain: policy-server.service.cf.internal
         targets:
-        - deployment: isolation-segments-cf
+        - deployment: isolation-segments-extended-cf
           domain: bosh
           instance_group: api
           network: cf-core
           query: '*'
       - domain: reverse-log-proxy.service.cf.internal
         targets:
-        - deployment: isolation-segments-cf
+        - deployment: isolation-segments-extended-cf
           domain: bosh
           instance_group: log-api
           network: cf-core
           query: '*'
       - domain: routing-api.service.cf.internal
         targets:
-        - deployment: isolation-segments-cf
+        - deployment: isolation-segments-extended-cf
           domain: bosh
           instance_group: api
           network: cf-core
           query: '*'
       - domain: silk-controller.service.cf.internal
         targets:
-        - deployment: isolation-segments-cf
+        - deployment: isolation-segments-extended-cf
           domain: bosh
           instance_group: diego-api
           network: cf-core
           query: '*'
       - domain: sql-db.service.cf.internal
         targets:
-        - deployment: isolation-segments-cf
+        - deployment: isolation-segments-extended-cf
           domain: bosh
           instance_group: database
           network: cf-core
           query: '*'
       - domain: ssh-proxy.service.cf.internal
         targets:
-        - deployment: isolation-segments-cf
+        - deployment: isolation-segments-extended-cf
           domain: bosh
           instance_group: scheduler
           network: cf-core
           query: '*'
       - domain: tps.service.cf.internal
         targets:
-        - deployment: isolation-segments-cf
+        - deployment: isolation-segments-extended-cf
           domain: bosh
           instance_group: scheduler
           network: cf-core
           query: '*'
       - domain: uaa.service.cf.internal
         targets:
-        - deployment: isolation-segments-cf
+        - deployment: isolation-segments-extended-cf
           domain: bosh
           instance_group: uaa
           network: cf-core
           query: '*'
       - domain: nats.service.cf.internal
         targets:
-        - deployment: isolation-segments-cf
+        - deployment: isolation-segments-extended-cf
           domain: bosh
           instance_group: nats
           network: cf-core
           query: '*'
       - domain: _.nats.service.cf.internal
         targets:
-        - deployment: isolation-segments-cf
+        - deployment: isolation-segments-extended-cf
           domain: bosh
           instance_group: nats
           network: cf-core
@@ -345,7 +345,7 @@ exodus:
   - run.cf.testing.example
   apps_domain: run.cf.testing.example
   base_domain: cf.testing.example
-  bosh: isolation-segments
+  bosh: isolation-segments-extended
   cf-deployment-date: 2022-Feb-14 03:48:47 UTC
   cf-deployment-hotfixes: true
   cf-deployment-url: https://github.com/cloudfoundry/cf-deployment/releases/tag/v16.25.0
@@ -353,20 +353,22 @@ exodus:
   core_network: cf-core
   db_network: cf-core
   edge_network: cf-edge
-  features: isolation-segments
+  features: isolation-segments,nfs-volume-services,nfs-ldap
   is_director: false
-  runtime_network: cf-runtime
+  runtime_network: cf-core
   system_domain: system.cf.testing.example
   system_org: system
   system_space: system
   use_create_env: false
-  vaulted_uaa_clients: /secret/isolation/segments/cf/uaa/client_secrets:firehose
+  vaulted_uaa_clients: /secret/isolation/segments/extended/cf/uaa/client_secrets:firehose
 features:
   randomize_az_placement: true
 instance_groups:
 - azs:
-  - z1
-  - z2
+  - zoneA
+  - zoneB
+  - zoneC
+  - zoneD
   instances: 1
   jobs:
   - name: smoke_tests
@@ -388,12 +390,14 @@ instance_groups:
   lifecycle: errand
   name: smoke-tests
   networks:
-  - name: cf-runtime
+  - name: cf-core
   stemcell: default
   vm_type: minimal
 - azs:
-  - z1
-  - z2
+  - zoneA
+  - zoneB
+  - zoneC
+  - zoneD
   instances: 2
   jobs:
   - name: nats
@@ -444,7 +448,7 @@ instance_groups:
   stemcell: default
   vm_type: minimal
 - azs:
-  - z1
+  - zoneA
   instances: 1
   jobs:
   - name: postgres
@@ -515,8 +519,10 @@ instance_groups:
     serial: true
   vm_type: small
 - azs:
-  - z1
-  - z2
+  - zoneA
+  - zoneB
+  - zoneC
+  - zoneD
   instances: 2
   jobs:
   - name: cfdot
@@ -632,8 +638,10 @@ instance_groups:
   stemcell: default
   vm_type: small
 - azs:
-  - z1
-  - z2
+  - zoneA
+  - zoneB
+  - zoneC
+  - zoneD
   instances: 2
   jobs:
   - name: uaa
@@ -709,6 +717,14 @@ instance_groups:
             authorities: uaa.resource,cloud_controller.admin_read_only
             authorized-grant-types: client_credentials
             secret: <!{credhub}:uaa_clients_network_policy_secret!>
+          nfs-broker-credhub-client:
+            authorities: credhub.read,credhub.write
+            authorized-grant-types: client_credentials
+            secret: <!{credhub}:nfs-broker-credhub-uaa-client-secret!>
+          nfs-broker-push-client:
+            authorities: cloud_controller.admin,clients.read
+            authorized-grant-types: client_credentials
+            secret: <!{credhub}:nfs-broker-push-uaa-client-secret!>
           routing_api_client:
             authorities: routing.routes.write,routing.routes.read,routing.router_groups.read
             authorized-grant-types: client_credentials
@@ -807,7 +823,7 @@ instance_groups:
   stemcell: default
   vm_type: minimal
 - azs:
-  - z1
+  - zoneA
   instances: 1
   jobs:
   - name: blobstore
@@ -855,8 +871,10 @@ instance_groups:
     serial: true
   vm_type: small
 - azs:
-  - z1
-  - z2
+  - zoneA
+  - zoneB
+  - zoneC
+  - zoneD
   instances: 2
   jobs:
   - name: cloud_controller_ng
@@ -981,6 +999,7 @@ instance_groups:
         staging_upload_password: <!{credhub}:cc_staging_upload_password!>
         staging_upload_user: staging_user
         temporary_use_logcache: true
+        volume_services_enabled: true
       ccdb:
         databases:
         - name: cloud_controller
@@ -994,7 +1013,7 @@ instance_groups:
       credhub_api:
         ca_cert: <!{credhub}:credhub_tls.ca!>
       description: Use `genesis info` on environment file for more details
-      name: Cloud Foundry (isolation-segments)
+      name: Cloud Foundry (isolation-segments-extended)
       router:
         route_services_secret: <!{credhub}:router_route_services_secret!>
       routing_api:
@@ -1181,8 +1200,10 @@ instance_groups:
   - 50GB_ephemeral_disk
   vm_type: small
 - azs:
-  - z1
-  - z2
+  - zoneA
+  - zoneB
+  - zoneC
+  - zoneD
   instances: 2
   jobs:
   - name: cloud_controller_worker
@@ -1236,6 +1257,7 @@ instance_groups:
             username: blobstore-user
         staging_upload_password: <!{credhub}:cc_staging_upload_password!>
         staging_upload_user: staging_user
+        volume_services_enabled: true
       ccdb:
         databases:
         - name: cloud_controller
@@ -1265,8 +1287,10 @@ instance_groups:
   stemcell: default
   vm_type: minimal
 - azs:
-  - z1
-  - z2
+  - zoneA
+  - zoneB
+  - zoneC
+  - zoneD
   instances: 2
   jobs:
   - name: cfdot
@@ -1356,6 +1380,7 @@ instance_groups:
             username: blobstore-user
         staging_upload_password: <!{credhub}:cc_staging_upload_password!>
         staging_upload_user: staging_user
+        volume_services_enabled: true
       ccdb:
         databases:
         - name: cloud_controller
@@ -1519,8 +1544,10 @@ instance_groups:
   - diego-ssh-proxy-network-properties
   vm_type: minimal
 - azs:
-  - z1
-  - z2
+  - zoneA
+  - zoneB
+  - zoneC
+  - zoneD
   instances: 2
   jobs:
   - name: gorouter
@@ -1581,8 +1608,10 @@ instance_groups:
   - cf-router-network-properties
   vm_type: minimal
 - azs:
-  - z1
-  - z2
+  - zoneA
+  - zoneB
+  - zoneC
+  - zoneD
   instances: 2
   jobs:
   - name: tcp_router
@@ -1615,8 +1644,10 @@ instance_groups:
   - cf-tcp-router-network-properties
   vm_type: minimal
 - azs:
-  - z1
-  - z2
+  - zoneA
+  - zoneB
+  - zoneC
+  - zoneD
   instances: 4
   jobs:
   - name: doppler
@@ -1719,8 +1750,10 @@ instance_groups:
   stemcell: default
   vm_type: minimal
 - azs:
-  - z1
-  - z2
+  - zoneA
+  - zoneB
+  - zoneC
+  - zoneD
   instances: 3
   jobs:
   - name: bosh-dns-adapter
@@ -1882,16 +1915,37 @@ instance_groups:
         key: <!{credhub}:loggr_udp_forwarder_tls.private_key!>
         server_name: loggr_udp_forwarder_metrics
     release: loggregator-agent
+  - name: nfsv3driver
+    properties:
+      nfsv3driver:
+        allowed-in-source: ""
+        ldap_host: ldap.myhost.com
+        ldap_port: 389
+        ldap_proto: tcp
+        ldap_svc_password: ldap-secure-password
+        ldap_svc_user: ldap-user
+        ldap_user_fqdn: cn=Users,dc=corp,dc=test,dc=com
+        tls:
+          ca_cert: <!{credhub}:nfsv3driver_cert.ca!>
+          client_cert: <!{credhub}:nfsv3driver_client_cert.certificate!>
+          client_key: <!{credhub}:nfsv3driver_client_cert.private_key!>
+          server_cert: <!{credhub}:nfsv3driver_cert.certificate!>
+          server_key: <!{credhub}:nfsv3driver_cert.private_key!>
+    release: nfs-volume
+  - name: mapfs
+    release: mapfs
   name: diego-cell
   networks:
-  - name: cf-runtime
+  - name: cf-core
   stemcell: default
   vm_extensions:
   - 100GB_ephemeral_disk
-  vm_type: small-highmem
+  vm_type: xlarge
 - azs:
-  - z1
-  - z2
+  - zoneA
+  - zoneB
+  - zoneC
+  - zoneD
   instances: 2
   jobs:
   - consumes:
@@ -1994,8 +2048,10 @@ instance_groups:
   stemcell: default
   vm_type: minimal
 - azs:
-  - z1
-  - z2
+  - zoneA
+  - zoneB
+  - zoneC
+  - zoneD
   instances: 2
   jobs:
   - name: credhub
@@ -2027,6 +2083,15 @@ instance_groups:
             operations:
             - read
             path: /*
+          - actors:
+            - uaa-client:nfs-broker-credhub-client
+            operations:
+            - read
+            - write
+            - delete
+            - read_acl
+            - write_acl
+            path: /nfsbroker/*
         ca_certificate: |
           <!{credhub}:credhub_tls.ca!>
         data_storage:
@@ -2058,8 +2123,10 @@ instance_groups:
   stemcell: default
   vm_type: minimal
 - azs:
-  - z1
-  - z2
+  - zoneA
+  - zoneB
+  - zoneC
+  - zoneD
   instances: 1
   jobs:
   - name: rotate_cc_database_key
@@ -2123,7 +2190,7 @@ instance_groups:
           instance_identity_key: <!{credhub}:diego_instance_identity_ca.private_key!>
         rep:
           placement_tags:
-          - custom-params-group
+          - custom-iso-group
           preloaded_rootfses:
           - cflinuxfs3:/var/vcap/packages/cflinuxfs3/rootfs.tar
       enable_consul_service_registration: false
@@ -2173,9 +2240,31 @@ instance_groups:
         ca_cert: <!{credhub}:uaa_ssl.ca!>
         client_secret: <!{credhub}:uaa_clients_tcp_emitter_secret!>
     release: diego
+  - name: nfsv3driver
+    properties:
+      nfsv3driver:
+        allowed-in-source: ""
+        ldap_ca_cert: nfs-ldap-ca-cert-ca
+        ldap_host: ldap.myhost.com
+        ldap_port: 389
+        ldap_proto: tcp
+        ldap_svc_password: ldap-secure-password
+        ldap_svc_user: ldap-user
+        ldap_user_fqdn: cn=Users,dc=corp,dc=test,dc=com
+        tls:
+          ca_cert: <!{credhub}:nfsv3driver_cert.ca!>
+          client_cert: <!{credhub}:nfsv3driver_client_cert.certificate!>
+          client_key: <!{credhub}:nfsv3driver_client_cert.private_key!>
+          server_cert: <!{credhub}:nfsv3driver_cert.certificate!>
+          server_key: <!{credhub}:nfsv3driver_cert.private_key!>
+    release: nfs-volume
+  - name: mapfs
+    provides:
+      mapfs: nil
+    release: mapfs
   name: custom-params-group
   networks:
-  - name: cf-runtime
+  - name: cf-core
   stemcell: test
   vm_extensions:
   - 100GB_ephemeral_disk
@@ -2192,10 +2281,6 @@ instance_groups:
         - <!{credhub}:diego_instance_identity_ca.ca!>
         - <!{credhub}:credhub_tls.ca!>
         - <!{credhub}:uaa_ssl.ca!>
-        - certificate: second-additional-test-ssl-cert
-          private_key: second-additional-test-ssl-private-key
-        - certificate: first-additional-test-ssl-cert
-          private_key: first-additional-test-ssl-private-key
     release: cflinuxfs3
   - name: garden
     properties:
@@ -2231,17 +2316,14 @@ instance_groups:
         - <!{credhub}:diego_instance_identity_ca.ca!>
         - <!{credhub}:credhub_tls.ca!>
         - <!{credhub}:uaa_ssl.ca!>
-        - certificate: second-additional-test-ssl-cert
-          private_key: second-additional-test-ssl-private-key
-        - certificate: first-additional-test-ssl-cert
-          private_key: first-additional-test-ssl-private-key
       diego:
         executor:
           instance_identity_ca_cert: <!{credhub}:diego_instance_identity_ca.certificate!>
           instance_identity_key: <!{credhub}:diego_instance_identity_ca.private_key!>
         rep:
           placement_tags:
-          - default-params-group
+          - default-iso-group
+          - default
           preloaded_rootfses:
           - cflinuxfs3:/var/vcap/packages/cflinuxfs3/rootfs.tar
       enable_consul_service_registration: false
@@ -2291,15 +2373,79 @@ instance_groups:
         ca_cert: <!{credhub}:uaa_ssl.ca!>
         client_secret: <!{credhub}:uaa_clients_tcp_emitter_secret!>
     release: diego
+  - name: nfsv3driver
+    properties:
+      nfsv3driver:
+        allowed-in-source: ""
+        ldap_ca_cert: nfs-ldap-ca-cert-ca
+        ldap_host: ldap.myhost.com
+        ldap_port: 389
+        ldap_proto: tcp
+        ldap_svc_password: ldap-secure-password
+        ldap_svc_user: ldap-user
+        ldap_user_fqdn: cn=Users,dc=corp,dc=test,dc=com
+        tls:
+          ca_cert: <!{credhub}:nfsv3driver_cert.ca!>
+          client_cert: <!{credhub}:nfsv3driver_client_cert.certificate!>
+          client_key: <!{credhub}:nfsv3driver_client_cert.private_key!>
+          server_cert: <!{credhub}:nfsv3driver_cert.certificate!>
+          server_key: <!{credhub}:nfsv3driver_cert.private_key!>
+    release: nfs-volume
+  - name: mapfs
+    provides:
+      mapfs: nil
+    release: mapfs
   name: default-params-group
   networks:
   - name: default
   stemcell: default
   vm_extensions:
   - 100GB_ephemeral_disk
-  vm_type: small-highmem
+  vm_type: xlarge
+- azs:
+  - zoneA
+  - zoneB
+  - zoneC
+  - zoneD
+  instances: 1
+  jobs:
+  - name: nfsbrokerpush
+    properties:
+      nfsbrokerpush:
+        app_domain: system.cf.testing.example
+        app_name: nfs-broker
+        cf:
+          client_id: nfs-broker-push-client
+          client_secret: <!{credhub}:nfs-broker-push-uaa-client-secret!>
+        create_credhub_security_group: true
+        create_sql_security_group: false
+        credhub:
+          uaa_ca_cert: <!{credhub}:uaa_ssl.ca!>
+          uaa_client_id: nfs-broker-credhub-client
+          uaa_client_secret: <!{credhub}:nfs-broker-credhub-uaa-client-secret!>
+        domain: system.cf.testing.example
+        ldap_enabled: true
+        organization: system
+        password: <!{credhub}:nfs-broker-password!>
+        skip_cert_verify: true
+        space: nfs-broker-space
+        store_id: nfsbroker
+        syslog_url: ""
+        username: nfs-broker
+    provides:
+      nfsbrokerpush:
+        as: ignore-me
+    release: nfs-volume
+  - name: cf-cli-7-linux
+    release: cf-cli
+  lifecycle: errand
+  name: nfs-broker-push
+  networks:
+  - name: cf-core
+  stemcell: default
+  vm_type: minimal
 manifest_version: v16.25.0
-name: isolation-segments-cf
+name: isolation-segments-extended-cf
 releases:
 - name: binary-buildpack
   sha1: 6e1ff3753ac5a86e968546222bbbaaba1264d938
@@ -2425,6 +2571,14 @@ releases:
   sha1: c3d11f473d4518505e2a671d8ad6a553e1b1c1ca
   url: https://bosh.io/d/github.com/bosh-packages/cf-cli-release?v=1.34.0
   version: 1.34.0
+- name: nfs-volume
+  sha1: 6dbfcdb3ed5de63fd63e82710dfb58084c566f62
+  url: https://bosh.io/d/github.com/cloudfoundry/nfs-volume-release?v=7.1.1
+  version: 7.1.1
+- name: mapfs
+  sha1: 440014423159187727d3622d41e5779f0f25902d
+  url: https://bosh.io/d/github.com/cloudfoundry/mapfs-release?v=1.2.6
+  version: 1.2.6
 - name: postgres
   sha1: e44bbe8f8a7cdde1cda67b202e399a239d104db6
   url: https://bosh.io/d/github.com/cloudfoundry/postgres-release?v=43

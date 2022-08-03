@@ -1,0 +1,23 @@
+instance_groups:
+- (( merge on name ))
+- name: (( grab meta.name ))
+  networks:
+  - (( replace ))
+  - name: (( grab meta.network_name || "(( grab params.cf_runtime_network ))" ))
+
+addons:
+- jobs:
+  - name: bosh-dns-aliases
+    properties:
+      aliases:
+      - domain: _.cell.service.cf.internal
+        targets:
+        - (( replace ))
+        - (( defer append ))
+        - deployment: ((deployment_name))
+          domain: bosh
+          instance_group: (( grab meta.name ))
+          network: (( grab meta.network_name || "(( grab params.cf_runtime_network ))" ))
+          query: _
+
+

@@ -1,0 +1,15 @@
+---
+bosh-variables:
+  nfs-ldap-service-user: (( grab params.nfs-ldap-service-user ))
+  nfs-ldap-host: (( grab params.nfs-ldap-host ))
+  nfs-ldap-port: (( grab params.nfs-ldap-port ))
+  nfs-ldap-proto: (( grab params.nfs-ldap-proto ))
+  nfs-ldap-fqdn: (( grab params.nfs-ldap-fqdn ))
+
+params:
+  nfs-ldap-service-user: (( param "Provide value for NFS LDAP service user" ))
+  nfs-ldap-host: (( param "Provide value for NFS LDAP host" ))
+  nfs-ldap-port: 389
+  nfs-ldap-proto: tcp
+  nfs-ldap-fqdn: (( param "Provide value for NFS LDAP fqdn" ))
+
