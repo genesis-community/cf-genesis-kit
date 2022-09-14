@@ -189,6 +189,24 @@ var _ = Describe("Interal Kit", func() {
 		CPI:           "aws",
 		Exodus:        "migrated",
 	})
+	Test(Environment{
+		Name:          "compiled-releases",
+		CloudConfig:   "aws",
+		RuntimeConfig: "dns",
+		CPI:           "aws",
+	})
+	Test(Environment{
+		Name:          "compiled-windows-releases",
+		CloudConfig:   "aws", //"azure",
+		RuntimeConfig: "dns",
+		CPI:           "aws", //"azure",
+	})
+	Test(Environment{
+		Name:          "windows-and-smb-support",
+		CloudConfig:   "aws", //"gcp",
+		RuntimeConfig: "dns",
+		CPI:           "aws", //"gcp",
+	})
 	// Test(Environment{
 	// 	Focus:       true,
 	// 	Name:        "nfs-volume-services",

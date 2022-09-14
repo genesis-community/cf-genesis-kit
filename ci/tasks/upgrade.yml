@@ -1,0 +1,34 @@
+---
+platform: linux
+
+image_resource:
+  type: registry-image
+  source:
+    repository: starkandwayne/genesis
+
+inputs:
+- name: git
+- name: git-ci
+- name: version
+- name: build
+- name: work
+
+outputs:
+- name: work
+
+run:
+  path: git-ci/ci/scripts/deploy
+
+params:
+  GENESIS_HONOR_ENV:    1
+  BUILD_ROOT:           build
+  GIT_NAME:             Stark & Wayne CI Bot
+  GIT_EMAIL:            ci@starkandwayne.com
+  VAULT_URI:            ((vault.url))
+  VAULT_TOKEN:          ((vault.token))
+  BOSH_ENVIRONMENT:     ((bosh.uri))
+  BOSH_CA_CERT:         ((bosh.ca))
+  BOSH_CLIENT:          ((bosh.username))
+  BOSH_CLIENT_SECRET:   ((bosh.password))
+  KEEP_STATE:           true
+  SECRETS_SEED_DATA:    ((secrets_seed_data))

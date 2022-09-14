@@ -89,8 +89,8 @@ if ! want_feature "bare" ; then
   fi
   manifest+=( "operations/custom-azs.yml" )
 
-  # Temporary override of specific releases - FIXME when upstream catches up
-  manifest+=(  "overlay/override-releases.yml" )
+  # Temporary override of specific releases - keep but leave empty when upstream catches up
+  manifest+=(  "overlay/override-releases/static.yml" )
 
 fi
 
@@ -223,8 +223,9 @@ for want in $GENESIS_REQUESTED_FEATURES; do
     local-postgres-db|local-mysql-db|mysql-db|postgres-db) db_specified=1; features+=( "$want" ) ;;
     bare|partitioned-network|haproxy|tls|no-nats-tls|self-signed) features+=( "$want" ) ;;
     minio-blobstore|aws-blobstore|aws-blobstore-iam|azure-blobstore|gcp-blobstore|gcp-use-access-key) features+=( "$want" ) ;;
-    nfs-volume-services|enable-service-discovery|ssh-proxy-on-routers|no-tcp-routers) features+=( "$want" ) ;;
-    app-autoscaler-integration|prometheus-integration|v2-nats-credentials) features+=( "$want" ) ;;
+    nfs-volume-services|enable-service-discovery|ssh-proxy-on-routers|no-tcp-routers|smb-volume-services) features+=( "$want" ) ;;
+    app-scheduler-integration|app-autoscaler-integration|prometheus-integration|v2-nats-credentials) features+=( "$want" ) ;;
+    windows-diego-cells) features+=( "$want" ) ;;
     +migrated-v1-env|+override-db-names) features+=( "$want" ) ;;
     v1-vm-types|no-v1-vm-types)
       : # no-op, dealt with above
@@ -385,21 +386,63 @@ for want in $GENESIS_REQUESTED_FEATURES; do
     #
 
     compiled-releases)
-      manifest+=( "cf-deployment/operations/use-compiled-releases.yml" ) ;;
+      manifest+=( \
+        "cf-deployment/operations/use-compiled-releases.yml" \
+        "overlay/override-releases/compiled.yml"
+      ) ;;
     small-footprint)
       : ;; # already dealt with
     nfs-volume-services)
-      manifest+=( "cf-deployment/operations/enable-nfs-volume-service.yml" );;
+      manifest+=( \
+        "cf-deployment/operations/enable-nfs-volume-service.yml" \
+      )
+      if ! want_feature "bare" ; then
+        manifest+=( \
+          "overlay/addons/nfs-volume-service.yml" \
+        )
+      fi
+      ;;
+    smb-volume-services)
+      manifest+=( \
+        "cf-deployment/operations/enable-smb-volume-service.yml" \
+      )
+      if ! want_feature "bare" ; then
+        manifest+=( \
+          "overlay/addons/smb-volume-service.yml" \
+        )
+      fi
+    ;;
     enable-service-discovery)
       manifest+=( "overlay/enable-service-discovery.yml" ) ;;
     app-autoscaler-integration)
       manifest+=( "overlay/addons/autoscaler.yml" ) ;;
+    app-scheduler-integration)
+      manifest+=( "overlay/addons/app-scheduler.yml" ) ;;
     prometheus-integration)
       manifest+=( "overlay/addons/prometheus.yml" ) ;;
     ssh-proxy-on-routers)
       manifest+=( "overlay/addons/ssh-proxy-on-routers.yml" ) ;;
     no-tcp-routers)
       manifest+=( "overlay/addons/no-tcp-routers.yml" ) ;;
+    windows-diego-cells)
+      manifest+=( \
+        "cf-deployment/operations/windows2019-cell.yml" \
+        "cf-deployment/operations/use-online-windows2019fs.yml" \
+        "cf-deployment/operations/use-latest-windows2019-stemcell.yml" \
+        "overlay/override-releases/static-windows.yml" \
+      )
+      if want_feature "compiled-releases"; then
+        manifests+=( \
+          "cf-deployment/operations/experimental/use-compiled-releases-windows.yml" \
+          "overlay/override-releases/compiled-windows.yml" \
+        )
+      fi
+      if ! want_feature "bare" ; then
+        manifest+=( \
+          "overlay/windows.yml" \
+        )
+      fi
+      ;;
     +migrated-v1-env)
       manifest+=( "overlay/addons/migration.yml" ) ;;
 
@@ -501,10 +544,11 @@ if ! want_feature "bare" ; then
       [[ $inst_grp == "loggregator" ]] && inst_grp="log_api" && echo >&2 "WARNING: params.loggregator_instances has been translated as params.log_api_instances";
       [[ $inst_grp == "postgres" ]]    && inst_grp="database" && echo >&2 "WARNING: params.postgres_instances has been translated as params.database_instances";
       [[ $inst_grp == "blobstore" ]]   && inst_grp="singleton-blobstore" && echo >&2 "WARNING: params.blobstore_instances has been translated as params.singleton_blobstore_instances";
+      [[ $inst_grp == "windows_diego_cell" ]]     && inst_grp="windows2019-cell" && echo >&2 "WARNING: params.windows_diego_cell_instances has been translated as params.windows2019-cell_instances";
 
       dashed_inst_grp="$(echo "$inst_grp" | tr _ -)" # convert any _ into -
       found=''
-      if [[ $dashed_inst_grp =~ ^(api|cc-worker|credhub|database|diego-(api|cell)|doppler|errand|haproxy|log-api|nats|rotate-cc-database-key|(tcp-)?router|scheduler|singleton-blobstore|smoke-tests|uaa)$ ]] ; then
+      if [[ $dashed_inst_grp =~ ^(api|cc-worker|credhub|database|diego-(api|cell)|doppler|errand|haproxy|log-api|nats|windows2019-cell|rotate-cc-database-key|(tcp-)?router|scheduler|singleton-blobstore|smoke-tests|uaa)$ ]] ; then
         inst_grp="$dashed_inst_grp";
         found=1
       fi
@@ -568,10 +612,11 @@ EOF
       [[ $inst_grp == "loggregator" ]] && inst_grp="log_api" && echo >&2 "WARNING: params.loggregator_vm_type has been translated as params.log_api_vm_type";
       [[ $inst_grp == "postgres" ]]    && inst_grp="database" && echo >&2 "WARNING: params.postgres_vm_type has been translated as params.database_vm_type";
       [[ $inst_grp == "blobstore" ]]   && inst_grp="singleton-blobstore" && echo >&2 "WARNING: params.blobstore_vm_type has been translated as params.singleton_blobstore_vm_type";
+      [[ $inst_grp == "windows_diego_cell" ]]     && inst_grp="windows2019-cell" && echo >&2 "WARNING: params.windows_diego_cell_vm_type has been translated as params.windows2019-cell_vm_type";
 
       dashed_inst_grp="$(echo "$inst_grp" | tr _ -)" # convert any _ into -
       found=''
-      if [[ $dashed_inst_grp =~ ^(api|cc-worker|credhub|database|diego-(api|cell)|doppler|errand|haproxy|log-api|nats|rotate-cc-database-key|(tcp-)?router|scheduler|singleton-blobstore|smoke-tests|uaa)$ ]] ; then
+      if [[ $dashed_inst_grp =~ ^(api|cc-worker|credhub|database|diego-(api|cell)|doppler|errand|haproxy|windows2019-cell|log-api|nats|rotate-cc-database-key|(tcp-)?router|scheduler|singleton-blobstore|smoke-tests|uaa)$ ]] ; then
         inst_grp="$dashed_inst_grp";
         found=1
       fi
@@ -587,7 +632,7 @@ EOF
           "        Expected instance groups are:" \
           "          api, cc-worker, credhub, database, diego-api, diego-cell, doppler," \
           "          errand, haproxy, log-api, nats, rotate-cc-database-key, router, scheduler," \
-          "          singleton-blobstore, smoke-tests, tcp-router, and uaa" ""
+          "          singleton-blobstore, smoke-tests, tcp-router, uaa, and windows2019-cell" ""
       fi
     done < <(echo "$instance_types")
 

@@ -1,0 +1,6 @@
+---
+genesis:
+  bosh_env:  gcp-uswest2-genesis-ci
+
+meta:
+  _ip_prefix: "10.4."

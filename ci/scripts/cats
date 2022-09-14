@@ -1,81 +1,114 @@
 #!/bin/bash
+set -e
 
-function lookup(){
-  genesis -C "$GENESIS_ROOT" lookup "$GENESIS_ENVIRONMENT" "$@"
+header() {
+  echo
+  echo "================================================================================"
+  echo "$1"
+  echo "--------------------------------------------------------------------------------"
+  echo
 }
-function run_local(){
-  export tmpdir=$(mktemp -d -t cats.XXXXXXXXXX)
-  trap "rm -rf ${tmpdir}" EXIT
-  echo "REPO: $CATS_GIT_SSH_URL VERSION: $VERSION"
-  git clone ${CATS_GIT_SSH_URL} ${tmpdir}
-  pushd ${tmpdir}
-    git checkout ${VERSION}
-    git submodule update --init
-  popd
-}
-function run_cats(){
-  case $1 in
-    "--local")
-      RUN_LOCAL=true
-      export CATS_GIT_SSH_URL=$(spruce json ci/settings.yml | jq -r '.meta.cats.git_ssh_url')
-      export VERSION=$(spruce json ci/settings.yml | jq -r '.meta.cats.tag')
-      RUN_CATS=""
-    ;;
-    "--deployment-dir")
-      echo "FOUND DEPL. DIR FLAG"
-      export BUILD_ROOT=$2
-      export GENESIS_ROOT=$BUILD_ROOT/work/cf-deployments
-      export GENESIS_ENVIRONMENT=ci-cats
-      export vault=/secret/ci/cats/cf
-      export credhub=/snw-genesis-ci-bosh/ci-cats-cf
 
-      credhub login --server $CREDHUB_URL --username $CREDHUB_USER --password $CREDHUB_PASSWORD --skip-tls-validation
-    ;;
-  esac
-  echo "$GENESIS_ROOT"
+bail() {
+  echo >&2 "$*  Did you misconfigure Concourse?"
+  exit 2
+}
+
+lookup() {
+  genesis -C "$WORK_DIR" lookup "$DEPLOY_ENV" "$@" 2>/dev/null
+}
+
+run_cats() {
+  echo "Running CATS from deployment dir $2"
+
   base=$(lookup params.base_domain)
-  system_domain=$(lookup params.system_domain system.$base)
+  system_domain="$(lookup params.system_domain "system.$base")"
+  ADMIN_PASSWORD="$(credhub get -q -n "$credhub_path/cf_admin_password")"
   export API_URL=api.$system_domain
-  export ADMIN_PASSWORD=$(credhub get -q -n $credhub/cf_admin_password)
+  export ADMIN_PASSWORD
   export APP_DOMAINS_0=run.$base
   case $RUN_CATS in
     "include_container_networking")
-      sed -i "s#include_security_groups:.*#include_security_groups: true#g" ../git-ci/ci/scripts/cats.yml
+      sed -i "s#include_security_groups:.*#include_security_groups: true#g" "$CI_DIR/cats.yml"
     ;;
     "include_deployments")
-      sed -i "s#include_v3:.*#include_v3: true#g" ../git-ci/ci/scripts/cats.yml
+      sed -i "s#include_v3:.*#include_v3: true#g" "$CI_DIR/cats.yml"
     ;;
     "include_service_instance_sharing")
-      sed -i "s#include_services:.*#include_services: true#g" ../git-ci/ci/scripts/cats.yml
+      sed -i "s#include_services:.*#include_services: true#g" "$CI_DIR/cats.yml"
     ;;
     "include_sso")
-      sed -i "s#include_services:.*#include_services: true#g" ../git-ci/ci/scripts/cats.yml
+      sed -i "s#include_services:.*#include_services: true#g" "$CI_DIR/cats.yml"
     ;;
     "include_tasks")
-      sed -i "s#include_v3:.*#include_v3: true#g" ../git-ci/ci/scripts/cats.yml
+      sed -i "s#include_v3:.*#include_v3: true#g" "$CI_DIR/cats.yml"
     ;;
     "include_zipkin")
-      sed -i "s#include_routing:.*#include_routing: true#g" ../git-ci/ci/scripts/cats.yml
+      sed -i "s#include_routing:.*#include_routing: true#g" "$CI_DIR/cats.yml"
     ;;
   esac
-  if [[ ${RUN_LOCAL} ]]; then
-    echo "RUNNING LOCALLY"
-    run_local
-  else
-    sed -i "s#${RUN_CATS}:.*#${RUN_CATS}: true#g" ../git-ci/ci/scripts/cats.yml
-    tmpdir="$BUILD_ROOT/cats"
-  fi
+
+  sed -i "s#${RUN_CATS}:.*#${RUN_CATS}: true#g" "$CI_DIR/cats.yml"
+  tmpdir="$ROOT_DIR/cats"
   export CONFIG=${tmpdir}/config.json
-  spruce merge ../git-ci/ci/scripts/cats.yml | spruce json | jq '.' > ${CONFIG}
-  pushd ${tmpdir}
-  FAILFAST_FLAG=""
-  VERBOSE_FLAG=""
-  if [[ ${FAILFAST}=="true" ]];then
-    FAILFAST_FLAG="--failFast"
-  fi
-  if [[ ${VERBOSE}=="true" ]];then
-    VERBOSE_FLAG="-v"
-  fi
-  echo "RUNNING CATS WITH NODES: ${CATS_NODES:-4} ${VERBOSE_FLAG} ${FAILFAST_FLAG}"
-  ./bin/test -nodes=${CATS_NODES:-4} ${VERBOSE_FLAG} $FAILFAST_FLAG
+  spruce merge "$CI_DIR/cats.yml" | spruce json | jq '.' > "${CONFIG}"
+  pushd "${tmpdir}" &>/dev/null
+    FAILFAST_FLAG=""
+    VERBOSE_FLAG=""
+    if [[ ${FAILFAST} == "true" ]] ; then
+      FAILFAST_FLAG="--failFast"
+    fi
+    if [[ ${VERBOSE} == "true" ]] ; then
+      VERBOSE_FLAG="-v"
+    fi
+    echo "RUNNING CATS WITH NODES: ${CATS_NODES:-4} ${VERBOSE_FLAG} ${FAILFAST_FLAG}"
+    ./bin/test -nodes="${CATS_NODES:-4}" ${VERBOSE_FLAG} ${FAILFAST_FLAG}
+  popd &>/dev/null
 }
+
+ROOT_DIR="$(pwd)"
+WORK_DIR="${ROOT_DIR}/work/cf-deployments"
+CI_DIR="${ROOT_DIR}/git-ci/ci"
+
+test -n "${DEPLOY_ENV:-}"         || bail "DEPLOY_ENV must be set to the deployment environment name."
+test -n "${KIT_SHORTNAME:-}"      || bail "KIT_SHORTNAME must be set to the short name of this kit."
+
+# Attach to Vault
+test -n "${VAULT_URI:-}"          || bail "VAULT_URI must be set to the Vault connection address - suggest using ((vault.url))"
+test -n "${VAULT_TOKEN:-}"        || bail "VAULT_TOKEN must be set to a valid token to connect to the Vault - suggest using ((vault.token))"
+safe target da-vault "$VAULT_URI" -k
+echo "$VAULT_TOKEN" | safe auth token
+
+# Get BOSH/CREDHUB envs
+bosh_env="$(lookup genesis 2>/dev/null | jq -r '.bosh_env // .env')"
+[[ "$bosh_env" =~ / ]] || bosh_env="${bosh_env}/bosh"
+
+bosh_exodus="$(lookup --exodus-for "$bosh_env" . "{}" 2>/dev/null)"
+BOSH_ENVIRONMENT="$(  jq -r '.url // ""' <<<"$bosh_exodus")"
+BOSH_CLIENT="$(       jq -r '.admin_username // ""' <<<"$bosh_exodus")"
+BOSH_CLIENT_SECRET="$(jq -r '.admin_password // ""' <<<"$bosh_exodus")"
+BOSH_CA_CERT="$(      jq -r '.ca_cert // ""' <<<"$bosh_exodus")"
+export BOSH_ENVIRONMENT BOSH_CLIENT BOSH_CLIENT_SECRET BOSH_CA_CERT
+
+CREDHUB_SERVER="$(    jq -r '.credhub_url // ""' <<<"$bosh_exodus")"
+if [[ -n "$CREDHUB_SERVER" ]] ; then
+  echo
+  CREDHUB_CLIENT="$( jq -r '.credhub_username // ""' <<<"$bosh_exodus")"
+  CREDHUB_SECRET="$( jq -r '.credhub_password // ""' <<<"$bosh_exodus")"
+  CREDHUB_CA_CERT="$(jq -r '"\(.credhub_ca_cert)\(.ca_cert)"' <<<"$bosh_exodus")"
+  export CREDHUB_SERVER CREDHUB_CLIENT CREDHUB_SECRET CREDHUB_CA_CERT
+  credhub_path="/${bosh_env/\//-}/${DEPLOY_ENV}-${KIT_SHORTNAME}"
+  echo
+fi
+
+test -n "${BOSH_ENVIRONMENT:-}"   || bail "BOSH_ENVIRONMENT must be set to BOSH directory URL - missing from $bosh_env deployment exodus data"
+test -n "${BOSH_CA_CERT:-}"       || bail "BOSH_CA_CERT must be set to the BOSH CA Cert - missing from $bosh_env deployment exodus data"
+test -n "${BOSH_CLIENT:-}"        || bail "BOSH_CLIENT must be set to BOSH Client user - missing from $bosh_env deployment exodus data"
+test -n "${BOSH_CLIENT_SECRET:-}" || bail "BOSH_CLIENT_SECRET must be set to BOSH Client secret - missing from $bosh_env deployment exodus data"
+test -n "${CREDHUB_SERVER:-}"     || bail "CREDHUB_SERVER must be set to Credhub URL - missing from $bosh_env deployment exodus data"
+test -n "${CREDHUB_CLIENT:-}"     || bail "CREDHUB_CLIENT must be set to Credhub username - missing from $bosh_env deployment exodus data"
+test -n "${CREDHUB_SECRET:-}"     || bail "CREDHUB_SECRET must be set to Credhub password - missing from $bosh_env deployment exodus data"
+test -n "${CREDHUB_CA_CERT:-}"    || bail "CREDHUB_CA_CERT must be set to Credhub ca_cert and UAA ca_cert password - missing from $bosh_env deployment exodus data"
+
+cd git
+run_cats --deployment-dir "$ROOT_DIR"

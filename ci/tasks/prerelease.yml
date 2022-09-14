@@ -1,0 +1,30 @@
+---
+platform: linux
+
+image_resource:
+  type: registry-image
+  source:
+    repository: starkandwayne/genesis
+
+inputs:
+- name: version
+- name: git
+- name: git-ci
+- name: build
+
+outputs:
+- name: gh
+- name: notifications
+
+params:
+  PRERELEASE:       1
+  RELEASE_ROOT:     gh
+  NOTIFICATION_OUT: notifications
+  DEVELOP_BRANCH:   develop
+  RELEASE_BRANCH:   main
+  GITHUB_OWNER:     genesis-community
+  GIT_EMAIL:        ci@starkandwayne.com
+  GIT_NAME:         Stark & Wayne CI Bot
+
+run:
+  path: git-ci/ci/scripts/release

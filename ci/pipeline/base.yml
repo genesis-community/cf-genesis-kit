@@ -19,6 +19,13 @@ meta:
   url:      (( param "Please specify the full url of the target Concourse CI" ))
   pipeline: (( grab meta.name ))
 
+  upstream:
+    package:  example # dummy value for things that don't use upstream
+    path:     (( grab meta.upstream.package ))
+    org:      cloudfoundry
+    repo:     (( concat meta.upstream.org "/" meta.upstream.package ))
+    url:      (( concat "https://github.com/" meta.upstream.repo ".git" ))
+
   vault:
     url:   (( param "Please provide the address of your Vault" ))
     token: (( param "Please provide a Vault Token" ))
@@ -44,17 +51,12 @@ meta:
     branch:       master
     private_key:  (( param "Please generate an SSH Deployment Key for this repo and specify it here" ))
     access_token: (( param "Please generate a Personal Access Token to be used for creating github releases (do you have a ci-bot?)" ))
-
-  credhub:
-    url: (( param "Please provide a credhub url" ))
-    username: (( param "Please provide a Credhub username" ))
-    password: (( param "Please provide a Credhub password" ))
-
-  bosh:
-    uri:        (( param "Please specify the Genesis CI BOSH Director URI" ))
-    cacert:     (( param "Please specify the Genesis CI BOSH Director Root CA cert" ))
-    username:   admin
-    password:   (( param "Please specify the Genesis CI BOSH Director admin password" ))
+    release_notes:
+      repo:       "ci-release-notes"
+      branch:     "main"
+      file:       (( concat meta.name "-release-notes.md" ))
+      uri:        (( concat "git@github.com:"  meta.github.owner "/" meta.github.release_notes.repo ))
+      edit:       (( concat "https://github.com/" meta.github.owner "/"  meta.github.release_notes.repo "/edit/"  meta.github.release_notes.branch "/" meta.github.release_notes.file ))
 
   shout:
     topic:    (( concat meta.name "-pipeline" ))
@@ -71,45 +73,39 @@ meta:
       pipeline: (( concat meta.url "/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME" ))
       build:    (( concat meta.shout.links.pipeline "/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME" ))
 
-  jobs:
-    cats:
-      params:
-        GENESIS_HONOR_ENV:    1
-        GIT_NAME:             (( grab meta.git.name ))
-        GIT_EMAIL:            (( grab meta.git.email ))
-        VAULT_URI:            (( grab meta.vault.url ))
-        VAULT_TOKEN:          (( grab meta.vault.token ))
-        KIT_SHORTNAME:        (( grab meta.kit ))
-        BOSH_ENVIRONMENT:     (( grab meta.bosh.uri ))
-        BOSH_CA_CERT:         (( grab meta.bosh.cacert ))
-        BOSH_CLIENT:          (( grab meta.bosh.username ))
-        BOSH_CLIENT_SECRET:   (( grab meta.bosh.password ))
-        CREDHUB_URL:          (( grab meta.credhub.url))
-        CREDHUB_USER:         (( grab meta.credhub.username))
-        CREDHUB_PASSWORD:     (( grab meta.credhub.password))
-        DEPLOYMENT_NAMES:     ci-cats
-        SKIP_CATS:            false
-        FAILFAST:             true
-        VERBOSE:              false
-        CATS_NODES:           6
+  task_connectivity_params:
+    GIT_NAME:             (( grab meta.git.name ))
+    GIT_EMAIL:            (( grab meta.git.email ))
+    VAULT_URI:            (( grab meta.vault.url ))
+    VAULT_TOKEN:          (( grab meta.vault.token ))
+    INFRASTRUCTURE:       (( grab meta.iaas ))
 
-
+  cats_params:
+    .: (( inject meta.task_connectivity_params ))
+    DEPLOY_ENV:           (( concat "ci-" meta.iaas "-cats" ))
+    KIT_SHORTNAME:        (( grab meta.kit ))
+    SKIP_CATS:            false
+    FAILFAST:             true
+    VERBOSE:              false
+    CATS_NODES:           6
 
 groups:
   - name: (( grab meta.pipeline ))
     jobs:
+    - build-kit
     - spec-tests
     - spec-check
-    - testflight
-    - upgrade-test
-    - cats-tests
-    - pre
-    - rc
-    - shipit
+    - ship-prerelease
+    - deploy
+    - upgrade
+    - acceptance-tests
+    - prepare
+    - ship-release
 
   - name: upstream
     jobs:
-    - cf-deployment
+    - upstream-sync
+
   - name: versions
     jobs:
     - major

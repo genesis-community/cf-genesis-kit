@@ -2,11 +2,15 @@
 meta:
   kit:             cf
   release:         CF Genesis Kit
-  target:          pipes@genesis
-  url:             https://pipes.starkandwayne.com
+  target:          cloudpipes/genesis
+  url:             https://cloudpipes.starkandwayne.com
+  iaas:            gcp
   exposed:         yes
   version_file:    version
   initial_version: 2.1.0
+
+  upstream:
+    package:  cf-deployment
 
   bosh:
     uri:      ((bosh.uri))

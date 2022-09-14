@@ -1,9 +1,0 @@
-#!/bin/bash
-
-set -e
-
-version=$(cat git-latest-tag/.git/ref)
-
-pushd git
-
-../git-ci/ci/tasks/spec-check/spec-check ${version}

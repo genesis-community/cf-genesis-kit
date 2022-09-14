@@ -213,6 +213,12 @@ credentials:
     certificate: ((vault "((vault_prefix))/loggregator/certs/ca:certificate"))
     private_key: ((vault "((vault_prefix))/loggregator/certs/ca:key"))
     ca: ((vault "((vault_prefix))/loggregator/certs/ca:certificate" ))
+- name: ((credhub_prefix))/loggregator_agent_metrics_tls_ca
+  type: certificate
+  value:
+    certificate: ((vault "((vault_prefix))/loggregator/certs/ca:certificate"))
+    private_key: ((vault "((vault_prefix))/loggregator/certs/ca:key"))
+    ca: ((vault "((vault_prefix))/loggregator/certs/ca:certificate" ))
 - name: ((credhub_prefix))/loggregator_tls_statsdinjector
   type: certificate
   value:
@@ -261,6 +267,12 @@ credentials:
     certificate: ((vault "((vault_prefix))/loggregator/certs/loggregator_tls_rlp_gateway:certificate"))
     private_key: ((vault "((vault_prefix))/loggregator/certs/loggregator_tls_rlp_gateway:key"))
     ca_name: ((credhub_prefix))/loggregator_ca
+- name: ((credhub_prefix))/loggregator_agent_metrics_tls
+  type: certificate
+  value:
+    certificate: ((vault "((vault_prefix))/loggregator/certs/loggregator_agent_metrics_tls:certificate"))
+    private_key: ((vault "((vault_prefix))/loggregator/certs/loggregator_agent_metrics_tls:private_key"))
+    ca_name: ((credhub_prefix))/loggregator_agent_metrics_tls_ca
 - name: ((credhub_prefix))/adapter_rlp_tls
   type: certificate
   value:

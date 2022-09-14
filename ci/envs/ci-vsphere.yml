@@ -1,0 +1,6 @@
+---
+genesis:
+  bosh_env:  snw-genesis-ci
+
+meta:
+  _ip_prefix: "10.128."

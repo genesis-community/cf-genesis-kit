@@ -1,0 +1,114 @@
+#!/usr/bin/env bash
+
+set -e
+set -o pipefail
+export TERM=xterm-256color
+
+header() {
+  echo
+  echo "================================================================================"
+  echo "$1"
+  echo "--------------------------------------------------------------------------------"
+  echo
+}
+
+bail() {
+  echo >&2 "[1;31m[ERROR][0m $*  Did you misconfigure Concourse?"
+  exit 2
+}
+
+test -n "${GIT_EMAIL:-}"      || bail "GIT_EMAIL must be set to an email address to use for Git commits."
+test -n "${GIT_NAME:-}"       || bail "GIT_NAME must be set to something; it will be used for Git commits."
+
+# Configuration Section for different upstreams
+
+# Reference: commit of version based
+ref=$(cat upstream/.git/ref) # commit-based ref
+upstream_url="https://github.com/${UPSTREAM_REPO:?UPSTREAM_REPO not exported}/tree/${ref}" #commit-based ref
+if [[ $ref =~ ^v ]] ; then
+	ref=$(cut -b 2- <<< "$ref") # version-based ref
+	upstream_url="https://github.com/${UPSTREAM_REPO:?UPSTREAM_REPO not exported}/releases/tag/v${ref}" #version-based ref
+fi
+
+# Package paths
+src_path="upstream"
+dst_path="git/${UPSTREAM_PATH}" #relative to the git path
+
+# override if you need specific files (whitelist)
+files=(); while IFS= read -r line ; do
+  files+=( "$line" )
+done < <(command ls -A1 "$src_path" | grep -v .git | grep -v '^tests$' | grep -v '^ci$' )
+# override if you don't want specific files (blacklist)
+remove=( )
+
+echo "CHECKING git status"
+git -C git status
+
+header "Bumping embedded $UPSTREAM_PATH to $ref"
+
+[[ -d "$dst_path" ]] || bail "Could not find upstream directory '$UPSTREAM_PATH' in the git repo"
+
+echo "Clearing out existing files in $dst_path"
+rm -rf "${dst_path:?Destination path not set}"
+mkdir "$dst_path"
+
+echo
+echo "Copying files from upstream repository:"
+for f in ${files[@]+"${files[@]}"} ; do
+  cp -Rv "$src_path/$f" "${dst_path}/$f"
+done
+
+if [[ ${#remove[@]} -gt 0 ]] ; then
+  echo
+  echo "Removing unneeded files:"
+  for f in ${remove[@]+"${remove[@]}"} ; do
+    rm -rfv "${dst_path:?Destination path not set}/$f"
+  done
+fi
+
+echo
+echo "Comparing changes from upstream:"
+if [[ -n "$(git -C git status --porcelain)" ]] ; then
+	ts="$(date -u +"%Y-%b-%d %H:%M:%S %Z")"
+	cat > git/overlay/upstream_version.yml <<EOF
+exodus:
+  ${UPSTREAM_PATH}-version: $ref
+  ${UPSTREAM_PATH}-date:    $ts
+  ${UPSTREAM_PATH}-url:     $upstream_url
+EOF
+	echo "Successfully updated $UPSTREAM_PATH to commit hash $ref"
+else
+	echo "No changes detected - aborting upstream synchronization."
+	exit 2
+fi
+
+git -C git diff --color=always "$UPSTREAM_PATH" | cat
+
+header "Recreate spec-test results to validate upstream"
+pushd git/spec > /dev/null
+  # TODO: remove spec/{credhub,vault} if needed? because this will regenerate vault.
+  rm -rf results/
+  ACK_GINKGO_RC=true ginkgo -p
+popd
+
+header "Spec file changes:"
+git -C git diff --color=always spec/results/ | cat
+
+header "Commiting updates to git"
+git config --global user.name  "${GIT_NAME}"
+git config --global user.email "${GIT_EMAIL}"
+
+pushd git &>/dev/null
+git add "$UPSTREAM_PATH"
+git add spec/
+git add overlay/upstream_version.yml
+git commit -m "Update to $UPSTREAM_REPO@$ref"
+
+# The following is done to ensure a clean push to the develop branch, while
+# basing the input on a version that last passed the spec-tests.
+https_url="$(git remote -v | grep '(fetch)' | sed -e 's/.*github.com:\(.*\) (fetch)/https:\/\/github.com\/\1/')"
+git remote add live "$https_url"
+git pull --rebase=merges live develop -X theirs --no-edit
+git remote remove live
+
+popd &>/dev/null

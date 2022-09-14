@@ -1,0 +1,6 @@
+instance_groups:
+- name: nfs-broker-push
+  networks:
+  - ((replace))
+  - name: ((cf_runtime_network))
+  azs: (( grab meta.azs ))

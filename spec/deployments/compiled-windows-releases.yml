@@ -1,0 +1,14 @@
+---
+kit:
+  name:    dev
+  version: 2.0.0
+  features:
+    - compiled-releases
+    - windows-diego-cells
+    - smb-volume-services
+
+genesis:
+  env: compiled-windows-releases
+
+params:
+  base_domain: cf.testing.examle

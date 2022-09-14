@@ -150,15 +150,27 @@ while [[ $ok != "true" ]]; do
   base_domain=
   prompt_for base_domain line \
     "What is the base domain of your Cloud Foundry?"
+  system_domain=
+  prompt_for system_domain line --default "system.${base_domain}" \
+    "What is the system domain of your Cloud Foundry? (press enter for default: system.{base_domain})"
+  apps_domain=
+  prompt_for apps_domain line --default "run.${base_domain}" \
+    "What is the apps domain of your Cloud Foundry? (press enter for default: run.{base_domain})"
+  if [[ "$system_domain" == "" ]]
+  then system_domain = "system.${base_domain}"
+  fi
+  if [[ "$apps_domain" == "" ]]
+  then apps_domain = "run.${base_domain}"
+  fi
 
   describe "" \
     "Using the base domain of #C{$base_domain}," \
     "you will get the following domains and endpoints:" \
     "" \
-    "    apps: https://#yi{<APP-NAME>}.#M{run}.#C{$base_domain}" \
-    "  cf api: https://#M{api.system}.#C{$base_domain}" \
-    "     uaa: https://#M{uaa.system}.#C{$base_domain}" \
-    "          https://#M{login.system}.#C{$base_domain}" \
+    "    apps: https://#yi{<APP-NAME>}.#C{$apps_domain}" \
+    "  cf api: https://#M{api}.#C{$system_domain}" \
+    "     uaa: https://#M{uaa}.#C{$system_domain}" \
+    "          https://#M{login}.#C{$system_domain}" \
 
   prompt_for ok boolean --default "y" \
     'Is this acceptable [y|n]?'
@@ -363,6 +375,9 @@ genesis_config_block
 echo "params:"
 echo "  # Cloud Foundry base domain"
 echo "  base_domain: $base_domain"
+echo "  system_domain: $system_domain"
+echo "  apps_domains:"
+echo "  - $apps_domain"
 
 case $database in
 mysql-db)
