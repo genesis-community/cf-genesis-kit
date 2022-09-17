@@ -516,7 +516,7 @@ if ! want_feature "bare" ; then
     fi
     manifest+=( \
       "cf-deployment/operations/azure.yml"
-      "operations/azure-availability_sets.yml" \
+      "operations/azure_availability_sets.yml" \
     )
     ;;
   warden)
