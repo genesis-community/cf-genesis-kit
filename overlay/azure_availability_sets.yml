@@ -1,0 +1,52 @@
+---
+# Use this override to setup the availability sets in Azure
+instance_groups:
+- name: nats
+  vm_extensions:
+  - (( append ))
+  - nats_as
+- name: diego-api
+  vm_extensions:
+  - (( append ))
+  - diego_api_as
+- name: uaa
+  vm_extensions:
+  - (( append ))
+  - uaa_as
+- name: scheduler
+  vm_extensions:
+  - (( append ))
+  - scheduler_as
+- name: diego-cell
+  vm_extensions:
+  - (( append ))
+  - diego_cell_as
+- name: router
+  vm_extensions:
+  - (( append ))
+  - router_as
+- name: api
+  vm_extensions:
+  - (( append ))
+  - api_as
+- name: cc-worker
+  vm_extensions:
+  - (( append ))
+  - cc_worker_as
+- name: doppler
+  vm_extensions:
+  - (( append ))
+  - doppler_as
+- name: log-api
+  vm_extensions:
+  - (( append ))
+  - log_api_as
+- name: tcp-router
+  vm_extensions:
+  - (( append ))
+  - tcp_router_as
+- name: credhub
+  vm_extensions:
+  - (( append ))
+  - credhub_as
+
