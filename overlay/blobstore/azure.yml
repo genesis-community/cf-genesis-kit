@@ -2,6 +2,14 @@
 bosh-variables:
   environment: (( grab params.blobstore_environment || params.azure_environment || "AzureCloud" ))
 
+# Per https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/resource-name-rules#microsoftstorage a key cannot
+# contain upper case so override here to exclude upper case
+variables:
+- name: cc_directory_key
+  type: password
+  options:
+    exclude_upper: true
+
 # Credhub Secrets
 #   blobstore_storage_account_name
 #   blobstore_storage_access_key
