@@ -1,0 +1,14 @@
+---
+meta:
+  ocfp:
+    env:
+      scale: (( grab params.env.scale || "dev" ))
+
+    vault:
+      tf: (( concat genesis.secrets_mount "tf/" genesis.vault_env ))
+
+    certs:
+      trusted:
+        - (( vault genesis.secrets_mount "certs/org:ca" )) # Organization CA, if exists
+        - (( vault genesis.secrets_mount "certs/dbs:ca" )) # External Databases CA
+

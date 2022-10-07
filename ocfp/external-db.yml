@@ -1,0 +1,157 @@
+---
+meta:
+  db:
+    cc: # ccdb, cc-worker, cc-clock, cc-deployment-updater
+      scheme:   (( vault meta.vault "/db/cloud_controller:scheme"   ))
+      username: (( vault meta.vault "/db/cloud_controller:username" ))
+      password: (( vault meta.vault "/db/cloud_controller:password" ))
+      host:     (( vault meta.vault "/db/cloud_controller:hostname" ))
+      port:     (( vault meta.vault "/db/cloud_controller:port"     ))
+      database: (( vault meta.vault "/db/cloud_controller:database" ))
+      ca:       (( vault meta.vault "/db/cloud_controller:ca" ))
+      tls:      true
+
+    credhub:
+      scheme:   (( vault meta.vault "/db/credhub:scheme"   ))
+      username: (( vault meta.vault "/db/credhub:username" ))
+      password: (( vault meta.vault "/db/credhub:password" ))
+      host:     (( vault meta.vault "/db/credhub:hostname" ))
+      port:     (( vault meta.vault "/db/credhub:port"     ))
+      database: (( vault meta.vault "/db/credhub:database" ))
+      ca:       (( vault meta.vault "/db/credhub:ca"       ))
+      tls:      true
+
+    diego: # bbs
+      scheme:   (( vault meta.vault "/db/diego:scheme"   ))
+      username: (( vault meta.vault "/db/diego:username" ))
+      password: (( vault meta.vault "/db/diego:password" ))
+      host:     (( vault meta.vault "/db/diego:hostname" ))
+      port:     (( vault meta.vault "/db/diego:port"     ))
+      database: (( vault meta.vault "/db/diego:database" ))
+      ca:       (( vault meta.vault "/db/diego:ca"       ))
+      tls:      true
+
+    locket:
+      scheme:   (( vault meta.vault "/db/locket:scheme"   ))
+      username: (( vault meta.vault "/db/locket:username" ))
+      password: (( vault meta.vault "/db/locket:password" ))
+      host:     (( vault meta.vault "/db/locket:hostname" ))
+      port:     (( vault meta.vault "/db/locket:port"     ))
+      database: (( vault meta.vault "/db/locket:database" ))
+      ca:       (( vault meta.vault "/db/locket:ca"       ))
+      tls:      true
+
+    network_connectivity: # silk
+      scheme:   (( vault meta.vault "/db/network_connectivity:scheme"   ))
+      username: (( vault meta.vault "/db/network_connectivity:username" ))
+      password: (( vault meta.vault "/db/network_connectivity:password" ))
+      host:     (( vault meta.vault "/db/network_connectivity:hostname" ))
+      port:     (( vault meta.vault "/db/network_connectivity:port"     ))
+      database: (( vault meta.vault "/db/network_connectivity:database" ))
+      ca:       (( vault meta.vault "/db/network_connectivity:ca"       ))
+      tls:      true
+
+    network_policy: # silk, olicy_server
+      scheme:   (( vault meta.vault "/db/network_policy:scheme"   ))
+      username: (( vault meta.vault "/db/network_policy:username" ))
+      password: (( vault meta.vault "/db/network_policy:password" ))
+      host:     (( vault meta.vault "/db/network_policy:hostname" ))
+      port:     (( vault meta.vault "/db/network_policy:port"     ))
+      database: (( vault meta.vault "/db/network_policy:database" ))
+      ca:       (( vault meta.vault "/db/network_policy:ca"       ))
+      tls:      true
+
+    routing_api:
+      scheme:   (( vault meta.vault "/db/routing_api:scheme"   ))
+      username: (( vault meta.vault "/db/routing_api:username" ))
+      password: (( vault meta.vault "/db/routing_api:password" ))
+      host:     (( vault meta.vault "/db/routing_api:hostname" ))
+      port:     (( vault meta.vault "/db/routing_api:port"     ))
+      database: (( vault meta.vault "/db/routing_api:database" ))
+      ca:       (( vault meta.vault "/db/routing_api:ca"       ))
+      tls:      true
+
+    uaa: # uaadb
+      scheme:   "postgresql" # uaa is different than the rest that use 'postgres'
+      username: (( vault meta.vault "/db/uaa:username" ))
+      password: (( vault meta.vault "/db/uaa:password" ))
+      host:     (( vault meta.vault "/db/uaa:hostname" ))
+      port:     (( vault meta.vault "/db/uaa:port"     ))
+      database: (( vault meta.vault "/db/uaa:database" ))
+      ca:       
+        - (( vault meta.vault "/db/uaa:ca"       ))
+      tls:      "enabled"
+
+bosh-variables:
+  external_db_uaa_scheme:               (( grab meta.db.uaa.scheme   ))
+  external_db_uaa_name:                 (( grab meta.db.uaa.database ))
+  external_db_uaa_address:              (( grab meta.db.uaa.hostname ))
+  external_db_uaa_port:                 (( grab meta.db.uaa.port     ))
+  external_db_uaa_username:             (( grab meta.db.uaa.username ))
+  external_db_uaa_password:             (( grab meta.db.uaa.password ))
+  external_db_uaa_ca:                   (( grab meta.db.uaa.ca       ))
+  external_db_uaa_tls:                  (( grab meta.db.uaa.tls      ))
+
+  external_db_cc_scheme:                (( grab meta.db.cc.scheme   ))
+  external_db_cc_name:                  (( grab meta.db.cc.database ))
+  external_db_cc_address:               (( grab meta.db.cc.hostname ))
+  external_db_cc_port:                  (( grab meta.db.cc.port     ))
+  external_db_cc_username:              (( grab meta.db.cc.username ))
+  external_db_cc_password:              (( grab meta.db.cc.password ))
+  external_db_cc_ca:                    (( grab meta.db.cc.ca       ))
+  external_db_cc_tls:                   (( grab meta.db.cc.tls      ))
+
+  external_db_diego_scheme:             (( grab meta.db.diego.scheme   ))
+  external_db_diego_name:               (( grab meta.db.diego.database ))
+  external_db_diego_address:            (( grab meta.db.diego.hostname ))
+  external_db_diego_port:               (( grab meta.db.diego.port     ))
+  external_db_diego_username:           (( grab meta.db.diego.username ))
+  external_db_diego_password:           (( grab meta.db.diego.password ))
+  external_db_diego_ca:                 (( grab meta.db.diego.ca       ))
+  external_db_diego_tls:                (( grab meta.db.diego.tls      ))
+))
+  external_db_policy_server_scheme:     (( grab meta.db.network_policy.scheme   ))
+  external_db_policy_server_name:       (( grab meta.db.network_policy.database ))
+  external_db_policy_server_address:    (( grab meta.db.network_policy.hostname ))
+  external_db_policy_server_port:       (( grab meta.db.network_policy.port     ))
+  external_db_policy_server_username:   (( grab meta.db.network_policy.username ))
+  external_db_policy_server_password:   (( grab meta.db.network_policy.password ))
+  external_db_policy_server_ca:         (( grab meta.db.network_policy.ca       ))
+  external_db_policy_server_tls:        (( grab meta.db.network_policy.tls      ))
+))
+  external_db_silk_scheme:              (( grab meta.db.network_connectivity.scheme   ))
+  external_db_silk_name:                (( grab meta.db.network_connectivity.database ))
+  external_db_silk_address:             (( grab meta.db.network_connectivity.hostname ))
+  external_db_silk_port:                (( grab meta.db.network_connectivity.port     ))
+  external_db_silk_username:            (( grab meta.db.network_connectivity.username ))
+  external_db_silk_password:            (( grab meta.db.network_connectivity.password ))
+  external_db_silk_ca:                  (( grab meta.db.network_connectivity.ca       ))
+  external_db_silk_tls:                 (( grab meta.db.network_connectivity.tls      ))
+))
+  external_db_routing_api_scheme:       (( grab meta.db.routing_api.scheme   ))
+  external_db_routing_api_name:         (( grab meta.db.routing_api.database ))
+  external_db_routing_api_address:      (( grab meta.db.routing_api.hostname ))
+  external_db_routing_api_port:         (( grab meta.db.routing_api.port     ))
+  external_db_routing_api_username:     (( grab meta.db.routing_api.username ))
+  external_db_routing_api_password:     (( grab meta.db.routing_api.password ))
+  external_db_routing_api_ca:           (( grab meta.db.routing_api.ca       ))
+  external_db_routing_api_tls:          (( grab meta.db.routing_api.tls      ))
+))
+  external_db_locket_scheme:            (( grab meta.db.locket.scheme   ))
+  external_db_locket_name:              (( grab meta.db.locket.database ))
+  external_db_locket_address:           (( grab meta.db.locket.hostname ))
+  external_db_locket_port:              (( grab meta.db.locket.port     ))
+  external_db_locket_username:          (( grab meta.db.locket.username ))
+  external_db_locket_password:          (( grab meta.db.locket.password ))
+  external_db_locket_ca:                (( grab meta.db.locket.ca       ))
+  external_db_locket_tls:               (( grab meta.db.locket.tls      ))
+))
+  external_db_credhub_scheme:           (( grab meta.db.credhub.scheme   ))
+  external_db_credhub_name:             (( grab meta.db.credhub.database ))
+  external_db_credhub_address:          (( grab meta.db.credhub.hostname ))
+  external_db_credhub_port:             (( grab meta.db.credhub.port     ))
+  external_db_credhub_username:         (( grab meta.db.credhub.username ))
+  external_db_credhub_password:         (( grab meta.db.credhub.password ))
+  external_db_credhub_ca:               (( grab meta.db.credhub.ca       ))
+  external_db_credhub_tls:              (( grab meta.db.credhub.tls      ))
+

@@ -755,6 +755,7 @@ if want_feature "ocfp" ; then
     "cf-deployment/operations/use-external-dbs.yml"
     "operations/use-external-dbs-ports.yml"
     "ocfp/external-db.yml"
+    "overlay/enable-service-discovery.yml"
   )
   
   case ${iaas} in

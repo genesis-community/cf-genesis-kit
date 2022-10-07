@@ -1,0 +1,82 @@
+#!/bin/bash
+set -eu
+
+tf_path=$(lookup meta.ocfp.vault.tf)
+exodus_path=$(lookup genesis.exodus)
+
+stratos_version="4.4.0"
+
+system_api_domain=$(safe get ${tf_path}/lbs/cf:domain)
+stratos_domain=$(safe get ${tf_path}/lbs/stratos:domain)
+
+stratos_db_hostname=$(safe get ${tf_path}/stratos/db/stratos:hostname)
+stratos_db_username=$(safe get ${tf_path}/stratos/db/stratos:username)
+stratos_db_password=$(safe get ${tf_path}/stratos/db/stratos:password)
+stratos_db_port=$(    safe get ${tf_path}/stratos/db/stratos:port)
+stratos_db_database=$(safe get ${tf_path}/stratos/db/stratos:database)
+stratos_db_sslmode=$( safe get ${tf_path}/stratos/db/stratos:sslmode) # verify-ca
+
+stratos_session_store_sekret=$(echo $RANDOM | sha256sum | awk '{print $1}')
+
+# TODO: `stratos-integration` ~ exodus ~> stratos_client:secret
+stratos_client_secret=$(safe get ${exodus_path}/stratos_client:secret)
+
+tmp_dir=$(mktemp -d)
+cd ${tmp_dir}
+
+cf cups console_db_tls_verify_ca  -p "$(
+cat <<-EOF
+{ uri": "${stratos_db_scheme}://", "username":"${stratos_db_username}", "password":"${stratos_db_password}", "hostname":"${stratos_db_hostname}", "port":"${stratos_db_port}", "dbname":"${stratos_db_database}", "sslmode":"${stratos_db_sslmode}" }'
+EOF
+)"
+
+if ! [[ -f stratos-ui-packaged.zip ]] ; then
+  # TODO: Temp Directory
+  wget https://github.com/orange-cloudfoundry/stratos-ui-cf-packager/releases/download/${stratos_version}/stratos-ui-packaged.zip
+  unzip stratos-ui-packaged.zip
+  rm stratos-ui-packaged.zip
+fi
+
+cat > manifest.yml <<-APPMANIFEST
+applications:
+  - name: apps
+    memory: 1512M
+    disk_quota: 1024M
+    host: console
+    timeout: 180
+    buildpack: binary_buildpack
+    health-check-type: port
+    env:
+       CF_API_URL: https://${system_api_domain}
+       CF_CLIENT: stratos
+       CF_CLIENT_SECRET: ${stratos_client_secret}
+       SESSION_STORE_SECRET: ${stratos_session_store_sekret}
+       SSO_OPTIONS: "nosplash, logout"
+       SSO_WHITELIST: "https://${stratos_domain}/*"
+       SSO_LOGIN: "true"
+       DB_SSL_MODE: "${stratos_db_sslmode}"
+    services:
+    - console_db_tls_verify_ca
+APPMANIFEST
+
+# Security group that allows to talk to VPC IP Rangek
+cat > vpc-sg.json <<EOF
+[
+  {
+    "protocol": "all",
+    "destination": "10.0.0.0-10.255.255.255"
+  }
+]
+EOF
+
+cf create-security-group vpc ${PWD}/vpc-sg.json
+cf bind-staging-security-group vpc
+cf bind-running-security-group vpc
+
+################################################################################
+# To the Stratosphere!
+################################################################################
+cf create-space stratos -o system
+cf target -o system -s stratos
+cf push -f manifest.yml
+

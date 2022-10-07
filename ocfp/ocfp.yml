@@ -1,0 +1,41 @@
+---
+params:
+  base_domain:   (( vault meta.ocfp.vault.tf "/ocfp/ocf/dns:base_domain" ))
+  system_domain: (( vault meta.ocfp.vault.tf "/ocfp/ocf/dns:system_domain" ))
+  apps_domains:
+  - (( vault meta.ocfp.vault.tf "/ocfp/ocf/dns:apps_domain" ))
+
+  blobstore_s3_region:              (( vault meta.ocfp.vault.tf "/bosh/iaas/vpc:region" ))
+  blobstore_app_packages_directory: (( vault meta.vault "blobstores/app_packages:name" ))
+  blobstore_buildpacks_directory:   (( vault meta.vault "blobstores/buildpacks:name" ))
+  blobstore_droplets_directory:     (( vault meta.vault "blobstores/droplets:name" ))
+  blobstore_resources_directory:    (( vault meta.vault "blobstores/resources:name" ))
+  skip_ssl_validation:              true # Using self-signed certs
+
+# Load Balancer Attachments
+instance_groups:
+- name: router
+  vm_extensions:
+  - ((replace)
+  - cf-system-apps-lb
+
+- name: scheduler
+  vm_extensions:
+  - ((replace)
+  - cf-ssh-lb
+
+- name: tcp-router
+  vm_extensions:
+  - ((replace)
+  - cf-tcp-lb
+
+- name: diego-cell
+  update:
+    max_in_flight: 3
+
+#stemcells default
+#      NOTE: See codex2 for 
+#NOTE: Okta feature - LATER 
+#
+#NOTE: update `check` to check for feature required vault things
+

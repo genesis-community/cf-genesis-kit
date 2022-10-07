@@ -1,0 +1,29 @@
+---
+params:
+  api_instances: 3
+  cc_worker_instances: 3
+  credhub_instances: 3
+  diego_api_instances: 3
+  diego_cell_instances: 10
+  doppler_instances: 3
+  log_api_instances: 3
+  nats_instances: 3
+  router_instances: 3
+  scheduler_instances: 3
+  tcp_router_instances: 3
+  uaa_instances: 3
+
+  api_vm_type: "api-prod"
+  cc_worker_vm_type: "cc-worker-prod"
+  credhub_vm_type: "credhub-prod"
+  diego_api_vm_type: "diego-api-prod"
+  diego_cell_vm_type: "diego-cell-prod"
+  doppler_vm_type: "doppler-prod"
+  errand_vm_type: "errand-prod"
+  log_api_vm_type: "log-api-prod"
+  nats_vm_type: "nats-prod"
+  router_vm_type: "router-prod"
+  scheduler_vm_type: "scheduler-prod"
+  tcp_router_vm_type: "tcp-router-prod"
+  uaa_vm_type: "uaa-prod"
+
