@@ -36,9 +36,6 @@ params:
   path: /instance_groups/name=diego-api/vm_type
   value: diego-api-dev
 - type: replace
-  path: /instance_groups/name=smoke-tests/vm_type
-  value: smoke-tests-dev
-- type: replace
   path: /instance_groups/name=nats/vm_type
   value: nats-dev
 - type: replace
@@ -70,5 +67,8 @@ params:
   value: credhub-dev
 - type: replace
   path: /instance_groups/name=rotate-cc-database-key/vm_type
-  value: rotate-cc-database-key-dev
+  value: default
+- type: replace
+  path: /instance_groups/name=smoke-tests/vm_type
+  value: default
 
