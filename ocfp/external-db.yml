@@ -88,7 +88,7 @@ meta:
   value: (( grab meta.db.uaa.scheme ))
 - type: replace
   path: /instance_groups/name=uaa/jobs/name=uaa/properties/uaadb/port
-  value: (( grab grab meta.db.uaa.port ))
+  value: (( grab meta.db.uaa.port ))
 - type: replace
   path: /instance_groups/name=uaa/jobs/name=uaa/properties/uaadb/databases/tag=uaa/name
   value: (( grab meta.db.uaa.database ))
