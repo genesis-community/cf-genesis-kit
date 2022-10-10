@@ -261,7 +261,7 @@ meta:
   value: (( grab meta.db.network_policy.password ))
 - type: replace
   path: /instance_groups/name=api/jobs/name=policy-server/properties/database/host
-  value: (( grab meta.db.network_policy.address ))
+  value: (( grab meta.db.network_policy.hostname ))
 - type: replace
   path: /instance_groups/name=api/jobs/name=policy-server/properties/database/port
   value: (( grab meta.db.network_policy.port ))
@@ -284,10 +284,10 @@ meta:
   value: (( grab meta.db.network_connectivity.username ))
 - type: replace
   path: /instance_groups/name=diego-api/jobs/name=silk-controller/properties/database/password
-  value: (( grab meta.db.network_connectivity.database_password ))
+  value: (( grab meta.db.network_connectivity.password ))
 - type: replace
   path: /instance_groups/name=diego-api/jobs/name=silk-controller/properties/database/host
-  value: (( grab meta.db.network_connectivity.database_address ))
+  value: (( grab meta.db.network_connectivity.hostname ))
 - type: replace
   path: /instance_groups/name=diego-api/jobs/name=silk-controller/properties/database/port
   value: (( grab meta.db.network_connectivity.port ))
@@ -313,7 +313,7 @@ meta:
   value: (( grab meta.db.locket.database ))
 - type: replace
   path: /instance_groups/name=diego-api/jobs/name=locket/properties/diego/locket/sql/db_host?
-  value: (( grab meta.db.locket.address ))
+  value: (( grab meta.db.locket.hostname ))
 - type: replace
   path: /instance_groups/name=diego-api/jobs/name=locket/properties/diego/locket/sql/db_password
   value: (( grab meta.db.locket.password ))
@@ -339,7 +339,7 @@ meta:
   value: (( grab meta.db.credhub.password ))
 - type: replace
   path: /instance_groups/name=credhub/jobs/name=credhub/properties/credhub/data_storage/host
-  value: (( grab meta.db.credhub.address ))
+  value: (( grab meta.db.credhub.hostname ))
 - type: replace
   path: /instance_groups/name=credhub/jobs/name=credhub/properties/credhub/data_storage/port
   value: (( grab meta.db.credhub.port ))
