@@ -1,9 +1,8 @@
 ---
 params:
-  base_domain:   (( vault meta.ocfp.vault.tf "/ocf/fqdns:base" ))
-  system_domain: (( vault meta.ocfp.vault.tf "/ocf/fqdns:system" ))
-  apps_domains:
-  - (( vault meta.ocfp.vault.tf "/ocf/fqdns:apps" ))
+  base_domain:   (( grab meta.ocfp.cf.fqdns.base ))
+  system_domain: (( grab meta.ocfp.cf.fqdns.system ))
+  apps_domains: (( grab meta.ocfp.cf.fqdns.apps ))
 
   skip_ssl_validation:              true # Using self-signed certs
 

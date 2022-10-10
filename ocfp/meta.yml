@@ -12,3 +12,10 @@ meta:
         - (( vault genesis.secrets_mount "certs/org:ca" )) # Organization CA, if exists
         - (( vault genesis.secrets_mount "certs/dbs:ca" )) # External Databases CA
 
+    cf:
+      fqdns:
+        base:   (( vault meta.ocfp.vault.tf "/ocf/fqdns:base" ))
+        system: (( vault meta.ocfp.vault.tf "/ocf/fqdns:system" ))
+        apps:
+        - (( vault meta.ocfp.vault.tf "/ocf/fqdns:apps" ))
+
