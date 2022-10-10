@@ -87,7 +87,7 @@
 
 # OCFP Cloud Config accounts for larger ephemeral disks vvv
 - type: remove
-  path: /instance_groups/name=diego-cell/vm_extensions/100GB_ephemeral_disk
+  path: /instance_groups/name=diego-cell/vm_extensions
 - type: remove
-  path: /instance_groups/name=api/vm_extensions/50GB_ephemeral_disk
+  path: /instance_groups/name=api/vm_extensions
 
