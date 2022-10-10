@@ -6,7 +6,7 @@ meta:
       username: (( vault meta.vault "/db/cloud_controller:username" ))
       password: (( vault meta.vault "/db/cloud_controller:password" ))
       hostname: (( vault meta.vault "/db/cloud_controller:hostname" ))
-      port:     (( vault meta.vault "/db/cloud_controller:port"     ))
+      port:     5432 # Components fail on strings so hardcoding this... :|
       database: (( vault meta.vault "/db/cloud_controller:database" ))
       ca:       (( vault meta.vault "/db/cloud_controller:ca" ))
       tls:      true
@@ -16,7 +16,7 @@ meta:
       username: (( vault meta.vault "/db/credhub:username" ))
       password: (( vault meta.vault "/db/credhub:password" ))
       hostname: (( vault meta.vault "/db/credhub:hostname" ))
-      port:     (( vault meta.vault "/db/credhub:port"     ))
+      port:     5432 # Components fail on strings so hardcoding this... :|
       database: (( vault meta.vault "/db/credhub:database" ))
       ca:       (( vault meta.vault "/db/credhub:ca"       ))
       tls:      true
@@ -26,7 +26,7 @@ meta:
       username: (( vault meta.vault "/db/diego:username" ))
       password: (( vault meta.vault "/db/diego:password" ))
       hostname: (( vault meta.vault "/db/diego:hostname" ))
-      port:     (( vault meta.vault "/db/diego:port"     ))
+      port:     5432 # Components fail on strings so hardcoding this... :|
       database: (( vault meta.vault "/db/diego:database" ))
       ca:       (( vault meta.vault "/db/diego:ca"       ))
       tls:      true
@@ -36,7 +36,7 @@ meta:
       username: (( vault meta.vault "/db/locket:username" ))
       password: (( vault meta.vault "/db/locket:password" ))
       hostname: (( vault meta.vault "/db/locket:hostname" ))
-      port:     (( vault meta.vault "/db/locket:port"     ))
+      port:     5432 # Components fail on strings so hardcoding this... :|
       database: (( vault meta.vault "/db/locket:database" ))
       ca:       (( vault meta.vault "/db/locket:ca"       ))
       tls:      true
@@ -46,17 +46,17 @@ meta:
       username: (( vault meta.vault "/db/network_connectivity:username" ))
       password: (( vault meta.vault "/db/network_connectivity:password" ))
       hostname: (( vault meta.vault "/db/network_connectivity:hostname" ))
-      port:     (( vault meta.vault "/db/network_connectivity:port"     ))
+      port:     5432 # Components fail on strings so hardcoding this... :|
       database: (( vault meta.vault "/db/network_connectivity:database" ))
       ca:       (( vault meta.vault "/db/network_connectivity:ca"       ))
       tls:      true
 
-    network_policy: # silk, olicy_server
+    network_policy: # policy_server
       scheme:   (( vault meta.vault "/db/network_policy:scheme"   ))
       username: (( vault meta.vault "/db/network_policy:username" ))
       password: (( vault meta.vault "/db/network_policy:password" ))
       hostname: (( vault meta.vault "/db/network_policy:hostname" ))
-      port:     (( vault meta.vault "/db/network_policy:port"     ))
+      port:     5432 # Components fail on strings so hardcoding this... :|
       database: (( vault meta.vault "/db/network_policy:database" ))
       ca:       (( vault meta.vault "/db/network_policy:ca"       ))
       tls:      true
@@ -66,7 +66,7 @@ meta:
       username: (( vault meta.vault "/db/routing_api:username" ))
       password: (( vault meta.vault "/db/routing_api:password" ))
       hostname: (( vault meta.vault "/db/routing_api:hostname" ))
-      port:     (( vault meta.vault "/db/routing_api:port"     ))
+      port:     5432 # Components fail on strings so hardcoding this... :|
       database: (( vault meta.vault "/db/routing_api:database" ))
       ca:       (( vault meta.vault "/db/routing_api:ca"       ))
       tls:      true
@@ -76,7 +76,7 @@ meta:
       username: (( vault meta.vault "/db/uaa:username" ))
       password: (( vault meta.vault "/db/uaa:password" ))
       hostname: (( vault meta.vault "/db/uaa:hostname" ))
-      port:     (( vault meta.vault "/db/uaa:port"     ))
+      port:     5432 # Components fail on strings so hardcoding this... :|
       database: (( vault meta.vault "/db/uaa:database" ))
       ca:       
         - (( vault meta.vault "/db/uaa:ca"       ))

@@ -2,9 +2,9 @@
 params:
   base_domain:   (( grab meta.ocfp.cf.fqdns.base ))
   system_domain: (( grab meta.ocfp.cf.fqdns.system ))
-  apps_domains: (( grab meta.ocfp.cf.fqdns.apps ))
+  apps_domains:  (( grab meta.ocfp.cf.fqdns.apps ))
 
-  skip_ssl_validation:              true # Using self-signed certs
+  skip_ssl_validation: true # Using self-signed certs
 
   cf_core_network:    (( concat genesis.env "-ocf" ))
   cf_edge_network:    (( concat genesis.env "-ocf" ))
