@@ -30,10 +30,10 @@ params:
 ---
 # VM Types
 - type: replace
-  path: /instance_groups/name=diego-cell/
+  path: /instance_groups/name=diego-cell/vm_type
   value: diego-cell-prod
 - type: replace
-  path: /instance_groups/name=diego-api/
+  path: /instance_groups/name=diego-api/vm_type
   value: diego-api-prod
 - type: replace
   path: /instance_groups/name=smoke-tests/vm_type

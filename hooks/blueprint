@@ -795,6 +795,10 @@ if [[ ${OCFP} > 0 ]] ; then
 
   manifest+=( "ocfp/external-blobstore.yml" )
 
+  env_scale=$(lookup "params.ocfp.env.scale" "dev")
+
+  manifest+=( "ocfp/scale/${env_scale}.yml" )
+  
   manifest+=(
     "overlay/enable-service-discovery.yml"
     "overlay/addons/autoscaler.yml"
