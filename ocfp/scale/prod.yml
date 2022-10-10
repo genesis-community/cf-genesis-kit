@@ -27,3 +27,48 @@ params:
   tcp_router_vm_type: "tcp-router-prod"
   uaa_vm_type: "uaa-prod"
 
+---
+# VM Types
+- type: replace
+  path: /instance_groups/name=diego-cell/
+  value: diego-cell-prod
+- type: replace
+  path: /instance_groups/name=diego-api/
+  value: diego-api-prod
+- type: replace
+  path: /instance_groups/name=smoke-tests/vm_type
+  value: smoke-tests-prod
+- type: replace
+  path: /instance_groups/name=nats/vm_type
+  value: nats-prod
+- type: replace
+  path: /instance_groups/name=uaa/vm_type
+  value: uaa-prod
+- type: replace
+  path: /instance_groups/name=api/vm_type
+  value: api-prod
+- type: replace
+  path: /instance_groups/name=cc-worker/vm_type
+  value: cc-worker-prod
+- type: replace
+  path: /instance_groups/name=scheduler/vm_type
+  value: scheduler-prod
+- type: replace
+  path: /instance_groups/name=router/vm_type
+  value: router-prod
+- type: replace
+  path: /instance_groups/name=tcp-router/vm_type
+  value: tcp-router-prod
+- type: replace
+  path: /instance_groups/name=doppler/vm_type
+  value: doppler-prod
+- type: replace
+  path: /instance_groups/name=log-api/vm_type
+  value: log-api-prod
+- type: replace
+  path: /instance_groups/name=credhub/vm_type
+  value: credhub-prod
+- type: replace
+  path: /instance_groups/name=rotate-cc-database-key/vm_type
+  value: rotate-cc-database-key-prod
+

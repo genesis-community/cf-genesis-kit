@@ -1,4 +1,5 @@
 ---
+# 3 AZs
 - type: replace
   path: /instance_groups/name=nats/azs
   value: 
@@ -83,4 +84,10 @@
     - (( concat genesis.env "-z1" ))
     - (( concat genesis.env "-z2" ))
     - (( concat genesis.env "-z3" ))
+
+# OCFP Cloud Config accounts for larger ephemeral disks vvv
+- type: remove
+  path: /instance_groups/name=diego-cell/vm_extensions/100GB_ephemeral_disk
+- type: remove
+  path: /instance_groups/name=api/vm_extensions/50GB_ephemeral_disk
 
