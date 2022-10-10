@@ -103,7 +103,7 @@ meta:
   value: (( grab meta.db.uaa.username ))
 - type: replace
   path: /instance_groups/name=uaa/jobs/name=uaa/properties/uaa?/ca_certs/-
-  value: (( grab meta.db.uaa.ca ))
+  value: (( join "" meta.db.uaa.ca ))
 - type: replace
   path: /instance_groups/name=uaa/jobs/name=uaa/properties/uaadb/tls?
   value: (( grab meta.db.uaa.tls ))

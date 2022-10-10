@@ -763,12 +763,16 @@ if [[ ${OCFP} > 0 ]] ; then
     "overlay/enable-service-discovery.yml"
   )
   
-  manifest+=( "overlay/blobstore/meta.yml" )
+  manifest+=(
+  "overlay/blobstore/meta.yml" 
+  "ocfp/external-blobstore.yml"
+  )
+
   case ${iaas} in
     (aws)
       manifest+=( 
       "overlay/blobstore/external.yml"
-      "overlay/blobstore/aws.yml"
+      "ocfp/aws/blobstore.yml" # fog first
       "cf-deployment/operations/use-external-blobstore.yml"
       )
       ;;
@@ -792,8 +796,6 @@ if [[ ${OCFP} > 0 ]] ; then
       ;;
     (*) bail "#R{[ERROR]} Unsupported IaaS: ${iaas}" ;;
   esac
-
-  manifest+=( "ocfp/external-blobstore.yml" )
 
   env_scale=$(lookup "params.ocfp.env.scale" "dev")
 
