@@ -229,25 +229,25 @@ meta:
 # API - Routing API
 - type: replace
   path: /instance_groups/name=api/jobs/name=routing-api/properties/routing_api/sqldb/type
-  value: (( grab meta.db.routing_api.api_scheme ))
+  value: (( grab meta.db.routing_api.scheme ))
 - type: replace
   path: /instance_groups/name=api/jobs/name=routing-api/properties/routing_api/sqldb/port
-  value: (( grab meta.db.routing_api.api_port ))
+  value: (( grab meta.db.routing_api.port ))
 - type: replace
   path: /instance_groups/name=api/jobs/name=routing-api/properties/routing_api/sqldb/schema
-  value: (( grab meta.db.routing_api.api_database ))
+  value: (( grab meta.db.routing_api.database ))
 - type: replace
   path: /instance_groups/name=api/jobs/name=routing-api/properties/routing_api/sqldb/host?
-  value: (( grab meta.db.routing_api.api_hostname ))
+  value: (( grab meta.db.routing_api.hostname ))
 - type: replace
   path: /instance_groups/name=api/jobs/name=routing-api/properties/routing_api/sqldb/password
-  value: (( grab meta.db.routing_api.api_password ))
+  value: (( grab meta.db.routing_api.password ))
 - type: replace
   path: /instance_groups/name=api/jobs/name=routing-api/properties/routing_api/sqldb/username
-  value: (( grab meta.db.routing_api.api_username ))
+  value: (( grab meta.db.routing_api.username ))
 - type: replace
   path: /instance_groups/name=api/jobs/name=routing-api/properties/routing_api/sqldb/ca_cert?
-  value: (( grab meta.db.routing_api.api_ca ))
+  value: (( grab meta.db.routing_api.ca ))
 
 # API - Policy Server
 - type: replace
