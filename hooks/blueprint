@@ -132,19 +132,24 @@ abort=
 warn=
 db_specified=
 opsdir="ops"
+OCFP=0
+iaas=
 
 [[ -n "${PREVIOUS_ENV:-}" ]] && opsdir=".genesis/cached/${PREVIOUS_ENV}/${opsdir}"
 
 for want in $GENESIS_REQUESTED_FEATURES; do
   # Validate requrested features
   case "$want" in
+    (aws|gcp|azure|vsphere)
+      iaas="$want"
+      ;;
     (cf-deployment-version-*) # Check if explicit verison of cf-deployment is requested
       [[ -z "$version" ]] || bail "#R{[ERROR]} You cannot specify more than one cf-deployment-version-* feature"
       version="${want#"cf-deployment-version-"}"
       break;
       ;;
     (ocfp)
-      true
+      OCFP=1
       ;;
     (shield-dbs|shield-blobstores)
       warn=1
@@ -742,27 +747,50 @@ if [[ -n "${version}" ]] && ! new_enough "${version}" "2.0.0-rc0"; then
   :
 fi
 
-if want_feature "ocfp" ; then
-  case "${GENESIS_ENVIRONMENT}" in
-    (*-mgmt*) env_type="mgmt" ;;
-    (*)       env_type="ocf" ;;
-  esac
+if [[ ${OCFP} > 0 ]] ; then
+
+    case ${iaas:-} in
+      (aws|gcp|azure|vsphere) true ;;
+      (*) bail "Expected IaaS feature set in env file with 'ocfp' feature, one of: aws|gcp|azure|vsphere" ;;
+    esac
 
   manifest+=( 
     "ocfp/meta.yml" 
     "ocfp/ocfp.yml"
     "ocfp/${iaas}/ocf.yml"
-    "cf-deployment/operations/use-external-dbs.yml"
-    "operations/use-external-dbs-ports.yml"
+    "ocfp/external-db-prep.yml"
     "ocfp/external-db.yml"
     "overlay/enable-service-discovery.yml"
   )
   
+  manifest+=( "overlay/blobstore/meta.yml" )
   case ${iaas} in
-    (aws)   manifest+=( "aws-blobstore" )   ;;
-    (gcp)   manifest+=( "gcp-blobstore" )   ;;
-    (azure) manifest+=( "azure-blobstore" ) ;;
-    (*)     bail "#R{[ERROR]} Unsupported IaaS: ${iaas}" ;;
+    (aws)
+      manifest+=( 
+      "overlay/blobstore/external.yml"
+      "overlay/blobstore/aws.yml"
+      "cf-deployment/operations/use-external-blobstore.yml"
+      )
+      ;;
+    (gcp)
+      manifest+=( 
+      "overlay/blobstore/external.yml"
+      "cf-deployment/operations/use-external-blobstore.yml"
+      "cf-deployment/operations/use-gcs-blobstore-access-key.yml"
+      )
+      ;;
+    (azure)
+      manifest+=( 
+        "overlay/blobstore/external.yml" \
+        "overlay/blobstore/azure.yml" \
+        "cf-deployment/operations/use-external-blobstore.yml" \
+        "cf-deployment/operations/use-azure-storage-blobstore.yml" \
+      )
+      ;;
+    (vsphere)
+      true # Use internal blobstore?
+      ;;
+    (*) bail "#R{[ERROR]} Unsupported IaaS: ${iaas}" ;;
   esac
 
   manifest+=(
@@ -772,9 +800,9 @@ if want_feature "ocfp" ; then
     "overlay/addons/prometheus.yml"
     "overlay/addons/ssh-proxy-on-routers.yml"
    )
-    #- scs-config-server-integration (rename from config-server-client)
-    #- scs-registry-integration
-    #- stratos-integration
+   #- scs-config-server-integration (rename from config-server-client)
+   #- scs-registry-integration
+   #- stratos-integration
 fi
 
 echo "${manifest[@]}"

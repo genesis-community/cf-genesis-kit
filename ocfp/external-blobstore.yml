@@ -1,0 +1,7 @@
+---
+params:
+  blobstore_s3_region:              (( vault meta.ocfp.vault.tf "/bosh/iaas/region:name" ))
+  blobstore_app_packages_directory: (( vault meta.ocfp.vault.tf "/blobstores/app_packages:name" ))
+  blobstore_buildpacks_directory:   (( vault meta.ocfp.vault.tf "/blobstores/buildpacks:name" ))
+  blobstore_droplets_directory:     (( vault meta.ocfp.vault.tf "/blobstores/droplets:name" ))
+  blobstore_resources_directory:    (( vault meta.ocfp.vault.tf "/blobstores/resources:name" ))

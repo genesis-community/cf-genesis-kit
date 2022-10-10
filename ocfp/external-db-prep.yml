@@ -1,45 +1,45 @@
 ---
 # Remove MySQL
 - type: remove
-  path: /instance_groups/name=database
+  path: /instance_groups/name=database?
 - type: remove
-  path: /releases/name=pxc
+  path: /releases/name=pxc?
 
 # Remove MySQL variables
 - type: remove
-  path: /variables/name=cf_mysql_mysql_admin_password
+  path: /variables/name=cf_mysql_mysql_admin_password?
 - type: remove
-  path: /variables/name=cf_mysql_mysql_cluster_health_password
+  path: /variables/name=cf_mysql_mysql_cluster_health_password?
 - type: remove
-  path: /variables/name=cf_mysql_mysql_galera_healthcheck_endpoint_password
+  path: /variables/name=cf_mysql_mysql_galera_healthcheck_endpoint_password?
 - type: remove
-  path: /variables/name=cf_mysql_mysql_galera_healthcheck_password
+  path: /variables/name=cf_mysql_mysql_galera_healthcheck_password?
 - type: remove
-  path: /variables/name=cf_mysql_proxy_api_password
+  path: /variables/name=cf_mysql_proxy_api_password?
 - type: remove
-  path: /variables/name=network_policy_database_password
+  path: /variables/name=network_policy_database_password?
 - type: remove
-  path: /variables/name=network_connectivity_database_password
+  path: /variables/name=network_connectivity_database_password?
 - type: remove
-  path: /variables/name=routing_api_database_password
+  path: /variables/name=routing_api_database_password?
 - type: remove
-  path: /variables/name=locket_database_password
+  path: /variables/name=locket_database_password?
 - type: remove
-  path: /variables/name=cc_database_password
+  path: /variables/name=cc_database_password?
 - type: remove
-  path: /variables/name=credhub_database_password
+  path: /variables/name=credhub_database_password?
 - type: remove
-  path: /variables/name=diego_database_password
+  path: /variables/name=diego_database_password?
 - type: remove
-  path: /variables/name=uaa_database_password
+  path: /variables/name=uaa_database_password?
 - type: remove
-  path: /variables/name=pxc_galera_ca
+  path: /variables/name=pxc_galera_ca?
 - type: remove
-  path: /variables/name=pxc_server_ca
+  path: /variables/name=pxc_server_ca?
 - type: remove
-  path: /variables/name=galera_server_certificate
+  path: /variables/name=galera_server_certificate?
 - type: remove
-  path: /variables/name=mysql_server_certificate
+  path: /variables/name=mysql_server_certificate?
 
 # nil out database bosh links
 - type: replace

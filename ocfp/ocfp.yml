@@ -1,32 +1,26 @@
 ---
 params:
-  base_domain:   (( vault meta.ocfp.vault.tf "/ocfp/ocf/dns:base_domain" ))
-  system_domain: (( vault meta.ocfp.vault.tf "/ocfp/ocf/dns:system_domain" ))
+  base_domain:   (( vault meta.ocfp.vault.tf "/ocf/fqdns:base" ))
+  system_domain: (( vault meta.ocfp.vault.tf "/ocf/fqdns:system" ))
   apps_domains:
-  - (( vault meta.ocfp.vault.tf "/ocfp/ocf/dns:apps_domain" ))
+  - (( vault meta.ocfp.vault.tf "/ocf/fqdns:apps" ))
 
-  blobstore_s3_region:              (( vault meta.ocfp.vault.tf "/bosh/iaas/vpc:region" ))
-  blobstore_app_packages_directory: (( vault meta.vault "blobstores/app_packages:name" ))
-  blobstore_buildpacks_directory:   (( vault meta.vault "blobstores/buildpacks:name" ))
-  blobstore_droplets_directory:     (( vault meta.vault "blobstores/droplets:name" ))
-  blobstore_resources_directory:    (( vault meta.vault "blobstores/resources:name" ))
   skip_ssl_validation:              true # Using self-signed certs
 
-# Load Balancer Attachments
 instance_groups:
 - name: router
   vm_extensions:
-  - ((replace)
+  - ((replace))
   - cf-system-apps-lb
 
 - name: scheduler
   vm_extensions:
-  - ((replace)
+  - ((append))
   - cf-ssh-lb
 
 - name: tcp-router
   vm_extensions:
-  - ((replace)
+  - ((replace))
   - cf-tcp-lb
 
 - name: diego-cell
