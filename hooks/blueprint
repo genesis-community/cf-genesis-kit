@@ -793,6 +793,8 @@ if [[ ${OCFP} > 0 ]] ; then
     (*) bail "#R{[ERROR]} Unsupported IaaS: ${iaas}" ;;
   esac
 
+  manifest+=( "ocfp/external-blobstore.yml" )
+
   manifest+=(
     "overlay/enable-service-discovery.yml"
     "overlay/addons/autoscaler.yml"
