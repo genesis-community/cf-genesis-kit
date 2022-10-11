@@ -806,7 +806,6 @@ if [[ ${OCFP} > 0 ]] ; then
     "overlay/addons/autoscaler.yml"
     "overlay/addons/app-scheduler.yml"
     "overlay/addons/prometheus.yml"
-    "overlay/addons/ssh-proxy-on-routers.yml"
    )
    #- scs-config-server-integration (rename from config-server-client)
    #- scs-registry-integration

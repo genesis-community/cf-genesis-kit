@@ -73,7 +73,7 @@
     - (( concat genesis.env "-z2" ))
     - (( concat genesis.env "-z3" ))
 - type: replace
-  path: /instance_groups/name=rotate-cc-database-key/azs
+  path: /instance_groups/name=rotate-cc-database-key?/azs
   value:
     - (( concat genesis.env "-z1" ))
     - (( concat genesis.env "-z2" ))

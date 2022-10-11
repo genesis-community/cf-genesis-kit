@@ -19,7 +19,7 @@ instance_groups:
 
 - name: scheduler
   vm_extensions:
-  - ((append))
+  - ((replace))
   - cf-ssh-lb
 
 - name: tcp-router

@@ -66,7 +66,7 @@ params:
   path: /instance_groups/name=credhub/vm_type
   value: credhub-dev
 - type: replace
-  path: /instance_groups/name=rotate-cc-database-key/vm_type
+  path: /instance_groups/name=rotate-cc-database-key?/vm_type
   value: default-dev
 - type: replace
   path: /instance_groups/name=smoke-tests/vm_type
