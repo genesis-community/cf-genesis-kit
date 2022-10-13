@@ -472,6 +472,10 @@ for want in $GENESIS_REQUESTED_FEATURES; do
       manifest+=( "overlay/addons/app-scheduler.yml" )
       ;;
 
+    (config-server-integration)
+      manifest+=( "overlay/addons/config-server.yml" )
+      ;;
+
     (prometheus-integration)
       manifest+=( "overlay/addons/prometheus.yml" )
       ;;
@@ -805,6 +809,7 @@ if [[ ${OCFP} > 0 ]] ; then
     "overlay/enable-service-discovery.yml"
     "overlay/addons/autoscaler.yml"
     "overlay/addons/app-scheduler.yml"
+    "overlay/addons/config-server.yml"
     "overlay/addons/prometheus.yml"
    )
    #- scs-config-server-integration (rename from config-server-client)
