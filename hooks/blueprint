@@ -751,12 +751,12 @@ if [[ -n "${version}" ]] && ! new_enough "${version}" "2.0.0-rc0"; then
   :
 fi
 
-if [[ ${OCFP} > 0 ]] ; then
-
-    case ${iaas:-} in
-      (aws|gcp|azure|vsphere) true ;;
-      (*) bail "Expected IaaS feature set in env file with 'ocfp' feature, one of: aws|gcp|azure|vsphere" ;;
-    esac
+if [[ ${OCFP} > 0 ]]
+then
+  case ${iaas:-} in
+    (aws|gcp|azure|vsphere) true ;;
+    (*) bail "Expected IaaS feature set in env file with 'ocfp' feature, one of: aws|gcp|azure|vsphere" ;;
+  esac
 
   manifest+=( 
     "ocfp/meta.yml" 
@@ -765,11 +765,8 @@ if [[ ${OCFP} > 0 ]] ; then
     "ocfp/external-db-prep.yml"
     "ocfp/external-db.yml"
     "overlay/enable-service-discovery.yml"
-  )
-  
-  manifest+=(
-  "overlay/blobstore/meta.yml" 
-  "ocfp/external-blobstore.yml"
+    "overlay/blobstore/meta.yml" 
+    "ocfp/external-blobstore.yml"
   )
 
   case ${iaas} in
@@ -779,6 +776,9 @@ if [[ ${OCFP} > 0 ]] ; then
       "ocfp/aws/blobstore.yml" # fog first
       "cf-deployment/operations/use-external-blobstore.yml"
       )
+      if want_feature "windows-diego-cells"; then
+        manifest+=( "ocfp/aws/windows.yml" )
+      fi
       ;;
     (gcp)
       manifest+=( 
@@ -786,6 +786,9 @@ if [[ ${OCFP} > 0 ]] ; then
       "cf-deployment/operations/use-external-blobstore.yml"
       "cf-deployment/operations/use-gcs-blobstore-access-key.yml"
       )
+      #if want_feature "windows-diego-cells"; then
+      #  manifest+=( "ocfp/gcp/windows.yml" )
+      #fi
       ;;
     (azure)
       manifest+=( 
@@ -794,8 +797,14 @@ if [[ ${OCFP} > 0 ]] ; then
         "cf-deployment/operations/use-external-blobstore.yml" \
         "cf-deployment/operations/use-azure-storage-blobstore.yml" \
       )
+      #if want_feature "windows-diego-cells"; then
+      #  manifest+=( "ocfp/azure/windows.yml" )
+      #fi
       ;;
     (vsphere)
+      #if want_feature "windows-diego-cells"; then
+      #  manifest+=( "ocfp/vsphere/windows.yml" )
+      #fi
       true # Use internal blobstore?
       ;;
     (*) bail "#R{[ERROR]} Unsupported IaaS: ${iaas}" ;;
