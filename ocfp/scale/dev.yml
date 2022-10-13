@@ -27,7 +27,6 @@ params:
   tcp_router_vm_type: "tcp-router-dev"
   uaa_vm_type: "uaa-dev"
   windows_diego_cell_vm_type: "windows-cell-dev"
-  smoke_tests_vm_type: "smoke-tests-dev"
 
 ---
 # VM Types

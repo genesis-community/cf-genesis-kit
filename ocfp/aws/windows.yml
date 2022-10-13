@@ -30,5 +30,5 @@
 
 - type: replace
   path: /instance_groups/name=smoke-tests-windows/vm_type
-  value: (( grab params.smoke_tests_vm_type  || "default" ))
+  value: (( grab params.errand_vm_type || "default" ))
 
