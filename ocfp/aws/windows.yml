@@ -1,0 +1,34 @@
+---
+- type: replace
+  path: /instance_groups/name=windows2019-cell/networks
+  value: 
+    - name:  (( concat genesis.env "-ocf" ))
+
+- type: replace
+  path: /instance_groups/name=windows2019-cell/azs
+  value: 
+    - name:  (( concat genesis.env "-ocf" ))
+    - (( concat genesis.env "-z1" ))
+    - (( concat genesis.env "-z2" ))
+    - (( concat genesis.env "-z3" ))
+
+- type: replace
+  path: /instance_groups/name=windows2019-cell/vm_type
+  value:  (( grab params.windows_diego_cell_vm_type  || "default" ))
+
+- type: replace
+  path: /instance_groups/name=windows2019-cell/instances
+  value:  (( grab params.windows_diego_cell_instances || 1 ))
+
+- type: remove
+  path: /instance_groups/name=windows2019-cell/vm_extensions
+
+- type: replace
+  path: /instance_groups/name=smoke-tests-windows/networks
+  value: 
+    - name:  (( concat genesis.env "-ocf" ))
+
+- type: replace
+  path: /instance_groups/name=smoke-tests-windows/vm_type
+  value: (( grab params.smoke_tests_vm_type  || "default" ))
+
