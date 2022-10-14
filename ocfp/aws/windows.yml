@@ -22,16 +22,19 @@
 - type: remove
   path: /instance_groups/name=windows2019-cell/vm_extensions
 
-- type: replace
-  path: /instance_groups/name=smoke-tests-windows/networks
-  value: 
-    - name:  (( concat genesis.env "-ocf" ))
+- type: remove
+  path: /instance_groups/name=smoke-tests-windows?
 
-  path: /instance_groups/name=smoke-tests-windows/azs
-  value: 
-    - (( concat genesis.env "-z1" ))
-
-- type: replace
-  path: /instance_groups/name=smoke-tests-windows/vm_type
-  value: (( grab params.errand_vm_type || "default" ))
+#- type: replace
+#  path: /instance_groups/name=smoke-tests-windows/networks
+#  value: 
+#    - name:  (( concat genesis.env "-ocf" ))
+#
+#  path: /instance_groups/name=smoke-tests-windows/azs
+#  value: 
+#    - (( concat genesis.env "-z1" ))
+#
+#- type: replace
+#  path: /instance_groups/name=smoke-tests-windows/vm_type
+#  value: (( grab params.errand_vm_type || "default" ))
 
