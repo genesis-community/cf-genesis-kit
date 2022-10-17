@@ -9,7 +9,7 @@ instance_groups:
     properties:
       uaa:
         clients:
-          stratos:
+          stratos_client:
             authorized-grant-types: authorization_code,client_credentials,refresh_token
             redirect-uri: (( concat "https://" meta.stratos_domain "/pp/v1/auth/sso_login_callback" ))
             autoapprove: true # Bypass users approval
