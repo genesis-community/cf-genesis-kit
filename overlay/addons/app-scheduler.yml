@@ -1,7 +1,7 @@
 ---
 exodus:
   app_scheduler_client: app_scheduler_client
-  app_scheduler_secret: (( grab instance_groups.uaa.jobs.uaa.properties.uaa.clients.app_scheduler_client.secret ))
+  app_scheduler_secret: ((uaa_clients_app_scheduler_secret))
   nats_client_cert:     ((nats_client_cert.certificate))
   nats_client_key:      ((nats_client_cert.private_key))
 

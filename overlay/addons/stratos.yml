@@ -2,10 +2,6 @@
 meta:
   stratos_domain: (( concat "console." params.apps_domain )) 
 
-exodus:
-  stratos_client: stratos_client
-  stratos_secret: (( grab instance_groups.uaa.jobs.uaa.properties.uaa.clients.stratos_client.secret ))
-
 instance_groups:
 - name: uaa
   jobs:
@@ -27,4 +23,8 @@ instance_groups:
 variables:
 - name: stratos_client_secret
   type: password
+
+exodus:
+  stratos_client: stratos_client
+  stratos_secret: ((stratos_client_secret))
 

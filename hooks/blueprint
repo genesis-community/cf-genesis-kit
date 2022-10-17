@@ -826,7 +826,7 @@ then
     "overlay/addons/prometheus.yml"
    )
 
-   if want-feature "stratos-integration"; then
+   if want_feature "stratos-integration"; then
      manifest+=( "ocfp/stratos.yml" )
    fi
    # TODO: 
