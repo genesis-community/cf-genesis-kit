@@ -1,13 +1,13 @@
 #!/bin/bash
 set -eu
 
-tf_path=$(lookup meta.ocfp.vault.tf)
-exodus_path=$(lookup genesis.exodus)
+tf_path=$(lookup --partial meta.ocfp.vault.tf)
+exodus_path=$(lookup --partial genesis.exodus)
 
 stratos_version="4.4.0"
 
-system_api_domain=$(safe get ${tf_path}/lbs/cf:domain)
-stratos_domain=$(safe get ${tf_path}/lbs/stratos:domain)
+system_api_domain=$(safe get ${tf_path}/ocf/fqdns:system)
+stratos_domain=$(safe get ${tf_path}/ocf/fqdns:stratos)
 
 stratos_db_hostname=$(safe get ${tf_path}/stratos/db/stratos:hostname)
 stratos_db_username=$(safe get ${tf_path}/stratos/db/stratos:username)
@@ -22,6 +22,7 @@ stratos_session_store_sekret=$(echo $RANDOM | sha256sum | awk '{print $1}')
 stratos_client_secret=$(safe get ${exodus_path}/stratos_client:secret)
 
 tmp_dir=$(mktemp -d)
+
 cd ${tmp_dir}
 
 cf cups console_db_tls_verify_ca  -p "$(

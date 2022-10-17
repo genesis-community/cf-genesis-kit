@@ -14,19 +14,20 @@ list() {
   echo
   echo "  smoketest         Run the smoke tests errand on the first vm in the"
   echo "                    api instance group."
+  echo
+  echo "  stratos           Deploy Stratos, the Cloud Foundry web console."
+  echo 
 }
-
 
 login() {
   if ! cf plugins | grep -q '^cf-targets'; then
     describe "#Y{The cf-targets plugin does not seem to be installed}"
-        echo "Install it first, via 'genesis do $GENESIS_ENVIRONMENT -- setup-cli'"
+    echo "Install it first, via 'genesis do $GENESIS_ENVIRONMENT -- setup-cli'"
     exit 1
   fi
 
-  base="$(lookup params.base_domain)"
-  system_domain="$(lookup --exodus system_domain "system.$base")"
-  api_url=https://api.$system_domain
+  api_domain="$(exodus api_domain)"
+  api_url="https://api.${api_domain}"
   username="$(exodus admin_username)"
   password="$(exodus admin_password)"
 
@@ -34,64 +35,56 @@ login() {
   cf api "$api_url" --skip-ssl-validation
   cf auth "$username" "$password"
   cf save-target -f "$GENESIS_ENVIRONMENT"
-  echo ; echo
+  echo -e "\n\n"
   cf target
 }
 
 case $GENESIS_ADDON_SCRIPT in
-list)
-  list
-  exit 0
-  ;;
-
-login)
-  login
-  exit 0
-  ;;
-
-remigrate)
-  # Migrate the secrets
-  set -e
-  #shellcheck disable=SC1091
-  source ./hooks/migrate-to-2.0
-  validate_expected_vault_secrets
-  correct_x509_certs
-  migrate_credentials_to_credhub
-  ;;
-
-setup-cli)
-
-	force=0
-	while test $# -gt 0 ; do
-		case "$1" in
-			-f) force=1;;
-			-*) describe "#R{[ERROR]} Bad option $1: expecting -f" && exit 1 ;;
-			*)  describe "#R{[ERROR]} setup-cli does not take any arguments" && exit 1;;
-		esac
-		shift
-	done
-  if ! cf list-plugin-repos | grep -q CF-Community; then
-    describe 'Adding #G{Cloud Foundry Community} plugins repository...'
-    cf add-plugin-repo CF-Community http://plugins.cloudfoundry.org
-  fi
-  if ! cf plugins | grep -q '^cf-targets'; then
-    describe 'Installing the #C{cf-targets} plugin...'
-		cmd=( cf install-plugin -r CF-Community Targets )
-		if [[ "$force" == "1" ]] ; then
-			cmd+=( -f )
-		fi
-    "${cmd[@]}"
-  fi
-  cf plugins
-  ;;
-
-smoketest)
-  "$GENESIS_BOSH_COMMAND" -e "$BOSH_ENVIRONMENT" -d "$BOSH_DEPLOYMENT" run-errand smoke_tests
-  ;;
-
-*)
-  echo "Unrecognized Cloud Foundry Genesis Kit addon."
-  list
-  exit 1
-  ;;
+  (list) list ; exit 0 ;;
+  
+  (login) login ; exit 0 ;;
+  
+  (remigrate)
+    # Migrate the secrets
+    set -e
+    #shellcheck disable=SC1091
+    source ./hooks/migrate-to-2.0
+    validate_expected_vault_secrets
+    correct_x509_certs
+    migrate_credentials_to_credhub
+    ;;
+  
+  (setup-cli)
+    force=0
+    while test $# -gt 0 ; do
+      case "$1" in
+        (-f) force=1;;
+        (-*) describe "#R{[ERROR]} Bad option $1: expecting -f" && exit 1 ;;
+        (*)  describe "#R{[ERROR]} setup-cli does not take any arguments" && exit 1;;
+      esac
+      shift
+    done
+    if ! cf list-plugin-repos | grep -q CF-Community; then
+      describe 'Adding #G{Cloud Foundry Community} plugins repository...'
+      cf add-plugin-repo CF-Community http://plugins.cloudfoundry.org
+    fi
+    if ! cf plugins | grep -q '^cf-targets'; then
+      describe 'Installing the #C{cf-targets} plugin...'
+      cmd=( cf install-plugin -r CF-Community Targets )
+      if [[ "$force" == "1" ]] ; then
+        cmd+=( -f )
+      fi
+      "${cmd[@]}"
+    fi
+    cf plugins
+    ;;
+  
+  (smoketest)
+    "$GENESIS_BOSH_COMMAND" -e "$BOSH_ENVIRONMENT" -d "$BOSH_DEPLOYMENT" run-errand smoke_tests
+    ;;
+  
+  (*) run_extended_addon ;; # This will run the addon script in the
+                            # $GENESIS_ADDON_SCRIPT file, if it exists.
+                            # Ex: hooks/addon-stratos
 esac
+
