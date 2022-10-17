@@ -1,0 +1,9 @@
+---
+bosh-variables:
+  nfs-ldap-service-user:     (( vault meta.vault "/nfs/ldap:user" ))
+  nfs-ldap-service-password: (( vault meta.vault "/nfs/ldap:pass" ))
+  nfs-ldap-host:             (( vault meta.vault "/nfs/ldap:host" ))
+  nfs-ldap-port:             (( vault meta.vault "/nfs/ldap:port" ))
+  nfs-ldap-proto:            (( vault meta.vault "/nfs/ldap:proto" ))
+  nfs-ldap-fqdn:             (( vault meta.vault "/nfs/ldap:fqdn" ))
+
