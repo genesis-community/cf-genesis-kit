@@ -83,7 +83,7 @@ case $GENESIS_ADDON_SCRIPT in
     "$GENESIS_BOSH_COMMAND" -e "$BOSH_ENVIRONMENT" -d "$BOSH_DEPLOYMENT" run-errand smoke_tests
     ;;
   
-  (*) run_extended_addon ;; # This will run the addon script in the
+  (*) run_extended_addon "$@" ;; # This will run the addon script in the
                             # $GENESIS_ADDON_SCRIPT file, if it exists.
                             # Ex: hooks/addon-stratos
 esac

@@ -11,6 +11,7 @@ meta:
       trusted:
         - (( vault genesis.secrets_mount "certs/org:ca" )) # Organization CA, if exists
         - (( vault genesis.secrets_mount "certs/dbs:ca" )) # External Databases CA
+        # TODO: Add Blacksmith Services CA here, add in blacksmith integration
 
     cf:
       fqdns:
