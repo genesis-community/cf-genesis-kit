@@ -25,3 +25,7 @@ params:
   nfs-ldap-proto:            (( grab meta.nfs.ldap.proto ))
   nfs-ldap-fqdn:             (( grab meta.nfs.ldap.fqdn ))
 
+---
+- type: replace
+  path: /instance_groups/name=diego-cell/jobs/name=nfsv3driver/properties/nfsv3driver/ldap_ca_cert?
+  value: (( vault genesis.secrets_mount "certs/org:ca" ))
