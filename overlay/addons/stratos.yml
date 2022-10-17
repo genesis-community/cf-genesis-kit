@@ -1,4 +1,7 @@
 ---
+meta:
+  stratos_domain: (( concat "console." params.apps_domain )) 
+
 exodus:
   stratos_client: stratos_client
   stratos_secret: (( grab instance_groups.uaa.jobs.uaa.properties.uaa.clients.stratos_client.secret ))
@@ -12,10 +15,7 @@ instance_groups:
         clients:
           stratos:
             authorized-grant-types: authorization_code,client_credentials,refresh_token
-            # TODO: Account for non-ocfp vvv
-# TODO: vvv add the META
-            redirect-uri: (( concat "https://" meta.ocfp.lbs.stratos.domain "/pp/v1/auth/sso_login_callback" ))
-            #redirect-uri: (( concat https://${stratos_domain}/pp/v1/auth/sso_login_callback
+            redirect-uri: (( concat "https://" meta.stratos_domain "/pp/v1/auth/sso_login_callback" ))
             autoapprove: true # Bypass users approval
             access-token-validity: 1200
             authorities: uaa.none

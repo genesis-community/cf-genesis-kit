@@ -825,6 +825,11 @@ then
     "overlay/addons/config-server.yml"
     "overlay/addons/prometheus.yml"
    )
+
+   if want-feature "stratos-integration"; then
+     manifest+=( "ocfp/stratos.yml" )
+   fi
+   # TODO: 
    #- scs-config-server-integration (rename from config-server-client)
    #- scs-registry-integration
 fi

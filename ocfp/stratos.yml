@@ -1,0 +1,4 @@
+---
+meta:
+  stratos_domain: (( vault meta.ocfp.vault.tf "/ocf/fqdns:apps" ))
+
