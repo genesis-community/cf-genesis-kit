@@ -1,28 +1,43 @@
 #!/bin/bash
 set -eu
 
-tf_path=$(lookup --partial meta.ocfp.vault.tf)
-exodus_path=$(lookup --partial genesis.exodus)
-
 stratos_version="4.4.0"
 
-system_api_domain=$(safe get ${tf_path}/ocf/fqdns:system)
-stratos_domain=$(safe get ${tf_path}/ocf/fqdns:stratos)
+exodus_path=$(lookup --partial genesis.exodus)
 
-stratos_db_hostname=$(safe get ${tf_path}/stratos/db/stratos:hostname)
-stratos_db_username=$(safe get ${tf_path}/stratos/db/stratos:username)
-stratos_db_password=$(safe get ${tf_path}/stratos/db/stratos:password)
-stratos_db_port=$(    safe get ${tf_path}/stratos/db/stratos:port)
-stratos_db_database=$(safe get ${tf_path}/stratos/db/stratos:database)
-stratos_db_sslmode=$( safe get ${tf_path}/stratos/db/stratos:sslmode) # verify-ca
+system_api_domain="$(exodus api_domain)"
+
+secrets_mount=$(lookup genesis.secrets_mount)
+vault_env=$(lookup genesis.env)
+case "${GENESIS_REQUESTED_FEATURES}" in
+  (*ocfp*)
+    tf_path=$(lookup --partial meta.ocfp.vault.tf)
+    env_path="${secrets_mount}/${vault_env}"
+
+    stratos_domain=$(safe get ${tf_path}/ocf/fqdns:stratos) 
+    stratos_db_hostname=$(safe get ${env_path}/stratos/db/stratos:hostname)
+    stratos_db_username=$(safe get ${env_path}/stratos/db/stratos:username)
+    stratos_db_password=$(safe get ${env_path}/stratos/db/stratos:password)
+    stratos_db_port=$(    safe get ${env_path}/stratos/db/stratos:port)
+    stratos_db_database=$(safe get ${env_path}/stratos/db/stratos:database)
+    stratos_db_sslmode=$( safe get ${env_path}/stratos/db/stratos:sslmode) # verify-ca
+    ;;
+  (*)
+    stratos_domain="console.$(exodus apps_domain)"
+    stratos_db_hostname=$(lookup params.db_hostname)
+    stratos_db_username=$(lookup params.db_username "stratos")
+    stratos_db_password=$(lookup params.db_password "stratos")
+    stratos_db_port=$(    lookup params.db_port     5432)
+    stratos_db_database=$(lookup params.db_database "stratos")
+    stratos_db_sslmode=$( lookup params.db_sslmode  "disabled") # verify-ca
+    ;;
+esac
 
 stratos_session_store_sekret=$(echo $RANDOM | sha256sum | awk '{print $1}')
-
-# TODO: `stratos-integration` ~ exodus ~> stratos_client:secret
+# TODO: Feature: `stratos` ~> exodus ~> stratos_client:secret
 stratos_client_secret=$(safe get ${exodus_path}/stratos_client:secret)
 
 tmp_dir=$(mktemp -d)
-
 cd ${tmp_dir}
 
 cf cups console_db_tls_verify_ca  -p "$(
