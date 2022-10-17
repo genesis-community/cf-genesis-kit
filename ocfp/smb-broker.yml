@@ -1,0 +1,17 @@
+---
+- type: replace
+  path: /instance_groups/name=smb-broker-push/networks
+  value: 
+    - name:  (( concat genesis.env "-ocf" ))
+
+- type: replace
+  path: /instance_groups/name=smb-broker-push/azs
+  value: 
+    - (( concat genesis.env "-z1" ))
+
+- type: replace
+  path: /instance_groups/name=smb-broker-push/vm_type
+  value:  (( grab params.errand_vm_type  || "default" ))
+
+
+

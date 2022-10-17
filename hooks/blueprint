@@ -834,6 +834,9 @@ then
    if want_feature "nfs-ldap"; then
      manifest+=( "ocfp/nfs-ldap.yml" )
    fi
+   if want_feature "smb-volume-services"; then
+     manifest+=( "ocfp/smb-broker.yml" )
+   fi
 
    # TODO: 
    #- scs-config-server-integration (rename from config-server-client)
