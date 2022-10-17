@@ -830,6 +830,11 @@ then
    if want_feature "stratos-integration"; then
      manifest+=( "ocfp/stratos.yml" )
    fi
+
+   if want_feature "nfs-ldap"; then
+     manifest+=( "ocfp/nfs-ldap.yml" )
+   fi
+
    # TODO: 
    #- scs-config-server-integration (rename from config-server-client)
    #- scs-registry-integration
