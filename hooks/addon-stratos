@@ -63,7 +63,25 @@ cf target -o system -s stratos
 cf cups console_db_tls_verify_ca  -p "$( cat <<-EOF
 { "uri": "${stratos_db_scheme}://", "username":"${stratos_db_username}", "password":"${stratos_db_password}", "hostname":"${stratos_db_hostname}", "port":"${stratos_db_port}", "dbname":"${stratos_db_database}", "sslmode":"${stratos_db_sslmode}" }'
 EOF
-)"
+)" || true
+
+# Security group that allows to talk to VPC IP Rangek
+cat > vpc-sg.json <<EOF
+[
+  {
+    "protocol": "all",
+    "destination": "10.0.0.0-10.255.255.255"
+  }
+]
+EOF
+
+cf create-security-group vpc ${PWD}/vpc-sg.json || true
+cf bind-staging-security-group vpc || true
+cf bind-running-security-group vpc || true
+
+################################################################################
+# To the Stratosphere!
+################################################################################
 
 cat > manifest.yml <<-APPMANIFEST
 applications:
@@ -87,22 +105,5 @@ applications:
     - console_db_tls_verify_ca
 APPMANIFEST
 
-# Security group that allows to talk to VPC IP Rangek
-cat > vpc-sg.json <<EOF
-[
-  {
-    "protocol": "all",
-    "destination": "10.0.0.0-10.255.255.255"
-  }
-]
-EOF
-
-cf create-security-group vpc ${PWD}/vpc-sg.json
-cf bind-staging-security-group vpc
-cf bind-running-security-group vpc
-
-################################################################################
-# To the Stratosphere!
-################################################################################
 cf push -f manifest.yml
 
