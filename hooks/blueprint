@@ -771,6 +771,7 @@ then
     "overlay/enable-service-discovery.yml"
     "overlay/blobstore/meta.yml" 
     "ocfp/external-blobstore.yml"
+    "ocfp/trusted-certs.yml"
   )
 
   case ${iaas} in
