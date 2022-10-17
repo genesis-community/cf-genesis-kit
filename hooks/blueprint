@@ -274,7 +274,7 @@ for want in $GENESIS_REQUESTED_FEATURES; do
     (bare|partitioned-network|haproxy|tls|no-nats-tls|self-signed|isolation-segments) features+=( "$want" ) ;;
     (minio-blobstore|aws-blobstore|aws-blobstore-iam|azure-blobstore|gcp-blobstore|gcp-use-access-key) features+=( "$want" ) ;;
     (enable-service-discovery|ssh-proxy-on-routers|no-tcp-routers) features+=( "$want" ) ;;
-    (app-scheduler-integration|app-autoscaler-integration|prometheus-integration|v2-nats-credentials) features+=( "$want" ) ;;
+    (app-scheduler-integration|app-autoscaler-integration|prometheus-integration|stratos-integration|v2-nats-credentials) features+=( "$want" ) ;;
     (windows-diego-cells) features+=( "$want" ) ;;
     (+migrated-v1-env|+override-db-names) features+=( "$want" ) ;;
     (v1-vm-types|no-v1-vm-types)
@@ -478,6 +478,10 @@ for want in $GENESIS_REQUESTED_FEATURES; do
 
     (prometheus-integration)
       manifest+=( "overlay/addons/prometheus.yml" )
+      ;;
+
+    (stratos-integration)
+      manifest+=( "overlay/addons/stratos.yml" )
       ;;
 
     (ssh-proxy-on-routers)
@@ -823,7 +827,6 @@ then
    )
    #- scs-config-server-integration (rename from config-server-client)
    #- scs-registry-integration
-   #- stratos-integration
 fi
 
 echo "${manifest[@]}"

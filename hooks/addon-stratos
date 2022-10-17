@@ -3,7 +3,7 @@ set -eu
 
 stratos_version="4.4.0"
 
-exodus_path=$(lookup --partial genesis.exodus)
+exodus_path=$(lookup --partial genesis.exodus_base)
 
 system_api_domain="$(exodus api_domain)"
 
