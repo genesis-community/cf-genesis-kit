@@ -12,7 +12,7 @@ vault_env=$(lookup genesis.env)
 
 case "${GENESIS_REQUESTED_FEATURES}" in
   (*ocfp*)
-    echo "Looking up OCFP information from the manifest, this will take a moment..."
+    echo "Looking up OCFP information from the manifest, this will take a few moments..."
     tf_path=$(lookup --partial meta.ocfp.vault.tf)
     secrets_mount=$(lookup --partial genesis.secrets_mount)
     vault_env=$(lookup --partial genesis.vault_env)
@@ -27,7 +27,7 @@ case "${GENESIS_REQUESTED_FEATURES}" in
     stratos_db_password=$(safe get ${env_path}/stratos/db/stratos:password)
     stratos_db_port=$(    safe get ${env_path}/stratos/db/stratos:port)
     stratos_db_database=$(safe get ${env_path}/stratos/db/stratos:database)
-    stratos_db_sslmode=$( safe get ${env_path}/stratos/db/stratos:sslmode) # verify-ca
+    stratos_db_sslmode="verify-ca"
     ;;
   (*)
     stratos_domain="console.$(exodus apps_domain)"
