@@ -27,7 +27,7 @@ login() {
   fi
 
   api_domain="$(exodus api_domain)"
-  api_url="https://api.${api_domain}"
+  api_url="https://${api_domain}"
   username="$(exodus admin_username)"
   password="$(exodus admin_password)"
 
