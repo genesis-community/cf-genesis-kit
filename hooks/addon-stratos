@@ -9,12 +9,16 @@ system_api_domain="$(exodus api_domain)"
 
 secrets_mount=$(lookup genesis.secrets_mount)
 vault_env=$(lookup genesis.env)
+
 case "${GENESIS_REQUESTED_FEATURES}" in
   (*ocfp*)
     tf_path=$(lookup --partial meta.ocfp.vault.tf)
-    env_path="${secrets_mount}/${vault_env}"
+    secrets_mount=$(lookup --partial genesis.secrets_mount)
+    vault_env=$(lookup --partial genesis.vault_env)
+    env_path="${secrets_mount}${vault_env}"
 
     stratos_domain=$(safe get ${tf_path}/ocf/fqdns:stratos) 
+
     stratos_db_hostname=$(safe get ${env_path}/stratos/db/stratos:hostname)
     stratos_db_username=$(safe get ${env_path}/stratos/db/stratos:username)
     stratos_db_password=$(safe get ${env_path}/stratos/db/stratos:password)
@@ -24,6 +28,7 @@ case "${GENESIS_REQUESTED_FEATURES}" in
     ;;
   (*)
     stratos_domain="console.$(exodus apps_domain)"
+
     stratos_db_hostname=$(lookup params.db_hostname)
     stratos_db_username=$(lookup params.db_username "stratos")
     stratos_db_password=$(lookup params.db_password "stratos")
