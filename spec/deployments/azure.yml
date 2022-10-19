@@ -1,0 +1,12 @@
+---
+kit:
+  name:    dev
+  version: 2.0.0
+  features:
+    - azure-blobstore
+
+genesis:
+  env:         azure
+
+params:
+  base_domain: cf.testing.examle

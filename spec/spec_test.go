@@ -131,6 +131,13 @@ var _ = Describe("Interal Kit", func() {
 		CPI:           "aws",
 	})
 	Test(Environment{
+		Name:          "azure",
+		CloudConfig:   "azure",
+		RuntimeConfig: "dns",
+		CredhubVars:   "azure",
+		CPI:           "azure",
+	})
+	Test(Environment{
 		Name:          "no-tcp-routers",
 		CloudConfig:   "aws",
 		RuntimeConfig: "dns",

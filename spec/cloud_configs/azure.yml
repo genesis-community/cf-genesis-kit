@@ -1,0 +1,398 @@
+azs:
+- name: z1
+
+compilation:
+  az: z1
+  network: infra
+  reuse_compilation_vms: true
+  vm_type: compilation-vm
+  workers: 6
+
+disk_types:
+- cloud_properties:
+    storage_account_type: Standard_LRS
+  disk_size: 1024
+  name: small
+- cloud_properties:
+    storage_account_type: Standard_LRS
+  disk_size: 10240
+  name: consul
+- cloud_properties:
+    storage_account_type: Standard_LRS
+  disk_size: 20480
+  name: postgres
+- cloud_properties:
+    storage_account_type: Standard_LRS
+  disk_size: 102400
+  name: blobstore
+- cloud_properties:
+    storage_account_type: Standard_LRS
+  disk_size: 10240
+  name: es_master
+- cloud_properties:
+    storage_account_type: Standard_LRS
+  disk_size: 102400
+  name: es_data
+- cloud_properties:
+    storage_account_type: Standard_LRS
+  disk_size: 102400
+  name: cluster_monitor
+- cloud_properties:
+    storage_account_type: Standard_LRS
+  disk_size: 20480
+  name: queue
+- cloud_properties:
+    storage_account_type: Standard_LRS
+  disk_size: 5120
+  name: rabbitmq
+- cloud_properties:
+    storage_account_type: Standard_LRS
+  disk_size: 102400
+  name: prometheus
+- cloud_properties:
+    storage_account_type: Standard_LRS
+  disk_size: 51200
+  name: concourse
+
+networks:
+- name: infra
+  subnets:
+  - az: z1
+    cloud_properties:
+      subnet_name: dev-infra-0
+      virtual_network_name: Production
+    dns:
+    - 168.63.129.16
+    gateway: 10.0.16.1
+    range: 10.0.16.0/24
+    reserved:
+    - 10.0.16.2 - 10.0.16.3
+    - 10.0.16.4
+    - 10.0.16.32 - 10.0.16.35
+    static:
+    - 10.0.16.5 - 10.0.16.20
+    - 10.0.16.96
+    - 10.0.16.100 - 10.0.16.105
+  type: manual
+- name: prometheus
+  subnets:
+  - az: z1
+    cloud_properties:
+      subnet_name: dev-infra-0
+      virtual_network_name: Production
+    dns:
+    - 168.63.129.16
+    gateway: 10.0.16.1
+    range: 10.0.16.0/24
+    reserved:
+    - 10.0.16.1 - 10.0.16.31
+    - 10.0.16.36 - 10.0.16.255
+    static:
+    - 10.0.16.32
+- name: cf-edge
+  subnets:
+  - az: z1
+    cloud_properties:
+      subnet_name: dev-cf-edge-0
+      virtual_network_name: Production
+    dns:
+    - 168.63.129.16
+    gateway: 10.0.19.1
+    range: 10.0.19.0/25
+    reserved:
+    - 10.0.19.2 - 10.0.19.4
+  type: manual
+- name: cf-core
+  subnets:
+  - az: z1
+    cloud_properties:
+      subnet_name: dev-cf-core-0
+      virtual_network_name: Production
+    dns:
+    - 168.63.129.16
+    gateway: 10.0.20.1
+    range: 10.0.20.0/24
+    reserved:
+    - 10.0.20.2 - 10.0.20.3
+  type: manual
+- name: cf-runtime
+  subnets:
+  - az: z1
+    cloud_properties:
+      subnet_name: dev-cf-runtime-0
+      virtual_network_name: Production
+    dns:
+    - 168.63.129.16
+    gateway: 10.0.23.1
+    range: 10.0.23.0/24
+    reserved:
+    - 10.0.23.2 - 10.0.23.3
+    static: []
+  type: manual
+- name: cf-svc
+  subnets:
+  - az: z1
+    cloud_properties:
+      subnet_name: dev-cf-svc-0
+      virtual_network_name: Production
+    dns:
+    - 168.63.129.16
+    gateway: 10.0.26.1
+    range: 10.0.26.0/24
+    reserved:
+    - 10.0.26.2 - 10.0.26.3
+    - 10.0.26.128 - 10.0.26.255
+    static:
+    - 10.0.26.4
+  type: manual
+- name: blacksmith
+  subnets:
+  - az: z1
+    cloud_properties:
+      subnet_name: dev-cf-svc-0
+      virtual_network_name: Production
+    dns:
+    - 168.63.129.16
+    gateway: 10.0.26.1
+    range: 10.0.26.0/24
+    reserved:
+    - 10.0.26.2 - 10.0.26.127
+    static:
+    - 10.0.26.128 - 10.0.26.135
+  type: manual
+- name: cf-db
+  subnets:
+  - az: z1
+    cloud_properties:
+      subnet_name: dev-cf-db-0
+      virtual_network_name: Production
+    dns:
+    - 168.63.129.16
+    gateway: 10.0.29.1
+    range: 10.0.29.0/28
+    reserved:
+    - 10.0.29.2 - 10.0.29.3
+    static:
+    - 10.0.29.4 - 10.0.29.12
+  type: manual
+
+vm_extensions:
+- cloud_properties:
+    availability_set: my-dev-consul
+  name: consul_as
+- cloud_properties:
+    availability_set: my-dev-haproxy
+  name: haproxy_as
+- cloud_properties:
+    availability_set: my-dev-haproxy-internal
+  name: haproxy_internal_as
+- cloud_properties:
+    availability_set: my-dev-nats
+  name: nats_as
+- cloud_properties:
+    availability_set: my-dev-postgres
+  name: postgres_as
+- cloud_properties:
+    availability_set: my-dev-mysql
+  name: mysql_as
+- cloud_properties:
+    availability_set: my-dev-blobstore
+  name: blobstore_as
+- cloud_properties:
+    availability_set: my-dev-uaa
+  name: uaa_as
+- cloud_properties:
+    availability_set: my-dev-api
+  name: api_as
+- cloud_properties:
+    availability_set: my-dev-doppler
+  name: doppler_as
+- cloud_properties:
+    availability_set: my-dev-loggregator_tc
+  name: loggregator_tc_as
+- cloud_properties:
+    availability_set: my-dev-router
+  name: router_as
+- cloud_properties:
+    availability_set: my-dev-bbs
+  name: bbs_as
+- cloud_properties:
+    availability_set: my-dev-diego
+  name: diego_as
+- cloud_properties:
+    availability_set: my-dev-access
+  name: access_as
+- cloud_properties:
+    availability_set: my-dev-cc-clock
+  name: cc-clock_as
+- cloud_properties:
+    availability_set: my-dev-cc-worker
+  name: cc-worker_as
+- cloud_properties:
+    availability_set: my-dev-cell
+  name: cell_as
+- cloud_properties:
+    availability_set: my-dev-smoketests
+  name: smoketest_as
+- cloud_properties:
+    availability_set: my-dev-rabbitmq-server
+  name: rmq_server_as
+- cloud_properties:
+    availability_set: my-dev-rabbitmq-broker
+  name: rmq_broker_as
+- cloud_properties:
+    availability_set: my-dev-rabbitmq-haproxy
+  name: rmq_haproxy_as
+- cloud_properties:
+    load_balancer: my-cf-dev-public-lb
+    security_group: my-dev-cf-public
+  name: cf-load-balanced
+- cloud_properties:
+    load_balancer: my-cf-dev-internal-lb
+    security_group: my-dev-cf-internal-only
+  name: internal-elb
+- cloud_properties:
+    root_disk:
+      size: 51200
+  name: 50GB_ephemeral_disk
+- cloud_properties:
+    root_disk:
+      size: 102400
+  name: 100GB_ephemeral_disk
+
+vm_types:
+- cloud_properties:
+    ephemeral_disk:
+      use_root_disk: true
+    instance_type: Standard_D2_v2
+    platform_fault_domain_count: 3
+    root_disk:
+      size: 61440
+    security_group: my-concourse-workers
+  name: concourse-worker
+- cloud_properties:
+    ephemeral_disk:
+      use_root_disk: true
+    instance_type: Standard_A0
+    platform_fault_domain_count: 3
+  name: tiny
+- cloud_properties:
+    ephemeral_disk:
+      use_root_disk: true
+    instance_type: Standard_A1_v2
+    platform_fault_domain_count: 3
+  name: small
+- cloud_properties:
+    ephemeral_disk:
+      use_root_disk: true
+    instance_type: Standard_F2s
+    platform_fault_domain_count: 3
+  name: medium
+- cloud_properties:
+    ephemeral_disk:
+      use_root_disk: true
+    instance_type: Standard_F4s
+    platform_fault_domain_count: 3
+  name: large
+- cloud_properties:
+    ephemeral_disk:
+      use_root_disk: true
+    instance_type: Standard_DS11_v2
+    platform_fault_domain_count: 3
+    root_disk:
+      size: 65536
+  name: runtime
+- cloud_properties:
+    availability_set: my-dev-es-master
+    ephemeral_disk:
+      use_root_disk: true
+    instance_type: Standard_A1_v2
+    platform_fault_domain_count: 3
+  name: es_master
+- cloud_properties:
+    availability_set: my-dev-es-data
+    ephemeral_disk:
+      use_root_disk: true
+    instance_type: Standard_D1_v2
+    platform_fault_domain_count: 3
+  name: es_data
+- cloud_properties:
+    availability_set: my-dev-es-cluster-monitor
+    ephemeral_disk:
+      use_root_disk: true
+    instance_type: Standard_D2_v2
+    platform_fault_domain_count: 3
+  name: cluster_monitor
+- cloud_properties:
+    availability_set: my-dev-es-queue
+    ephemeral_disk:
+      use_root_disk: true
+    instance_type: Standard_A2_v2
+    platform_fault_domain_count: 3
+  name: queue
+- cloud_properties:
+    availability_set: my-dev-es-maintenance
+    ephemeral_disk:
+      use_root_disk: true
+    instance_type: Standard_A1_v2
+    platform_fault_domain_count: 3
+  name: maintenance
+- cloud_properties:
+    availability_set: my-dev-es-ingestor
+    ephemeral_disk:
+      use_root_disk: true
+    instance_type: Standard_A1_v2
+    platform_fault_domain_count: 3
+  name: ingestor
+- cloud_properties:
+    availability_set: my-dev-es-parser
+    ephemeral_disk:
+      use_root_disk: true
+    instance_type: Standard_D1_v2
+    platform_fault_domain_count: 3
+  name: parser
+- cloud_properties:
+    availability_set: my-dev-es-ls-router
+    ephemeral_disk:
+      use_root_disk: true
+    instance_type: Standard_A1_v2
+    platform_fault_domain_count: 3
+  name: ls_router
+- cloud_properties:
+    availability_set: my-dev-es-errands
+    ephemeral_disk:
+      use_root_disk: true
+    instance_type: Standard_D1_v2
+    platform_fault_domain_count: 3
+  name: errand
+- cloud_properties:
+    availability_set: my-compilation-vms
+    instance_type: Standard_A2_v2
+  name: compilation-vm
+# TODO
+- name: api
+  cloud_properties: (( grab vm_types.medium.cloud_properties ))
+- name: bbs
+  cloud_properties: (( grab vm_types.small.cloud_properties ))
+- name: cell
+  cloud_properties: (( grab vm_types.runtime.cloud_properties ))
+- name: diego
+  cloud_properties: (( grab vm_types.medium.cloud_properties ))
+- name: doppler
+  cloud_properties: (( grab vm_types.small.cloud_properties ))
+- name: loggregator
+  cloud_properties: (( grab vm_types.medium.cloud_properties ))
+- name: nats
+  cloud_properties: (( grab vm_types.small.cloud_properties ))
+- name: router
+  cloud_properties: (( grab vm_types.small.cloud_properties ))
+- name: syslogger
+  cloud_properties: (( grab vm_types.small.cloud_properties ))
+- name: uaa
+  cloud_properties: (( grab vm_types.medium.cloud_properties ))
+- name: postgres
+  cloud_properties: (( grab vm_types.large.cloud_properties ))
+- name: haproxy
+  cloud_properties: (( grab vm_types.small.cloud_properties ))
+
+
