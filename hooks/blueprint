@@ -274,7 +274,7 @@ for want in $GENESIS_REQUESTED_FEATURES; do
     (bare|partitioned-network|haproxy|tls|no-nats-tls|self-signed|isolation-segments) features+=( "$want" ) ;;
     (minio-blobstore|aws-blobstore|aws-blobstore-iam|azure-blobstore|gcp-blobstore|gcp-use-access-key) features+=( "$want" ) ;;
     (enable-service-discovery|ssh-proxy-on-routers|no-tcp-routers) features+=( "$want" ) ;;
-    (app-scheduler-integration|app-autoscaler-integration|prometheus-integration|stratos-integration|v2-nats-credentials) features+=( "$want" ) ;;
+    (blacksmith-integration|app-scheduler-integration|app-autoscaler-integration|prometheus-integration|stratos-integration|v2-nats-credentials) features+=( "$want" ) ;;
     (windows-diego-cells) features+=( "$want" ) ;;
     (+migrated-v1-env|+override-db-names) features+=( "$want" ) ;;
     (v1-vm-types|no-v1-vm-types)
@@ -462,6 +462,10 @@ for want in $GENESIS_REQUESTED_FEATURES; do
 
     (enable-service-discovery)
       manifest+=( "overlay/enable-service-discovery.yml" )
+      ;;
+
+    (blacksmith-integration)
+      manifest+=( "overlay/addons/blacksmith.yml" )
       ;;
 
     (app-autoscaler-integration)
@@ -826,6 +830,10 @@ then
     "overlay/addons/config-server.yml"
     "overlay/addons/prometheus.yml"
    )
+
+   if want_feature "blacksmith-integration"; then
+     manifest+=( "ocfp/blacksmith.yml" )
+   fi
 
    if want_feature "stratos-integration"; then
      manifest+=( "ocfp/stratos.yml" )
