@@ -56,7 +56,7 @@ generate_dynamic_isolation_segments() {
     fi
   fi
   if want_feature "smb-volume-services" ; then
-    iso_seg_merges+=( overlay/dynamic-templates/isolation-segment-nfs.yml )
+    iso_seg_merges+=( overlay/dynamic-templates/isolation-segment-smb.yml )
   fi
 
   for group in $isolation_groups; do

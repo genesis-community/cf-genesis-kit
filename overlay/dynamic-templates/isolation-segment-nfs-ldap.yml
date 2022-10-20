@@ -11,4 +11,4 @@ instance_groups:
           ldap_proto:        ((nfs-ldap-proto))
           ldap_user_fqdn:    ((nfs-ldap-fqdn))
           allowed-in-source: ""
-          ldap_ca_cert:      ((nfs-ldap-ca-cert.ca))
+          ldap_ca_cert:      (( grab params.nfs-ldap-ca-cert-ca || "((nfs-ldap-ca-cert.ca))" ))
