@@ -12,4 +12,3 @@ params:
   nfs-ldap-port: 389
   nfs-ldap-proto: tcp
   nfs-ldap-fqdn: (( param "Provide value for NFS LDAP fqdn" ))
-
