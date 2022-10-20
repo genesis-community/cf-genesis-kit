@@ -54,7 +54,7 @@ unchanged=()
 changed=()
 while IFS='' read -r rel; do
   prev_ver="$(echo "$prev_releases" | jq -r --arg r "$rel" \
-    '.releases | map(select(.name == $r) | .version) | sort | unique | join(",") | if(.|length>0) then . else "--none--" end | join(",")' )"
+    '.releases | map(select(.name == $r) | .version) | sort | unique | if(.|length>0) then .|join(",") else "--none--" end' )"
   if [[ "$prev_ver" == "--none--" ]] ; then continue ; fi
   curr_ver="$(echo "$curr_releases" | jq -r --arg r "$rel" \
     '.releases | map(select(.name == $r) | .version) | sort | unique | join(",")' )"
@@ -103,7 +103,7 @@ if [[ "${#changed[@]}" -gt 0 && -n "${changed[0]}" ]] ; then
   if [ -f "${ci_dir}/ci/upstreamrepo.yml" ]; then
     upstreamrepo=$(spruce json "${ci_dir}/ci/upstreamrepo.yml")
   else
-    upstreamrepo="[]"
+    upstreamrepo='{"repos": []}'
   fi
   # TODO: do this in two phases -- first phase pull out all the non-compiled
   #       versions, then run through with the compiled versions, picking up the
