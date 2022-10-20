@@ -158,179 +158,169 @@ addons:
       aliases:
       - domain: _.cell.service.cf.internal
         targets:
-        - deployment: isolation-segments-extended-cf
+        - deployment: azure-cf
           domain: bosh
           instance_group: diego-cell
-          network: cf-core
+          network: cf-runtime
           query: _
-        - deployment: isolation-segments-extended-cf
+        - deployment: azure-cf
           domain: bosh
           instance_group: windows2012R2-cell
-          network: cf-core
+          network: cf-runtime
           query: _
-        - deployment: isolation-segments-extended-cf
+        - deployment: azure-cf
           domain: bosh
           instance_group: windows2016-cell
-          network: cf-core
+          network: cf-runtime
           query: _
-        - deployment: isolation-segments-extended-cf
+        - deployment: azure-cf
           domain: bosh
           instance_group: isolated-diego-cell
-          network: cf-core
-          query: _
-        - deployment: isolation-segments-extended-cf
-          domain: bosh
-          instance_group: custom-params-group
-          network: cf-core
-          query: _
-        - deployment: isolation-segments-extended-cf
-          domain: bosh
-          instance_group: default-params-group
-          network: default
+          network: cf-runtime
           query: _
       - domain: auctioneer.service.cf.internal
         targets:
-        - deployment: isolation-segments-extended-cf
+        - deployment: azure-cf
           domain: bosh
           instance_group: scheduler
           network: cf-core
           query: q-s4
       - domain: bbs.service.cf.internal
         targets:
-        - deployment: isolation-segments-extended-cf
+        - deployment: azure-cf
           domain: bosh
           instance_group: diego-api
           network: cf-core
           query: q-s4
       - domain: blobstore.service.cf.internal
         targets:
-        - deployment: isolation-segments-extended-cf
+        - deployment: azure-cf
           domain: bosh
           instance_group: singleton-blobstore
           network: cf-core
           query: '*'
       - domain: cc-uploader.service.cf.internal
         targets:
-        - deployment: isolation-segments-extended-cf
+        - deployment: azure-cf
           domain: bosh
           instance_group: api
           network: cf-core
           query: '*'
       - domain: cloud-controller-ng.service.cf.internal
         targets:
-        - deployment: isolation-segments-extended-cf
+        - deployment: azure-cf
           domain: bosh
           instance_group: api
           network: cf-core
           query: '*'
       - domain: credhub.service.cf.internal
         targets:
-        - deployment: isolation-segments-extended-cf
+        - deployment: azure-cf
           domain: bosh
           instance_group: credhub
           network: cf-core
           query: '*'
       - domain: doppler.service.cf.internal
         targets:
-        - deployment: isolation-segments-extended-cf
+        - deployment: azure-cf
           domain: bosh
           instance_group: doppler
           network: cf-core
           query: '*'
       - domain: file-server.service.cf.internal
         targets:
-        - deployment: isolation-segments-extended-cf
+        - deployment: azure-cf
           domain: bosh
           instance_group: api
           network: cf-core
           query: '*'
       - domain: gorouter.service.cf.internal
         targets:
-        - deployment: isolation-segments-extended-cf
+        - deployment: azure-cf
           domain: bosh
           instance_group: router
           network: cf-edge
           query: '*'
       - domain: locket.service.cf.internal
         targets:
-        - deployment: isolation-segments-extended-cf
+        - deployment: azure-cf
           domain: bosh
           instance_group: diego-api
           network: cf-core
           query: '*'
       - domain: loggregator-trafficcontroller.service.cf.internal
         targets:
-        - deployment: isolation-segments-extended-cf
+        - deployment: azure-cf
           domain: bosh
           instance_group: log-api
           network: cf-core
           query: '*'
       - domain: policy-server.service.cf.internal
         targets:
-        - deployment: isolation-segments-extended-cf
+        - deployment: azure-cf
           domain: bosh
           instance_group: api
           network: cf-core
           query: '*'
       - domain: reverse-log-proxy.service.cf.internal
         targets:
-        - deployment: isolation-segments-extended-cf
+        - deployment: azure-cf
           domain: bosh
           instance_group: log-api
           network: cf-core
           query: '*'
       - domain: routing-api.service.cf.internal
         targets:
-        - deployment: isolation-segments-extended-cf
+        - deployment: azure-cf
           domain: bosh
           instance_group: api
           network: cf-core
           query: '*'
       - domain: silk-controller.service.cf.internal
         targets:
-        - deployment: isolation-segments-extended-cf
+        - deployment: azure-cf
           domain: bosh
           instance_group: diego-api
           network: cf-core
           query: '*'
       - domain: sql-db.service.cf.internal
         targets:
-        - deployment: isolation-segments-extended-cf
+        - deployment: azure-cf
           domain: bosh
           instance_group: database
           network: cf-core
           query: '*'
       - domain: ssh-proxy.service.cf.internal
         targets:
-        - deployment: isolation-segments-extended-cf
+        - deployment: azure-cf
           domain: bosh
           instance_group: scheduler
           network: cf-core
           query: '*'
       - domain: tps.service.cf.internal
         targets:
-        - deployment: isolation-segments-extended-cf
+        - deployment: azure-cf
           domain: bosh
           instance_group: scheduler
           network: cf-core
           query: '*'
       - domain: uaa.service.cf.internal
         targets:
-        - deployment: isolation-segments-extended-cf
+        - deployment: azure-cf
           domain: bosh
           instance_group: uaa
           network: cf-core
           query: '*'
       - domain: nats.service.cf.internal
         targets:
-        - deployment: isolation-segments-extended-cf
+        - deployment: azure-cf
           domain: bosh
           instance_group: nats
           network: cf-core
           query: '*'
       - domain: _.nats.service.cf.internal
         targets:
-        - deployment: isolation-segments-extended-cf
+        - deployment: azure-cf
           domain: bosh
           instance_group: nats
           network: cf-core
@@ -340,12 +330,12 @@ addons:
 exodus:
   admin_password: <!{credhub}:cf_admin_password!>
   admin_username: admin
-  api_domain: api.system.cf.testing.example
+  api_domain: api.system.cf.testing.examle
   app_domains:
-  - run.cf.testing.example
-  apps_domain: run.cf.testing.example
-  base_domain: cf.testing.example
-  bosh: isolation-segments-extended
+  - run.cf.testing.examle
+  apps_domain: run.cf.testing.examle
+  base_domain: cf.testing.examle
+  bosh: azure
   cf-deployment-date: 2022-Feb-14 03:48:47 UTC
   cf-deployment-hotfixes: true
   cf-deployment-url: https://github.com/cloudfoundry/cf-deployment/releases/tag/v16.25.0
@@ -353,22 +343,19 @@ exodus:
   core_network: cf-core
   db_network: cf-core
   edge_network: cf-edge
-  features: isolation-segments,nfs-volume-services,nfs-ldap
+  features: azure-blobstore
   is_director: false
-  runtime_network: cf-core
-  system_domain: system.cf.testing.example
+  runtime_network: cf-runtime
+  system_domain: system.cf.testing.examle
   system_org: system
   system_space: system
   use_create_env: false
-  vaulted_uaa_clients: /secret/isolation/segments/extended/cf/uaa/client_secrets:firehose
+  vaulted_uaa_clients: /secret/azure/cf/uaa/client_secrets:firehose
 features:
   randomize_az_placement: true
 instance_groups:
 - azs:
-  - zoneA
-  - zoneB
-  - zoneC
-  - zoneD
+  - z1
   instances: 1
   jobs:
   - name: smoke_tests
@@ -376,8 +363,8 @@ instance_groups:
       bpm:
         enabled: true
       smoke_tests:
-        api: https://api.system.cf.testing.example
-        apps_domain: run.cf.testing.example
+        api: https://api.system.cf.testing.examle
+        apps_domain: run.cf.testing.examle
         cf_dial_timeout_in_seconds: 300
         client: cf_smoke_tests
         client_secret: <!{credhub}:uaa_clients_cf_smoke_tests_secret!>
@@ -390,15 +377,12 @@ instance_groups:
   lifecycle: errand
   name: smoke-tests
   networks:
-  - name: cf-core
+  - name: cf-runtime
   stemcell: default
   vm_type: minimal
 - azs:
-  - zoneA
-  - zoneB
-  - zoneC
-  - zoneD
-  instances: 2
+  - z1
+  instances: 1
   jobs:
   - name: nats
     properties:
@@ -446,9 +430,11 @@ instance_groups:
   networks:
   - name: cf-core
   stemcell: default
+  vm_extensions:
+  - nats_as
   vm_type: minimal
 - azs:
-  - zoneA
+  - z1
   instances: 1
   jobs:
   - name: postgres
@@ -519,11 +505,8 @@ instance_groups:
     serial: true
   vm_type: small
 - azs:
-  - zoneA
-  - zoneB
-  - zoneC
-  - zoneD
-  instances: 2
+  - z1
+  instances: 1
   jobs:
   - name: cfdot
     properties:
@@ -636,13 +619,12 @@ instance_groups:
   networks:
   - name: cf-core
   stemcell: default
+  vm_extensions:
+  - diego_api_as
   vm_type: small
 - azs:
-  - zoneA
-  - zoneB
-  - zoneC
-  - zoneD
-  instances: 2
+  - z1
+  instances: 1
   jobs:
   - name: uaa
     properties:
@@ -658,8 +640,8 @@ instance_groups:
           product_logo: null
           square_logo: null
         links:
-          passwd: https://login.system.cf.testing.example/forgot_password
-          signup: https://login.system.cf.testing.example/create_account
+          passwd: https://login.system.cf.testing.examle/forgot_password
+          signup: https://login.system.cf.testing.examle/create_account
         saml:
           activeKeyId: key-1
           keys:
@@ -717,14 +699,6 @@ instance_groups:
             authorities: uaa.resource,cloud_controller.admin_read_only
             authorized-grant-types: client_credentials
             secret: <!{credhub}:uaa_clients_network_policy_secret!>
-          nfs-broker-credhub-client:
-            authorities: credhub.read,credhub.write
-            authorized-grant-types: client_credentials
-            secret: <!{credhub}:nfs-broker-credhub-uaa-client-secret!>
-          nfs-broker-push-client:
-            authorities: cloud_controller.admin,clients.read
-            authorized-grant-types: client_credentials
-            secret: <!{credhub}:nfs-broker-push-uaa-client-secret!>
           routing_api_client:
             authorities: routing.routes.write,routing.routes.read,routing.router_groups.read
             authorized-grant-types: client_credentials
@@ -733,7 +707,7 @@ instance_groups:
             authorized-grant-types: authorization_code
             autoapprove: true
             override: true
-            redirect-uri: https://uaa.system.cf.testing.example/login
+            redirect-uri: https://uaa.system.cf.testing.examle/login
             scope: openid,cloud_controller.read,cloud_controller.write,cloud_controller.admin
             secret: <!{credhub}:uaa_clients_ssh-proxy_secret!>
           tcp_emitter:
@@ -767,7 +741,7 @@ instance_groups:
             password: <!{credhub}:cf_admin_password!>
         sslCertificate: <!{credhub}:uaa_ssl.certificate!>
         sslPrivateKey: <!{credhub}:uaa_ssl.private_key!>
-        url: https://uaa.system.cf.testing.example
+        url: https://uaa.system.cf.testing.examle
         zones:
           internal:
             hostnames:
@@ -803,10 +777,10 @@ instance_groups:
             component: uaa
           tls_port: 8443
           uris:
-          - uaa.system.cf.testing.example
-          - '*.uaa.system.cf.testing.example'
-          - login.system.cf.testing.example
-          - '*.login.system.cf.testing.example'
+          - uaa.system.cf.testing.examle
+          - '*.uaa.system.cf.testing.examle'
+          - login.system.cf.testing.examle
+          - '*.login.system.cf.testing.examle'
     release: routing
   - name: statsd_injector
     properties:
@@ -821,79 +795,28 @@ instance_groups:
   networks:
   - name: cf-core
   stemcell: default
+  vm_extensions:
+  - uaa_as
   vm_type: minimal
 - azs:
-  - zoneA
+  - z1
   instances: 1
-  jobs:
-  - name: blobstore
-    properties:
-      blobstore:
-        admin_users:
-        - password: <!{credhub}:blobstore_admin_users_password!>
-          username: blobstore-user
-        secure_link:
-          secret: <!{credhub}:blobstore_secure_link_secret!>
-        tls:
-          cert: <!{credhub}:blobstore_tls.certificate!>
-          private_key: <!{credhub}:blobstore_tls.private_key!>
-      select_directories_to_backup:
-      - buildpacks
-      - packages
-      - droplets
-      system_domain: system.cf.testing.example
-    release: capi
-  - name: route_registrar
-    properties:
-      nats:
-        tls:
-          client_cert: <!{credhub}:nats_client_cert.certificate!>
-          client_key: <!{credhub}:nats_client_cert.private_key!>
-          enabled: true
-      route_registrar:
-        routes:
-        - name: blobstore
-          port: 8080
-          registration_interval: 20s
-          tags:
-            component: blobstore
-          uris:
-          - blobstore.system.cf.testing.example
-    release: routing
-  migrated_from:
-  - name: blobstore
-  name: singleton-blobstore
-  networks:
-  - name: cf-core
-  persistent_disk_type: 100GB
-  stemcell: default
-  update:
-    serial: true
-  vm_type: small
-- azs:
-  - zoneA
-  - zoneB
-  - zoneC
-  - zoneD
-  instances: 2
   jobs:
   - name: cloud_controller_ng
     properties:
       app_domains:
-      - run.cf.testing.example
+      - run.cf.testing.examle
       app_ssh:
         host_key_fingerprint: <!{credhub}:diego_ssh_proxy_host_key.public_key_fingerprint!>
-      build: cf-genesis-kit v2.1.2
+      build: cf-genesis-kit v2.0.0
       cc:
         buildpacks:
-          blobstore_type: webdav
-          webdav_config:
-            blobstore_timeout: 5
-            ca_cert: <!{credhub}:blobstore_tls.ca!>
-            password: <!{credhub}:blobstore_admin_users_password!>
-            private_endpoint: https://blobstore.service.cf.internal:4443
-            public_endpoint: https://blobstore.system.cf.testing.example
-            username: blobstore-user
+          buildpack_directory_key: azure-cf-buildpacks-((cc_directory_key))
+          fog_connection:
+            azure_storage_access_key: test-access-key
+            azure_storage_account_name: test-secret-access-key
+            environment: AzureCloud
+            provider: AzureRM
         bulk_api_password: <!{credhub}:cc_bulk_api_password!>
         database_encryption:
           current_key_label: encryption_key_0
@@ -909,14 +832,12 @@ instance_groups:
         diego:
           docker_staging_stack: cflinuxfs3
         droplets:
-          blobstore_type: webdav
-          webdav_config:
-            blobstore_timeout: 5
-            ca_cert: <!{credhub}:blobstore_tls.ca!>
-            password: <!{credhub}:blobstore_admin_users_password!>
-            private_endpoint: https://blobstore.service.cf.internal:4443
-            public_endpoint: https://blobstore.system.cf.testing.example
-            username: blobstore-user
+          droplet_directory_key: azure-cf-droplets-((cc_directory_key))
+          fog_connection:
+            azure_storage_access_key: test-access-key
+            azure_storage_account_name: test-secret-access-key
+            environment: AzureCloud
+            provider: AzureRM
         install_buildpacks:
         - name: staticfile_buildpack
           package: staticfile-buildpack-cflinuxfs3
@@ -951,27 +872,23 @@ instance_groups:
           private_key: <!{credhub}:cc_tls.private_key!>
           public_cert: <!{credhub}:cc_tls.certificate!>
         packages:
-          blobstore_type: webdav
-          webdav_config:
-            blobstore_timeout: 5
-            ca_cert: <!{credhub}:blobstore_tls.ca!>
-            password: <!{credhub}:blobstore_admin_users_password!>
-            private_endpoint: https://blobstore.service.cf.internal:4443
-            public_endpoint: https://blobstore.system.cf.testing.example
-            username: blobstore-user
+          app_package_directory_key: azure-cf-app-packages-((cc_directory_key))
+          fog_connection:
+            azure_storage_access_key: test-access-key
+            azure_storage_account_name: test-secret-access-key
+            environment: AzureCloud
+            provider: AzureRM
         public_tls:
           ca_cert: <!{credhub}:cc_public_tls.ca!>
           certificate: <!{credhub}:cc_public_tls.certificate!>
           private_key: <!{credhub}:cc_public_tls.private_key!>
         resource_pool:
-          blobstore_type: webdav
-          webdav_config:
-            blobstore_timeout: 5
-            ca_cert: <!{credhub}:blobstore_tls.ca!>
-            password: <!{credhub}:blobstore_admin_users_password!>
-            private_endpoint: https://blobstore.service.cf.internal:4443
-            public_endpoint: https://blobstore.system.cf.testing.example
-            username: blobstore-user
+          fog_connection:
+            azure_storage_access_key: test-access-key
+            azure_storage_account_name: test-secret-access-key
+            environment: AzureCloud
+            provider: AzureRM
+          resource_directory_key: azure-cf-resources-((cc_directory_key))
         security_group_definitions:
         - name: public_networks
           rules:
@@ -999,7 +916,6 @@ instance_groups:
         staging_upload_password: <!{credhub}:cc_staging_upload_password!>
         staging_upload_user: staging_user
         temporary_use_logcache: true
-        volume_services_enabled: true
       ccdb:
         databases:
         - name: cloud_controller
@@ -1013,7 +929,7 @@ instance_groups:
       credhub_api:
         ca_cert: <!{credhub}:credhub_tls.ca!>
       description: Use `genesis info` on environment file for more details
-      name: Cloud Foundry (isolation-segments-extended)
+      name: Cloud Foundry (azure)
       router:
         route_services_secret: <!{credhub}:router_route_services_secret!>
       routing_api:
@@ -1021,7 +937,7 @@ instance_groups:
       ssl:
         skip_cert_verify: true
       support_address: https://github.com/genesis-community/cf-genesis-kit
-      system_domain: system.cf.testing.example
+      system_domain: system.cf.testing.examle
       uaa:
         ca_cert: <!{credhub}:uaa_ssl.ca!>
         clients:
@@ -1033,7 +949,7 @@ instance_groups:
             secret: <!{credhub}:uaa_clients_cc_service_key_client_secret!>
           cloud_controller_username_lookup:
             secret: <!{credhub}:uaa_clients_cloud_controller_username_lookup_secret!>
-        url: https://uaa.system.cf.testing.example
+        url: https://uaa.system.cf.testing.examle
     provides:
       cloud_controller:
         as: cloud_controller
@@ -1077,18 +993,18 @@ instance_groups:
           name: api
           port: 9022
           registration_interval: 10s
-          server_cert_domain_san: api.system.cf.testing.example
+          server_cert_domain_san: api.system.cf.testing.examle
           tags:
             component: CloudController
           tls_port: 9024
           uris:
-          - api.system.cf.testing.example
+          - api.system.cf.testing.examle
         - name: policy-server
           registration_interval: 20s
-          server_cert_domain_san: api.system.cf.testing.example
+          server_cert_domain_san: api.system.cf.testing.examle
           tls_port: 4002
           uris:
-          - api.system.cf.testing.example/networking
+          - api.system.cf.testing.examle/networking
     release: routing
   - name: statsd_injector
     properties:
@@ -1139,7 +1055,7 @@ instance_groups:
           schema: routing-api
           type: postgres
           username: routing-api
-        system_domain: system.cf.testing.example
+        system_domain: system.cf.testing.examle
       uaa:
         ca_cert: <!{credhub}:uaa_ssl.ca!>
         tls_port: 8443
@@ -1198,66 +1114,55 @@ instance_groups:
   stemcell: default
   vm_extensions:
   - 50GB_ephemeral_disk
+  - api_as
   vm_type: small
 - azs:
-  - zoneA
-  - zoneB
-  - zoneC
-  - zoneD
-  instances: 2
+  - z1
+  instances: 1
   jobs:
   - name: cloud_controller_worker
     properties:
       cc:
         buildpacks:
-          blobstore_type: webdav
-          webdav_config:
-            blobstore_timeout: 5
-            ca_cert: <!{credhub}:blobstore_tls.ca!>
-            password: <!{credhub}:blobstore_admin_users_password!>
-            private_endpoint: https://blobstore.service.cf.internal:4443
-            public_endpoint: https://blobstore.system.cf.testing.example
-            username: blobstore-user
+          buildpack_directory_key: azure-cf-buildpacks-((cc_directory_key))
+          fog_connection:
+            azure_storage_access_key: test-access-key
+            azure_storage_account_name: test-secret-access-key
+            environment: AzureCloud
+            provider: AzureRM
         database_encryption:
           current_key_label: encryption_key_0
           keys:
             encryption_key_0: <!{credhub}:cc_db_encryption_key!>
         db_encryption_key: <!{credhub}:cc_db_encryption_key!>
         droplets:
-          blobstore_type: webdav
-          webdav_config:
-            blobstore_timeout: 5
-            ca_cert: <!{credhub}:blobstore_tls.ca!>
-            password: <!{credhub}:blobstore_admin_users_password!>
-            private_endpoint: https://blobstore.service.cf.internal:4443
-            public_endpoint: https://blobstore.system.cf.testing.example
-            username: blobstore-user
+          droplet_directory_key: azure-cf-droplets-((cc_directory_key))
+          fog_connection:
+            azure_storage_access_key: test-access-key
+            azure_storage_account_name: test-secret-access-key
+            environment: AzureCloud
+            provider: AzureRM
         internal_api_password: <!{credhub}:cc_internal_api_password!>
         mutual_tls:
           ca_cert: <!{credhub}:cc_tls.ca!>
           private_key: <!{credhub}:cc_tls.private_key!>
           public_cert: <!{credhub}:cc_tls.certificate!>
         packages:
-          blobstore_type: webdav
-          webdav_config:
-            blobstore_timeout: 5
-            ca_cert: <!{credhub}:blobstore_tls.ca!>
-            password: <!{credhub}:blobstore_admin_users_password!>
-            private_endpoint: https://blobstore.service.cf.internal:4443
-            public_endpoint: https://blobstore.system.cf.testing.example
-            username: blobstore-user
+          app_package_directory_key: azure-cf-app-packages-((cc_directory_key))
+          fog_connection:
+            azure_storage_access_key: test-access-key
+            azure_storage_account_name: test-secret-access-key
+            environment: AzureCloud
+            provider: AzureRM
         resource_pool:
-          blobstore_type: webdav
-          webdav_config:
-            blobstore_timeout: 5
-            ca_cert: <!{credhub}:blobstore_tls.ca!>
-            password: <!{credhub}:blobstore_admin_users_password!>
-            private_endpoint: https://blobstore.service.cf.internal:4443
-            public_endpoint: https://blobstore.system.cf.testing.example
-            username: blobstore-user
+          fog_connection:
+            azure_storage_access_key: test-access-key
+            azure_storage_account_name: test-secret-access-key
+            environment: AzureCloud
+            provider: AzureRM
+          resource_directory_key: azure-cf-resources-((cc_directory_key))
         staging_upload_password: <!{credhub}:cc_staging_upload_password!>
         staging_upload_user: staging_user
-        volume_services_enabled: true
       ccdb:
         databases:
         - name: cloud_controller
@@ -1272,7 +1177,7 @@ instance_groups:
         enabled: true
       ssl:
         skip_cert_verify: true
-      system_domain: system.cf.testing.example
+      system_domain: system.cf.testing.examle
       uaa:
         ca_cert: <!{credhub}:uaa_ssl.ca!>
         clients:
@@ -1285,13 +1190,12 @@ instance_groups:
   networks:
   - name: cf-core
   stemcell: default
+  vm_extensions:
+  - cc_worker_as
   vm_type: minimal
 - azs:
-  - zoneA
-  - zoneB
-  - zoneC
-  - zoneD
-  instances: 2
+  - z1
+  instances: 1
   jobs:
   - name: cfdot
     properties:
@@ -1333,54 +1237,45 @@ instance_groups:
     properties:
       cc:
         buildpacks:
-          blobstore_type: webdav
-          webdav_config:
-            blobstore_timeout: 5
-            ca_cert: <!{credhub}:blobstore_tls.ca!>
-            password: <!{credhub}:blobstore_admin_users_password!>
-            private_endpoint: https://blobstore.service.cf.internal:4443
-            public_endpoint: https://blobstore.system.cf.testing.example
-            username: blobstore-user
+          buildpack_directory_key: azure-cf-buildpacks-((cc_directory_key))
+          fog_connection:
+            azure_storage_access_key: test-access-key
+            azure_storage_account_name: test-secret-access-key
+            environment: AzureCloud
+            provider: AzureRM
         database_encryption:
           current_key_label: encryption_key_0
           keys:
             encryption_key_0: <!{credhub}:cc_db_encryption_key!>
         db_encryption_key: <!{credhub}:cc_db_encryption_key!>
         droplets:
-          blobstore_type: webdav
-          webdav_config:
-            blobstore_timeout: 5
-            ca_cert: <!{credhub}:blobstore_tls.ca!>
-            password: <!{credhub}:blobstore_admin_users_password!>
-            private_endpoint: https://blobstore.service.cf.internal:4443
-            public_endpoint: https://blobstore.system.cf.testing.example
-            username: blobstore-user
+          droplet_directory_key: azure-cf-droplets-((cc_directory_key))
+          fog_connection:
+            azure_storage_access_key: test-access-key
+            azure_storage_account_name: test-secret-access-key
+            environment: AzureCloud
+            provider: AzureRM
         internal_api_password: <!{credhub}:cc_internal_api_password!>
         mutual_tls:
           ca_cert: <!{credhub}:cc_tls.ca!>
           private_key: <!{credhub}:cc_tls.private_key!>
           public_cert: <!{credhub}:cc_tls.certificate!>
         packages:
-          blobstore_type: webdav
-          webdav_config:
-            blobstore_timeout: 5
-            ca_cert: <!{credhub}:blobstore_tls.ca!>
-            password: <!{credhub}:blobstore_admin_users_password!>
-            private_endpoint: https://blobstore.service.cf.internal:4443
-            public_endpoint: https://blobstore.system.cf.testing.example
-            username: blobstore-user
+          app_package_directory_key: azure-cf-app-packages-((cc_directory_key))
+          fog_connection:
+            azure_storage_access_key: test-access-key
+            azure_storage_account_name: test-secret-access-key
+            environment: AzureCloud
+            provider: AzureRM
         resource_pool:
-          blobstore_type: webdav
-          webdav_config:
-            blobstore_timeout: 5
-            ca_cert: <!{credhub}:blobstore_tls.ca!>
-            password: <!{credhub}:blobstore_admin_users_password!>
-            private_endpoint: https://blobstore.service.cf.internal:4443
-            public_endpoint: https://blobstore.system.cf.testing.example
-            username: blobstore-user
+          fog_connection:
+            azure_storage_access_key: test-access-key
+            azure_storage_account_name: test-secret-access-key
+            environment: AzureCloud
+            provider: AzureRM
+          resource_directory_key: azure-cf-resources-((cc_directory_key))
         staging_upload_password: <!{credhub}:cc_staging_upload_password!>
         staging_upload_user: staging_user
-        volume_services_enabled: true
       ccdb:
         databases:
         - name: cloud_controller
@@ -1395,7 +1290,7 @@ instance_groups:
         enabled: true
       ssl:
         skip_cert_verify: true
-      system_domain: system.cf.testing.example
+      system_domain: system.cf.testing.examle
       uaa:
         ca_cert: <!{credhub}:uaa_ssl.ca!>
         clients:
@@ -1542,13 +1437,11 @@ instance_groups:
   stemcell: default
   vm_extensions:
   - diego-ssh-proxy-network-properties
+  - scheduler_as
   vm_type: minimal
 - azs:
-  - zoneA
-  - zoneB
-  - zoneC
-  - zoneD
-  instances: 2
+  - z1
+  instances: 1
   jobs:
   - name: gorouter
     properties:
@@ -1566,6 +1459,7 @@ instance_groups:
           <!{credhub}:uaa_ssl.ca!>
           <!{credhub}:network_policy_server_external.ca!>
         enable_ssl: true
+        frontend_idle_timeout: 180
         route_services_secret: <!{credhub}:router_route_services_secret!>
         status:
           password: <!{credhub}:router_status_password!>
@@ -1606,13 +1500,11 @@ instance_groups:
     serial: true
   vm_extensions:
   - cf-router-network-properties
+  - router_as
   vm_type: minimal
 - azs:
-  - zoneA
-  - zoneB
-  - zoneC
-  - zoneD
-  instances: 2
+  - z1
+  instances: 1
   jobs:
   - name: tcp_router
     properties:
@@ -1642,13 +1534,11 @@ instance_groups:
   stemcell: default
   vm_extensions:
   - cf-tcp-router-network-properties
+  - tcp_router_as
   vm_type: minimal
 - azs:
-  - zoneA
-  - zoneB
-  - zoneC
-  - zoneD
-  instances: 4
+  - z1
+  instances: 1
   jobs:
   - name: doppler
     properties:
@@ -1718,11 +1608,11 @@ instance_groups:
         - name: log-cache-reverse-proxy
           port: 8083
           registration_interval: 20s
-          server_cert_domain_san: log-cache.system.cf.testing.example
+          server_cert_domain_san: log-cache.system.cf.testing.examle
           tls_port: 8083
           uris:
-          - log-cache.system.cf.testing.example
-          - '*.log-cache.system.cf.testing.example'
+          - log-cache.system.cf.testing.examle
+          - '*.log-cache.system.cf.testing.examle'
     release: routing
   - name: log-cache-cf-auth-proxy
     properties:
@@ -1748,13 +1638,12 @@ instance_groups:
   networks:
   - name: cf-core
   stemcell: default
+  vm_extensions:
+  - doppler_as
   vm_type: minimal
 - azs:
-  - zoneA
-  - zoneB
-  - zoneC
-  - zoneD
-  instances: 3
+  - z1
+  instances: 1
   jobs:
   - name: bosh-dns-adapter
     properties:
@@ -1915,38 +1804,17 @@ instance_groups:
         key: <!{credhub}:loggr_udp_forwarder_tls.private_key!>
         server_name: loggr_udp_forwarder_metrics
     release: loggregator-agent
-  - name: nfsv3driver
-    properties:
-      nfsv3driver:
-        allowed-in-source: ""
-        ldap_host: ldap.myhost.com
-        ldap_port: 389
-        ldap_proto: tcp
-        ldap_svc_password: ldap-secure-password
-        ldap_svc_user: ldap-user
-        ldap_user_fqdn: cn=Users,dc=corp,dc=test,dc=com
-        tls:
-          ca_cert: <!{credhub}:nfsv3driver_cert.ca!>
-          client_cert: <!{credhub}:nfsv3driver_client_cert.certificate!>
-          client_key: <!{credhub}:nfsv3driver_client_cert.private_key!>
-          server_cert: <!{credhub}:nfsv3driver_cert.certificate!>
-          server_key: <!{credhub}:nfsv3driver_cert.private_key!>
-    release: nfs-volume
-  - name: mapfs
-    release: mapfs
   name: diego-cell
   networks:
-  - name: cf-core
+  - name: cf-runtime
   stemcell: default
   vm_extensions:
   - 100GB_ephemeral_disk
-  vm_type: xlarge
+  - diego_cell_as
+  vm_type: small-highmem
 - azs:
-  - zoneA
-  - zoneB
-  - zoneC
-  - zoneD
-  instances: 2
+  - z1
+  instances: 1
   jobs:
   - consumes:
       doppler:
@@ -1973,7 +1841,7 @@ instance_groups:
           client_secret: <!{credhub}:uaa_clients_doppler_secret!>
       ssl:
         skip_cert_verify: true
-      system_domain: system.cf.testing.example
+      system_domain: system.cf.testing.examle
       uaa:
         ca_cert: <!{credhub}:uaa_ssl.ca!>
         internal_url: https://uaa.service.cf.internal:8443
@@ -2029,30 +1897,29 @@ instance_groups:
         routes:
         - name: doppler
           registration_interval: 20s
-          server_cert_domain_san: doppler.system.cf.testing.example
+          server_cert_domain_san: doppler.system.cf.testing.examle
           tls_port: 8081
           uris:
-          - doppler.system.cf.testing.example
-          - '*.doppler.system.cf.testing.example'
+          - doppler.system.cf.testing.examle
+          - '*.doppler.system.cf.testing.examle'
         - name: rlp-gateway
           registration_interval: 20s
-          server_cert_domain_san: log-stream.system.cf.testing.example
+          server_cert_domain_san: log-stream.system.cf.testing.examle
           tls_port: 8088
           uris:
-          - log-stream.system.cf.testing.example
-          - '*.log-stream.system.cf.testing.example'
+          - log-stream.system.cf.testing.examle
+          - '*.log-stream.system.cf.testing.examle'
     release: routing
   name: log-api
   networks:
   - name: cf-core
   stemcell: default
+  vm_extensions:
+  - log_api_as
   vm_type: minimal
 - azs:
-  - zoneA
-  - zoneB
-  - zoneC
-  - zoneD
-  instances: 2
+  - z1
+  instances: 1
   jobs:
   - name: credhub
     properties:
@@ -2083,15 +1950,6 @@ instance_groups:
             operations:
             - read
             path: /*
-          - actors:
-            - uaa-client:nfs-broker-credhub-client
-            operations:
-            - read
-            - write
-            - delete
-            - read_acl
-            - write_acl
-            path: /nfsbroker/*
         ca_certificate: |
           <!{credhub}:credhub_tls.ca!>
         data_storage:
@@ -2121,12 +1979,11 @@ instance_groups:
   networks:
   - name: cf-core
   stemcell: default
+  vm_extensions:
+  - credhub_as
   vm_type: minimal
 - azs:
-  - zoneA
-  - zoneB
-  - zoneC
-  - zoneD
+  - z1
   instances: 1
   jobs:
   - name: rotate_cc_database_key
@@ -2138,312 +1995,8 @@ instance_groups:
   - name: cf-core
   stemcell: default
   vm_type: minimal
-- azs:
-  - custom-az
-  instances: 5
-  jobs:
-  - name: cflinuxfs3-rootfs-setup
-    properties:
-      cflinuxfs3-rootfs:
-        trusted_certs:
-        - <!{credhub}:diego_instance_identity_ca.ca!>
-        - <!{credhub}:credhub_tls.ca!>
-        - <!{credhub}:uaa_ssl.ca!>
-    release: cflinuxfs3
-  - name: garden
-    properties:
-      garden:
-        cleanup_process_dirs_on_wait: true
-        containerd_mode: true
-        default_container_grace_time: 0
-        deny_networks:
-        - 0.0.0.0/0
-        destroy_containers_on_start: true
-        graph_cleanup_threshold_in_mb: 0
-      logging:
-        format:
-          timestamp: rfc3339
-    provides:
-      iptables: nil
-    release: garden-runc
-  - name: rep
-    properties:
-      bpm:
-        enabled: true
-      containers:
-        proxy:
-          enabled: true
-          require_and_verify_client_certificates: true
-          trusted_ca_certificates:
-          - <!{credhub}:gorouter_backend_tls.ca!>
-          - <!{credhub}:ssh_proxy_backends_tls.ca!>
-          verify_subject_alt_name:
-          - gorouter.service.cf.internal
-          - ssh-proxy.service.cf.internal
-        trusted_ca_certificates:
-        - <!{credhub}:diego_instance_identity_ca.ca!>
-        - <!{credhub}:credhub_tls.ca!>
-        - <!{credhub}:uaa_ssl.ca!>
-      diego:
-        executor:
-          instance_identity_ca_cert: <!{credhub}:diego_instance_identity_ca.certificate!>
-          instance_identity_key: <!{credhub}:diego_instance_identity_ca.private_key!>
-        rep:
-          placement_tags:
-          - custom-iso-group
-          preloaded_rootfses:
-          - cflinuxfs3:/var/vcap/packages/cflinuxfs3/rootfs.tar
-      enable_consul_service_registration: false
-      enable_declarative_healthcheck: true
-      logging:
-        format:
-          timestamp: rfc3339
-      loggregator:
-        ca_cert: <!{credhub}:loggregator_tls_agent.ca!>
-        cert: <!{credhub}:loggregator_tls_agent.certificate!>
-        key: <!{credhub}:loggregator_tls_agent.private_key!>
-        use_v2_api: true
-      tls:
-        ca_cert: <!{credhub}:diego_rep_agent_v2.ca!>
-        cert: <!{credhub}:diego_rep_agent_v2.certificate!>
-        key: <!{credhub}:diego_rep_agent_v2.private_key!>
-    release: diego
-  - name: route_emitter
-    properties:
-      bpm:
-        enabled: true
-      diego:
-        route_emitter:
-          bbs:
-            ca_cert: <!{credhub}:diego_bbs_client.ca!>
-            client_cert: <!{credhub}:diego_bbs_client.certificate!>
-            client_key: <!{credhub}:diego_bbs_client.private_key!>
-          local_mode: true
-          nats:
-            tls:
-              client_cert: <!{credhub}:nats_client_cert.certificate!>
-              client_key: <!{credhub}:nats_client_cert.private_key!>
-              enabled: true
-      internal_routes:
-        enabled: true
-      logging:
-        format:
-          timestamp: rfc3339
-      loggregator:
-        ca_cert: <!{credhub}:loggregator_tls_agent.ca!>
-        cert: <!{credhub}:loggregator_tls_agent.certificate!>
-        key: <!{credhub}:loggregator_tls_agent.private_key!>
-        use_v2_api: true
-      tcp:
-        enabled: true
-      uaa:
-        ca_cert: <!{credhub}:uaa_ssl.ca!>
-        client_secret: <!{credhub}:uaa_clients_tcp_emitter_secret!>
-    release: diego
-  - name: nfsv3driver
-    properties:
-      nfsv3driver:
-        allowed-in-source: ""
-        ldap_host: ldap.myhost.com
-        ldap_port: 389
-        ldap_proto: tcp
-        ldap_svc_password: ldap-secure-password
-        ldap_svc_user: ldap-user
-        ldap_user_fqdn: cn=Users,dc=corp,dc=test,dc=com
-        tls:
-          ca_cert: <!{credhub}:nfsv3driver_cert.ca!>
-          client_cert: <!{credhub}:nfsv3driver_client_cert.certificate!>
-          client_key: <!{credhub}:nfsv3driver_client_cert.private_key!>
-          server_cert: <!{credhub}:nfsv3driver_cert.certificate!>
-          server_key: <!{credhub}:nfsv3driver_cert.private_key!>
-    release: nfs-volume
-  - name: mapfs
-    provides:
-      mapfs: nil
-    release: mapfs
-  name: custom-params-group
-  networks:
-  - name: cf-core
-  stemcell: test
-  vm_extensions:
-  - 100GB_ephemeral_disk
-  - cf-router-network-properties
-  vm_type: small-highmem
-- azs:
-  - z1
-  instances: 1
-  jobs:
-  - name: cflinuxfs3-rootfs-setup
-    properties:
-      cflinuxfs3-rootfs:
-        trusted_certs:
-        - <!{credhub}:diego_instance_identity_ca.ca!>
-        - <!{credhub}:credhub_tls.ca!>
-        - <!{credhub}:uaa_ssl.ca!>
-    release: cflinuxfs3
-  - name: garden
-    properties:
-      garden:
-        cleanup_process_dirs_on_wait: true
-        containerd_mode: true
-        default_container_grace_time: 0
-        deny_networks:
-        - 0.0.0.0/0
-        destroy_containers_on_start: true
-        graph_cleanup_threshold_in_mb: 0
-      logging:
-        format:
-          timestamp: rfc3339
-    provides:
-      iptables: nil
-    release: garden-runc
-  - name: rep
-    properties:
-      bpm:
-        enabled: true
-      containers:
-        proxy:
-          enabled: true
-          require_and_verify_client_certificates: true
-          trusted_ca_certificates:
-          - <!{credhub}:gorouter_backend_tls.ca!>
-          - <!{credhub}:ssh_proxy_backends_tls.ca!>
-          verify_subject_alt_name:
-          - gorouter.service.cf.internal
-          - ssh-proxy.service.cf.internal
-        trusted_ca_certificates:
-        - <!{credhub}:diego_instance_identity_ca.ca!>
-        - <!{credhub}:credhub_tls.ca!>
-        - <!{credhub}:uaa_ssl.ca!>
-      diego:
-        executor:
-          instance_identity_ca_cert: <!{credhub}:diego_instance_identity_ca.certificate!>
-          instance_identity_key: <!{credhub}:diego_instance_identity_ca.private_key!>
-        rep:
-          placement_tags:
-          - default-iso-group
-          - default
-          preloaded_rootfses:
-          - cflinuxfs3:/var/vcap/packages/cflinuxfs3/rootfs.tar
-      enable_consul_service_registration: false
-      enable_declarative_healthcheck: true
-      logging:
-        format:
-          timestamp: rfc3339
-      loggregator:
-        ca_cert: <!{credhub}:loggregator_tls_agent.ca!>
-        cert: <!{credhub}:loggregator_tls_agent.certificate!>
-        key: <!{credhub}:loggregator_tls_agent.private_key!>
-        use_v2_api: true
-      tls:
-        ca_cert: <!{credhub}:diego_rep_agent_v2.ca!>
-        cert: <!{credhub}:diego_rep_agent_v2.certificate!>
-        key: <!{credhub}:diego_rep_agent_v2.private_key!>
-    release: diego
-  - name: route_emitter
-    properties:
-      bpm:
-        enabled: true
-      diego:
-        route_emitter:
-          bbs:
-            ca_cert: <!{credhub}:diego_bbs_client.ca!>
-            client_cert: <!{credhub}:diego_bbs_client.certificate!>
-            client_key: <!{credhub}:diego_bbs_client.private_key!>
-          local_mode: true
-          nats:
-            tls:
-              client_cert: <!{credhub}:nats_client_cert.certificate!>
-              client_key: <!{credhub}:nats_client_cert.private_key!>
-              enabled: true
-      internal_routes:
-        enabled: true
-      logging:
-        format:
-          timestamp: rfc3339
-      loggregator:
-        ca_cert: <!{credhub}:loggregator_tls_agent.ca!>
-        cert: <!{credhub}:loggregator_tls_agent.certificate!>
-        key: <!{credhub}:loggregator_tls_agent.private_key!>
-        use_v2_api: true
-      tcp:
-        enabled: true
-      uaa:
-        ca_cert: <!{credhub}:uaa_ssl.ca!>
-        client_secret: <!{credhub}:uaa_clients_tcp_emitter_secret!>
-    release: diego
-  - name: nfsv3driver
-    properties:
-      nfsv3driver:
-        allowed-in-source: ""
-        ldap_host: ldap.myhost.com
-        ldap_port: 389
-        ldap_proto: tcp
-        ldap_svc_password: ldap-secure-password
-        ldap_svc_user: ldap-user
-        ldap_user_fqdn: cn=Users,dc=corp,dc=test,dc=com
-        tls:
-          ca_cert: <!{credhub}:nfsv3driver_cert.ca!>
-          client_cert: <!{credhub}:nfsv3driver_client_cert.certificate!>
-          client_key: <!{credhub}:nfsv3driver_client_cert.private_key!>
-          server_cert: <!{credhub}:nfsv3driver_cert.certificate!>
-          server_key: <!{credhub}:nfsv3driver_cert.private_key!>
-    release: nfs-volume
-  - name: mapfs
-    provides:
-      mapfs: nil
-    release: mapfs
-  name: default-params-group
-  networks:
-  - name: default
-  stemcell: default
-  vm_extensions:
-  - 100GB_ephemeral_disk
-  vm_type: xlarge
-- azs:
-  - zoneA
-  - zoneB
-  - zoneC
-  - zoneD
-  instances: 1
-  jobs:
-  - name: nfsbrokerpush
-    properties:
-      nfsbrokerpush:
-        app_domain: system.cf.testing.example
-        app_name: nfs-broker
-        cf:
-          client_id: nfs-broker-push-client
-          client_secret: <!{credhub}:nfs-broker-push-uaa-client-secret!>
-        create_credhub_security_group: true
-        create_sql_security_group: false
-        credhub:
-          uaa_ca_cert: <!{credhub}:uaa_ssl.ca!>
-          uaa_client_id: nfs-broker-credhub-client
-          uaa_client_secret: <!{credhub}:nfs-broker-credhub-uaa-client-secret!>
-        domain: system.cf.testing.example
-        ldap_enabled: true
-        organization: system
-        password: <!{credhub}:nfs-broker-password!>
-        skip_cert_verify: true
-        space: nfs-broker-space
-        store_id: nfsbroker
-        syslog_url: ""
-        username: nfs-broker
-    provides:
-      nfsbrokerpush:
-        as: ignore-me
-    release: nfs-volume
-  - name: cf-cli-7-linux
-    release: cf-cli
-  lifecycle: errand
-  name: nfs-broker-push
-  networks:
-  - name: cf-core
-  stemcell: default
-  vm_type: minimal
 manifest_version: v16.25.0
-name: isolation-segments-extended-cf
+name: azure-cf
 releases:
 - name: binary-buildpack
   sha1: 6e1ff3753ac5a86e968546222bbbaaba1264d938
@@ -2569,14 +2122,6 @@ releases:
   sha1: c3d11f473d4518505e2a671d8ad6a553e1b1c1ca
   url: https://bosh.io/d/github.com/bosh-packages/cf-cli-release?v=1.34.0
   version: 1.34.0
-- name: nfs-volume
-  sha1: 6dbfcdb3ed5de63fd63e82710dfb58084c566f62
-  url: https://bosh.io/d/github.com/cloudfoundry/nfs-volume-release?v=7.1.1
-  version: 7.1.1
-- name: mapfs
-  sha1: 440014423159187727d3622d41e5779f0f25902d
-  url: https://bosh.io/d/github.com/cloudfoundry/mapfs-release?v=1.2.6
-  version: 1.2.6
 - name: postgres
   sha1: e44bbe8f8a7cdde1cda67b202e399a239d104db6
   url: https://bosh.io/d/github.com/cloudfoundry/postgres-release?v=43

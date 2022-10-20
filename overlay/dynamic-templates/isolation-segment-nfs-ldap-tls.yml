@@ -1,0 +1,7 @@
+instance_groups:
+- name: (( grab meta.name ))
+  jobs:
+  - name: nfsv3driver
+    properties:
+      nfsv3driver:
+        ldap_ca_cert: (( grab meta.nfs-ldap-ca-cert-ca || params.nfs-ldap-ca-cert-ca ))

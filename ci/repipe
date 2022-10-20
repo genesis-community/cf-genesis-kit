@@ -10,6 +10,8 @@
 
 set -ue
 
+base_dir="$(cd "$(dirname "$0")" && pwd)"
+
 need_command() {
   local cmd=${1:?need_command() - no command name given}
   local url=${2:-}
@@ -179,7 +181,8 @@ echo >&2 "Using settings found in ${settings_file}"
 
 # --  Extract pipeline target information and compare -------------------------
 set -e
-trap "rm -f .deploy.yml" QUIT TERM EXIT INT
+trap "rm -rf .deploy.yml pipeline/upstream" QUIT TERM EXIT INT
+[[ -x "${base_dir}/scripts/build-upstream-jobs" ]] && "${base_dir}/scripts/build-upstream-jobs"
 config="$(spruce merge --fallback-append pipeline/base.yml pipeline/*/*.yml "${settings_file}")"
 meta="$(spruce merge --skip-eval --cherry-pick meta <<<"$config" | spruce json)"
 spruce merge --skip-eval --prune meta <<<"$config" > .deploy.yml
@@ -214,8 +217,12 @@ if (( DRYRUN > 0 )) ; then
   if [ ! -t 1 ] ; then
     pid="$$"
     persistent_file="$(/usr/sbin/lsof -p "$pid" -a -d 1 | tail -n 1 | awk '{print $NF}')"
-    if [[ -n "${persistent_file}" && -n "$(type -p realpath || true)" ]] ; then
-      persistent_file="$(realpath --relative-to="$call_dir" "$persistent_file")"
+    if [[ -n "${persistent_file}" ]] ; then
+      if [[ "${persistent_file}" =~ '->0x' ]] ; then
+        persistent_file=''
+      elif [[ -n "$(type -p realpath || true)" ]] ; then
+        persistent_file="$(realpath --relative-to="$call_dir" "$persistent_file")"
+      fi
     fi
   fi
 fi

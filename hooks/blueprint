@@ -51,17 +51,20 @@ generate_dynamic_isolation_segments() {
   fi
   if want_feature "nfs-volume-services" ; then
     iso_seg_merges+=( overlay/dynamic-templates/isolation-segment-nfs.yml )
-    if want_feature "nfs-ldap" ; then
+    if want_feature "nfs-ldap" || want_feature "nfs-ldap-tls" ; then
       iso_seg_merges+=( overlay/dynamic-templates/isolation-segment-nfs-ldap.yml )
+      if want_feature "nfs-ldap-tls" ; then
+        iso_seg_merges+=( overlay/dynamic-templates/isolation-segment-nfs-ldap-tls.yml )
+      fi
     fi
   fi
   if want_feature "smb-volume-services" ; then
-    iso_seg_merges+=( overlay/dynamic-templates/isolation-segment-nfs.yml )
+    iso_seg_merges+=( overlay/dynamic-templates/isolation-segment-smb.yml )
   fi
 
   for group in $isolation_groups; do
     additional_trusted_certs=''
-    if jq -e --arg v "$group" '.isolation_segments[] | select( .name == $v ) | .additional_trusted_certs//[] | length > 0' <<<"$1" &>/dev/null  ; then 
+    if jq -e --arg v "$group" '.isolation_segments[] | select( .name == $v ) | .additional_trusted_certs//[] | length > 0' <<<"$1" &>/dev/null  ; then
       additional_trusted_certs='overlay/dynamic-templates/isolation-segment-additional-trusted-certs.yml'
     fi
     dynamic_segment_fragment_file="overlay/dynamic/isolation_segments_$group.yml"
@@ -260,6 +263,7 @@ for want in $GENESIS_REQUESTED_FEATURES; do
       # dealt with above, but kept for interoperability checks with other features
       features+=( "small-footprint" );
       ;;
+
     (nfs-volume-services|cf-deployments/operations/enable-nfs-volume-services) features+=( "nfs-volume-services" ) ;;
     (smb-volume-services|cf-deployments/operations/enable-smb-volume-services) features+=( "smb-volume-services" ) ;;
     (nfs-ldap|cf-deployments/operations/enable-nfs-ldap)
@@ -268,7 +272,11 @@ for want in $GENESIS_REQUESTED_FEATURES; do
         describe >&2 \
           "#R[ERROR]} Feature #c{$want} cannot be specified without feature #c{nfs-volume-services}"
       fi
-      features+=( "nfs-ldap" )
+      if [[ $want == "nfs-ldap-tls" ]] ; then
+        features+=( "nfs-ldap-tls" )
+      else
+        features+=( "nfs-ldap" )
+      fi
       ;;
     (local-postgres-db|local-mysql-db|mysql-db|postgres-db) db_specified=1; features+=( "$want" ) ;;
     (bare|partitioned-network|haproxy|tls|no-nats-tls|self-signed|isolation-segments) features+=( "$want" ) ;;
@@ -441,11 +449,23 @@ for want in $GENESIS_REQUESTED_FEATURES; do
           "overlay/addons/nfs-volume-service.yml" \
         )
       fi
-      if want_feature "nfs-ldap" ; then
+      if want_feature "nfs-ldap" || want_feature "nfs-ldap-tls" ; then
         manifest+=( \
           "cf-deployment/operations/enable-nfs-ldap.yml" \
           "overlay/addons/nfs-ldap.yml" \
         )
+        if want_feature "nfs-ldap-tls"; then
+          manifest+=( overlay/addons/nfs-ldap-tls.yml )
+          # If user provided their own nfs-ldap-ca path, delete the default
+          if jq <<<"$params" -e '."nfs-ldap-ca-cert-ca"' &> /dev/null ; then
+            remove_unused_secret_ops_file="operations/dynamic/remove-unused-nfs-ldap-ca-cert.yml"
+            cat <<EOF > "$remove_unused_secret_ops_file"
+- type: remove
+  path: /variables/name=nfs-ldap-ca-cert
+EOF
+            manifest+=( "$remove_unused_secret_ops_file" )
+          fi
+        fi
       fi
       ;;
 
