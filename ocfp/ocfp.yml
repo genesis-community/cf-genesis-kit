@@ -25,7 +25,7 @@ instance_groups:
 - name: tcp-router
   vm_extensions:
   - ((replace))
-  - (( grab params.tcp_elb || cf-tcp-lb ))
+  - (( grab params.tcp_lb_vm_ext || cf-tcp-lb ))
 
 - name: diego-cell
   update:
