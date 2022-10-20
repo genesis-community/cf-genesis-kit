@@ -2244,7 +2244,6 @@ instance_groups:
     properties:
       nfsv3driver:
         allowed-in-source: ""
-        ldap_ca_cert: nfs-ldap-ca-cert-ca
         ldap_host: ldap.myhost.com
         ldap_port: 389
         ldap_proto: tcp
@@ -2377,7 +2376,6 @@ instance_groups:
     properties:
       nfsv3driver:
         allowed-in-source: ""
-        ldap_ca_cert: nfs-ldap-ca-cert-ca
         ldap_host: ldap.myhost.com
         ldap_port: 389
         ldap_proto: tcp

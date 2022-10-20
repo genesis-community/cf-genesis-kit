@@ -1,5 +1,1 @@
-nfs-ldap-ca-cert:
-  ca: nfs-ldap-ca-cert-ca
-  certificate: nfs-ldap-ca-cert-cert
-  private_key: nfs-ldap-ca-cert-private-key
 nfs-ldap-service-password: ldap-secure-password
