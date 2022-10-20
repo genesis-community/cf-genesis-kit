@@ -54,7 +54,7 @@ unchanged=()
 changed=()
 while IFS='' read -r rel; do
   prev_ver="$(echo "$prev_releases" | jq -r --arg r "$rel" \
-    '.releases | map(select(.name == $r) | .version) | sort | unique | join(",") | if(.|length>0) then . else "--none--" | join(",")' )"
+    '.releases | map(select(.name == $r) | .version) | sort | unique | join(",") | if(.|length>0) then . else "--none--" end | join(",")' )"
   if [[ "$prev_ver" == "--none--" ]] ; then continue ; fi
   curr_ver="$(echo "$curr_releases" | jq -r --arg r "$rel" \
     '.releases | map(select(.name == $r) | .version) | sort | unique | join(",")' )"
