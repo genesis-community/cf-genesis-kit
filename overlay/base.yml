@@ -1,17 +1,19 @@
 --- # overrides: basic overrides for genesis compatibility
 exodus:
   admin_username: admin
-  admin_password: ((cf_admin_password))
-  base_domain:    (( grab params.base_domain ))
-  system_domain:  (( grab params.system_domain ))
-  app_domains:    (( grab params.app_domains ))
-  apps_domain:    (( grab params.apps_domain ))
-  api_domain:     (( concat "api." params.system_domain ))
+  admin_password:    ((cf_admin_password))
+  uaa_client:        admin
+  uaa_client_secret: ((uaa_admin_client_secret))
+  base_domain:       (( grab params.base_domain ))
+  system_domain:     (( grab params.system_domain ))
+  app_domains:       (( grab params.app_domains ))
+  apps_domain:       (( grab params.apps_domain ))
+  api_domain:        (( concat "api." params.system_domain ))
 
-  edge_network:    (( grab params.cf_edge_network || params.network ))
-  core_network:    (( grab params.cf_core_network || params.network ))
-  runtime_network: (( grab params.cf_runtime_network || params.network ))
-  db_network:      (( grab params.cf_db_network || params.cf_core_network || params.network ))
+  edge_network:      (( grab params.cf_edge_network || params.network ))
+  core_network:      (( grab params.cf_core_network || params.network ))
+  runtime_network:   (( grab params.cf_runtime_network || params.network ))
+  db_network:        (( grab params.cf_db_network || params.cf_core_network || params.network ))
 
   vaulted_uaa_clients: (( concat meta.vault "/uaa/client_secrets:firehose" ))
 
