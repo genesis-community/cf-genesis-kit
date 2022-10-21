@@ -65,12 +65,17 @@ generate_dynamic_isolation_segments() {
   for group in $isolation_groups; do
     additional_trusted_certs=''
     if jq -e --arg v "$group" '.isolation_segments[] | select( .name == $v ) | .additional_trusted_certs//[] | length > 0' <<<"$1" &>/dev/null  ; then
-      additional_trusted_certs='overlay/dynamic-templates/isolation-segment-additional-trusted-certs.yml'
+
+      additional_trusted_certs="overlay/dynamic/isolation-segment-${group}-additional-trusted-certs.yml"
+      sed -e 's/{{segment-name}}/'"$group"'/g' \
+        < 'overlay/dynamic-templates/isolation-segment-additional-trusted-certs.yml' \
+        > "$additional_trusted_certs"
+
     fi
     dynamic_segment_fragment_file="overlay/dynamic/isolation_segments_$group.yml"
     spruce merge --prune "meta" "overlay/dynamic-templates/isolation-segment.yml" \
       ${iso_seg_merges[@]+"${iso_seg_merges[@]}"} $additional_trusted_certs \
-      <(echo "$1" | jq --arg v "$group" '.isolation_segments[] | select(.name == $v ) | {"meta": .}') \
+      <(echo "$1" | sed -e 's#"(( *#"(( defer "#g' | jq --arg v "$group" '.isolation_segments[] | select(.name == $v ) | {"meta": .}') \
       <(echo '{"instance_groups": [ "((prepend))", "((defer append))" ]}') \
       > "$dynamic_segment_fragment_file"
     echo "$dynamic_segment_fragment_file"
