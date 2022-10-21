@@ -1,5 +1,5 @@
 params:
-  isolation-segments:
+  isolation_segments:
   - name: {{segment-name}}
     base_trusted_certs:
     - ((diego_instance_identity_ca.ca))

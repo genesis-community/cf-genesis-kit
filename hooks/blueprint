@@ -75,7 +75,7 @@ generate_dynamic_isolation_segments() {
     dynamic_segment_fragment_file="overlay/dynamic/isolation_segments_$group.yml"
     spruce merge --prune "meta" "overlay/dynamic-templates/isolation-segment.yml" \
       ${iso_seg_merges[@]+"${iso_seg_merges[@]}"} $additional_trusted_certs \
-      <(echo "$1" | sed -e 's#"(( *#"(( defer "#g' | jq --arg v "$group" '.isolation_segments[] | select(.name == $v ) | {"meta": .}') \
+      <(echo "$1" | sed -e 's#"(( *#"(( defer #g' | jq --arg v "$group" '.isolation_segments[] | select(.name == $v ) | {"meta": .}') \
       <(echo '{"instance_groups": [ "((prepend))", "((defer append))" ]}') \
       > "$dynamic_segment_fragment_file"
     echo "$dynamic_segment_fragment_file"
