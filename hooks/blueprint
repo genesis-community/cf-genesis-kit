@@ -271,7 +271,7 @@ for want in $GENESIS_REQUESTED_FEATURES; do
 
     (nfs-volume-services|cf-deployments/operations/enable-nfs-volume-services) features+=( "nfs-volume-services" ) ;;
     (smb-volume-services|cf-deployments/operations/enable-smb-volume-services) features+=( "smb-volume-services" ) ;;
-    (nfs-ldap|cf-deployments/operations/enable-nfs-ldap)
+    (nfs-ldap|nfs-ldap-tls|cf-deployments/operations/enable-nfs-ldap)
       if ! want_feature 'nfs-volume-services' && ! want_feature "cf-deployments/operations/enable-nfs-volume-services" ; then
         abort=1
         describe >&2 \
