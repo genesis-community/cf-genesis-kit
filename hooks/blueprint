@@ -844,7 +844,7 @@ then
     (*) bail "#R{[ERROR]} Unsupported IaaS: ${iaas}" ;;
   esac
 
-  env_scale=$(lookup "params.ocfp.env.scale" "dev")
+  env_scale=$(lookup "params.ocfp_env_scale" "dev")
 
   manifest+=( "ocfp/scale/${env_scale}.yml" )
   
