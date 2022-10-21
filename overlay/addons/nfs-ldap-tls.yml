@@ -1,5 +1,5 @@
 params:
-  nfs-ldap-ca-cert-ca: ((nfs-ldap-ca-cert.ca))
+  nfs-ldap-ca-cert: ((nfs-ldap-ca-cert.ca))
 
 instance_groups:
 - name: diego-cell
@@ -7,7 +7,7 @@ instance_groups:
   - name: nfsv3driver
     properties:
       nfsv3driver:
-        ldap_ca_cert: (( grab params.nfs-ldap-ca-cert-ca ))
+        ldap_ca_cert: (( grab params.nfs-ldap-ca-cert ))
 
 variables:
 - name: nfs-ldap-ca-cert

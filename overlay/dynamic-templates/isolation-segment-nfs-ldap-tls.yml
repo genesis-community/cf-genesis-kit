@@ -4,4 +4,5 @@ instance_groups:
   - name: nfsv3driver
     properties:
       nfsv3driver:
-        ldap_ca_cert: (( grab meta.nfs-ldap-ca-cert-ca || params.nfs-ldap-ca-cert-ca ))
+        ldap_ca_cert: (( grab meta.nfs-ldap-ca-cert || params.nfs-ldap-ca-cert ))
+

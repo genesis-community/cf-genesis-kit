@@ -8,6 +8,7 @@ meta:
       port:  (( vault meta.vault "/nfs/ldap:port" ))
       proto: (( vault meta.vault "/nfs/ldap:proto" ))
       fqdn:  (( vault meta.vault "/nfs/ldap:fqdn" ))
+      ca:    (( vault meta.vault "/nfs/ldap:ca" ))
 
 bosh-variables:
   nfs-ldap-service-user:     (( grab meta.nfs.ldap.user ))
@@ -24,11 +25,12 @@ params:
   nfs-ldap-port:             (( grab meta.nfs.ldap.port ))
   nfs-ldap-proto:            (( grab meta.nfs.ldap.proto ))
   nfs-ldap-fqdn:             (( grab meta.nfs.ldap.fqdn ))
+  nfs-ldap-ca-cert:          (( grab meta.nfs.ldap.ca ))
 
 ---
 - type: replace
   path: /instance_groups/name=diego-cell/jobs/name=nfsv3driver/properties/nfsv3driver/ldap_ca_cert?
-  value: (( vault genesis.secrets_mount "certs/org:ca" ))
+  value: (( grab meta.nfs.ldap.ca ))
 
 - type: replace
   path: /instance_groups/name=nfs-broker-push/networks
@@ -43,5 +45,4 @@ params:
 - type: replace
   path: /instance_groups/name=nfs-broker-push/vm_type
   value:  (( grab params.errand_vm_type  || "default" ))
-
 
