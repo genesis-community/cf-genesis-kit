@@ -864,7 +864,7 @@ then
      manifest+=( "ocfp/stratos.yml" )
    fi
 
-   if want_feature "nfs-ldap"want_feature "nfs-ldap-tls"; then
+   if want_feature "nfs-ldap" || want_feature "nfs-ldap-tls"; then
      manifest+=( "ocfp/nfs-ldap.yml" )
    fi
    if want_feature "smb-volume-services"; then
