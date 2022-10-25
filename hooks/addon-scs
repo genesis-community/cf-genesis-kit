@@ -1,0 +1,146 @@
+#!/bin/bash
+set -eu
+
+org="system"
+space="scs"
+exodus_path=$(lookup --partial genesis.exodus_base)
+system_api_domain="$(exodus api_domain)"
+cf_admin_username="$(exodus admin_username)"
+cf_admin_password="$(exodus admin_password)"
+apps_domain="$(exodus apps_domain)"
+#secrets_mount=$(lookup genesis.secrets_mount)
+#vault_env=$(lookup genesis.env)
+
+# system_domain ???
+case "${GENESIS_REQUESTED_FEATURES}" in
+  (*ocfp*)
+    echo "Looking up OCFP information from the manifest, this will take a few moments..."
+    #tf_path=$(lookup --partial meta.ocfp.vault.tf)
+    #secrets_mount=$(lookup --partial genesis.secrets_mount)
+    #vault_env=$(lookup --partial genesis.vault_env)
+    #env_path="${secrets_mount}${vault_env}"
+    true
+    ;;
+  (*)
+    true
+    ;;
+esac
+
+cf create-space -o ${org} ${space} 
+cf target -o ${org} -s ${space}
+
+scs_client=$(safe get ${exodus_path}:scs_client)
+scs_client_secret=$(safe get ${exodus_path}:scs_secret)
+scs_space_guid=$(cf space ${space} --guid)
+
+release_tag="Greenwich.SR3"
+buildpack="go_buildpack"
+memory="512M"
+disk="1048M"
+broker_auth_user="admin"
+broker_auth_password="admin"
+skip_ssl_validation="true"
+scs_broker_archive= # Default to downloading
+configserver_uri="file:///config_server.jar" # root is app/aritfacts directory
+registry_uri="file:///registry.jar" # root is app/aritfacts directory
+
+while [[ $# > 0 ]]
+do # Process opertor arguments
+  case "${1}" in 
+    (run) shift ;;
+    (*.zip|*gz) scs_broker_archive="${1}"
+      # TODO: support uri
+      shift
+      ;;
+    (skip_ssl_validation)
+      skip_ssl_validation="${2}"
+      shift 2 || fail "Usage: ... skip_ssl_validation <true|false>"
+      ;;
+    (memory)
+      memory="${2}"
+      shift 2 || fail "Usage: ... memory <#M>"
+      ;;
+    (disk)
+      disk="${2}"
+      shift 2 || fail "Usage: ... disk <#M>"
+      ;;
+    (buildpack)
+      buildpack="${2}"
+      shift 2 || fail "Usage: ... buildpack <buildpack-name>"
+      ;;
+    (release_tag)
+      release_tag="${2}"
+      shift 2 || fail "Usage: ... release_tag <tag>"
+      ;;
+    (configserver_uri)
+      configserver_uri="${2}"
+      shift 2 || fail "Usage: ... configserver_uri <uri>"
+      ;;
+    (registry_uri)
+      registry_uri="${2}"
+      shift 2 || fail "Usage: ... registry_uri <uri>"
+      ;;
+    (*)
+      echo "Unknown argument: ${1}"
+      ;;
+  esac
+  shift
+done
+
+case "${scs_broker_archive}" in
+  (*.zip) unzip -o "${scs_broker_archive}" ;; # unzip scs-*.zip
+  (*gz)   tar zxf "${scs_broker_archive}"  ;; # extract scs-*gz
+  (*) # TODO: swap to release versions once available.
+    scs_uri="https://github.com/starkandwayne/config-server-broker/archive/refs/heads/master.zip "
+    echo "Downloading SCS from ${scs_uri}..."
+    wget "${scs_uri}" && unzip -o master.zip && rm master.zip
+    ;;
+esac
+
+cat > manifest.yml <<-APPMANIFEST
+---
+applications:
+  - name: scs-broker
+    buildpack: ${buildpack}
+    memory: ${memory}
+    disk_quota: ${disk}
+    host: console
+    timeout: 180
+    health-check-type: port
+    env:
+      CONFIG_SERVER_BROKER_CONFIG:
+        broker_auth:
+          user: ${broker_auth_user}
+          password:	${broker_auth_password}
+        service_name: scs-broker
+        service_id: scs-broker
+        basic_plan_name: default
+        basic_plan_id: default
+        description: Broker to create SCS config-servers and registries
+        long_description: Broker to create SCS config-servers and registries
+        config_server_release_tag: ${release_tag}
+        cloud_foundry_config:
+          api_url: https://${system_api_domain}
+          skip_ssl_validation: ${skip_ssl_validation}
+          cf_username: ${cf_admin_username}
+          cf_password: ${cf_admin_password}
+          uaa_client_id: ${scs_client}
+          uaa_client_secret: ${scs_client_secret}
+        instance_space_guid: ${scs_space_guid}
+        instance_domain: ${system_api_domain}
+        config_server_download_uri: ${configserver_uri}
+        registry_download_uri: ${registry_uri}
+APPMANIFEST
+
+echo "Puhsing SCS Broker..."
+cf push -f manifest.yml
+
+echo "Creating the service broker..."
+cf create-service-broker "${broker_auth_user}" "${broker_auth_password}" \
+  "https://scs-broker.${apps_domain}"
+
+echo <<-EOT
+SCS service broker is now running, you should now be able to create a service ex:
+\t$ cf create-service config-server default test-service -c "{...whatever json configuration you wish to use for config-server - see config-server docs from Spring.io...}"
+EOT
+

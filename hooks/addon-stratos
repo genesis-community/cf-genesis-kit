@@ -57,7 +57,7 @@ else
 fi
 
 
-cf create-space stratos -o system
+cf create-space -o system stratos
 cf target -o system -s stratos
 
 cf cups console_db_tls_verify_ca  -p "$( cat <<-EOF
@@ -84,6 +84,7 @@ cf bind-running-security-group vpc || true
 ################################################################################
 
 cat > manifest.yml <<-APPMANIFEST
+---
 applications:
   - name: apps
     memory: 1512M
@@ -93,14 +94,14 @@ applications:
     buildpack: binary_buildpack
     health-check-type: port
     env:
-       CF_API_URL: https://${system_api_domain}
-       CF_CLIENT: ${stratos_client}
-       CF_CLIENT_SECRET: ${stratos_client_secret}
-       SESSION_STORE_SECRET: ${stratos_session_store_sekret}
-       SSO_OPTIONS: "nosplash, logout"
-       SSO_WHITELIST: "https://${stratos_domain}/*"
-       SSO_LOGIN: "true"
-       DB_SSL_MODE: "${stratos_db_sslmode}"
+      CF_API_URL: https://${system_api_domain}
+      CF_CLIENT: ${stratos_client}
+      CF_CLIENT_SECRET: ${stratos_client_secret}
+      SESSION_STORE_SECRET: ${stratos_session_store_sekret}
+      SSO_OPTIONS: "nosplash, logout"
+      SSO_WHITELIST: "https://${stratos_domain}/*"
+      SSO_LOGIN: "true"
+      DB_SSL_MODE: "${stratos_db_sslmode}"
     services:
     - console_db_tls_verify_ca
 APPMANIFEST

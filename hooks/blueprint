@@ -501,8 +501,8 @@ EOF
       manifest+=( "overlay/addons/app-scheduler.yml" )
       ;;
 
-    (config-server-integration)
-      manifest+=( "overlay/addons/config-server.yml" )
+    (scs-integration)
+      manifest+=( "overlay/addons/scs.yml" )
       ;;
 
     (prometheus-integration)
@@ -852,7 +852,7 @@ then
     "overlay/enable-service-discovery.yml"
     "overlay/addons/autoscaler.yml"
     "overlay/addons/app-scheduler.yml"
-    "overlay/addons/config-server.yml"
+    "overlay/addons/scs.yml"
     "overlay/addons/prometheus.yml"
    )
 
@@ -870,10 +870,6 @@ then
    if want_feature "smb-volume-services"; then
      manifest+=( "ocfp/smb-broker.yml" )
    fi
-
-   # TODO: 
-   #- scs-config-server-integration (rename from config-server-client)
-   #- scs-registry-integration
 fi
 
 echo "${manifest[@]}"
