@@ -8,23 +8,6 @@ system_api_domain="$(exodus api_domain)"
 cf_admin_username="$(exodus admin_username)"
 cf_admin_password="$(exodus admin_password)"
 apps_domain="$(exodus apps_domain)"
-#secrets_mount=$(lookup genesis.secrets_mount)
-#vault_env=$(lookup genesis.env)
-
-# system_domain ???
-case "${GENESIS_REQUESTED_FEATURES}" in
-  (*ocfp*)
-    echo "Looking up OCFP information from the manifest, this will take a few moments..."
-    #tf_path=$(lookup --partial meta.ocfp.vault.tf)
-    #secrets_mount=$(lookup --partial genesis.secrets_mount)
-    #vault_env=$(lookup --partial genesis.vault_env)
-    #env_path="${secrets_mount}${vault_env}"
-    true
-    ;;
-  (*)
-    true
-    ;;
-esac
 
 cf create-space -o ${org} ${space} 
 cf target -o ${org} -s ${space}
