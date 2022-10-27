@@ -287,7 +287,7 @@ for want in $GENESIS_REQUESTED_FEATURES; do
     (bare|partitioned-network|haproxy|tls|no-nats-tls|self-signed|isolation-segments) features+=( "$want" ) ;;
     (minio-blobstore|aws-blobstore|aws-blobstore-iam|azure-blobstore|gcp-blobstore|gcp-use-access-key) features+=( "$want" ) ;;
     (enable-service-discovery|ssh-proxy-on-routers|no-tcp-routers) features+=( "$want" ) ;;
-    (blacksmith-integration|app-scheduler-integration|app-autoscaler-integration|prometheus-integration|stratos-integration|v2-nats-credentials) features+=( "$want" ) ;;
+    (blacksmith-integration|trust-blacksmith-ca|app-scheduler-integration|app-autoscaler-integration|prometheus-integration|stratos-integration|v2-nats-credentials) features+=( "$want" ) ;;
     (windows-diego-cells) features+=( "$want" ) ;;
     (+migrated-v1-env|+override-db-names) features+=( "$want" ) ;;
     (v1-vm-types|no-v1-vm-types)
@@ -491,6 +491,14 @@ EOF
 
     (blacksmith-integration)
       manifest+=( "overlay/addons/blacksmith.yml" )
+      ;;
+
+    (trust-blacksmith-ca)
+      if want_feature ocfp ; then
+        manifest+=( "ocfp/trust-blacksmith-ca.yml" )
+      else
+        manifest+=( "overlay/addons/trust-blacksmith-ca.yml" )
+      fi
       ;;
 
     (app-autoscaler-integration)
