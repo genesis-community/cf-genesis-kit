@@ -69,10 +69,12 @@ do # Process opertor arguments
       echo "Unknown argument: ${1}"
       ;;
   esac
-  shift
 done
 
-curl -sOL "${broker_uri}" || fail "Could not download :${broker_uri}"
+if ! curl -sOL "${broker_uri}" 
+then fail "Could not download :${broker_uri}"
+fi
+
 file_name=$(basename "${broker_uri}")
 case "${file_name}" in
   (*.zip) unzip -o "${file_name}" ;; # unzip scs-*.zip
@@ -119,7 +121,7 @@ applications:
         registry_download_uri: ${registry_uri}
 APPMANIFEST
 
-echo "Puhsing SCS Broker..."
+echo "Pushing SCS Broker..."
 cf push -f manifest.yml
 
 echo "Creating the service broker..."
