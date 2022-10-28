@@ -1,6 +1,8 @@
 #!/bin/bash
 set -eu
 
+fail() { echo "$@" >&2 ; exit 1; }
+
 org="system"
 space="scs"
 exodus_path=$(lookup --partial genesis.exodus_base)
@@ -31,10 +33,6 @@ while [[ $# > 0 ]]
 do # Process opertor arguments
   case "${1}" in 
     (run) shift ;;
-    (*.zip|*gz) scs_broker_archive="${1}"
-      # TODO: support uri
-      shift
-      ;;
     (skip_ssl_validation)
       skip_ssl_validation="${2}"
       shift 2 || fail "Usage: ... skip_ssl_validation <true|false>"
@@ -55,6 +53,10 @@ do # Process opertor arguments
       release_tag="${2}"
       shift 2 || fail "Usage: ... release_tag <tag>"
       ;;
+    (broker_uri)
+      broker_uri="${2}"
+      shift 2 || fail "Usage: ... broker_uri <uri>"
+      ;;
     (configserver_uri)
       configserver_uri="${2}"
       shift 2 || fail "Usage: ... configserver_uri <uri>"
@@ -70,11 +72,13 @@ do # Process opertor arguments
   shift
 done
 
-case "${scs_broker_archive}" in
-  (*.zip) unzip -o "${scs_broker_archive}" ;; # unzip scs-*.zip
-  (*gz)   tar zxf "${scs_broker_archive}"  ;; # extract scs-*gz
+curl -sOL "${broker_uri}" || fail "Could not download :${broker_uri}"
+file_name=$(basename "${broker_uri}")
+case "${file_name}" in
+  (*.zip) unzip -o "${file_name}" ;; # unzip scs-*.zip
+  (*gz)   tar zxf "${file_name}"  ;; # extract scs-*gz
   (*) # TODO: swap to release versions once available.
-    scs_uri="https://github.com/starkandwayne/config-server-broker/archive/refs/heads/master.zip "
+    scs_uri="https://github.com/starkandwayne/config-server-broker/archive/refs/heads/master.zip"
     echo "Downloading SCS from ${scs_uri}..."
     wget "${scs_uri}" && unzip -o master.zip && rm master.zip
     ;;

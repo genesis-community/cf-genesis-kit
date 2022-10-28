@@ -150,7 +150,6 @@ abort=
 warn=
 db_specified=
 opsdir="ops"
-OCFP=0
 iaas=
 
 [[ -n "${PREVIOUS_ENV:-}" ]] && opsdir=".genesis/cached/${PREVIOUS_ENV}/${opsdir}"
@@ -165,9 +164,6 @@ for want in $GENESIS_REQUESTED_FEATURES; do
       [[ -z "$version" ]] || bail "#R{[ERROR]} You cannot specify more than one cf-deployment-version-* feature"
       version="${want#"cf-deployment-version-"}"
       break;
-      ;;
-    (ocfp)
-      OCFP=1
       ;;
     (shield-dbs|shield-blobstores)
       warn=1
@@ -287,11 +283,6 @@ for want in $GENESIS_REQUESTED_FEATURES; do
         describe >&2 \
           "#R[ERROR]} Feature #c{$want} cannot be specified without feature #c{nfs-volume-services}"
       fi
-      if [[ $want == "nfs-ldap-tls" ]] ; then
-        features+=( "nfs-ldap-tls" )
-      else
-        features+=( "nfs-ldap" )
-      fi
       ;;
     (local-postgres-db|local-mysql-db|mysql-db|postgres-db) db_specified=1; features+=( "$want" ) ;;
     (bare|partitioned-network|haproxy|tls|no-nats-tls|self-signed|isolation-segments) features+=( "$want" ) ;;
@@ -311,6 +302,9 @@ for want in $GENESIS_REQUESTED_FEATURES; do
         describe >&2 \
           "#R[ERROR]} #c{$want} is not an upstream operation -- see cf-deployment for valid operations."
       fi
+      ;;
+    (ocfp)
+      features+=( "$want" )
       ;;
     (*)
       if [[ -f "$GENESIS_ROOT/${opsdir}/$want.yml" || -f "$GENESIS_ROOT/ops/$want.yml" ]] ; then
@@ -470,7 +464,7 @@ for want in $GENESIS_REQUESTED_FEATURES; do
           "overlay/addons/nfs-ldap.yml" \
         )
         if want_feature "nfs-ldap-tls"; then
-          manifest+=( overlay/addons/nfs-ldap-tls.yml )
+          manifest+=( "overlay/addons/nfs-ldap-tls.yml" )
           # If user provided their own nfs-ldap-ca path, delete the default
           if jq <<<"$params" -e '."nfs-ldap-ca-cert-ca"' &> /dev/null ; then
             remove_unused_secret_ops_file="operations/dynamic/remove-unused-nfs-ldap-ca-cert.yml"
@@ -802,7 +796,7 @@ if [[ -n "${version}" ]] && ! new_enough "${version}" "2.0.0-rc0"; then
   :
 fi
 
-ocfp::manifests() {
+if want_feature "ocfp" ; then 
   case ${iaas:-} in
     (aws|gcp|azure|vsphere) true ;;
     (*) bail "Expected IaaS feature set in env file with 'ocfp' feature, one of: aws|gcp|azure|vsphere" ;;
@@ -884,13 +878,10 @@ ocfp::manifests() {
    if want_feature "nfs-ldap" || want_feature "nfs-ldap-tls"; then
      manifest+=( "ocfp/nfs-ldap.yml" )
    fi
+
    if want_feature "smb-volume-services"; then
      manifest+=( "ocfp/smb-broker.yml" )
    fi
-}
-
-if [[ ${OCFP} > 0 ]]
-then manifests+=($(ocfp::manifests))
 fi
 
 echo "${manifest[@]}"

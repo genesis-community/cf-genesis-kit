@@ -1,9 +1,10 @@
 #!/bin/bash
 for f in $GENESIS_REQUESTED_FEATURES ; do
   case $f in
-    (cf-deployment/operations/enable-nfs-volume-services) echo 'nfs-volume-services' ;;
-    (cf-deployment/operations/enable-nfs-lambda)          echo 'nfs-lambda' ;;
-    (cf-deployment/operations/enable-smb-volume-services) echo 'smb-volume-services' ;;
+    (cf-deployment/operations/enable-nfs-volume-services) echo "nfs-volume-services" ;;
+    (cf-deployment/operations/enable-nfs-lambda)          echo "nfs-lambda" ;;
+    (cf-deployment/operations/enable-smb-volume-services) echo "smb-volume-services" ;;
+    (nfs-ldap-tls) echo "nfs-ldap" ;;
     (*) echo "$f" ;;
   esac
 done
