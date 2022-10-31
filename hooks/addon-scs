@@ -88,7 +88,7 @@ do # Process opertor arguments
       shift 2 || fail "Usage: ... registry_jar_uri <uri>"
       ;;
     (*)
-      echo "Unknown argument: ${1}"
+      fail "Unknown argument: ${1}"
       ;;
   esac
 done
@@ -96,7 +96,7 @@ done
 [[ -n "${broker_uri}" ]] ||
   broker_uri="https://github.com/starkandwayne/scs-broker/archive/refs/tags/v0.0.2.tar.gz"
 
-fetch "${broker_uri}"
+fetch::uri "${broker_uri}"
 
 extract $(basename "${broker_uri}")
 
@@ -117,7 +117,7 @@ applications:
     env:
       GOPACKAGENAME: scs-broker
       SCS_BROKER_CONFIG: |-
-        {"basic_plan_id":"default","basic_plan_name":"default","broker_auth":{"password":"${broker_auth_password}","user":"${broker_auth_user}"},"cloud_foundry_config":{"api_url":"https://${system_api_domain}","cf_password":"${cf_admin_password}","cf_username":"${cf_admin_username}","skip_ssl_validation":"${skip_ssl_validation}","uaa_client_id":"${scs_client}","uaa_client_secret":"${scs_client_secret}"},"config_server_download_uri":"${configserver_jar_uri}","config_server_release_tag":"${release_tag}","description":"Broker to create SCS config-servers and registries","instance_domain":"${system_api_domain}","instance_space_guid":"${scs_space_guid}","long_description":"Broker to create SCS config-servers and registries","registry_download_uri":"${registry_jar_uri}","service_id":"scs-broker","service_name":"scs-broker"}
+        {"basic_plan_id":"default","basic_plan_name":"default","broker_auth":{"password":"${broker_auth_password}","user":"${broker_auth_user}"},"cloud_foundry_config":{"api_url":"https://${system_api_domain}","cf_password":"${cf_admin_password}","cf_username":"${cf_admin_username}","skip_ssl_validation":${skip_ssl_validation},"uaa_client_id":"${scs_client}","uaa_client_secret":"${scs_client_secret}"},"config_server_download_uri":"${configserver_jar_uri}","config_server_release_tag":"${release_tag}","description":"Broker to create SCS config-servers and registries","instance_domain":"${system_api_domain}","instance_space_guid":"${scs_space_guid}","long_description":"Broker to create SCS config-servers and registries","registry_download_uri":"${registry_jar_uri}","service_id":"scs-broker","service_name":"scs-broker"}
 
 APPMANIFEST
 
