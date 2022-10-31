@@ -3,6 +3,28 @@ set -eu
 
 fail() { echo "$@" >&2 ; exit 1; }
 
+fetch::uri() {
+  curl -sOL "${1}" || fail "Failed to download: ${1}"
+}
+
+fetch::artifacts() {
+  mkdir artifacts
+  pushd artifacts
+  for uri in "${configserver_jar_uri}" "${registry_jar_uri}"
+  do fetch::uri "${uri}"
+  done
+  popd
+}
+
+extract() {
+  case "${1}" in
+    (*.zip) unzip -o "${1}" ;; # unzip scs-*.zip
+    (*gz)   tar zxf "${1}"  ;; # extract scs-*gz
+    (*)     fail "Unknown file type: ${1}" ;;
+  esac
+  rm ${1}
+}
+
 org="system"
 space="scs"
 exodus_path=$(lookup --partial genesis.exodus_base)
@@ -20,14 +42,14 @@ scs_space_guid=$(cf space ${space} --guid)
 
 release_tag="Greenwich.SR3"
 buildpack="go_buildpack"
-memory="512M"
+memory="2048M"
 disk="1048M"
 broker_auth_user="admin"
 broker_auth_password="admin"
 skip_ssl_validation="true"
 scs_broker_archive= # Default to downloading
-configserver_uri="file:///config_server.jar" # root is app/aritfacts directory
-registry_uri="file:///registry.jar" # root is app/aritfacts directory
+configserver_jar_uri="https://github.com/starkandwayne/cf-spring-cloud-config-server/releases/download/1.1.0/spring-cloud-config-server-1.1.0-2.5.14.SCS.3.1.37.jar"
+registry_jar_uri="https://github.com/starkandwayne/scs-service-registry/releases/download/1.0.1-3.1.37/service-registry-1.0.1-3.1.37.jar"
 
 while [[ $# > 0 ]]
 do # Process opertor arguments
@@ -57,13 +79,13 @@ do # Process opertor arguments
       broker_uri="${2}"
       shift 2 || fail "Usage: ... broker_uri <uri>"
       ;;
-    (configserver_uri)
-      configserver_uri="${2}"
-      shift 2 || fail "Usage: ... configserver_uri <uri>"
+    (configserver_jar_uri)
+      configserver_jar_uri="${2}"
+      shift 2 || fail "Usage: ... configserver_jar_uri <uri>"
       ;;
-    (registry_uri)
-      registry_uri="${2}"
-      shift 2 || fail "Usage: ... registry_uri <uri>"
+    (registry_jar_uri)
+      registry_jar_uri="${2}"
+      shift 2 || fail "Usage: ... registry_jar_uri <uri>"
       ;;
     (*)
       echo "Unknown argument: ${1}"
@@ -74,21 +96,13 @@ done
 [[ -n "${broker_uri}" ]] ||
   broker_uri="https://github.com/starkandwayne/scs-broker/archive/refs/tags/v0.0.2.tar.gz"
 
-if ! curl -sOL "${broker_uri}" 
-then fail "Could not download :${broker_uri}"
-fi
+fetch "${broker_uri}"
 
-file_name=$(basename "${broker_uri}")
-
-case "${file_name}" in
-  (*.zip) unzip -o "${file_name}" ;; # unzip scs-*.zip
-  (*gz)   tar zxf "${file_name}"  ;; # extract scs-*gz
-  (*)     fail "Unknown file type: ${file_name}" ;;
-esac
-
-rm ${file_name}
+extract $(basename "${broker_uri}")
 
 cd scs-broker-*
+
+fetch::artifacts
 
 cat > manifest.yml <<-APPMANIFEST
 ---
@@ -101,8 +115,9 @@ applications:
     timeout: 180
     health-check-type: port
     env:
+      GOPACKAGENAME: scs-broker
       SCS_BROKER_CONFIG: |-
-        {"basic_plan_id":"default","basic_plan_name":"default","broker_auth":{"password":"${broker_auth_password}","user":"${broker_auth_user}"},"cloud_foundry_config":{"api_url":"https://${system_api_domain}","cf_password":"${cf_admin_password}","cf_username":"${cf_admin_username}","skip_ssl_validation":"${skip_ssl_validation}","uaa_client_id":"${scs_client}","uaa_client_secret":"${scs_client_secret}"},"config_server_download_uri":"${configserver_uri}","config_server_release_tag":"${release_tag}","description":"Broker to create SCS config-servers and registries","instance_domain":"${system_api_domain}","instance_space_guid":"${scs_space_guid}","long_description":"Broker to create SCS config-servers and registries","registry_download_uri":"${registry_uri}","service_id":"scs-broker","service_name":"scs-broker"}
+        {"basic_plan_id":"default","basic_plan_name":"default","broker_auth":{"password":"${broker_auth_password}","user":"${broker_auth_user}"},"cloud_foundry_config":{"api_url":"https://${system_api_domain}","cf_password":"${cf_admin_password}","cf_username":"${cf_admin_username}","skip_ssl_validation":"${skip_ssl_validation}","uaa_client_id":"${scs_client}","uaa_client_secret":"${scs_client_secret}"},"config_server_download_uri":"${configserver_jar_uri}","config_server_release_tag":"${release_tag}","description":"Broker to create SCS config-servers and registries","instance_domain":"${system_api_domain}","instance_space_guid":"${scs_space_guid}","long_description":"Broker to create SCS config-servers and registries","registry_download_uri":"${registry_jar_uri}","service_id":"scs-broker","service_name":"scs-broker"}
 
 APPMANIFEST
 
