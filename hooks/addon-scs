@@ -71,20 +71,24 @@ do # Process opertor arguments
   esac
 done
 
+[[ -n "${broker_uri}" ]] ||
+  broker_uri="https://github.com/starkandwayne/scs-broker/archive/refs/tags/v0.0.2.tar.gz"
+
 if ! curl -sOL "${broker_uri}" 
 then fail "Could not download :${broker_uri}"
 fi
 
 file_name=$(basename "${broker_uri}")
+
 case "${file_name}" in
   (*.zip) unzip -o "${file_name}" ;; # unzip scs-*.zip
   (*gz)   tar zxf "${file_name}"  ;; # extract scs-*gz
-  (*) # TODO: swap to release versions once available.
-    scs_uri="https://github.com/starkandwayne/config-server-broker/archive/refs/heads/master.zip"
-    echo "Downloading SCS from ${scs_uri}..."
-    wget "${scs_uri}" && unzip -o master.zip && rm master.zip
-    ;;
+  (*)     fail "Unknown file type: ${file_name}" ;;
 esac
+
+rm ${file_name}
+
+cd scs-broker-*
 
 cat > manifest.yml <<-APPMANIFEST
 ---
@@ -97,28 +101,9 @@ applications:
     timeout: 180
     health-check-type: port
     env:
-      CONFIG_SERVER_BROKER_CONFIG:
-        broker_auth:
-          user: ${broker_auth_user}
-          password:	${broker_auth_password}
-        service_name: scs-broker
-        service_id: scs-broker
-        basic_plan_name: default
-        basic_plan_id: default
-        description: Broker to create SCS config-servers and registries
-        long_description: Broker to create SCS config-servers and registries
-        config_server_release_tag: ${release_tag}
-        cloud_foundry_config:
-          api_url: https://${system_api_domain}
-          skip_ssl_validation: ${skip_ssl_validation}
-          cf_username: ${cf_admin_username}
-          cf_password: ${cf_admin_password}
-          uaa_client_id: ${scs_client}
-          uaa_client_secret: ${scs_client_secret}
-        instance_space_guid: ${scs_space_guid}
-        instance_domain: ${system_api_domain}
-        config_server_download_uri: ${configserver_uri}
-        registry_download_uri: ${registry_uri}
+      SCS_BROKER_CONFIG: |-
+        {"basic_plan_id":"default","basic_plan_name":"default","broker_auth":{"password":"${broker_auth_password}","user":"${broker_auth_user}"},"cloud_foundry_config":{"api_url":"https://${system_api_domain}","cf_password":"${cf_admin_password}","cf_username":"${cf_admin_username}","skip_ssl_validation":"${skip_ssl_validation}","uaa_client_id":"${scs_client}","uaa_client_secret":"${scs_client_secret}"},"config_server_download_uri":"${configserver_uri}","config_server_release_tag":"${release_tag}","description":"Broker to create SCS config-servers and registries","instance_domain":"${system_api_domain}","instance_space_guid":"${scs_space_guid}","long_description":"Broker to create SCS config-servers and registries","registry_download_uri":"${registry_uri}","service_id":"scs-broker","service_name":"scs-broker"}
+
 APPMANIFEST
 
 echo "Pushing SCS Broker..."
@@ -132,4 +117,6 @@ echo <<-EOT
 SCS service broker is now running, you should now be able to create a service ex:
 \t$ cf create-service config-server default test-service -c "{...whatever json configuration you wish to use for config-server - see config-server docs from Spring.io...}"
 EOT
+
+exit 0
 
