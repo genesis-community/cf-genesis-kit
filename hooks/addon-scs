@@ -42,7 +42,7 @@ scs_space_guid=$(cf space ${space} --guid)
 
 release_tag="Greenwich.SR3"
 buildpack="go_buildpack"
-memory="2048M"
+memory="256M"
 disk="1048M"
 broker_auth_user="admin"
 broker_auth_password="admin"
@@ -125,7 +125,7 @@ echo "Pushing SCS Broker..."
 cf push -f manifest.yml
 
 echo "Creating the service broker..."
-cf create-service-broker "${broker_auth_user}" "${broker_auth_password}" \
+cf create-service-broker scs-broker "${broker_auth_user}" "${broker_auth_password}" \
   "https://scs-broker.${apps_domain}"
 
 echo <<-EOT
