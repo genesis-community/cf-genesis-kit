@@ -5,27 +5,30 @@
 ################################################################################
 warn()  { warn=1  ; describe >&2 "#Y{[WARNING]} $(echo -e $*)\n" ; }
 abort() { abort=1 ; describe >&2 "#R{[ERROR]} $(echo -e $*)\n" ; }
-fail()  { bail "#R{[ERROR]} $(echo -e $*)\n" ; }
+fail()  { bail "#R{[ERROR]} $(echo -e $*)\n" ; exit 1 ; }
 
 switch_cf_version() {
   describe >&2 "" \
     "- #y{Experimental Feature Enabled:} Custom cf-deployment version: $version"
   cfd_file="$GENESIS_ROOT/.genesis/kits/addons/cf-deployment-${version}.tar.gz"
-  if ! [[ -f "$cfd_file" ]] ; then
+  cfd_url="https://github.com/cloudfoundry/cf-deployment/archive/v${version}.tar.gz"
+  if ! [[ -s "${cfd_file}" ]]
+  then
     # Download
     describe >&2 \
       "  #i{Fetching cf-deployment-${version} release from cloudfoundry/cf-deployment}" \
       "  #i{on github.com}"
-    mkdir -p "$GENESIS_ROOT/.genesis/kits/addons/"
-    curl -sSL -o "$cfd_file" "https://github.com/cloudfoundry/cf-deployment/archive/v${version}.tar.gz" > /dev/null
-    if ! [[ -f "$cfd_file" ]] ; then
-      describe >&2 "" \
-        "  #R{[ERROR]} Failed to download cf-deployment v$version -- cannot continue" ""
-      exit 1
-    fi
+
+    mkdir -p "${GENESIS_ROOT}/.genesis/kits/addons/"
+
+    curl -sSL -o "${cfd_file}" "${cfd_url}" > /dev/null
+
+    [[ -s "${cfd_file}" ]]  ||
+      fail "Failed to download cf-deployment v${version} -- cannot continue"
+
     topdir="$(tar -ztf "$cfd_file" | awk '{print $NF}' | cut -d'/' -f1 | uniq)"
-    if [[ $topdir != "cf-deployment-$version" ]] ; then
-      fail "Downloaded cf-deployment v$version doesn't look like a valid release -- cannot continue"
+    if [[ ${topdir} != "cf-deployment-${version}" ]] ; then
+      fail "Downloaded cf-deployment v${version} doesn't look like a valid release -- cannot continue"
       exit 1
     fi
   else
@@ -55,37 +58,47 @@ gopatch::remove() {
 # Dynamic Isolation Segments
 ################################################################################
 dynamic::isolation::segments() {
-  isolation_groups="$(echo "$1" | jq -r '.isolation_segments[] | .name')"
-  iso_seg_merges=();
+  declare -a isolation_groups
+  declare -a iso_seg_merges
 
-  if ! want_feature "bare" || want_feature "partitioned-network" ; then
-    iso_seg_merges+=( "overlay/dynamic-templates/isolation-segment-network.yml" )
+  iso_seg_merges=()
+  isolation_groups=($(echo "$1" | jq -r '.isolation_segments[] | .name'))
+
+  if ! want_feature bare || want_feature partitioned-network
+  then iso_seg_merges+=( "overlay/dynamic-templates/isolation-segment-network.yml" )
   fi
 
-  if want_feature "nfs-volume-services" ; then
+  if want_feature nfs-volume-services
+  then
     iso_seg_merges+=( "overlay/dynamic-templates/isolation-segment-nfs.yml" )
-    if want_feature "nfs-ldap" || want_feature "nfs-ldap-tls" ; then
+
+    if want_feature nfs-ldap || want_feature nfs-ldap-tls
+    then
       iso_seg_merges+=( "overlay/dynamic-templates/isolation-segment-nfs-ldap.yml" )
 
-      if want_feature "nfs-ldap-tls" ; then
-        iso_seg_merges+=( "overlay/dynamic-templates/isolation-segment-nfs-ldap-tls.yml" )
+      if want_feature nfs-ldap-tls
+      then iso_seg_merges+=( "overlay/dynamic-templates/isolation-segment-nfs-ldap-tls.yml" )
       fi
 
-      if want_feature ocfp ; then iso_seg_merges+=( "ocfp/nfs-ldap.yml" ) ; fi
+      if want_feature ocfp 
+      then 
+        iso_seg_merges+=( 
+        "overlay/dynamic-templates/isolation-segment-nfs-ldap-ocfp.yml" 
+        "ocfp/nfs-ldap-data.yml" 
+        )
+      fi
     fi
   fi
 
-  if want_feature "smb-volume-services" ; then
-    iso_seg_merges+=( overlay/dynamic-templates/isolation-segment-smb.yml )
-
-    if want_feature ocfp ; then iso_seg_merges+=( "ocfp/smb-broker.yml" ) ; fi
+  if want_feature smb-volume-services
+  then iso_seg_merges+=( "overlay/dynamic-templates/isolation-segment-smb.yml" )
   fi
 
-  if want_feature "trust-blacksmith-ca" ; then
-    if want_feature ocfp ; then
-      iso_seg_merges+=( "ocfp/trust-blacksmith-ca.yml" )
-    else
-      iso_seg_merges+=( "overlay/addons/trust-blacksmith-ca.yml" )
+  if want_feature trust-blacksmith-ca
+  then
+    if want_feature ocfp
+    then iso_seg_merges+=( "ocfp/trust-blacksmith-ca.yml" )
+    else iso_seg_merges+=( "overlay/addons/trust-blacksmith-ca.yml" )
     fi
   fi
 
@@ -95,24 +108,30 @@ dynamic::isolation::segments() {
       >> overlay/dynamic/meta.yml
   iso_seg_merges+=( "overlay/dynamic/meta.yml" )
 
-  for group in $isolation_groups; do
+  for group in ${isolation_groups[@]}
+  do
     additional_trusted_certs=''
-    if jq -e --arg v "$group" '.isolation_segments[] | select( .name == $v ) | .additional_trusted_certs//[] | length > 0' <<<"$1" &>/dev/null  ; then
-
+    if jq -e --arg v "$group" \
+      '.isolation_segments[] | select( .name == $v ) | .additional_trusted_certs//[] | length > 0' <<<"$1" &>/dev/null
+    then
       additional_trusted_certs="overlay/dynamic/isolation-segment-${group}-additional-trusted-certs.yml"
-      sed -e 's/{{segment-name}}/'"$group"'/g' \
-        < 'overlay/dynamic-templates/isolation-segment-additional-trusted-certs.yml' \
-        > "$additional_trusted_certs"
 
+      sed -e 's/{{segment-name}}/'"${group}"'/g' \
+        < 'overlay/dynamic-templates/isolation-segment-additional-trusted-certs.yml' \
+        > "${additional_trusted_certs}"
     fi
+
     dynamic_segment_fragment_file="overlay/dynamic/isolation_segments_$group.yml"
 
-    spruce merge --prune "meta" "overlay/dynamic-templates/isolation-segment.yml" \
-      ${iso_seg_merges[@]+"${iso_seg_merges[@]}"} $additional_trusted_certs \
+    spruce merge --prune "meta" \
+      "overlay/dynamic-templates/isolation-segment.yml" \
+      ${iso_seg_merges[@]+"${iso_seg_merges[@]}"} \
+      ${additional_trusted_certs} \
       <(echo "$1" | sed -e 's#"(( *#"(( defer #g' | jq --arg v "$group" '.isolation_segments[] | select(.name == $v ) | {"meta": .}') \
       <(echo '{"instance_groups": [ "((prepend))", "((defer append))" ]}') \
-      > "$dynamic_segment_fragment_file"
-    echo "$dynamic_segment_fragment_file"
+      > "${dynamic_segment_fragment_file}"
+
+    echo "${dynamic_segment_fragment_file}"
   done
 }
 
@@ -909,6 +928,7 @@ features::ocfp() {
         ;;
       (nfs-volume-services)
         manifests+=( "ocfp/nfs-ldap.yml" )
+        manifests+=( "ocfp/nfs-ldap-data.yml" )
         ;;
       (smb-volume-services)
         manifests+=( "ocfp/smb-broker.yml" )

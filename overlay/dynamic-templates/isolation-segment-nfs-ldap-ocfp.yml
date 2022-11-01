@@ -1,0 +1,29 @@
+---
+meta:
+  nfs:
+    ldap:
+      user:  (( vault meta.vault "/nfs/ldap:user" ))
+      pass:  (( vault meta.vault "/nfs/ldap:pass" ))
+      host:  (( vault meta.vault "/nfs/ldap:host" ))
+      port:  (( vault meta.vault "/nfs/ldap:port" ))
+      proto: (( vault meta.vault "/nfs/ldap:proto" ))
+      fqdn:  (( vault meta.vault "/nfs/ldap:fqdn" ))
+      ca:    (( vault meta.vault "/nfs/ldap:ca" ))
+
+bosh-variables:
+  nfs-ldap-service-user:     (( grab meta.nfs.ldap.user ))
+  nfs-ldap-service-password: (( grab meta.nfs.ldap.pass ))
+  nfs-ldap-host:             (( grab meta.nfs.ldap.host ))
+  nfs-ldap-port:             (( grab meta.nfs.ldap.port ))
+  nfs-ldap-proto:            (( grab meta.nfs.ldap.proto ))
+  nfs-ldap-fqdn:             (( grab meta.nfs.ldap.fqdn ))
+
+params:
+  nfs-ldap-service-user:     (( grab meta.nfs.ldap.user ))
+  nfs-ldap-service-password: (( grab meta.nfs.ldap.pass ))
+  nfs-ldap-host:             (( grab meta.nfs.ldap.host ))
+  nfs-ldap-port:             (( grab meta.nfs.ldap.port ))
+  nfs-ldap-proto:            (( grab meta.nfs.ldap.proto ))
+  nfs-ldap-fqdn:             (( grab meta.nfs.ldap.fqdn ))
+  nfs-ldap-ca-cert:          (( grab meta.nfs.ldap.ca ))
+
