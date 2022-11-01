@@ -35,7 +35,7 @@ params:
 - type: replace
   path: /instance_groups/name=nfs-broker-push/networks
   value: 
-    - name:  (( concat genesis.env "-ocf" ))
+    - name: (( concat genesis.env "-ocf" ))
 
 - type: replace
   path: /instance_groups/name=nfs-broker-push/azs
@@ -44,5 +44,5 @@ params:
 
 - type: replace
   path: /instance_groups/name=nfs-broker-push/vm_type
-  value:  (( grab params.errand_vm_type  || "default" ))
+  value:  (( concat "errand-" meta.ocfp.env.scale ))
 

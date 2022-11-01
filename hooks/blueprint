@@ -857,9 +857,8 @@ if want_feature "ocfp" ; then
 
   env_scale=$(lookup "params.ocfp_env_scale" "dev")
 
-  manifest+=( "ocfp/scale/${env_scale}.yml" )
-  
   manifest+=(
+    "ocfp/scale/${env_scale}.yml" 
     "overlay/enable-service-discovery.yml"
     "overlay/addons/autoscaler.yml"
     "overlay/addons/app-scheduler.yml"
@@ -867,21 +866,24 @@ if want_feature "ocfp" ; then
     "overlay/addons/prometheus.yml"
    )
 
-   if want_feature "blacksmith-integration"; then
-     manifest+=( "ocfp/blacksmith.yml" )
-   fi
-
-   if want_feature "stratos-integration"; then
-     manifest+=( "ocfp/stratos.yml" )
-   fi
-
-   if want_feature "nfs-ldap" || want_feature "nfs-ldap-tls"; then
-     manifest+=( "ocfp/nfs-ldap.yml" )
-   fi
-
-   if want_feature "smb-volume-services"; then
-     manifest+=( "ocfp/smb-broker.yml" )
-   fi
+   for want in ${GENESIS_ROOT}
+   do
+     case "${want}" in
+       (blacksmith-integration) 
+         manifest+=( "ocfp/blacksmith.yml" )
+         ;;
+       (stratos-integration)
+         manifest+=( "ocfp/stratos.yml" )
+         ;;
+       (nfs*)
+         manifest+=( "ocfp/nfs-ldap.yml" )
+         ;;
+       (smb-volume-services)
+         manifest+=( "ocfp/smb-broker.yml" )
+         ;;
+       (*) true ;; # Skip what we don't care about
+     esac
+   done
 fi
 
 echo "${manifest[@]}"
