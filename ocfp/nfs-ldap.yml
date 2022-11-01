@@ -39,8 +39,7 @@ params:
 
 - type: replace
   path: /instance_groups/name=nfs-broker-push/azs
-  value: 
-    - (( concat genesis.env "-z1" ))
+  value: (( grab meta.ocfp.azs ))
 
 - type: replace
   path: /instance_groups/name=nfs-broker-push/vm_type

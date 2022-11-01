@@ -6,12 +6,9 @@
 
 - type: replace
   path: /instance_groups/name=smb-broker-push/azs
-  value: 
-    - (( concat genesis.env "-z1" ))
+  value: (( grab meta.ocfp.azs ))
 
 - type: replace
   path: /instance_groups/name=smb-broker-push/vm_type
-  value:  (( grab params.errand_vm_type  || "default" ))
-
-
+  value:  (( concat "errand-" meta.ocfp.env.scale ))
 

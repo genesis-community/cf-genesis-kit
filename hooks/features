@@ -1,10 +1,10 @@
 #!/bin/bash
-for f in $GENESIS_REQUESTED_FEATURES ; do
-  case $f in
+for feature in $GENESIS_REQUESTED_FEATURES ; do
+  case $feature in
     (cf-deployment/operations/enable-nfs-volume-services) echo "nfs-volume-services" ;;
     (cf-deployment/operations/enable-nfs-lambda)          echo "nfs-lambda" ;;
     (cf-deployment/operations/enable-smb-volume-services) echo "smb-volume-services" ;;
-    (*) echo "$f" ;;
+    (*) echo "$feature" ;;
   esac
 done
 db_overrides="$(lookup params 2>/dev/null | jq -r '. | keys| .[] | select(. | test("^(cc|uaa|diego|policyserver|silk|locket|routingapi|credhub)db_(name|user)$"))')"

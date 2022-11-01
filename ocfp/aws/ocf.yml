@@ -1,90 +1,11 @@
 ---
-# 3 AZs
-- type: replace
-  path: /instance_groups/name=nats/azs
-  value: 
-    - (( concat genesis.env "-z1" ))
-    - (( concat genesis.env "-z2" ))
-    - (( concat genesis.env "-z3" ))
-- type: replace
-  path: /instance_groups/name=diego-api/azs
-  value:
-    - (( concat genesis.env "-z1" ))
-    - (( concat genesis.env "-z2" ))
-    - (( concat genesis.env "-z3" ))
-- type: replace
-  path: /instance_groups/name=uaa/azs
-  value:
-    - (( concat genesis.env "-z1" ))
-    - (( concat genesis.env "-z2" ))
-    - (( concat genesis.env "-z3" ))
-- type: replace
-  path: /instance_groups/name=scheduler/azs
-  value:
-    - (( concat genesis.env "-z1" ))
-    - (( concat genesis.env "-z2" ))
-    - (( concat genesis.env "-z3" ))
-- type: replace
-  path: /instance_groups/name=diego-cell/azs
-  value:
-    - (( concat genesis.env "-z1" ))
-    - (( concat genesis.env "-z2" ))
-    - (( concat genesis.env "-z3" ))
-- type: replace
-  path: /instance_groups/name=router/azs
-  value:
-    - (( concat genesis.env "-z1" ))
-    - (( concat genesis.env "-z2" ))
-    - (( concat genesis.env "-z3" ))
-- type: replace
-  path: /instance_groups/name=api/azs
-  value:
-    - (( concat genesis.env "-z1" ))
-    - (( concat genesis.env "-z2" ))
-    - (( concat genesis.env "-z3" ))
-- type: replace
-  path: /instance_groups/name=cc-worker/azs
-  value:
-    - (( concat genesis.env "-z1" ))
-    - (( concat genesis.env "-z2" ))
-    - (( concat genesis.env "-z3" ))
-- type: replace
-  path: /instance_groups/name=doppler/azs
-  value:
-    - (( concat genesis.env "-z1" ))
-    - (( concat genesis.env "-z2" ))
-    - (( concat genesis.env "-z3" ))
-- type: replace
-  path: /instance_groups/name=log-api/azs
-  value:
-    - (( concat genesis.env "-z1" ))
-    - (( concat genesis.env "-z2" ))
-    - (( concat genesis.env "-z3" ))
-- type: replace
-  path: /instance_groups/name=tcp-router/azs
-  value:
-    - (( concat genesis.env "-z1" ))
-    - (( concat genesis.env "-z2" ))
-    - (( concat genesis.env "-z3" ))
-- type: replace
-  path: /instance_groups/name=credhub/azs
-  value:
-    - (( concat genesis.env "-z1" ))
-    - (( concat genesis.env "-z2" ))
-    - (( concat genesis.env "-z3" ))
-- type: replace
-  path: /instance_groups/name=rotate-cc-database-key?/azs
-  value:
-    - (( concat genesis.env "-z1" ))
-    - (( concat genesis.env "-z2" ))
-    - (( concat genesis.env "-z3" ))
-- type: replace
-  path: /instance_groups/name=smoke-tests/azs
-  value:
-    - (( concat genesis.env "-z1" ))
-    - (( concat genesis.env "-z2" ))
-    - (( concat genesis.env "-z3" ))
-
+meta:
+  ocfp:
+    azs:
+      - (( concat genesis.env "-z1" ))
+      - (( concat genesis.env "-z2" ))
+      - (( concat genesis.env "-z3" ))
+---
 # OCFP Cloud Config accounts for larger ephemeral disks vvv
 - type: remove
   path: /instance_groups/name=diego-cell/vm_extensions

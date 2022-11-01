@@ -806,6 +806,7 @@ if want_feature "ocfp" ; then
     "ocfp/meta.yml" 
     "ocfp/ocfp.yml"
     "ocfp/${iaas}/ocf.yml"
+    "ocfp/${iaas}/azs.yml"
     "ocfp/external-db-prep.yml"
     "ocfp/external-db.yml"
     "overlay/enable-service-discovery.yml"
@@ -875,7 +876,7 @@ if want_feature "ocfp" ; then
        (stratos-integration)
          manifest+=( "ocfp/stratos.yml" )
          ;;
-       (nfs*)
+       (nfs-volume-services)
          manifest+=( "ocfp/nfs-ldap.yml" )
          ;;
        (smb-volume-services)

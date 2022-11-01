@@ -1,0 +1,46 @@
+---
+# 3 AZs
+- type: replace
+  path: /instance_groups/name=nats/azs
+  value: (( grab meta.ocfp.azs ))
+- type: replace
+  path: /instance_groups/name=diego-api/azs
+  value: (( grab meta.ocfp.azs ))
+- type: replace
+  path: /instance_groups/name=uaa/azs
+  value: (( grab meta.ocfp.azs ))
+- type: replace
+  path: /instance_groups/name=scheduler/azs
+  value: (( grab meta.ocfp.azs ))
+- type: replace
+  path: /instance_groups/name=diego-cell/azs
+  value: (( grab meta.ocfp.azs ))
+- type: replace
+  path: /instance_groups/name=router/azs
+  value: (( grab meta.ocfp.azs ))
+- type: replace
+  path: /instance_groups/name=api/azs
+  value: (( grab meta.ocfp.azs ))
+- type: replace
+  path: /instance_groups/name=cc-worker/azs
+  value: (( grab meta.ocfp.azs ))
+- type: replace
+  path: /instance_groups/name=doppler/azs
+  value: (( grab meta.ocfp.azs ))
+- type: replace
+  path: /instance_groups/name=log-api/azs
+  value: (( grab meta.ocfp.azs ))
+- type: replace
+  path: /instance_groups/name=tcp-router/azs
+  value: (( grab meta.ocfp.azs ))
+- type: replace
+  path: /instance_groups/name=credhub/azs
+  value: (( grab meta.ocfp.azs ))
+- type: replace
+  path: /instance_groups/name=rotate-cc-database-key?/azs
+  value: (( grab meta.ocfp.azs ))
+- type: replace
+  path: /instance_groups/name=smoke-tests/azs
+  value: (( grab meta.ocfp.azs ))
+
+
