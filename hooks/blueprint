@@ -3,19 +3,9 @@
 ################################################################################
 # Functions
 ################################################################################
-warn() {
-  warn=1
-  echo >&2 -e "#Y{[WARNING]} $*\n"
-}
-
-abort() {
-  abort=1
-  echo >&2 -e "#R{[ERROR]} $*\n"
-}
-
-fail() {
-  bail "#R{[ERROR]} $*\n"
-}
+warn()  { warn=1  ; describe >&2 "#Y{[WARNING]} $(echo -e $*)\n" ; }
+abort() { abort=1 ; describe >&2 "#R{[ERROR]} $(echo -e $*)\n" ; }
+fail()  { bail "#R{[ERROR]} $(echo -e $*)\n" ; }
 
 switch_cf_version() {
   describe >&2 "" \
@@ -52,12 +42,12 @@ switch_cf_version() {
 
 gopatch::replace() {
   local _path="$1" _value="$2"
-  echo -e "  - type: replace\n    path: \n    value: \n"
+  echo -e "  - type: replace\n    path: ${_path}\n    value: ${_value}\n"
 }
 
 gopatch::remove() {
   local _path="$1"
-  echo -e "  - type: remove\n    path: \n"
+  echo -e "  - type: remove\n    path: ${_path}\n"
 }
 
 dynamic::isolation::segments() {
@@ -156,7 +146,7 @@ dynamic::instance::vm::types() {
 
       dashed_inst_grp="$(echo "$inst_grp" | tr _ -)" # convert any _ into -
 
-      if [[ $dashed_inst_grp =~ ^(api|cc-worker|credhub|database|diego-(api|cell)|doppler|errand|haproxy|windows2019-cell|log-api|nats|rotate-cc-database-key|(tcp-)?router|scheduler|singleton-blobstore|smoke-tests|uaa)$ ]]
+      if [[ ! $dashed_inst_grp =~ ^(api|cc-worker|credhub|database|diego-(api|cell)|doppler|errand|haproxy|windows2019-cell|log-api|nats|rotate-cc-database-key|(tcp-)?router|scheduler|singleton-blobstore|smoke-tests|uaa)$ ]]
       then
         inst_grp="$dashed_inst_grp";
 
@@ -246,7 +236,7 @@ dynamic::instance::counts() {
       esac
 
       dashed_inst_grp="$(echo "$inst_grp" | tr _ -)" # convert any _ into -
-      if [[ $dashed_inst_grp =~ ^(api|cc-worker|credhub|database|diego-(api|cell)|doppler|errand|haproxy|log-api|nats|windows2019-cell|rotate-cc-database-key|(tcp-)?router|scheduler|singleton-blobstore|smoke-tests|uaa)$ ]] 
+      if [[ ! $dashed_inst_grp =~ ^(api|cc-worker|credhub|database|diego-(api|cell)|doppler|errand|haproxy|log-api|nats|windows2019-cell|rotate-cc-database-key|(tcp-)?router|scheduler|singleton-blobstore|smoke-tests|uaa)$ ]] 
       then
         inst_grp="$dashed_inst_grp";
 
@@ -258,7 +248,7 @@ dynamic::instance::counts() {
           "\n\t\tsingleton-blobstore, smoke-tests, tcp-router, and uaa" ""
       fi
 
-      gopatch::replace "/instance_groups/name=${inst_grp}/instances" \
+      gopatch::replace "/instance_groups/name=${inst_grp}?/instances" \
         "${count}" >> "$counts_opsfile"
 
       used="$(echo "$used"; echo "$inst_grp")"
@@ -271,7 +261,7 @@ dynamic::instance::counts() {
       do
         if ! echo "$used" | grep "^$errand_name\$" &>/dev/null
         then
-          gopatch::replace "/instance_groups/name=${errand_name}/instances" \
+          gopatch::replace "/instance_groups/name=${errand_name}?/instances" \
             "${errand_instances}" >> "$counts_opsfile"
 
           used="$(echo "$used"; echo "$errand_name")"
@@ -779,7 +769,7 @@ features::process() {
       fi
     fi
   
-    if [[ "${#databases}" == 0 ]]
+    if [[ "${#databases[@]}" == 0 ]]
     then manifests+=( "cf-deployment/operations/use-postgres.yml" )
     fi
   
@@ -804,7 +794,9 @@ features::process() {
         ;;
     esac
   
-    dynamic::instances::vm::types
+    dynamic::instance::counts
+
+    dynamic::instance::vm::types
   fi
   
   # Include the migration manifest fragments
@@ -925,6 +917,7 @@ declare -a features;   features=()
 declare -a opsfiles;   opsfiles=()
 declare -a blobstores; blobstores=()
 declare -a databases;  databases=()
+
 version=""
 abort=
 warn=
@@ -932,8 +925,8 @@ db_specified=
 iaas=
 cpi="$(bosh_cpi)" || true
 opsdir="ops"
-[[ -n "${PREVIOUS_ENV:-}" ]] 
-  && opsdir=".genesis/cached/${PREVIOUS_ENV}/${opsdir}"
+[[ -n "${PREVIOUS_ENV:-}" ]] &&
+  opsdir=".genesis/cached/${PREVIOUS_ENV}/${opsdir}"
 
 # Base configuration with minimal injections required for Genesis compliance
 manifests=(
@@ -974,4 +967,4 @@ if want_feature "isolation-segments" ; then features::isos ; fi
 for opsfile in ${opsfiles[@]} ; do manifests+=( "$opsfile" ) ; done
 
 # Finally, we print out the list of yamls to be merged
-echo "${manifest[@]}"
+echo "${manifests[@]}"
