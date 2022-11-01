@@ -101,15 +101,6 @@ dynamic::isolation::segments() {
     fi
   fi
 
-  {
-    echo -e "---\nmeta:"
-    echo -e "  vault: ${GENESIS_SECRETS_MOUNT}${GENESIS_VAULT_PREFIX}" 
-    echo -e "\ngenesis:"
-    echo -e "  env: ${GENESIS_ENVIRONMENT}"
-    echo -e "  secrets_mount: ${GENESIS_SECRETS_MOUNT}"
-    echo -e "  vault_env: ${GENESIS_ENVIRONMENT//-/\/}"
-  } > "${meta_file:="overlay/dynamic/meta.yml"}"
-
   if want_feature ocfp
   then iso_seg_merges+=( "ocfp/meta.yml" )
   fi
@@ -129,7 +120,7 @@ dynamic::isolation::segments() {
 
     dynamic_segment_fragment_file="overlay/dynamic/isolation_segments_$group.yml"
 
-    spruce merge -m --prune "meta" ${meta_file} \
+    spruce merge -m --prune meta \
       "overlay/dynamic-templates/isolation-segment.yml" \
       ${iso_seg_merges[@]+"${iso_seg_merges[@]}"} \
       ${additional_trusted_certs} \
@@ -201,8 +192,8 @@ dynamic::instance::vm::types() {
           "\n\tsingleton-blobstore, smoke-tests, tcp-router, uaa, and windows2019-cell\n"
       fi
 
-      gopatch::replace "/instance_groups/name=${inst_grp}/vm_type" \
-        "${type}" >> "$types_op_file"
+      gopatch::replace "/instance_groups/name=${inst_grp}/vm_type" "${type}" \
+        >> "$types_op_file"
 
       used="$(echo "$used"; echo "$inst_grp")"
 

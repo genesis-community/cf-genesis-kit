@@ -1,8 +1,19 @@
+---
+genesis:
+  env:           (( grab $GENESIS_ENVIRONMENT ))
+  secrets_mount: (( grab $GENESIS_SECRETS_MOUNT ))
+  vault_prefix:  (( grab $GENESIS_VAULT_PREFIX ))
+  vault_env:     (( grab $GENESIS_VAULT_ENV_SLUG ))
+
 meta:
+  vault: (( concat genesis.secrets_mount genesis.vault_prefix ))
+
   __default_tags:
   - (( grab meta.tag || meta.name ))
+
   __default_vm_extentions:
   - 100GB_ephemeral_disk
+
 
 instance_groups:
 - name: (( grab meta.name ))
