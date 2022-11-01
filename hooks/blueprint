@@ -59,27 +59,30 @@ dynamic::isolation::segments() {
   iso_seg_merges=();
 
   if ! want_feature "bare" || want_feature "partitioned-network" ; then
-    iso_seg_merges+=( overlay/dynamic-templates/isolation-segment-network.yml  )
+    iso_seg_merges+=( "overlay/dynamic-templates/isolation-segment-network.yml" )
   fi
 
   if want_feature "nfs-volume-services" ; then
-    iso_seg_merges+=( overlay/dynamic-templates/isolation-segment-nfs.yml )
+    iso_seg_merges+=( "overlay/dynamic-templates/isolation-segment-nfs.yml" )
     if want_feature "nfs-ldap" || want_feature "nfs-ldap-tls" ; then
-      iso_seg_merges+=( overlay/dynamic-templates/isolation-segment-nfs-ldap.yml )
+      iso_seg_merges+=( "overlay/dynamic-templates/isolation-segment-nfs-ldap.yml" )
+
       if want_feature "nfs-ldap-tls" ; then
-        iso_seg_merges+=( overlay/dynamic-templates/isolation-segment-nfs-ldap-tls.yml )
+        iso_seg_merges+=( "overlay/dynamic-templates/isolation-segment-nfs-ldap-tls.yml" )
       fi
-      if want_feature ocfp ; then iso_seg_merges+=( ocfp/nfs-ldap.yml ) ; fi
+
+      if want_feature ocfp ; then iso_seg_merges+=( "ocfp/nfs-ldap.yml" ) ; fi
     fi
   fi
 
   if want_feature "smb-volume-services" ; then
     iso_seg_merges+=( overlay/dynamic-templates/isolation-segment-smb.yml )
-    if want_feature ocfp ; then iso_seg_merges+=( smb-broker.yml ) ; fi
+
+    if want_feature ocfp ; then iso_seg_merges+=( "ocfp/smb-broker.yml" ) ; fi
   fi
 
   if want_feature "trust-blacksmith-ca" ; then
-    if want_feature "ocfp" ; then
+    if want_feature ocfp ; then
       iso_seg_merges+=( "ocfp/trust-blacksmith-ca.yml" )
     else
       iso_seg_merges+=( "overlay/addons/trust-blacksmith-ca.yml" )
@@ -968,6 +971,9 @@ randomize_az_placement="$(jq -r '.randomize_az_placement//false' <(echo "$params
 ################################################################################
 features::setup
 features::validate
+
+[[ ${#features[@]} == 0 ]] || GENESIS_REQUESTED_FEATURES+=" ${features[*]}"
+
 features::v1::check
 features::process
 features::isos # Then we process isolation segments
