@@ -69,11 +69,13 @@ dynamic::isolation::segments() {
       if want_feature "nfs-ldap-tls" ; then
         iso_seg_merges+=( overlay/dynamic-templates/isolation-segment-nfs-ldap-tls.yml )
       fi
+      if want_feature ocfp ; then iso_seg_merges+=( ocfp/nfs-ldap.yml ) ; fi
     fi
   fi
 
   if want_feature "smb-volume-services" ; then
     iso_seg_merges+=( overlay/dynamic-templates/isolation-segment-smb.yml )
+    if want_feature ocfp ; then iso_seg_merges+=( smb-broker.yml ) ; fi
   fi
 
   if want_feature "trust-blacksmith-ca" ; then
@@ -83,6 +85,12 @@ dynamic::isolation::segments() {
       iso_seg_merges+=( "overlay/addons/trust-blacksmith-ca.yml" )
     fi
   fi
+
+  echo -e "--- # meta.yml\n" > overlay/dynamic/meta.yml
+  lookup --partial meta |
+    ruby -ryaml -rjson -e 'puts YAML.dump(JSON.parse(STDIN.read))' \
+      >> overlay/dynamic/meta.yml
+  iso_seg_merges+=( "overlay/dynamic/meta.yml" )
 
   for group in $isolation_groups; do
     additional_trusted_certs=''
@@ -95,6 +103,7 @@ dynamic::isolation::segments() {
 
     fi
     dynamic_segment_fragment_file="overlay/dynamic/isolation_segments_$group.yml"
+
     spruce merge --prune "meta" "overlay/dynamic-templates/isolation-segment.yml" \
       ${iso_seg_merges[@]+"${iso_seg_merges[@]}"} $additional_trusted_certs \
       <(echo "$1" | sed -e 's#"(( *#"(( defer #g' | jq --arg v "$group" '.isolation_segments[] | select(.name == $v ) | {"meta": .}') \
@@ -824,6 +833,8 @@ features::process() {
 # Isolation Segments Feature
 ################################################################################
 features::isos() {
+  want_feature isolation-segments || return 0
+
   while read -r segment
   do manifests+=( "${segment}" )
   done < <(dynamic::isolation::segments "$params")
@@ -833,6 +844,8 @@ features::isos() {
 # OCFP Features
 ################################################################################
 features::ocfp() {
+  want_feature ocfp || return 0
+
   env_scale=$(lookup "params.ocfp_env_scale" "dev")
 
   # OCFP Base Overlays
@@ -953,27 +966,13 @@ randomize_az_placement="$(jq -r '.randomize_az_placement//false' <(echo "$params
 ################################################################################
 # Features
 ################################################################################
-if [[ "${#features[@]}" > 0 ]] # Question -- what is the logic behind this?
-then GENESIS_REQUESTED_FEATURES="${features[*]}"
-else GENESIS_REQUESTED_FEATURES=""
-fi
-
 features::setup
-
 features::validate
-
 features::v1::check
-
 features::process
+features::isos # Then we process isolation segments
+features::ocfp # ocfp overrides base manifests
 
-# ocfp overrides base manifests
-if want_feature "ocfp" ; then features::ocfp ; fi
+manifests+=( ${opsfiles[@]} ) # opsfiles override everything
 
-# Then we process isolation segments
-if want_feature "isolation-segments" ; then features::isos ; fi
-
-# opsfiles override everything
-for opsfile in ${opsfiles[@]} ; do manifests+=( "$opsfile" ) ; done
-
-# Finally, we print out the list of yamls to be merged
-echo "${manifests[@]}"
+echo "${manifests[@]}" # Finally, we print out the list of yamls to be merged
