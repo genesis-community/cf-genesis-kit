@@ -103,14 +103,14 @@ dynamic::isolation::segments() {
   fi
 
   {
-    echo -e "--- # meta.yml\n"
-    echo -e "meta:\n"
-    echo -e "vault: ${GENESIS_SECRETS_MOUNT}${GENESIS_VAULT_PREFIX}\n" 
-    echo -e "--- # genesis.yml\n"
-    echo -e "genesis:\n"
-    echo -e "  env: ${GENESIS_ENVIRONMENT}\n"
-    echo -e "  secrets_mount: ${GENESIS_SECRETS_MOUNT}\n"
-    echo -e "  vault_prefix: ${GENESIS_VAULT_PREFIX}\n"
+    echo -e \
+    "---" \
+    "meta:" \
+    "  vault: ${GENESIS_SECRETS_MOUNT}${GENESIS_VAULT_PREFIX}"  \
+    "genesis:" \
+    "  env: ${GENESIS_ENVIRONMENT}" \
+    "  secrets_mount: ${GENESIS_SECRETS_MOUNT}" \
+    "  vault_env: ${GENESIS_ENVIRONMENT//-/\/}"
   } > "${meta_file:="overlay/dynamic/meta.yml"}"
 
   if want_feature ocfp
