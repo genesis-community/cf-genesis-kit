@@ -76,16 +76,16 @@ dynamic::isolation::segments() {
     then
       iso_seg_merges+=( "overlay/dynamic-templates/isolation-segment-nfs-ldap.yml" )
 
-      if want_feature nfs-ldap-tls
-      then iso_seg_merges+=( "overlay/dynamic-templates/isolation-segment-nfs-ldap-tls.yml" )
-      fi
-
       if want_feature ocfp 
       then 
         iso_seg_merges+=( 
         "overlay/dynamic-templates/isolation-segment-nfs-ldap-ocfp.yml" 
         "ocfp/nfs-ldap-data.yml" 
         )
+      else
+        if want_feature nfs-ldap-tls
+        then iso_seg_merges+=( "overlay/dynamic-templates/isolation-segment-nfs-ldap-tls.yml" )
+        fi
       fi
     fi
   fi
@@ -102,11 +102,20 @@ dynamic::isolation::segments() {
     fi
   fi
 
-  echo -e "--- # meta.yml\n" > overlay/dynamic/meta.yml
-  lookup --partial meta |
-    ruby -ryaml -rjson -e 'puts YAML.dump(JSON.parse(STDIN.read))' \
-      >> overlay/dynamic/meta.yml
-  iso_seg_merges+=( "overlay/dynamic/meta.yml" )
+  {
+    echo -e "--- # meta.yml\n"
+    echo -e "meta:\n"
+    echo -e "vault: ${GENESIS_SECRETS_MOUNT}${GENESIS_VAULT_PREFIX}\n" 
+    echo -e "--- # genesis.yml\n"
+    echo -e "genesis:\n"
+    echo -e "  env: ${GENESIS_ENVIRONMENT}\n"
+    echo -e "  secrets_mount: ${GENESIS_SECRETS_MOUNT}\n"
+    echo -e "  vault_prefix: ${GENESIS_VAULT_PREFIX}\n"
+  } > "${meta_file:="overlay/dynamic/meta.yml"}"
+
+  if want_feature ocfp
+  then iso_seg_merges+=( "ocfp/meta.yml" )
+  fi
 
   for group in ${isolation_groups[@]}
   do
@@ -123,7 +132,7 @@ dynamic::isolation::segments() {
 
     dynamic_segment_fragment_file="overlay/dynamic/isolation_segments_$group.yml"
 
-    spruce merge --prune "meta" \
+    spruce merge -m --prune "meta" ${meta_file} \
       "overlay/dynamic-templates/isolation-segment.yml" \
       ${iso_seg_merges[@]+"${iso_seg_merges[@]}"} \
       ${additional_trusted_certs} \

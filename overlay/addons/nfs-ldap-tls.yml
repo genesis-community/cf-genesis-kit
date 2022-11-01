@@ -11,6 +11,6 @@ variables:
 
 ---
 - type: replace
-  path: instance_groups/name=diego-cell/jobs/name=nfsv3driver/properties/nfsv3driver/ldap_ca_cert
+  path: /instance_groups/name=diego-cell/jobs/name=nfsv3driver/properties/nfsv3driver/ldap_ca_cert?
   value: (( grab params.nfs-ldap-ca-cert ))
 
