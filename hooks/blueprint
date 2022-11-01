@@ -14,7 +14,6 @@ switch_cf_version() {
   cfd_url="https://github.com/cloudfoundry/cf-deployment/archive/v${version}.tar.gz"
   if ! [[ -s "${cfd_file}" ]]
   then
-    # Download
     describe >&2 \
       "  #i{Fetching cf-deployment-${version} release from cloudfoundry/cf-deployment}" \
       "  #i{on github.com}"
@@ -103,14 +102,12 @@ dynamic::isolation::segments() {
   fi
 
   {
-    echo -e \
-    "---" \
-    "meta:" \
-    "  vault: ${GENESIS_SECRETS_MOUNT}${GENESIS_VAULT_PREFIX}"  \
-    "genesis:" \
-    "  env: ${GENESIS_ENVIRONMENT}" \
-    "  secrets_mount: ${GENESIS_SECRETS_MOUNT}" \
-    "  vault_env: ${GENESIS_ENVIRONMENT//-/\/}"
+    echo -e "---\nmeta:"
+    echo -e "  vault: ${GENESIS_SECRETS_MOUNT}${GENESIS_VAULT_PREFIX}" 
+    echo -e "\ngenesis:"
+    echo -e "  env: ${GENESIS_ENVIRONMENT}"
+    echo -e "  secrets_mount: ${GENESIS_SECRETS_MOUNT}"
+    echo -e "  vault_env: ${GENESIS_ENVIRONMENT//-/\/}"
   } > "${meta_file:="overlay/dynamic/meta.yml"}"
 
   if want_feature ocfp
@@ -1002,7 +999,10 @@ randomize_az_placement="$(jq -r '.randomize_az_placement//false' <(echo "$params
 features::setup
 features::validate
 
-[[ ${#features[@]} == 0 ]] || GENESIS_REQUESTED_FEATURES+=" ${features[*]}"
+if [[ ${#features[@]} > 0 ]] 
+then GENESIS_REQUESTED_FEATURES="${features[*]}"
+else GENESIS_REQUESTED_FEATURES=""
+fi
 
 features::v1::check
 features::process
