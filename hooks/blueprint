@@ -218,10 +218,10 @@ dynamic::instance::vm::types() {
     fi
 
     dups="$(echo "$used"|sort|uniq -d)";
-    if [[ -n "$dups" ]] ; then
-      bail \
-        "#R{[ERROR]} Instance vm types specified (or translated as) multiple times:" "$dups"
-    fi
+
+    [[ -z "$dups" ]] ||
+      fail "Instance vm types specified (or translated as) multiple times:" "$dups"
+
     manifests+=( "$types_op_file" )
   fi
 }
@@ -295,6 +295,7 @@ dynamic::instance::counts() {
     done < <(echo "$instance_group_counts")
 
     errand_instances="$(echo "$params" | jq -r '.errand_instances//""')"
+
     if [[ -n "$errand_instances" ]] 
     then # Deal with errand meta-type
       for errand_name in smoke-tests rotate-cc-database-key 
@@ -530,7 +531,7 @@ features::v1::check() {
   if want_feature "+migrated-v1-env" || want_feature "azure-blobstore" || want_feature 'minio-blobstore' || want_feature 'aws-blobstore' || want_feature 'gcp-blobstore'
   then
     want_feature 'bare' &&
-      bail "Cannot have #C{bare} feature when migrating from v1"
+      fail "Cannot have #C{bare} feature when migrating from v1"
 
     manifests+=( "overlay/blobstore/meta.yml" )
   fi

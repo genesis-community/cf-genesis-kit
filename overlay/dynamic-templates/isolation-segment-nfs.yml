@@ -11,8 +11,7 @@ instance_groups:
           server_cert: ((nfsv3driver_cert.certificate))
           server_key: ((nfsv3driver_cert.private_key))
     release: nfs-volume
-
   - name: mapfs
+    release: mapfs
     provides:
       mapfs: nil
-    release: mapfs
