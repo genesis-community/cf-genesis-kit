@@ -1,8 +1,0 @@
----
-meta:
-  ocfp:
-    certs:
-      trusted:
-        - (( append ))
-        - (( vault genesis.exodus_mount genesis.env "/blacksmith:blacksmith_ca" ))
-

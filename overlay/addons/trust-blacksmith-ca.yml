@@ -1,3 +1,8 @@
 ---
-# TODO: Add blacksmith-ca to trusted certs from exodus blacksmith:blacksmith_ca
+- type: replace
+  path: /instance_groups/name=diego-cell/jobs/name=cflinuxfs3-rootfs-setup/properties/cflinuxfs3-rootfs/trusted_certs/-
+  value: (( vault genesis.exodus_mount genesis.env "/blacksmith:blacksmith_ca" ))
 
+- type: replace
+  path: /instance_groups/name=diego-cell/jobs/name=rep/properties/containers/trusted_ca_certificates/-
+  value: (( vault genesis.exodus_mount genesis.env "/blacksmith:blacksmith_ca" ))
