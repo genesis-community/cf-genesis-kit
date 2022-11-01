@@ -1,7 +1,7 @@
 #!/bin/bash
 
 ################################################################################
-# Functions
+# Utility Functions
 ################################################################################
 warn()  { warn=1  ; describe >&2 "#Y{[WARNING]} $(echo -e $*)\n" ; }
 abort() { abort=1 ; describe >&2 "#R{[ERROR]} $(echo -e $*)\n" ; }
@@ -25,13 +25,11 @@ switch_cf_version() {
     fi
     topdir="$(tar -ztf "$cfd_file" | awk '{print $NF}' | cut -d'/' -f1 | uniq)"
     if [[ $topdir != "cf-deployment-$version" ]] ; then
-      describe >&2 "" \
-        "  #R{[ERROR]} Downloaded cf-deployment v$version doesn't look like a valid release  -- cannot continue" ""
+      fail "Downloaded cf-deployment v$version doesn't look like a valid release -- cannot continue"
       exit 1
     fi
   else
-    describe >&2 \
-      "  #i{Using cached copy of cf-deployment-${version} release}"
+    describe >&2 "  #i{Using cached copy of cf-deployment-${version} release}"
   fi
 
   rm -rf "./cf-deployment"
@@ -40,6 +38,9 @@ switch_cf_version() {
   echo >&2
 }
 
+################################################################################
+# Go-Patch
+################################################################################
 gopatch::replace() {
   local _path="$1" _value="$2"
   echo -e "  - type: replace\n    path: ${_path}\n    value: ${_value}\n"
@@ -50,6 +51,9 @@ gopatch::remove() {
   echo -e "  - type: remove\n    path: ${_path}\n"
 }
 
+################################################################################
+# Dynamic Isolation Segments
+################################################################################
 dynamic::isolation::segments() {
   isolation_groups="$(echo "$1" | jq -r '.isolation_segments[] | .name')"
   iso_seg_merges=();
@@ -100,6 +104,9 @@ dynamic::isolation::segments() {
   done
 }
 
+################################################################################
+# Dynamic Instance VM Types
+################################################################################
 dynamic::instance::vm::types() {
   instance_types="$( echo "$params" |
     jq -r 'with_entries(if (.key|test("_vm_type$")) then {key: (.key|capture("(?<k>.*)_vm_type$")|.k), value: .value} else empty end )|to_entries | .[] | "\(.key) \(.value)"'
@@ -188,6 +195,9 @@ dynamic::instance::vm::types() {
   fi
 }
 
+################################################################################
+# Dynamic Instance Counts
+################################################################################
 dynamic::instance::counts() {
   instance_group_counts="$( echo "$params" | 
     jq -r 'with_entries(if (.key | test("_instances$")) then { key: (.key | capture("(?<k>.*)_instances$") | .k), value: .value } else empty end) | to_entries | .[] | "\(.key) \(.value)"'
@@ -197,8 +207,7 @@ dynamic::instance::counts() {
     used=''
     counts_opsfile="operations/dynamic/instance_counts.yml"
 
-    echo "--- # Dynamically created instance count overrides" \
-      > "$counts_opsfile"
+    echo "--- # Dynamically created instance counts" > "$counts_opsfile"
 
     while read -r inst_grp count; do
       case ${inst_grp} in
