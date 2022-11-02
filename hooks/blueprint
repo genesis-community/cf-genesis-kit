@@ -885,7 +885,6 @@ features::ocfp() {
   env_scale=$(lookup "params.ocfp_env_scale" "dev")
 
   manifests+=( 
-    "overlay/enable-service-discovery.yml"
     "overlay/addons/autoscaler.yml"
     "overlay/addons/app-scheduler.yml"
     "overlay/addons/scs.yml"

@@ -25,6 +25,15 @@ instance_groups:
   networks:
   - name: (( grab meta.network_name || "default" ))
   jobs:
+  - name: bosh-dns-adapter
+    properties:
+      internal_domains: ["apps.internal."]
+      dnshttps:
+        client:
+          tls: ((cf_app_sd_client_tls))
+        server:
+          ca: ((cf_app_sd_client_tls.ca))
+    release: cf-networking
   - name: cflinuxfs3-rootfs-setup
     release: cflinuxfs3
     properties:
@@ -136,13 +145,4 @@ addons:
           network: (( grab meta.network_name || "default" ))
           query: _
     release: bosh-dns-aliases
-  - name: bosh-dns-adapter
-    properties:
-      internal_domains: ["apps.internal."]
-      dnshttps:
-        client:
-          tls: ((cf_app_sd_client_tls))
-        server:
-          ca: ((cf_app_sd_client_tls.ca))
-    release: cf-networking
 
