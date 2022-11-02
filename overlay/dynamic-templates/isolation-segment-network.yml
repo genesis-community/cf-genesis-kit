@@ -6,7 +6,8 @@ instance_groups:
   - name: (( grab meta.network_name || "(( grab params.cf_runtime_network ))" ))
 
 addons:
-- jobs:
+- name: bosh-dns-aliases
+  jobs:
   - name: bosh-dns-aliases
     properties:
       aliases:

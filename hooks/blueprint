@@ -983,8 +983,8 @@ randomize_az_placement="$(jq -r '.randomize_az_placement//false' <(echo "$params
 ################################################################################
 # Features
 ################################################################################
-features::setup
 features::validate
+features::setup
 
 if [[ ${#features[@]} > 0 ]] 
 then GENESIS_REQUESTED_FEATURES="${features[*]}"
