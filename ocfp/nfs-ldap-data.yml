@@ -17,6 +17,7 @@ bosh-variables:
   nfs-ldap-port:             (( grab meta.nfs.ldap.port ))
   nfs-ldap-proto:            (( grab meta.nfs.ldap.proto ))
   nfs-ldap-fqdn:             (( grab meta.nfs.ldap.fqdn ))
+  nfs-ldap-ca-cert:          (( grab meta.nfs.ldap.ca ))
 
 params:
   nfs-ldap-service-user:     (( grab meta.nfs.ldap.user ))
@@ -26,5 +27,4 @@ params:
   nfs-ldap-proto:            (( grab meta.nfs.ldap.proto ))
   nfs-ldap-fqdn:             (( grab meta.nfs.ldap.fqdn ))
   nfs-ldap-ca-cert:          (( grab meta.nfs.ldap.ca ))
-
 
