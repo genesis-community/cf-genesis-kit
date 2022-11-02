@@ -30,8 +30,8 @@ instance_groups:
     .: (( inject instance_groups.diego-cell.jobs.garden-cni ))
   - name: netmon
     .: (( inject instance_groups.diego-cell.jobs.netmon ))
-  - name: vxlan-policy-agent
-    .: (( inject instance_groups.diego-cell.jobs.vxlan-policy-agent ))
+#  - name: vxlan-policy-agent
+#    .: (( inject instance_groups.diego-cell.jobs.vxlan-policy-agent ))
   - name: silk-daemon
     .: (( inject instance_groups.diego-cell.jobs.silk-daemon ))
   - name: silk-cni
