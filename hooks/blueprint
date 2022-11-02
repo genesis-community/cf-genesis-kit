@@ -429,7 +429,13 @@ features::validate() {
       (bare|partitioned-network|haproxy|tls|no-nats-tls|self-signed|isolation-segments)
         features+=( "$want" )
         ;;
-      (minio-blobstore|aws-blobstore|aws-blobstore-iam|azure-blobstore|gcp-blobstore|gcp-use-access-key)
+      (minio-blobstore|aws-blobstore|aws-blobstore-iam|azure-blobstore|gcp-blobstore)
+        if want_feature ocfp 
+        then abort "Cannot specify blobstore with ocfp feature. \n\tWith ocfp feature blobstore specifies you."
+        fi
+        features+=( "$want" )
+        ;;
+      (gcp-use-access-key)
         features+=( "$want" )
         ;;
       (enable-service-discovery|ssh-proxy-on-routers|no-tcp-routers)
@@ -468,6 +474,14 @@ features::validate() {
         ;;
     esac
   done
+
+  if want_feature ocfp ; then
+    case $iaas in
+      (aws|azure|gcp) features+=( "${iaas}-blobstore" ) ;;
+      (vsphere) features+=( "minio-blobstore" ) ;;
+      (*) abort "Blobstores are not supported on #c{$iaas} yet." ;;
+    esac
+  fi
   
   [[ -z "$db_specified" ]] && ! want_feature 'bare' &&
     features+=( "local-postgres-db" )
@@ -525,7 +539,9 @@ features::setup() {
 # Version 1 features check
 ################################################################################
 features::v1::check() {
-  if want_feature "+migrated-v1-env" || want_feature "azure-blobstore" || want_feature 'minio-blobstore' || want_feature 'aws-blobstore' || want_feature 'gcp-blobstore'
+  if want_feature "+migrated-v1-env" || want_feature "azure-blobstore" ||
+     want_feature 'minio-blobstore' || want_feature 'aws-blobstore' ||
+     want_feature 'gcp-blobstore'
   then
     want_feature 'bare' &&
       fail "Cannot have #C{bare} feature when migrating from v1"
@@ -867,21 +883,6 @@ features::ocfp() {
   want_feature ocfp || return 0
 
   env_scale=$(lookup "params.ocfp_env_scale" "dev")
-
-  # OCFP Base Overlays
-  manifests+=( 
-    "overlay/blobstore/external.yml"
-    "cf-deployment/operations/use-external-blobstore.yml"
-  )
-
-  case ${iaas:-} in
-    (aws|gcp|azure) true ;;
-    (vsphere) manifests+=( "overlay/blobstore/minio.yml" ) ;;
-    (*)
-      fail "Expected IaaS '${iaas}' feature in env file with 'ocfp' feature, one of:\n\taws, gcp, azure, or vsphere"
-      ;;
-  esac
-
 
   manifests+=( 
     "overlay/enable-service-discovery.yml"
