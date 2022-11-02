@@ -875,12 +875,8 @@ features::ocfp() {
   )
 
   case ${iaas:-} in
-    (aws|gcp|azure)
-      manifests+=( "cf-deployment/operations/use-azure-storage-blobstore.yml" )
-      ;;
-    (vsphere)
-      manifests+=( "overlay/blobstore/minio.yml" )
-      ;;
+    (aws|gcp|azure) true ;;
+    (vsphere) manifests+=( "overlay/blobstore/minio.yml" ) ;;
     (*)
       fail "Expected IaaS '${iaas}' feature in env file with 'ocfp' feature, one of:\n\taws, gcp, azure, or vsphere"
       ;;
