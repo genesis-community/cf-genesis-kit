@@ -20,7 +20,8 @@ instance_groups:
   azs: (( grab meta.azs || "(( grab meta.azs ))" ))
   networks:
   - name: (( grab meta.network_name || "default" ))
-  vm_type: (( grab meta.vm_type || "(( grab params.diego-cell_vm_type || params.diego_cell_vm_type || \"small-highmem\" ))" )) vm_extensions: (( grab meta.vm_extensions || meta.__default_vm_extentions ))
+  vm_type: (( grab meta.vm_type || "(( grab params.diego-cell_vm_type || params.diego_cell_vm_type || \"small-highmem\" ))" ))
+  vm_extensions: (( grab meta.vm_extensions || meta.__default_vm_extentions ))
   stemcell: (( grab meta.stemcell || "default" ))
   jobs:
   - name: cfdot
