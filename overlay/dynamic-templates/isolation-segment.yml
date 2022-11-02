@@ -14,17 +14,30 @@ meta:
   __default_vm_extentions:
   - 100GB_ephemeral_disk
 
-
 instance_groups:
 - name: (( grab meta.name ))
-  azs: (( grab meta.azs || "(( grab meta.azs ))" ))
   instances: (( grab meta.instances || 1 ))
-  vm_type: (( grab meta.vm_type || "(( grab params.diego-cell_vm_type || params.diego_cell_vm_type || \"small-highmem\" ))" ))
-  vm_extensions: (( grab meta.vm_extensions || meta.__default_vm_extentions ))
-  stemcell: (( grab meta.stemcell || "default" ))
+  azs: (( grab meta.azs || "(( grab meta.azs ))" ))
   networks:
   - name: (( grab meta.network_name || "default" ))
+  vm_type: (( grab meta.vm_type || "(( grab params.diego-cell_vm_type || params.diego_cell_vm_type || \"small-highmem\" ))" )) vm_extensions: (( grab meta.vm_extensions || meta.__default_vm_extentions ))
+  stemcell: (( grab meta.stemcell || "default" ))
   jobs:
+  - name: cfdot
+    .: (( inject instance_groups.diego-cell.jobs.cfdot ))
+  - name: garden-cni
+    .: (( inject instance_groups.diego-cell.jobs.garden-cni ))
+  - name: netmon
+    .: (( inject instance_groups.diego-cell.jobs.netmon ))
+  - name: vxlan-policy-agent
+    .: (( inject instance_groups.diego-cell.jobs.vxlan-policy-agent ))
+  - name: silk-daemon
+    .: (( inject instance_groups.diego-cell.jobs.silk-daemon ))
+  - name: silk-cni
+    .: (( inject instance_groups.diego-cell.jobs.silk-cni )
+  - name: loggr-udp-forwarder
+    .: (( inject instance_groups.diego-cell.jobs.loggr-udp-forwarder ))
+
   - name: bosh-dns-adapter
     properties:
       internal_domains: ["apps.internal."]
@@ -101,6 +114,11 @@ instance_groups:
           timestamp: "rfc3339"
   - name: route_emitter
     release: diego
+    consumes:
+      nats:
+        ip_addresses: false
+      nats-tls:
+        ip_addresses: false
     properties:
       bpm:
         enabled: true
@@ -131,6 +149,10 @@ instance_groups:
       uaa:
         ca_cert: "((uaa_ssl.ca))"
         client_secret: "((uaa_clients_tcp_emitter_secret))"
+
+
+
+
 addons:
 - name: bosh-dns-aliases
   jobs:
