@@ -34,7 +34,7 @@ instance_groups:
   - name: silk-daemon
     .: (( inject instance_groups.diego-cell.jobs.silk-daemon ))
   - name: silk-cni
-    .: (( inject instance_groups.diego-cell.jobs.silk-cni )
+    .: (( inject instance_groups.diego-cell.jobs.silk-cni ))
   - name: loggr-udp-forwarder
     .: (( inject instance_groups.diego-cell.jobs.loggr-udp-forwarder ))
 
