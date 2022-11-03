@@ -1,0 +1,30 @@
+---
+# Use distinct vxlan policy links for runtime cells
+- type: replace
+  path: /instance_groups/name=diego-cell/jobs/name=vxlan-policy-agent/provides?/vpa
+  value: {as: vpa-runtime}
+- type: replace
+  path: /instance_groups/name=diego-cell/jobs/name=silk-daemon/consumes?/vpa
+  value: {from: vpa-runtime}
+- type: replace
+  path: /instance_groups/name=diego-cell/jobs/name=silk-cni/consumes?/vpa
+  value: {from: vpa-runtime}
+- type: replace
+  path: /instance_groups/name=diego-cell/jobs/name=vxlan-policy-agent/consumes?/iptables
+  value: {from: iptables-runtime}
+- type: replace
+  path: /instance_groups/name=diego-cell/jobs/name=silk-daemon/consumes?/iptables
+  value: {from: iptables-runtime}
+- type: replace
+  path: /instance_groups/name=diego-cell/jobs/name=netmon/consumes?/iptables
+  value: {from: iptables-runtime}
+- type: replace
+  path: /instance_groups/name=diego-cell/jobs/name=garden/provides?/iptables
+  value: {as: iptables-runtime}
+- type: replace
+  path: /instance_groups/name=diego-cell/jobs/name=vxlan-policy-agent/consumes?/cni_config
+  value: {from: cni_config_runtime}
+- type: replace
+  path: /instance_groups/name=diego-cell/jobs/name=silk-cni/provides?/cni_config
+  value: {as: cni_config_runtime}
+

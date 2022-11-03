@@ -980,6 +980,7 @@ manifests=(
   "cf-deployment/cf-deployment.yml"
   "overlay/base.yml"
   "overlay/upstream_version.yml"
+  "overlay/diego-cells-networking.yml"
 )
 
 [[ -n $version ]] && switch_cf_version "$version"
