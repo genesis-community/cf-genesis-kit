@@ -25,19 +25,19 @@ instance_groups:
   stemcell: (( grab meta.stemcell || "default" ))
   jobs:
   - name: cfdot
-    .: (( inject instance_groups.diego-cell.jobs.cfdot ))
+    .: (( defer inject instance_groups.diego-cell.jobs.cfdot ))
 
   - name: garden-cni
-    .: (( inject instance_groups.diego-cell.jobs.garden-cni ))
+    .: (( defer inject instance_groups.diego-cell.jobs.garden-cni ))
 
   - name: netmon
-    .: (( inject instance_groups.diego-cell.jobs.netmon ))
+    .: (( defer inject instance_groups.diego-cell.jobs.netmon ))
     consumes:
       iptables:
         from: (( concat "iptables-" meta.name ))
 
   - name: vxlan-policy-agent
-    .: (( inject instance_groups.diego-cell.jobs.vxlan-policy-agent ))
+    .: (( defer inject instance_groups.diego-cell.jobs.vxlan-policy-agent ))
     provides:
       vpa:
         as: (( concat "vpa-" meta.name ))
@@ -48,7 +48,7 @@ instance_groups:
         from: (( concat "cni_config-" meta.name ))
 
   - name: silk-daemon
-    .: (( inject instance_groups.diego-cell.jobs.silk-daemon ))
+    .: (( defer inject instance_groups.diego-cell.jobs.silk-daemon ))
     consumes:
       vpa:
         from: (( concat "vpa-" meta.name ))
@@ -56,7 +56,7 @@ instance_groups:
         from: (( concat "iptables-" meta.name ))
 
   - name: silk-cni
-    .: (( inject instance_groups.diego-cell.jobs.silk-cni ))
+    .: (( defer inject instance_groups.diego-cell.jobs.silk-cni ))
     consumes:
       vpa:
         from: (( concat "vpa-" meta.name ))
@@ -65,7 +65,7 @@ instance_groups:
         as: (( concat "cni_config-" meta.name ))
 
   - name: loggr-udp-forwarder
-    .: (( inject instance_groups.diego-cell.jobs.loggr-udp-forwarder ))
+    .: (( defer inject instance_groups.diego-cell.jobs.loggr-udp-forwarder ))
 
   - name: bosh-dns-adapter
     properties:
