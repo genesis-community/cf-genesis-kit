@@ -462,7 +462,10 @@ features::validate() {
         fi
         ;;
       (ocfp)
-        features+=( "$want" )
+        features+=( 
+          "enable-service-discovery"
+          "$want" 
+        )
         ;;
       (*)
         if [[ -f "$GENESIS_ROOT/${opsdir}/$want.yml" ||

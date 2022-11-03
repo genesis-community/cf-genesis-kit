@@ -29,12 +29,34 @@ instance_groups:
   - name: garden-cni
     .: (( inject instance_groups.diego-cell.jobs.garden-cni ))
   - name: netmon
+    consumes:
+      iptables:
+        from: (( concat "iptables-" meta.name ))
     .: (( inject instance_groups.diego-cell.jobs.netmon ))
-#  - name: vxlan-policy-agent
-#    .: (( inject instance_groups.diego-cell.jobs.vxlan-policy-agent ))
+  - name: vxlan-policy-agent
+    provides:
+      vpa:
+        as: (( concat "vpa-" meta.name ))
+    consumes:
+      iptables:
+        from: (( concat "iptables-" meta.name ))
+      cni_config:
+        from: (( concat "cni_config-" meta.name ))
+    .: (( inject instance_groups.diego-cell.jobs.vxlan-policy-agent ))
   - name: silk-daemon
+    consumes:
+      vpa:
+        from: (( concat "vpa-" meta.name ))
+      iptables:
+        from: (( concat "iptables-" meta.name ))
     .: (( inject instance_groups.diego-cell.jobs.silk-daemon ))
   - name: silk-cni
+    consumes:
+      vpa:
+        from: (( concat "vpa-" meta.name ))
+    provides:
+      cni_config:
+        as: (( concat "cni_config-" meta.name ))
     .: (( inject instance_groups.diego-cell.jobs.silk-cni ))
   - name: loggr-udp-forwarder
     .: (( inject instance_groups.diego-cell.jobs.loggr-udp-forwarder ))
@@ -59,7 +81,9 @@ instance_groups:
   - name: garden
     release: garden-runc
     provides:
-      iptables: nil
+      iptables:
+        as: iptables-(( grab meta.name ))
+
     properties:
       garden:
         containerd_mode: true
@@ -151,9 +175,6 @@ instance_groups:
         ca_cert: "((uaa_ssl.ca))"
         client_secret: "((uaa_clients_tcp_emitter_secret))"
 
-
-
-
 addons:
 - name: bosh-dns-aliases
   jobs:
@@ -169,4 +190,34 @@ addons:
           network: (( grab meta.network_name || "default" ))
           query: _
     release: bosh-dns-aliases
+
+---
+# Add platform cells to DNS aliases
+- type: replace
+  path: /addons/name=bosh-dns-aliases/jobs/name=bosh-dns-aliases/properties/aliases/domain=_.cell.service.cf.internal/targets/-
+  value:
+    query: '_'
+    instance_group: (( grab meta.name ))
+    deployment: ((deployment_name))
+    network: ((network_name))
+    domain: bosh
+
+# Enable service discovery
+- type: replace
+  path: /instance_groups/name=(( grab meta.name ))/jobs/name=bosh-dns-adapter?
+  value:
+    name: bosh-dns-adapter
+    properties:
+      internal_domains: ["apps.internal."]
+      dnshttps:
+        client:
+          tls: ((cf_app_sd_client_tls))
+        server:
+          ca: ((cf_app_sd_server_tls.ca))
+    release: cf-networking
+
+- type: replace
+  path: /instance_groups/name=(( grab meta.name ))/jobs/name=route_emitter/properties/internal_routes?
+  value:
+    enabled: true
 
