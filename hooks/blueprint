@@ -122,6 +122,7 @@ dynamic::isolation::segments() {
 
     spruce merge -m --prune meta \
       "overlay/dynamic-templates/isolation-segment.yml" \
+      "overlay/dynamic-templates/isolation-segment-dns-sd.yml" \
       ${iso_seg_merges[@]+"${iso_seg_merges[@]}"} \
       ${additional_trusted_certs} \
       <(echo "$1" | sed -e 's#"(( *#"(( defer #g' | jq --arg v "$group" '.isolation_segments[] | select(.name == $v ) | {"meta": .}') \

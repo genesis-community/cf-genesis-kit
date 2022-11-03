@@ -26,14 +26,18 @@ instance_groups:
   jobs:
   - name: cfdot
     .: (( inject instance_groups.diego-cell.jobs.cfdot ))
+
   - name: garden-cni
     .: (( inject instance_groups.diego-cell.jobs.garden-cni ))
+
   - name: netmon
+    .: (( inject instance_groups.diego-cell.jobs.netmon ))
     consumes:
       iptables:
         from: (( concat "iptables-" meta.name ))
-    .: (( inject instance_groups.diego-cell.jobs.netmon ))
+
   - name: vxlan-policy-agent
+    .: (( inject instance_groups.diego-cell.jobs.vxlan-policy-agent ))
     provides:
       vpa:
         as: (( concat "vpa-" meta.name ))
@@ -42,22 +46,24 @@ instance_groups:
         from: (( concat "iptables-" meta.name ))
       cni_config:
         from: (( concat "cni_config-" meta.name ))
-    .: (( inject instance_groups.diego-cell.jobs.vxlan-policy-agent ))
+
   - name: silk-daemon
+    .: (( inject instance_groups.diego-cell.jobs.silk-daemon ))
     consumes:
       vpa:
         from: (( concat "vpa-" meta.name ))
       iptables:
         from: (( concat "iptables-" meta.name ))
-    .: (( inject instance_groups.diego-cell.jobs.silk-daemon ))
+
   - name: silk-cni
+    .: (( inject instance_groups.diego-cell.jobs.silk-cni ))
     consumes:
       vpa:
         from: (( concat "vpa-" meta.name ))
     provides:
       cni_config:
         as: (( concat "cni_config-" meta.name ))
-    .: (( inject instance_groups.diego-cell.jobs.silk-cni ))
+
   - name: loggr-udp-forwarder
     .: (( inject instance_groups.diego-cell.jobs.loggr-udp-forwarder ))
 
@@ -190,34 +196,4 @@ addons:
           network: (( grab meta.network_name || "default" ))
           query: _
     release: bosh-dns-aliases
-
----
-# Add platform cells to DNS aliases
-- type: replace
-  path: /addons/name=bosh-dns-aliases/jobs/name=bosh-dns-aliases/properties/aliases/domain=_.cell.service.cf.internal/targets/-
-  value:
-    query: '_'
-    instance_group: (( grab meta.name ))
-    deployment: ((deployment_name))
-    network: ((network_name))
-    domain: bosh
-
-# Enable service discovery
-- type: replace
-  path: /instance_groups/name=(( grab meta.name ))/jobs/name=bosh-dns-adapter?
-  value:
-    name: bosh-dns-adapter
-    properties:
-      internal_domains: ["apps.internal."]
-      dnshttps:
-        client:
-          tls: ((cf_app_sd_client_tls))
-        server:
-          ca: ((cf_app_sd_server_tls.ca))
-    release: cf-networking
-
-- type: replace
-  path: /instance_groups/name=(( grab meta.name ))/jobs/name=route_emitter/properties/internal_routes?
-  value:
-    enabled: true
 
