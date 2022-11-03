@@ -1,16 +1,14 @@
 ---
-# Add platform cells to DNS aliases
 - type: replace
   path: /addons/name=bosh-dns-aliases/jobs/name=bosh-dns-aliases/properties/aliases/domain=_.cell.service.cf.internal/targets/-
   value:
     query: '_'
-    instance_group: (( grab meta.name ))
+    instance_group: {{segment-name}}
     deployment: ((deployment_name))
     network: ((network_name))
     domain: bosh
-# Enable service discovery
 - type: replace
-  path: /instance_groups/name=(( grab meta.name ))/jobs/name=bosh-dns-adapter?
+  path: /instance_groups/name={{segment-name}}/jobs/name=bosh-dns-adapter?
   value:
     name: bosh-dns-adapter
     properties:
@@ -22,7 +20,7 @@
           ca: ((cf_app_sd_server_tls.ca))
     release: cf-networking
 - type: replace
-  path: /instance_groups/name=(( grab meta.name ))/jobs/name=route_emitter/properties/internal_routes?
+  path: /instance_groups/name={{segment-name}}/jobs/name=route_emitter/properties/internal_routes?
   value:
     enabled: true
 

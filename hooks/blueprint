@@ -120,9 +120,13 @@ dynamic::isolation::segments() {
 
     dynamic_segment_fragment_file="overlay/dynamic/isolation_segments_$group.yml"
 
+    sed -e 's/{{segment-name}}/'"${group}"'/g' \
+      < 'overlay/dynamic-templates/isolation-segment-additional-trusted-certs.yml' \
+      > "overlay/dynamic/isolation-segment-${group}-dns-sd.yml" 
+
     spruce merge -m --prune meta \
       "overlay/dynamic-templates/isolation-segment.yml" \
-      "overlay/dynamic-templates/isolation-segment-dns-sd.yml" \
+      "overlay/dynamic/isolation-segment-${group}-dns-sd.yml" \
       ${iso_seg_merges[@]+"${iso_seg_merges[@]}"} \
       ${additional_trusted_certs} \
       <(echo "$1" | sed -e 's#"(( *#"(( defer #g' | jq --arg v "$group" '.isolation_segments[] | select(.name == $v ) | {"meta": .}') \
