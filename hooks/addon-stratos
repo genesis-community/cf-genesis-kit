@@ -48,14 +48,30 @@ stratos_client=$(safe get ${exodus_path}:stratos_client)
 stratos_client_secret=$(safe get ${exodus_path}:stratos_secret)
 
 shift # run
+create_sgs=
+while [[ $# > 0 ]]
+do
+  arg="$1" ; shift
+  case $arg in
+    (file)
+      file="$1"
+      shift || fail "Expected a filename after 'file'"
+      ;;
+    (sgs)
+      create_sgs=true
+      ;;
+  esac
+done
+
+
 if [[ -s "${1:-}" ]] ; then
+  shift
   unzip -o "$1"
 else
   echo "Downloading Stratos ${stratos_version}..."
   wget https://github.com/orange-cloudfoundry/stratos-ui-cf-packager/releases/download/${stratos_version}/stratos-ui-packaged.zip &&
     unzip -o stratos-ui-packaged.zip && rm stratos-ui-packaged.zip
 fi
-
 
 cf create-space -o system stratos
 cf target -o system -s stratos
@@ -65,8 +81,9 @@ cf cups console_db_tls_verify_ca  -p "$( cat <<-EOF
 EOF
 )" || true
 
-# Security group that allows to talk to VPC IP Rangek
-cat > vpc-sg.json <<EOF
+if [[ -n ${create_sgs} ]]
+then # Security group that allows to talk to VPC IP Range
+  cat > vpc-sg.json <<EOF
 [
   {
     "protocol": "all",
@@ -74,10 +91,10 @@ cat > vpc-sg.json <<EOF
   }
 ]
 EOF
-
-cf create-security-group vpc ${PWD}/vpc-sg.json || true
-cf bind-staging-security-group vpc || true
-cf bind-running-security-group vpc || true
+  cf create-security-group vpc ${PWD}/vpc-sg.json || true
+  cf bind-staging-security-group vpc || true
+  cf bind-running-security-group vpc || true
+fi
 
 ################################################################################
 # To the Stratosphere!
