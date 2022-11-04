@@ -51,6 +51,9 @@ scs_broker_archive= # Default to downloading
 configserver_jar_uri="https://github.com/starkandwayne/cf-spring-cloud-config-server/releases/download/1.1.0/spring-cloud-config-server-1.1.0-2.5.14.SCS.3.1.37.jar"
 registry_jar_uri="https://github.com/starkandwayne/scs-service-registry/releases/download/1.0.1-3.1.37/service-registry-1.0.1-3.1.37.jar"
 
+deploy=0
+register=0
+
 while [[ $# > 0 ]]
 do # Process opertor arguments
   case "${1}" in 
@@ -87,25 +90,37 @@ do # Process opertor arguments
       registry_jar_uri="${2}"
       shift 2 || fail "Usage: ... registry_jar_uri <uri>"
       ;;
+    (deploy)
+      deploy=1
+      shift
+      ;;
+    (deploy)
+      register=1
+      shift
+      ;;
     (*)
       fail "Unknown argument: ${1}"
       ;;
   esac
 done
 
-[[ -n "${broker_uri}" ]] ||
-  broker_uri="https://github.com/starkandwayne/scs-broker/archive/refs/tags/v0.0.2.tar.gz"
+if [[ ${deploy} > 0 ]]
+then
+  echo "Deploying SCS Broker"
 
-fetch::uri "${broker_uri}"
-
-extract $(basename "${broker_uri}")
-
-cd scs-broker-*
-
-fetch::artifacts
-
-cat > manifest.yml <<-APPMANIFEST
----
+  [[ -n "${broker_uri}" ]] ||
+    broker_uri="https://github.com/starkandwayne/scs-broker/archive/refs/tags/v0.0.2.tar.gz"
+  
+  fetch::uri "${broker_uri}"
+  
+  extract $(basename "${broker_uri}")
+  
+  cd scs-broker-*
+  
+  fetch::artifacts
+  
+  cat > manifest.yml <<-APPMANIFEST
+  ---
 applications:
   - name: scs-broker
     buildpack: ${buildpack}
@@ -121,17 +136,21 @@ applications:
 
 APPMANIFEST
 
-echo "Pushing SCS Broker..."
-cf push -f manifest.yml
-
-echo "Creating the service broker..."
-cf create-service-broker scs-broker "${broker_auth_user}" "${broker_auth_password}" \
-  "https://scs-broker.${apps_domain}"
+  echo "Pushing SCS Broker..."
+  cf push -f manifest.yml
 
 echo <<-EOT
 SCS service broker is now running, you should now be able to create a service ex:
 \t$ cf create-service config-server default test-service -c "{...whatever json configuration you wish to use for config-server - see config-server docs from Spring.io...}"
 EOT
+fi
+
+if [[ ${register} > 0 ]]
+then
+  echo "Registering SCS Broker"
+  echo "Creating the service broker..."
+  cf create-service-broker scs-broker "${broker_auth_user}" "${broker_auth_password}" \
+    "https://scs-broker.${apps_domain}"
+fi
 
 exit 0
-
