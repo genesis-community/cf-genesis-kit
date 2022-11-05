@@ -435,6 +435,7 @@ features::validate() {
            ! want_feature "cf-deployments/operations/enable-nfs-volume-services"
         then abort "Feature #c{$want} cannot be specified without feature #c{nfs-volume-services}"
         fi
+        features+=( "$want" )
         ;;
       (local-postgres-db|local-mysql-db|mysql-db|postgres-db)
         features+=( "$want" )
