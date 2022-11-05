@@ -121,8 +121,16 @@ dynamic::isolation::segments() {
     dynamic_segment_fragment_file="overlay/dynamic/isolation_segments_$group.yml"
 
     sed -e 's/{{segment-name}}/'"${group}"'/g' \
-      < 'overlay/dynamic-templates/isolation-segment-additional-trusted-certs.yml' \
+      < 'overlay/dynamic-templates/isolation-segment-dns-sd.yml' \
       > "overlay/dynamic/isolation-segment-${group}-dns-sd.yml" 
+
+    if want_feature nfs-volume-services ; then
+      sed -e 's/{{segment-name}}/'"${group}"'/g' \
+        < 'overlay/dynamic-templates/isolation-segment-nfs-ldap-config.yml' \
+        > "overlay/dynamic/isolation-segment-${group}-nfs-ldap-config.yml" 
+
+      iso_seg_merges+=( "overlay/dynamic/isolation-segment-${group}-nfs-ldap-config.yml" )
+    fi
 
     spruce merge -m --prune meta \
       "overlay/dynamic-templates/isolation-segment.yml" \
@@ -677,6 +685,7 @@ features::process() {
           manifests+=(
             "cf-deployment/operations/enable-nfs-ldap.yml"
             "overlay/addons/nfs-ldap.yml"
+            "overlay/addons/nfs-ldap-config.yml"
           )
 
           if want_feature "nfs-ldap-tls"; then

@@ -1,0 +1,26 @@
+---
+- type: replace
+  path: /instance_groups/name={{segment-name}}/jobs/name=nfsv3driver/properties/nfsv3driver/ldap_svc_user?
+  value: (( grab meta.nfs.ldap.user ))
+- type: replace
+  path: /instance_groups/name={{segment-name}}/jobs/name=nfsv3driver/properties/nfsv3driver/ldap_svc_password?
+  value: (( grab meta.nfs.ldap.pass ))
+- type: replace
+  path: /instance_groups/name={{segment-name}}/jobs/name=nfsv3driver/properties/nfsv3driver/ldap_host?
+  value: (( grab meta.nfs.ldap.host ))
+- type: replace
+  path: /instance_groups/name={{segment-name}}/jobs/name=nfsv3driver/properties/nfsv3driver/ldap_port?
+  value: (( grab meta.nfs.ldap.port ))
+- type: replace
+  path: /instance_groups/name={{segment-name}}/jobs/name=nfsv3driver/properties/nfsv3driver/ldap_proto?
+  value: (( grab meta.nfs.ldap.proto ))
+- type: replace
+  path: /instance_groups/name={{segment-name}}/jobs/name=nfsv3driver/properties/nfsv3driver/ldap_user_fqdn?
+  value: (( grab meta.nfs.ldap.fqdn ))
+- type: replace
+  path: /instance_groups/name={{segment-name}}/jobs/name=nfsv3driver/properties/nfsv3driver/allowed-in-source?
+  value: ""
+- type: replace
+  path: /instance_groups/name={{segment-name}}/jobs/name=nfsbrokerpush/properties/nfsbrokerpush/ldap_enabled?
+  value: true
+
