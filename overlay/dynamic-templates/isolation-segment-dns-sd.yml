@@ -5,7 +5,7 @@
     query: '_'
     instance_group: {{segment-name}}
     deployment: ((deployment_name))
-    network: ((network_name))
+    network: (( grab meta.network_name || "default" ))
     domain: bosh
 - type: replace
   path: /instance_groups/name={{segment-name}}/jobs/name=bosh-dns-adapter?

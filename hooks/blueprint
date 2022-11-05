@@ -120,18 +120,6 @@ dynamic::isolation::segments() {
 
     dynamic_segment_fragment_file="overlay/dynamic/isolation_segments_$group.yml"
 
-    sed -e 's/{{segment-name}}/'"${group}"'/g' \
-      < 'overlay/dynamic-templates/isolation-segment-dns-sd.yml' \
-      > "overlay/dynamic/isolation-segment-${group}-dns-sd.yml" 
-
-    if want_feature nfs-volume-services ; then
-      sed -e 's/{{segment-name}}/'"${group}"'/g' \
-        < 'overlay/dynamic-templates/isolation-segment-nfs-ldap-config.yml' \
-        > "overlay/dynamic/isolation-segment-${group}-nfs-ldap-config.yml" 
-
-      iso_seg_merges+=( "overlay/dynamic/isolation-segment-${group}-nfs-ldap-config.yml" )
-    fi
-
     spruce merge -m --prune meta \
       "overlay/dynamic-templates/isolation-segment.yml" \
       "overlay/dynamic/isolation-segment-${group}-dns-sd.yml" \
@@ -142,6 +130,20 @@ dynamic::isolation::segments() {
       > "${dynamic_segment_fragment_file}"
 
     echo "${dynamic_segment_fragment_file}"
+
+    sed -e 's/{{segment-name}}/'"${group}"'/g' \
+      < 'overlay/dynamic-templates/isolation-segment-dns-sd.yml' \
+      > "overlay/dynamic/isolation_segment_${group}_dns_sd.yml" 
+
+    echo "overlay/dynamic/isolation_segment_${group}_dns_sd.yml" 
+
+    if want_feature nfs-volume-services ; then
+      sed -e 's/{{segment-name}}/'"${group}"'/g' \
+        < 'overlay/dynamic-templates/isolation-segment-nfs-ldap-config.yml' \
+        > "overlay/dynamic/isolation_segment_${group}_nfs_ldap_config.yml" 
+
+      echo "overlay/dynamic/isolation_segment_${group}_nfs_ldap_config.yml" 
+    fi
   done
 }
 

@@ -20,7 +20,4 @@
 - type: replace
   path: /instance_groups/name={{segment-name}}/jobs/name=nfsv3driver/properties/nfsv3driver/allowed-in-source?
   value: ""
-- type: replace
-  path: /instance_groups/name={{segment-name}}/jobs/name=nfsbrokerpush/properties/nfsbrokerpush/ldap_enabled?
-  value: true
 
