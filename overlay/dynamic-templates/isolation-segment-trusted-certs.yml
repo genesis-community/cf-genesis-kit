@@ -6,12 +6,12 @@ instance_groups:
       properties:
         containers:
           trusted_ca_certificates:
-            - (( append ))
-            - (( grab meta.ocfp.certs.trusted ))
+            - (( defer append ))
+            - (( defer grab meta.ocfp.certs.trusted ))
     - name: cflinuxfs3-rootfs-setup
       properties:
         cflinuxfs3-rootfs:
           trusted_certs:
-            - (( append ))
-            - (( grab meta.ocfp.certs.trusted ))
+            - (( defer append ))
+            - (( defer grab meta.ocfp.certs.trusted ))
 
