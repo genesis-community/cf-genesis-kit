@@ -1,0 +1,4 @@
+---
+params:
+  additional_trusted_certs: (( grab meta.ocfp.certs.trusted ))
+

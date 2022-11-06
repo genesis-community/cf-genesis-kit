@@ -26,4 +26,3 @@ params:
   nfs-ldap-proto:            (( grab meta.nfs.ldap.proto ))
   nfs-ldap-fqdn:             (( grab meta.nfs.ldap.fqdn ))
   nfs-ldap-ca-cert:          (( grab meta.nfs.ldap.ca ))
-

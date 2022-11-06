@@ -5,7 +5,8 @@ params:
     - ((diego_instance_identity_ca.ca))
     - ((credhub_tls.ca))
     - ((uaa_ssl.ca))
-    additional_trusted_certs: []
+    additional_trusted_certs:
+      - (( append ))
 
 instance_groups:
 - name: (( grab meta.name ))
