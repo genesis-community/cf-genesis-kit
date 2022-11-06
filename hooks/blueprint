@@ -85,7 +85,6 @@ dynamic::isolation::segments() {
         "overlay/dynamic-templates/isolation-segment-nfs-ldap-ocfp.yml" 
         "ocfp/nfs-ldap-data.yml" 
         )
-      else
       fi
     fi
   fi
@@ -136,6 +135,15 @@ dynamic::isolation::segments() {
       > "overlay/dynamic/isolation_segment_${group}_dns_sd.yml" 
 
     echo "overlay/dynamic/isolation_segment_${group}_dns_sd.yml" 
+
+    if want_feature ocfp
+    then
+      sed -e 's/{{segment-name}}/'"${group}"'/g' \
+        < 'ocfp/isolation-segment-trusted-certs.yml' \
+        > "overlay/dynamic/isolation_segment_${group}_trusted_certs.yml" 
+
+      echo "overlay/dynamic/isolation_segment_${group}_trusted_certs.yml" 
+    fi
 
     if want_feature nfs-volume-services ; then
       sed -e 's/{{segment-name}}/'"${group}"'/g' \
