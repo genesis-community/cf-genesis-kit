@@ -139,7 +139,7 @@ dynamic::isolation::segments() {
     if want_feature ocfp
     then
       sed -e 's/{{segment-name}}/'"${group}"'/g' \
-        < 'ocfp/isolation-segment-trusted-certs.yml' \
+        < 'overlay/dynamic/isolation-segment-trusted-certs.yml' \
         > "overlay/dynamic/isolation_segment_${group}_trusted_certs.yml" 
 
       echo "overlay/dynamic/isolation_segment_${group}_trusted_certs.yml" 
