@@ -75,6 +75,10 @@ dynamic::isolation::segments() {
     then
       iso_seg_merges+=( "overlay/dynamic-templates/isolation-segment-nfs-ldap.yml" )
 
+      if want_feature nfs-ldap-tls
+      then iso_seg_merges+=( "overlay/dynamic-templates/isolation-segment-nfs-ldap-tls.yml" )
+      fi
+
       if want_feature ocfp 
       then 
         iso_seg_merges+=( 
@@ -82,9 +86,6 @@ dynamic::isolation::segments() {
         "ocfp/nfs-ldap-data.yml" 
         )
       else
-        if want_feature nfs-ldap-tls
-        then iso_seg_merges+=( "overlay/dynamic-templates/isolation-segment-nfs-ldap-tls.yml" )
-        fi
       fi
     fi
   fi
