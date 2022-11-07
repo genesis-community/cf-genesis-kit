@@ -99,6 +99,9 @@ instance_groups:
         graph_cleanup_threshold_in_mb: 0
         deny_networks:
         - 0.0.0.0/0
+        network_plugin: /var/vcap/packages/runc-cni/bin/garden-external-networker
+        network_plugin_extra_args:
+        - --configFile=/var/vcap/jobs/garden-cni/config/adapter.json
       logging:
         format:
           timestamp: "rfc3339"
