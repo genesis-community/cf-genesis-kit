@@ -20,3 +20,9 @@ instance_groups:
 variables:
 - name: uaa_clients_app_scheduler_secret
   type: password
+
+---
+- type: replace
+  path: /instance_groups/name=api?/jobs/name=cloud_controller_ng/properties/cc/broker_client_timeout_seconds
+  value: 300
+
