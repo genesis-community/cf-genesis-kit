@@ -120,7 +120,7 @@ then
   fetch::artifacts
   
   cat > manifest.yml <<-APPMANIFEST
-  ---
+---
 applications:
   - name: scs-broker
     buildpack: ${buildpack}
