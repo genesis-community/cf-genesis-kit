@@ -94,7 +94,7 @@ do # Process opertor arguments
       deploy=1
       shift
       ;;
-    (deploy)
+    (register)
       register=1
       shift
       ;;
