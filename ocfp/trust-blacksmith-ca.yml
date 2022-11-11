@@ -4,5 +4,5 @@ meta:
     certs:
       trusted:
         - (( append ))
-        - (( vault genesis.exodus_mount genesis.env "/blacksmith:blacksmith_ca" ))
+        - (( vault $GENESIS_EXODUS_MOUNT genesis.env "/blacksmith:blacksmith_ca" ))
 
