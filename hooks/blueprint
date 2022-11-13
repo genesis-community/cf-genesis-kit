@@ -94,13 +94,9 @@ dynamic::isolation::segments() {
   fi
 
   if want_feature ocfp
-  then iso_seg_merges+=( "ocfp/meta.yml" )
-  fi
-
-  if want_feature trust-blacksmith-ca
   then
-    iso_seg_merges+=( "overlay/addons/trust-blacksmith-ca.yml" )
-    if want_feature ocfp
+    iso_seg_merges+=( "ocfp/meta.yml" )
+    if want_feature trust-blacksmith-ca
     then iso_seg_merges+=( "ocfp/trust-blacksmith-ca.yml" )
     fi
   fi
