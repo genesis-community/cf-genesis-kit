@@ -94,16 +94,19 @@ dynamic::isolation::segments() {
   fi
 
   if want_feature ocfp
-  then 
-    iso_seg_merges+=( "ocfp/meta.yml" )
-    if want_feature trust-blacksmith-ca
+  then iso_seg_merges+=( "ocfp/meta.yml" )
+  fi
+
+  if want_feature trust-blacksmith-ca
+  then
+    iso_seg_merges+=( "overlay/addons/trust-blacksmith-ca.yml" )
+    if want_feature ocfp
     then iso_seg_merges+=( "ocfp/trust-blacksmith-ca.yml" )
     fi
   fi
 
   for group in ${isolation_groups[@]}
   do
-
     if want_feature ocfp
     then
       sed -e 's/{{segment-name}}/'"${group}"'/g' \
@@ -722,10 +725,9 @@ features::process() {
         manifests+=( "overlay/enable-service-discovery.yml" )
         ;;
       (trust-blacksmith-ca)
-        if want_feature ocfp ; then
-          manifests+=( "ocfp/trust-blacksmith-ca.yml" )
-        else
-          manifests+=( "overlay/addons/trust-blacksmith-ca.yml" )
+        manifests+=( "overlay/addons/trust-blacksmith-ca.yml" )
+        if want_feature ocfp
+        then manifests+=( "ocfp/trust-blacksmith-ca.yml" )
         fi
         ;;
       (app-autoscaler-integration)
