@@ -8,15 +8,19 @@ if [[ $GENESIS_DEPLOY_RC == 0 ]]; then
       echo
       echo "For details about the deployment, run"
       echo
-  describe "  #G{$GENESIS_CALL info $GENESIS_ENVIRONMENT}"
+  describe "  #G{$GENESIS_CALL $GENESIS_ENVIRONMENT info}"
+      echo
+      echo "To see a list of available addons, run"
+      echo
+  describe "  #G{$GENESIS_CALL $GENESIS_ENVIRONMENT do -- list}"
       echo
       echo "To set up your local cf CLI installation with useful plugins:"
       echo
-  describe "  #G{$GENESIS_CALL do $GENESIS_ENVIRONMENT -- setup-cli}"
+  describe "  #G{$GENESIS_CALL $GENESIS_ENVIRONMENT do -- setup-cli}"
       echo
       echo "To log into Cloud Foundry, run"
       echo
-  describe "  #G{$GENESIS_CALL do $GENESIS_ENVIRONMENT -- login}"
+  describe "  #G{$GENESIS_CALL $GENESIS_ENVIRONMENT do -- login}"
       echo
 
 fi
