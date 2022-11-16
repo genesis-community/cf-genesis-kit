@@ -113,7 +113,7 @@ dynamic::isolation::segments() {
     fi
 
     additional_trusted_certs=''
-    if jq -e --arg v "$group" \
+    if want_feature ocfp || jq -e --arg v "$group" \
       '.isolation_segments[] | select( .name == $v ) | .additional_trusted_certs//[] | length > 0' <<<"$1" &>/dev/null
     then
       additional_trusted_certs="overlay/dynamic/isolation-segment-${group}-additional-trusted-certs.yml"
