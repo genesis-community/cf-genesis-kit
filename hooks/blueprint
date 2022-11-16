@@ -107,7 +107,7 @@ dynamic::isolation::segments() {
     if want_feature ocfp || jq -e --arg v "$group" \
       '.isolation_segments[] | select( .name == $v ) | .additional_trusted_certs//[] | length > 0' <<<"$1" &>/dev/null
     then
-      additional_trusted_certs="$(dynamic::isolation::additional_trusted_certs "additional-trusted-certs" "$group")"
+      additional_trusted_certs="$(dynamic::isolation::template::render "additional-trusted-certs" "$group")"
       want_feature ocfp &&
         additional_trusted_certs+=" $(dynamic::isolation::template::render "ocfp-trusted-certs" "$group")"
     fi
@@ -140,9 +140,8 @@ dynamic::isolation::template::render() {
   local _dst="${_dstdir}/isolation-segment-${_name}-${_tmpl}.yml"
 
   sed -e 's/{{segment-name}}/'"${_name}"'/g' < "${_src}" > "${_dst}"
-  echo "${_file}"
+  echo "${_dst}"
 }
-
 
 ################################################################################
 # Dynamic Instance VM Types
