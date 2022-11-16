@@ -66,4 +66,8 @@ else
 fi
 
 [[ "$cc_ok" == "no" ]] && exit 1
+
+echo
+
+
 exit 0
