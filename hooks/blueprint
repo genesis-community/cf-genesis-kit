@@ -103,27 +103,16 @@ dynamic::isolation::segments() {
 
   for group in ${isolation_groups[@]}
   do
-    if want_feature ocfp
-    then
-      sed -e 's/{{segment-name}}/'"${group}"'/g' \
-        < 'overlay/dynamic-templates/isolation-segment-ocfp-trusted-certs.yml' \
-        > "overlay/dynamic/isolation_segment_${group}_ocfp_trusted_certs.yml" 
-
-      iso_seg_merges+=( "overlay/dynamic/isolation_segment_${group}_ocfp_trusted_certs.yml" )
-    fi
-
     additional_trusted_certs=''
     if want_feature ocfp || jq -e --arg v "$group" \
       '.isolation_segments[] | select( .name == $v ) | .additional_trusted_certs//[] | length > 0' <<<"$1" &>/dev/null
     then
-      additional_trusted_certs="overlay/dynamic/isolation-segment-${group}-additional-trusted-certs.yml"
-
-      sed -e 's/{{segment-name}}/'"${group}"'/g' \
-        < 'overlay/dynamic-templates/isolation-segment-additional-trusted-certs.yml' \
-        > "${additional_trusted_certs}"
+      additional_trusted_certs="$(dynamic::isolation::additional_trusted_certs "additional-trusted-certs" "$group")"
+      want_feature ocfp &&
+        additional_trusted_certs+=" $(dynamic::isolation::template::render "ocfp-trusted-certs" "$group")"
     fi
 
-    dynamic_segment_fragment_file="overlay/dynamic/isolation_segments_$group.yml"
+    dynamic_segment_fragment_file="overlay/dynamic/isolation-segments-$group.yml"
 
     spruce merge -m --prune meta \
       "overlay/dynamic-templates/isolation-segment.yml" \
@@ -135,21 +124,25 @@ dynamic::isolation::segments() {
 
     echo "${dynamic_segment_fragment_file}"
 
-    sed -e 's/{{segment-name}}/'"${group}"'/g' \
-      < 'overlay/dynamic-templates/isolation-segment-dns-sd.yml' \
-      > "overlay/dynamic/isolation_segment_${group}_dns_sd.yml" 
+    dynamic::isolation::template::render "dns-sd" "$group"
 
-    echo "overlay/dynamic/isolation_segment_${group}_dns_sd.yml" 
-
-    if want_feature nfs-volume-services ; then
-      sed -e 's/{{segment-name}}/'"${group}"'/g' \
-        < 'overlay/dynamic-templates/isolation-segment-nfs-ldap-config.yml' \
-        > "overlay/dynamic/isolation_segment_${group}_nfs_ldap_config.yml" 
-
-      echo "overlay/dynamic/isolation_segment_${group}_nfs_ldap_config.yml" 
-    fi
+    want_feature nfs-volume-services &&
+      dynamic::isolation::template::render "nfs-ldap-config" "$group"
   done
 }
+
+dynamic::isolation::template::render() {
+  local _tmpl=$1 _name="$2"
+  
+  local _srcdir='overlay/dynamic-templates'
+  local _dstdir='overlay/dynamic'
+  local _src="${_srcdir}/isolation-segment-${_tmpl}.yml"
+  local _dst="${_dstdir}/isolation-segment-${_name}-${_tmpl}.yml"
+
+  sed -e 's/{{segment-name}}/'"${_name}"'/g' < "${_src}" > "${_dst}"
+  echo "${_file}"
+}
+
 
 ################################################################################
 # Dynamic Instance VM Types
@@ -931,8 +924,12 @@ features::ocfp() {
     "ocfp/${iaas}/blobstore.yml"
   )
 
-  if want_feature "windows-diego-cells"; then
-    manifests+=( "ocfp/${iaas}/windows.yml" )
+  if want_feature "windows-diego-cells"
+  then
+    manifests+=( 
+      "ocfp/${iaas}/windows.yml"
+      "ocfp/trusted-certs-windows.yml"
+    )
   fi
 
   manifests+=( "ocfp/scale/${env_scale}.yml" )
