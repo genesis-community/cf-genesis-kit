@@ -132,7 +132,53 @@ applications:
     env:
       GOPACKAGENAME: scs-broker
       SCS_BROKER_CONFIG: |-
-        {"basic_plan_id":"default","basic_plan_name":"default","broker_auth":{"password":"${broker_auth_password}","user":"${broker_auth_user}"},"cloud_foundry_config":{"api_url":"https://${system_api_domain}","cf_password":"${cf_admin_password}","cf_username":"${cf_admin_username}","skip_ssl_validation":${skip_ssl_validation},"uaa_client_id":"${scs_client}","uaa_client_secret":"${scs_client_secret}"},"config_server_download_uri":"${configserver_jar_uri}","config_server_release_tag":"${release_tag}","description":"Broker to create SCS config-servers and registries","instance_domain":"${system_api_domain}","instance_space_guid":"${scs_space_guid}","long_description":"Broker to create SCS config-servers and registries","registry_server_download_uri":"${registry_jar_uri}","service_id":"scs-broker","service_name":"scs-broker"}
+        {
+          "description": "Broker to create SCS services",
+          "long_description": "Broker to create SCS services",
+          "basic_plan_id": "default",
+          "basic_plan_name": "default",
+          "instance_domain": "${system_api_domain}",
+          "instance_space_guid": "${scs_space_guid}",
+          "artifacts_directory": "/app/artifacts",  
+
+          "broker_auth": {
+            "password": "${broker_auth_password}",
+            "user": "${broker_auth_user}"
+          },
+
+          "cloud_foundry_config":{
+            "api_url":"https://${system_api_domain}",
+            "cf_password":"${cf_admin_password}",
+            "cf_username":"${cf_admin_username}",
+            "skip_ssl_validation":${skip_ssl_validation},
+            "uaa_client_id":"${scs_client}",
+            "uaa_client_secret":"${scs_client_secret}"},
+            "config_server_download_uri":"${configserver_jar_uri}",
+            "config_server_release_tag":"${release_tag}",
+            "registry_server_download_uri":"${registry_jar_uri}",
+            "service_id":"scs-broker",
+            "service_name":"scs-broker"
+          },
+
+          "services": [
+            {
+              "service_name": "config-server",
+              "service_id": "config-server",
+              "service_plan_id": "default-cs",
+              "service_plan_name": "default",
+              "service_description": "Broker to create config-servers",
+              "service_download_uri": "${configserver_jar_uri}"
+            },
+            {
+              "service_name": "service-registry",
+              "service_id": "service-registry",
+              "service_plan_id": "default-sr",
+              "service_plan_name": "default",
+              "service_description": "Broker to create config-servers",
+              "service_download_uri": "${registry_jar_uri}"
+            }
+          ],
+        }
 
 APPMANIFEST
 
