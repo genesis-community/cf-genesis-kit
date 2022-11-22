@@ -53,8 +53,8 @@ registry_jar_uri="https://github.com/starkandwayne/scs-service-registry/releases
 
 broker_name="scs-broker"
 broker_old_name="scs-broker"
-broker_auth_user="admin"
-broker_auth_password="admin"
+broker_auth_username=${BROKER_AUTH_USERNAME:-"admin"}
+broker_auth_password=${BROKER_AUTH_PASSWORD:-"admin"}
 skip_ssl_validation="true"
 scs_broker_archive= # Default to downloading
 
@@ -88,6 +88,14 @@ do # Process opertor arguments
     (broker_uri)
       broker_uri="${2}"
       shift 2 || fail "Usage: ... broker_uri <uri>"
+      ;;
+    (broker_username)
+      broker_auth_username="${2}"
+      shift 2 || fail "Usage: ... broker_username <username>"
+      ;;
+    (broker_password)
+      broker_auth_password="${2}"
+      shift 2 || fail "Usage: ... broker_password <password>"
       ;;
     (configserver_jar_uri)
       configserver_jar_uri="${2}"
@@ -145,14 +153,14 @@ applications:
           "instance_space_guid": "${scs_space_guid}",
           "artifacts_directory": "/app/artifacts",
           "broker_auth": {
-            "user": "${broker_auth_user}",
-            "password": "${broker_auth_password}",
+            "user": "${broker_auth_username}",
+            "password": $(jq --null-input --arg "val" "${broker_auth_password}" '$val'),
           },
           "cloud_foundry_config":{
             "api_url":"https://${system_api_domain}",
             "skip_ssl_validation":${skip_ssl_validation},
             "cf_username":"${cf_admin_username}",
-            "cf_password":"${cf_admin_password}",
+            "cf_password": $(jq --null-input --arg "val" "${cf_admin_password}" '$val'),
             "uaa_client_id":"${scs_client}",
             "uaa_client_secret":"${scs_client_secret}"}
           },
@@ -207,7 +215,7 @@ then
   echo "Registering SCS Broker"
   echo "${broker_action^}ing the service broker..."
   cf "${broker_action}e-service-broker" "${broker_name}" \
-    "${broker_auth_user}" "${broker_auth_password}" \
+    "${broker_auth_username}" "${broker_auth_password}" \
     "https://scs-broker.${apps_domain}"
 fi
 
