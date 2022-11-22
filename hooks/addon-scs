@@ -141,7 +141,7 @@ applications:
           "instance_space_guid": "${scs_space_guid}",
           "artifacts_directory": "/app/artifacts",  
           "broker_auth": {
-            "user": "${broker_auth_user}"
+            "user": "${broker_auth_user}",
             "password": "${broker_auth_password}",
           },
           "cloud_foundry_config":{
