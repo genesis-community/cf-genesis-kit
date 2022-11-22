@@ -157,7 +157,7 @@ applications:
             {
               "service_id": "config-server",
               "service_name": "config-server",
-              "service_plan_id": "default",
+              "service_plan_id": "default-cs",
               "service_plan_name": "default",
               "service_description": "Broker to create Config Servers",
               "service_download_uri": "${configserver_jar_uri}"
@@ -165,7 +165,7 @@ applications:
             {
               "service_id": "service-registry",
               "service_name": "service-registry",
-              "service_plan_id": "default",
+              "service_plan_id": "default-sr",
               "service_plan_name": "default",
               "service_description": "Broker to create Service Registries",
               "service_download_uri": "${registry_jar_uri}"
