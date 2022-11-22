@@ -133,8 +133,8 @@ applications:
       GOPACKAGENAME: scs-broker
       SCS_BROKER_CONFIG: |-
         {
-          "broker_id": "scs-broker"
-          "broker_name": "scs-broker"
+          "broker_id": "scs-broker",
+          "broker_name": "scs-broker",
           "description": "Broker to create SCS services",
           "long_description": "Broker to create Spring Cloud Services (SCS) Config Servers or Service Registries",
           "instance_domain": "${system_api_domain}",
