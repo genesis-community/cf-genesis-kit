@@ -156,15 +156,14 @@ applications:
             "user": "${broker_auth_username}",
             "password": $(jq --null-input --arg "val" "${broker_auth_password}" '$val'),
           },
-          "cloud_foundry_config":{
-            "api_url":"https://${system_api_domain}",
-            "skip_ssl_validation":${skip_ssl_validation},
-            "cf_username":"${cf_admin_username}",
+          "cloud_foundry_config": {
+            "api_url": "https://${system_api_domain}",
+            "skip_ssl_validation": ${skip_ssl_validation},
+            "cf_username": "${cf_admin_username}",
             "cf_password": $(jq --null-input --arg "val" "${cf_admin_password}" '$val'),
-            "uaa_client_id":"${scs_client}",
-            "uaa_client_secret":"${scs_client_secret}"}
+            "uaa_client_id": "${scs_client}",
+            "uaa_client_secret": "${scs_client_secret}"}
           },
-
           "services": [
             {
               "service_id": "config-server",
@@ -188,10 +187,10 @@ applications:
 APPMANIFEST
 
   echo "Pushing SCS Broker..."
-  cf push -f manifest.yml
+  cf push -f "manifest.yml"
 
-echo <<-EOT
-SCS service broker is now running, you should now be able to create a service ex:
+  echo <<-EOT
+SCS service broker is now running, you should now be able to create a service, e.g.:
 \t$ cf create-service config-server default test-service -c "{...whatever json configuration you wish to use for config-server - see config-server docs from Spring.io...}"
 EOT
 fi
