@@ -4,7 +4,10 @@ set -eu
 fail() { echo "$@" >&2 ; exit 1; }
 
 fetch::uri() {
-  curl -sOL "${1}" || fail "Failed to download: ${1}"
+  local url=$1
+  curl --fail --silent --show-error --location --remote-name \
+    --url "${url}" \
+    || fail "Failed to download: ${url}"
 }
 
 fetch::artifacts() {
