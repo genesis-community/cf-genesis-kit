@@ -133,48 +133,41 @@ applications:
       GOPACKAGENAME: scs-broker
       SCS_BROKER_CONFIG: |-
         {
+          "broker_id": "scs-broker"
+          "broker_name": "scs-broker"
           "description": "Broker to create SCS services",
-          "long_description": "Broker to create SCS services",
-          "basic_plan_id": "default",
-          "basic_plan_name": "default",
+          "long_description": "Broker to create Spring Cloud Services (SCS) Config Servers or Service Registries",
           "instance_domain": "${system_api_domain}",
           "instance_space_guid": "${scs_space_guid}",
           "artifacts_directory": "/app/artifacts",  
-
           "broker_auth": {
-            "password": "${broker_auth_password}",
             "user": "${broker_auth_user}"
+            "password": "${broker_auth_password}",
           },
-
           "cloud_foundry_config":{
             "api_url":"https://${system_api_domain}",
-            "cf_password":"${cf_admin_password}",
-            "cf_username":"${cf_admin_username}",
             "skip_ssl_validation":${skip_ssl_validation},
+            "cf_username":"${cf_admin_username}",
+            "cf_password":"${cf_admin_password}",
             "uaa_client_id":"${scs_client}",
-            "uaa_client_secret":"${scs_client_secret}"},
-            "config_server_download_uri":"${configserver_jar_uri}",
-            "config_server_release_tag":"${release_tag}",
-            "registry_server_download_uri":"${registry_jar_uri}",
-            "service_id":"scs-broker",
-            "service_name":"scs-broker"
+            "uaa_client_secret":"${scs_client_secret}"}
           },
 
           "services": [
             {
-              "service_name": "config-server",
               "service_id": "config-server",
-              "service_plan_id": "default-cs",
+              "service_name": "config-server",
+              "service_plan_id": "default",
               "service_plan_name": "default",
-              "service_description": "Broker to create config-servers",
+              "service_description": "Broker to create Config Servers",
               "service_download_uri": "${configserver_jar_uri}"
             },
             {
-              "service_name": "service-registry",
               "service_id": "service-registry",
-              "service_plan_id": "default-sr",
+              "service_name": "service-registry",
+              "service_plan_id": "default",
               "service_plan_name": "default",
-              "service_description": "Broker to create config-servers",
+              "service_description": "Broker to create Service Registries",
               "service_download_uri": "${registry_jar_uri}"
             }
           ],
