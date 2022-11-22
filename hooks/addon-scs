@@ -51,6 +51,8 @@ broker_uri="https://github.com/starkandwayne/scs-broker/archive/refs/tags/v0.0.2
 configserver_jar_uri="https://github.com/starkandwayne/cf-spring-cloud-config-server/releases/download/1.1.0/spring-cloud-config-server-1.1.0-2.5.14.SCS.3.1.37.jar"
 registry_jar_uri="https://github.com/starkandwayne/scs-service-registry/releases/download/1.0.1-3.1.37/service-registry-1.0.1-3.1.37.jar"
 
+broker_name="scs-broker"
+broker_old_name="scs-broker"
 broker_auth_user="admin"
 broker_auth_password="admin"
 skip_ssl_validation="true"
@@ -135,8 +137,8 @@ applications:
       GOPACKAGENAME: scs-broker
       SCS_BROKER_CONFIG: |-
         {
-          "broker_id": "scs-broker",
-          "broker_name": "scs-broker",
+          "broker_id": "${broker_name}",
+          "broker_name": "${broker_name}",
           "description": "Broker to create SCS services",
           "long_description": "Broker to create Spring Cloud Services (SCS) Config Servers or Service Registries",
           "instance_domain": "${system_api_domain}",
@@ -188,9 +190,24 @@ fi
 
 if [[ ${register} > 0 ]]
 then
+  broker_is_registered=$(
+    cf curl "/v2/service_brokers" \
+      | jq --raw-output \
+          --arg "broker_name" "${broker_name}" \
+          --arg "broker_old_name" "${broker_old_name}" \
+          '.resources[].entity
+            | select(.name == $broker_name || .name == $broker_old_name)
+            | .name'
+  )
+  broker_action="creat"
+  if [[ -n ${broker_is_registered} ]]; then
+    broker_action="updat"
+  fi
+
   echo "Registering SCS Broker"
-  echo "Creating the service broker..."
-  cf create-service-broker scs-broker "${broker_auth_user}" "${broker_auth_password}" \
+  echo "${broker_action^}ing the service broker..."
+  cf "${broker_action}e-service-broker" "${broker_name}" \
+    "${broker_auth_user}" "${broker_auth_password}" \
     "https://scs-broker.${apps_domain}"
 fi
 
