@@ -28,38 +28,40 @@ extract() {
   rm ${1}
 }
 
-org="system"
-space="scs"
-exodus_path=$(lookup --partial genesis.exodus_base)
+exodus_path=$(lookup --partial "genesis.exodus_base")
 system_api_domain="$(exodus api_domain)"
 cf_admin_username="$(exodus admin_username)"
 cf_admin_password="$(exodus admin_password)"
 apps_domain="$(exodus apps_domain)"
 
-cf create-space -o ${org} ${space} 
-cf target -o ${org} -s ${space}
+org="system"
+space="scs"
+cf create-space -o "${org}" "${space}"
+cf target -o "${org}" -s "${space}"
 
 scs_client=$(safe get ${exodus_path}:scs_client)
 scs_client_secret=$(safe get ${exodus_path}:scs_secret)
 scs_space_guid=$(cf space ${space} --guid)
 
-release_tag="Greenwich.SR3"
-buildpack="go_buildpack"
 memory="256M"
 disk="1048M"
+buildpack="go_buildpack"
+release_tag="Greenwich.SR3"
+broker_uri="https://github.com/starkandwayne/scs-broker/archive/refs/tags/v0.0.2.tar.gz"
+configserver_jar_uri="https://github.com/starkandwayne/cf-spring-cloud-config-server/releases/download/1.1.0/spring-cloud-config-server-1.1.0-2.5.14.SCS.3.1.37.jar"
+registry_jar_uri="https://github.com/starkandwayne/scs-service-registry/releases/download/1.0.1-3.1.37/service-registry-1.0.1-3.1.37.jar"
+
 broker_auth_user="admin"
 broker_auth_password="admin"
 skip_ssl_validation="true"
 scs_broker_archive= # Default to downloading
-configserver_jar_uri="https://github.com/starkandwayne/cf-spring-cloud-config-server/releases/download/1.1.0/spring-cloud-config-server-1.1.0-2.5.14.SCS.3.1.37.jar"
-registry_jar_uri="https://github.com/starkandwayne/scs-service-registry/releases/download/1.0.1-3.1.37/service-registry-1.0.1-3.1.37.jar"
 
 deploy=0
 register=0
 
 while [[ $# > 0 ]]
 do # Process opertor arguments
-  case "${1}" in 
+  case "${1}" in
     (run) shift ;;
     (skip_ssl_validation)
       skip_ssl_validation="${2}"
@@ -111,17 +113,14 @@ if [[ ${deploy} > 0 ]]
 then
   echo "Deploying SCS Broker"
 
-  [[ -n "${broker_uri}" ]] ||
-    broker_uri="https://github.com/starkandwayne/scs-broker/archive/refs/tags/v0.0.2.tar.gz"
-  
   fetch::uri "${broker_uri}"
-  
+
   extract $(basename "${broker_uri}")
-  
+
   cd scs-broker-*
-  
+
   fetch::artifacts
-  
+
   cat > manifest.yml <<-APPMANIFEST
 ---
 applications:
@@ -142,7 +141,7 @@ applications:
           "long_description": "Broker to create Spring Cloud Services (SCS) Config Servers or Service Registries",
           "instance_domain": "${system_api_domain}",
           "instance_space_guid": "${scs_space_guid}",
-          "artifacts_directory": "/app/artifacts",  
+          "artifacts_directory": "/app/artifacts",
           "broker_auth": {
             "user": "${broker_auth_user}",
             "password": "${broker_auth_password}",
