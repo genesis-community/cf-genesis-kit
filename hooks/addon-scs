@@ -144,7 +144,7 @@ applications:
     env:
       GOPACKAGENAME: scs-broker
       SCS_BROKER_CONFIG: |-
-        {
+        '{
           "broker_id": "${broker_name}",
           "broker_name": "${broker_name}",
           "description": "Broker to create SCS services",
@@ -182,7 +182,7 @@ applications:
               "service_download_uri": "${registry_jar_uri}"
             }
           ],
-        }
+        }'
 
 APPMANIFEST
 
