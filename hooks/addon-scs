@@ -30,6 +30,7 @@ extract() {
 
 exodus_path=$(lookup --partial "genesis.exodus_base")
 system_api_domain="$(exodus api_domain)"
+system_domain="$(exodus system_domain)"
 cf_admin_username="$(exodus admin_username)"
 cf_admin_password="$(exodus admin_password)"
 apps_domain="$(exodus apps_domain)"
@@ -149,7 +150,7 @@ applications:
           "broker_name": "${broker_name}",
           "description": "Broker to create SCS services",
           "long_description": "Broker to create Spring Cloud Services (SCS) Config Servers or Service Registries",
-          "instance_domain": "${system_api_domain}",
+          "instance_domain": "${system_domain}",
           "instance_space_guid": "${scs_space_guid}",
           "artifacts_directory": "/app/artifacts",
           "broker_auth": {
