@@ -144,7 +144,7 @@ applications:
     env:
       GOPACKAGENAME: scs-broker
       SCS_BROKER_CONFIG: |-
-        '{
+        {
           "broker_id": "${broker_name}",
           "broker_name": "${broker_name}",
           "description": "Broker to create SCS services",
@@ -154,7 +154,7 @@ applications:
           "artifacts_directory": "/app/artifacts",
           "broker_auth": {
             "user": "${broker_auth_username}",
-            "password": $(jq --null-input --arg "val" "${broker_auth_password}" '$val'),
+            "password": $(jq --null-input --arg "val" "${broker_auth_password}" '$val')
           },
           "cloud_foundry_config": {
             "api_url": "https://${system_api_domain}",
@@ -162,7 +162,7 @@ applications:
             "cf_username": "${cf_admin_username}",
             "cf_password": $(jq --null-input --arg "val" "${cf_admin_password}" '$val'),
             "uaa_client_id": "${scs_client}",
-            "uaa_client_secret": "${scs_client_secret}"}
+            "uaa_client_secret": "${scs_client_secret}"
           },
           "services": [
             {
@@ -181,8 +181,8 @@ applications:
               "service_description": "Broker to create Service Registries",
               "service_download_uri": "${registry_jar_uri}"
             }
-          ],
-        }'
+          ]
+        }
 
 APPMANIFEST
 
