@@ -203,7 +203,7 @@ then
           --arg "broker_name" "${broker_name}" \
           --arg "broker_old_name" "${broker_old_name}" \
           '.resources[].entity
-            | select(.name == $broker_name || .name == $broker_old_name)
+            | select(.name == $broker_name or .name == $broker_old_name)
             | .name'
   )
   broker_action="creat"
