@@ -150,7 +150,7 @@ applications:
           "broker_name": "${broker_name}",
           "description": "Broker to create SCS services",
           "long_description": "Broker to create Spring Cloud Services (SCS) Config Servers or Service Registries",
-          "instance_domain": "${system_domain}",
+          "instance_domain": "${apps_domain}",
           "instance_space_guid": "${scs_space_guid}",
           "artifacts_directory": "/app/artifacts",
           "broker_auth": {
