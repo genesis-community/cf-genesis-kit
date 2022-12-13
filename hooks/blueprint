@@ -906,6 +906,7 @@ features::process() {
 ################################################################################
 features::isos() {
   want_feature isolation-segments || return 0
+  manifests+=( "operations/diego-cells-networking.yml" )
 
   while read -r segment
   do manifests+=( "${segment}" )
@@ -1012,7 +1013,6 @@ manifests=(
   "cf-deployment/cf-deployment.yml"
   "overlay/base.yml"
   "overlay/upstream_version.yml"
-  "overlay/diego-cells-networking.yml"
 )
 
 [[ -n $version ]] && switch_cf_version "$version"
