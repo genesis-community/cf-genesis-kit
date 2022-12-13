@@ -767,15 +767,25 @@ features::process() {
         ;;
       (*)
         if [[ $want =~ cf-deployment/.* ]] ; then
-          if [[ -f "$want.yml" ]] ; then
+          if [[ -s "$want.yml" ]] ; then
             manifests+=( "$want.yml" )
           else
             fail "Kit $GENESIS_KIT_NAME/$GENESIS_KIT_VERSION does not support the '$want' feature."
           fi
-        elif [[ -f "$GENESIS_ROOT/${opsdir}/$want.yml" ]] ; then
-          opsfiles+=( "$GENESIS_ROOT/${opsdir}/$want.yml" )
-        elif [[ -f "$GENESIS_ROOT/ops/$want.yml" ]] ; then
-          opsfiles+=( "$GENESIS_ROOT/ops/$want.yml" )
+        elif [[ -s "$GENESIS_ROOT/${opsdir}/$want.yml" ]] ; then
+          if want_feature ocfp
+          then
+            opsfiles+=( "$GENESIS_ROOT/${opsdir}/$want.yml" )
+          else
+            manifests+=( "$GENESIS_ROOT/${opsdir}/$want.yml" )
+          fi
+        elif [[ -s "$GENESIS_ROOT/ops/$want.yml" ]] ; then
+          if want_feature ocfp
+          then
+            opsfiles+=( "$GENESIS_ROOT/ops/$want.yml" )
+          else
+            manifests+=( "$GENESIS_ROOT/ops/$want.yml" )
+          fi
         fi
         ;;
     esac
@@ -1016,6 +1026,8 @@ features::process
 features::isos # Then we process isolation segments
 features::ocfp # ocfp overrides base manifests
 
-manifests+=( ${opsfiles[@]} ) # opsfiles override everything
+if want_feature ocfp
+then manifests+=( ${opsfiles[@]} ) # opsfiles override everything in ocfp arch
+fi
 
 echo "${manifests[@]}" # Finally, we print out the list of yamls to be merged
