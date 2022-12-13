@@ -1027,7 +1027,7 @@ features::isos # Then we process isolation segments
 features::ocfp # ocfp overrides base manifests
 
 if want_feature ocfp
-then manifests+=( ${opsfiles[@]} ) # opsfiles override everything in ocfp arch
+then manifests+=( ${opsfiles[@]+"${opsfiles[@]}"} ) # opsfiles override everything in ocfp arch
 fi
 
 echo "${manifests[@]}" # Finally, we print out the list of yamls to be merged
