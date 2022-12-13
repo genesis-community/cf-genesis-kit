@@ -2,8 +2,6 @@
 exodus:
   admin_username:          admin
   admin_password:          ((cf_admin_password))
-  uaa_admin_client:        admin
-  uaa_admin_client_secret: ((uaa_admin_client_secret))
   base_domain:             (( grab params.base_domain ))
   system_domain:           (( grab params.system_domain ))
   app_domains:             (( grab params.app_domains ))

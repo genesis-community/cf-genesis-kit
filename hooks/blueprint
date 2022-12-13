@@ -465,6 +465,9 @@ features::validate() {
       (v1-vm-types|no-v1-vm-types)
         true # no-op, dealt with above
         ;;
+      (uaa-admin-client)
+        features+=( "$want" )
+        ;;
       (cf-deployment/*)
         if [[ -f "$want.yml" ]]
         then features+=( "$want" )
@@ -478,6 +481,9 @@ features::validate() {
           "enable-service-discovery"
           "$want" 
         )
+
+        want_feature uaa-admin-client ||
+          features+=( "uaa-admin-client" )
         ;;
       (*)
         if [[ -f "$GENESIS_ROOT/${opsdir}/$want.yml" ||
@@ -762,6 +768,11 @@ features::process() {
         # process outside of base features so that base features can be called within iso segs
         true
         ;;
+
+      (uaa-admin-client)
+        manifests+=( "overlay/addons/uaa-admin-client.yml" )
+        ;;
+
       (+migrated-v1-env)
         manifests+=( "overlay/addons/migration.yml" )
         ;;
