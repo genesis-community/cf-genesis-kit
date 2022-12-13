@@ -3,9 +3,9 @@
 ################################################################################
 # Utility Functions
 ################################################################################
-warn()  { warn=1  ; describe >&2 "#Y{[WARNING]} $(echo -e $*)\n" ; }
-abort() { abort=1 ; describe >&2 "#R{[ERROR]} $(echo -e $*)\n" ; }
-fail()  { bail "#R{[ERROR]} $(echo -e $*)\n" ; exit 1 ; }
+warn()  { warn=1  ; describe >&2 "#Y{[WARNING]} $(echo -e "$*")\n" ; }
+abort() { abort=1 ; describe >&2 "#R{[ERROR]} $(echo -e "$*")\n" ; }
+fail()  { bail "#R{[ERROR]} $(echo -e "$*")\n" ; exit 1 ; }
 
 switch_cf_version() {
   describe >&2 "" \
@@ -79,11 +79,11 @@ dynamic::isolation::segments() {
       then iso_seg_merges+=( "overlay/dynamic-templates/isolation-segment-nfs-ldap-tls.yml" )
       fi
 
-      if want_feature ocfp 
-      then 
-        iso_seg_merges+=( 
-        "overlay/dynamic-templates/isolation-segment-nfs-ldap-ocfp.yml" 
-        "ocfp/nfs-ldap-data.yml" 
+      if want_feature ocfp
+      then
+        iso_seg_merges+=(
+        "overlay/dynamic-templates/isolation-segment-nfs-ldap-ocfp.yml"
+        "ocfp/nfs-ldap-data.yml"
         )
       fi
     fi
@@ -101,7 +101,7 @@ dynamic::isolation::segments() {
     fi
   fi
 
-  for group in ${isolation_groups[@]}
+  for group in "${isolation_groups[@]}"
   do
     additional_trusted_certs=''
     if want_feature ocfp || jq -e --arg v "$group" \
@@ -133,7 +133,7 @@ dynamic::isolation::segments() {
 
 dynamic::isolation::template::render() {
   local _tmpl=$1 _name="$2"
-  
+
   local _srcdir='overlay/dynamic-templates'
   local _dstdir='overlay/dynamic'
   local _src="${_srcdir}/isolation-segment-${_tmpl}.yml"
@@ -237,7 +237,7 @@ dynamic::instance::vm::types() {
 # Dynamic Instance Counts
 ################################################################################
 dynamic::instance::counts() {
-  instance_group_counts="$( echo "$params" | 
+  instance_group_counts="$( echo "$params" |
     jq -r 'with_entries(if (.key | test("_instances$")) then { key: (.key | capture("(?<k>.*)_instances$") | .k), value: .value } else empty end) | to_entries | .[] | "\(.key) \(.value)"'
   )"
 
@@ -253,7 +253,7 @@ dynamic::instance::counts() {
           continue # dealt with elsewhere
           ;;
         (cell)
-          inst_grp="diego_cell" 
+          inst_grp="diego_cell"
           warn "Translated: params.cell_instances => params.diego_cell_instances"
           ;;
         (diego)
@@ -265,7 +265,7 @@ dynamic::instance::counts() {
           warn "Translated: params.bbs_instances => params.diego_api_instances"
           ;;
         (loggregator)
-          inst_grp="log_api" 
+          inst_grp="log_api"
           warn "Translated: params.loggregator_instances => params.log_api_instances"
           ;;
         (postgres)
@@ -284,7 +284,7 @@ dynamic::instance::counts() {
 
       dashed_inst_grp="$(echo "$inst_grp" | tr _ -)" # convert any _ into -
 
-      if [[ ! $dashed_inst_grp =~ ^(api|cc-worker|credhub|database|diego-(api|cell)|doppler|errand|haproxy|log-api|nats|windows2019-cell|rotate-cc-database-key|(tcp-)?router|scheduler|singleton-blobstore|smoke-tests|uaa)$ ]] 
+      if [[ ! $dashed_inst_grp =~ ^(api|cc-worker|credhub|database|diego-(api|cell)|doppler|errand|haproxy|log-api|nats|windows2019-cell|rotate-cc-database-key|(tcp-)?router|scheduler|singleton-blobstore|smoke-tests|uaa)$ ]]
       then
         inst_grp="$dashed_inst_grp";
 
@@ -304,9 +304,9 @@ dynamic::instance::counts() {
 
     errand_instances="$(echo "$params" | jq -r '.errand_instances//""')"
 
-    if [[ -n "$errand_instances" ]] 
+    if [[ -n "$errand_instances" ]]
     then # Deal with errand meta-type
-      for errand_name in smoke-tests rotate-cc-database-key 
+      for errand_name in smoke-tests rotate-cc-database-key
       do
         if ! echo "$used" | grep "^$errand_name\$" &>/dev/null
         then
@@ -334,9 +334,6 @@ features::validate() {
   for want in $GENESIS_REQUESTED_FEATURES; do
     # Validate requrested features
     case "$want" in
-      (aws|gcp|azure|vsphere)
-        iaas="$want"
-        ;;
       (cf-deployment-version-*) # Check if explicit verison of cf-deployment is requested
         [[ -z "$version" ]] ||
           fail "You cannot specify more than one cf-deployment-version-* feature"
@@ -442,7 +439,7 @@ features::validate() {
         features+=( "$want" )
         ;;
       (minio-blobstore|aws-blobstore|aws-blobstore-iam|azure-blobstore|gcp-blobstore)
-        if want_feature ocfp 
+        if want_feature ocfp
         then abort "Cannot specify blobstore with ocfp feature. \n\tWith ocfp feature blobstore specifies you."
         fi
         features+=( "$want" )
@@ -477,9 +474,9 @@ features::validate() {
         fi
         ;;
       (ocfp)
-        features+=( 
+        features+=(
           "enable-service-discovery"
-          "$want" 
+          "$want"
         )
 
         want_feature uaa-admin-client ||
@@ -487,7 +484,7 @@ features::validate() {
         ;;
       (*)
         if [[ -f "$GENESIS_ROOT/${opsdir}/$want.yml" ||
-              -f "$GENESIS_ROOT/ops/$want.yml" ]] 
+              -f "$GENESIS_ROOT/ops/$want.yml" ]]
         then features+=( "$want" )
         else
           abort "The #c{$want} feature is not supported, see MANUAL.md for valid features."
@@ -497,22 +494,22 @@ features::validate() {
   done
 
   if want_feature ocfp ; then
-    case $iaas in
+    case $cpi in
       (aws|azure|gcp) features+=( "${iaas}-blobstore" ) ;;
       (vsphere) features+=( "minio-blobstore" ) ;;
-      (*) abort "Blobstores are not supported on #c{$iaas} yet." ;;
+      (*) abort "Blobstores are not supported on #c{${iaas}} yet." ;;
     esac
   fi
-  
+
   [[ -z "$db_specified" ]] && ! want_feature 'bare' &&
     features+=( "local-postgres-db" )
 
   [[ "$abort" == "1" ]] &&
     fail "#R{Cannot continue} - fix the #C{$GENESIS_ENVIRONMENT.yml} file."
 
-  [[ "$warn"  == "1" ]] && 
+  [[ "$warn"  == "1" ]] &&
     warn "Adjust your #C{$GENESIS_ENVIRONMENT.yml} file to remove warnings."
-} 
+}
 
 ################################################################################
 # Features Processing Setup
@@ -524,7 +521,7 @@ features::setup() {
   else
     manifests+=( "cf-deployment/operations/rename-network-and-deployment.yml" )
   fi
-  
+
   # Set up some best practices if not bare
   if ! want_feature "bare" ; then
     manifests+=(
@@ -533,12 +530,12 @@ features::setup() {
       "overlay/ten-year-ca-expiry.yml"
       "overlay/uaa-branding.yml"
     )
-  
+
     # Change vm types - must be done before operations delete unused instance_types
     if want_feature v1-vm-types ; then
       manifests+=( "overlay/addons/v1-vm-types.yml" )
     fi
-  
+
     # Deal with availability zones - has to be done to core instance groups
     # before they potentially get removed by further features
     if [[ $cpi == 'azure' ]] || want_feature "small-footprint" ||
@@ -550,7 +547,7 @@ features::setup() {
       )
     fi
     manifests+=( "operations/custom-azs.yml" )
-  
+
     # Temporary override of specific releases - keep but leave empty when upstream catches up
     manifests+=( "overlay/override-releases/static.yml" )
   fi
@@ -623,7 +620,7 @@ features::process() {
           )
         fi
         ;;
-  
+
       ############################################################################
       # Database
       ############################################################################
@@ -636,7 +633,7 @@ features::process() {
           "overlay/db/external-${want%-db}.yml"
         )
         ;;
-  
+
       (local-postgres-db)
         databases+=( "$want" )
         manifests+=( "cf-deployment/operations/use-postgres.yml" )
@@ -651,7 +648,7 @@ features::process() {
           fi
         fi
         ;;
-  
+
       (local-mysql-db)
         databases+=( "$want" )
         manifests+=( "overlay/db/local-mysql-db.yml" )
@@ -666,7 +663,7 @@ features::process() {
           fi
         fi
         ;;
-  
+
       ############################################################################
       # Addons
       ############################################################################
@@ -752,14 +749,14 @@ features::process() {
           "cf-deployment/operations/use-latest-windows2019-stemcell.yml"
           "overlay/override-releases/static-windows.yml"
         )
-  
+
         if want_feature "compiled-releases"; then
           manifests+=(
             "cf-deployment/operations/experimental/use-compiled-releases-windows.yml"
             "overlay/override-releases/compiled-windows.yml"
           )
         fi
-  
+
         if ! want_feature "bare" ; then
           manifests+=( "overlay/windows.yml")
         fi
@@ -800,7 +797,7 @@ features::process() {
         fi
         ;;
     esac
-  
+
     ############################################################################
     # HAProxy
     ############################################################################
@@ -822,15 +819,15 @@ features::process() {
         manifests+=( "overlay/routing/haproxy-small-footprint.yml" )
     fi
   done
-  
-  if [[ "${#blobstores[@]}" > 1 ]]
+
+  if (( "${#blobstores[@]}" > 1 ))
   then fail "Too many blobstores selected; pick only one of: ${blobstores[*]}"
   fi
-  
-  if [[ "${#databases[@]}" > 1 ]] 
+
+  if (( "${#databases[@]}" > 1 ))
   then fail "Too many databases selected; pick only one of: ${databases[*]}"
   fi
-  
+
   if [[ "$has_availability_zones" == 'true' || "$randomize_az_placement" == 'true' ]]
   then
     if want_feature "bare"; then
@@ -838,7 +835,7 @@ features::process() {
         "\n\tare not compatible with feature '#C{bare}'."
     fi
   fi
-  
+
   if ! want_feature "bare"
   then
     want_feature "no-nats-tls" ||
@@ -851,25 +848,25 @@ features::process() {
       want_feature "no-nats-tls" ||
         manifests+=( "overlay/addons/migration-v1-nats-credentials-tls.yml" )
     fi
-  
+
     skip_ssl_validation="$(jq -r '.skip_ssl_validation' <(echo "$params"))"
     if [[ "$skip_ssl_validation" == 'false' ]] ; then
       if ! want_feature "cf-deployment/operations/stop-skipping-tls-validation"
       then manifests+=( "cf-deployment/operations/stop-skipping-tls-validation" )
       fi
     fi
-  
+
     if [[ "${#databases[@]}" == 0 ]]
     then manifests+=( "cf-deployment/operations/use-postgres.yml" )
     fi
-  
+
     ##############################################################################
     # IaaS - Deal with IaaS peculiarities
     ##############################################################################
     case "$cpi" in
       (azure)
         # TODO: if this turns out needed, we may re-introduce `azure` feature to include it when bare is specified
-        if [[ "$has_availability_zones" == 'true' || "$randomize_az_placement" == 'true' ]] 
+        if [[ "$has_availability_zones" == 'true' || "$randomize_az_placement" == 'true' ]]
         then
           fail "#M{params.availibility_zones} and #M{params.randomize_az_placement} are" \
             "\n\tnot compatible with deployments to Azure infrastructure."
@@ -883,15 +880,15 @@ features::process() {
         manifests+=( "cf-deployment/operations/bosh-lite.yml" )
         ;;
     esac
-  
+
     dynamic::instance::counts
 
     dynamic::instance::vm::types
   fi
-  
+
   # Include the migration manifest fragments
   version="$(exodus kit_version)"
-  if [[ -n "${version}" ]] && 
+  if [[ -n "${version}" ]] &&
     ! new_enough "${version}" "2.0.0-rc0"
   then
     manifests+=( "operations/migrate/cells.yml")
@@ -921,17 +918,17 @@ features::ocfp() {
 
   env_scale=$(lookup "params.ocfp_env_scale" "dev")
 
-  manifests+=( 
+  manifests+=(
     "overlay/addons/autoscaler.yml"
     "overlay/addons/app-scheduler.yml"
     "overlay/addons/scs.yml"
     "overlay/addons/prometheus.yml"
-    "overlay/blobstore/meta.yml" 
+    "overlay/blobstore/meta.yml"
   )
 
   # OCFP Overrides
   manifests+=(
-    "ocfp/meta.yml" 
+    "ocfp/meta.yml"
     "ocfp/ocfp.yml"
     "ocfp/external-db-prep.yml"
     "ocfp/external-db.yml"
@@ -947,7 +944,7 @@ features::ocfp() {
 
   if want_feature "windows-diego-cells"
   then
-    manifests+=( 
+    manifests+=(
       "ocfp/${iaas}/windows.yml"
       "ocfp/trusted-certs-windows.yml"
     )
@@ -955,7 +952,7 @@ features::ocfp() {
 
   manifests+=( "ocfp/scale/${env_scale}.yml" )
 
-  for want in ${GENESIS_REQUESTED_FEATURES[@]}
+  for want in "${GENESIS_REQUESTED_FEATURES[@]}"
   do
     case "${want}" in
       (stratos-integration)
@@ -1002,8 +999,9 @@ version=""
 abort=
 warn=
 db_specified=
-iaas=
 cpi="$(bosh_cpi)" || true
+iaas="$cpi"
+[[ $iaas == 'google' ]] && iaas='gcp'
 opsdir="ops"
 [[ -n "${PREVIOUS_ENV:-}" ]] &&
   opsdir=".genesis/cached/${PREVIOUS_ENV}/${opsdir}"
@@ -1027,7 +1025,7 @@ randomize_az_placement="$(jq -r '.randomize_az_placement//false' <(echo "$params
 features::validate
 features::setup
 
-if [[ ${#features[@]} > 0 ]] 
+if (( ${#features[@]} > 0 ))
 then GENESIS_REQUESTED_FEATURES="${features[*]}"
 else GENESIS_REQUESTED_FEATURES=""
 fi
