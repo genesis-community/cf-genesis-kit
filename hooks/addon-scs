@@ -1,0 +1,222 @@
+#!/bin/bash
+set -eu
+
+fail() { echo "$@" >&2 ; exit 1; }
+
+fetch::uri() {
+  local url=$1
+  curl --fail --silent --show-error --location --remote-name \
+    --url "${url}" \
+    || fail "Failed to download: ${url}"
+}
+
+fetch::artifacts() {
+  mkdir artifacts
+  pushd artifacts
+  for uri in "${configserver_jar_uri}" "${registry_jar_uri}"
+  do fetch::uri "${uri}"
+  done
+  popd
+}
+
+extract() {
+  case "${1}" in
+    (*.zip) unzip -o "${1}" ;; # unzip scs-*.zip
+    (*gz)   tar zxf "${1}"  ;; # extract scs-*gz
+    (*)     fail "Unknown file type: ${1}" ;;
+  esac
+  rm ${1}
+}
+
+exodus_path=$(lookup --partial "genesis.exodus_base")
+system_api_domain="$(exodus api_domain)"
+system_domain="$(exodus system_domain)"
+cf_admin_username="$(exodus admin_username)"
+cf_admin_password="$(exodus admin_password)"
+apps_domain="$(exodus apps_domain)"
+
+org="system"
+space="scs"
+cf create-space -o "${org}" "${space}"
+cf target -o "${org}" -s "${space}"
+
+scs_client=$(safe get ${exodus_path}:scs_client)
+scs_client_secret=$(safe get ${exodus_path}:scs_secret)
+scs_space_guid=$(cf space ${space} --guid)
+
+memory="256M"
+disk="1048M"
+buildpack="go_buildpack"
+release_tag="Greenwich.SR3"
+broker_uri="https://github.com/starkandwayne/scs-broker/archive/refs/tags/v0.0.2.tar.gz"
+configserver_jar_uri="https://github.com/starkandwayne/cf-spring-cloud-config-server/releases/download/1.1.0/spring-cloud-config-server-1.1.0-2.5.14.SCS.3.1.37.jar"
+registry_jar_uri="https://github.com/starkandwayne/scs-service-registry/releases/download/1.0.1-3.1.37/service-registry-1.0.1-3.1.37.jar"
+
+broker_name="scs-broker"
+broker_old_name="scs-broker"
+broker_auth_username=${BROKER_AUTH_USERNAME:-"admin"}
+broker_auth_password=${BROKER_AUTH_PASSWORD:-"admin"}
+skip_ssl_validation="true"
+scs_broker_archive= # Default to downloading
+
+deploy=0
+register=0
+
+while [[ $# > 0 ]]
+do # Process opertor arguments
+  case "${1}" in
+    (run) shift ;;
+    (skip_ssl_validation)
+      skip_ssl_validation="${2}"
+      shift 2 || fail "Usage: ... skip_ssl_validation <true|false>"
+      ;;
+    (memory)
+      memory="${2}"
+      shift 2 || fail "Usage: ... memory <#M>"
+      ;;
+    (disk)
+      disk="${2}"
+      shift 2 || fail "Usage: ... disk <#M>"
+      ;;
+    (buildpack)
+      buildpack="${2}"
+      shift 2 || fail "Usage: ... buildpack <buildpack-name>"
+      ;;
+    (release_tag)
+      release_tag="${2}"
+      shift 2 || fail "Usage: ... release_tag <tag>"
+      ;;
+    (broker_uri)
+      broker_uri="${2}"
+      shift 2 || fail "Usage: ... broker_uri <uri>"
+      ;;
+    (broker_username)
+      broker_auth_username="${2}"
+      shift 2 || fail "Usage: ... broker_username <username>"
+      ;;
+    (broker_password)
+      broker_auth_password="${2}"
+      shift 2 || fail "Usage: ... broker_password <password>"
+      ;;
+    (configserver_jar_uri)
+      configserver_jar_uri="${2}"
+      shift 2 || fail "Usage: ... configserver_jar_uri <uri>"
+      ;;
+    (registry_jar_uri)
+      registry_jar_uri="${2}"
+      shift 2 || fail "Usage: ... registry_jar_uri <uri>"
+      ;;
+    (deploy)
+      deploy=1
+      shift
+      ;;
+    (register)
+      register=1
+      shift
+      ;;
+    (*)
+      fail "Unknown argument: ${1}"
+      ;;
+  esac
+done
+
+if [[ ${deploy} > 0 ]]
+then
+  echo "Deploying SCS Broker"
+
+  fetch::uri "${broker_uri}"
+
+  extract $(basename "${broker_uri}")
+
+  cd scs-broker-*
+
+  fetch::artifacts
+
+  cat > manifest.yml <<-APPMANIFEST
+---
+applications:
+  - name: scs-broker
+    buildpack: ${buildpack}
+    memory: ${memory}
+    disk_quota: ${disk}
+    host: console
+    timeout: 180
+    health-check-type: port
+    env:
+      GOPACKAGENAME: scs-broker
+      SCS_BROKER_CONFIG: |-
+        {
+          "broker_id": "${broker_name}",
+          "broker_name": "${broker_name}",
+          "description": "Broker to create SCS services",
+          "long_description": "Broker to create Spring Cloud Services (SCS) Config Servers or Service Registries",
+          "instance_domain": "${apps_domain}",
+          "instance_space_guid": "${scs_space_guid}",
+          "artifacts_directory": "/app/artifacts",
+          "broker_auth": {
+            "user": "${broker_auth_username}",
+            "password": $(jq --null-input --arg "val" "${broker_auth_password}" '$val')
+          },
+          "cloud_foundry_config": {
+            "api_url": "https://${system_api_domain}",
+            "skip_ssl_validation": ${skip_ssl_validation},
+            "cf_username": "${cf_admin_username}",
+            "cf_password": $(jq --null-input --arg "val" "${cf_admin_password}" '$val'),
+            "uaa_client_id": "${scs_client}",
+            "uaa_client_secret": "${scs_client_secret}"
+          },
+          "services": [
+            {
+              "service_id": "config-server",
+              "service_name": "config-server",
+              "service_plan_id": "default-cs",
+              "service_plan_name": "default",
+              "service_description": "Broker to create Config Servers",
+              "service_download_uri": "${configserver_jar_uri}"
+            },
+            {
+              "service_id": "service-registry",
+              "service_name": "service-registry",
+              "service_plan_id": "default-sr",
+              "service_plan_name": "default",
+              "service_description": "Broker to create Service Registries",
+              "service_download_uri": "${registry_jar_uri}"
+            }
+          ]
+        }
+
+APPMANIFEST
+
+  echo "Pushing SCS Broker..."
+  cf push -f "manifest.yml"
+
+  echo <<-EOT
+SCS service broker is now running, you should now be able to create a service, e.g.:
+\t$ cf create-service config-server default test-service -c "{...whatever json configuration you wish to use for config-server - see config-server docs from Spring.io...}"
+EOT
+fi
+
+if [[ ${register} > 0 ]]
+then
+  broker_is_registered=$(
+    cf curl "/v2/service_brokers" \
+      | jq --raw-output \
+          --arg "broker_name" "${broker_name}" \
+          --arg "broker_old_name" "${broker_old_name}" \
+          '.resources[].entity
+            | select(.name == $broker_name or .name == $broker_old_name)
+            | .name'
+  )
+  broker_action="creat"
+  if [[ -n ${broker_is_registered} ]]; then
+    broker_action="updat"
+  fi
+
+  echo "Registering SCS Broker"
+  echo "${broker_action^}ing the service broker..."
+  cf "${broker_action}e-service-broker" "${broker_name}" \
+    "${broker_auth_username}" "${broker_auth_password}" \
+    "https://scs-broker.${apps_domain}"
+fi
+
+exit 0

@@ -1,13 +1,6 @@
+---
 params:
-  nfs-ldap-ca-cert-ca: ((nfs-ldap-ca-cert.ca))
-
-instance_groups:
-- name: diego-cell
-  jobs:
-  - name: nfsv3driver
-    properties:
-      nfsv3driver:
-        ldap_ca_cert: (( grab params.nfs-ldap-ca-cert-ca ))
+  nfs-ldap-ca-cert: ((nfs-ldap-ca-cert.ca))
 
 variables:
 - name: nfs-ldap-ca-cert
@@ -15,4 +8,9 @@ variables:
   options:
     common_name: NFSLDAPCA
     is_ca: true
+
+---
+- type: replace
+  path: /instance_groups/name=diego-cell/jobs/name=nfsv3driver/properties/nfsv3driver/ldap_ca_cert?
+  value: (( grab params.nfs-ldap-ca-cert ))
 

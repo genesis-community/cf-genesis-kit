@@ -1,7 +1,7 @@
 ---
 exodus:
   app_autoscaler_client:      app_autoscaler_client
-  app_autoscaler_secret:      (( grab instance_groups.uaa.jobs.uaa.properties.uaa.clients.app_autoscaler_client.secret ))
+  app_autoscaler_secret:      ((uaa_clients_app_autoscaler_secret))
   loggregator_ca:             ((loggregator_ca.certificate))
   loggregator_tls_rlp_cert:   ((loggregator_tls_rlp.certificate))
   loggregator_tls_rlp_key:    ((loggregator_tls_rlp.private_key))

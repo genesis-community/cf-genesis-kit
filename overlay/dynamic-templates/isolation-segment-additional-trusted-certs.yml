@@ -1,9 +1,12 @@
-meta:
-  __base_trusted_certs:
+params:
+  isolation_segments:
+  - name: {{segment-name}}
+    base_trusted_certs:
     - ((diego_instance_identity_ca.ca))
     - ((credhub_tls.ca))
     - ((uaa_ssl.ca))
-  additional_trusted_certs: []
+    additional_trusted_certs:
+      - (( append ))
 
 instance_groups:
 - name: (( grab meta.name ))
@@ -11,8 +14,8 @@ instance_groups:
   - name: cflinuxfs3-rootfs-setup
     properties:
       cflinuxfs3-rootfs:
-        trusted_certs: (( grab meta.__base_trusted_certs meta.additional_trusted_certs ))
+        trusted_certs: (( defer grab params.isolation_segments.{{segment-name}}.base_trusted_certs params.isolation_segments.{{segment-name}}.additional_trusted_certs ))
   - name: rep
     properties:
       containers:
-        trusted_ca_certificates: (( grab meta.__base_trusted_certs meta.additional_trusted_certs ))
+        trusted_ca_certificates: (( defer grab params.isolation_segments.{{segment-name}}.base_trusted_certs params.isolation_segments.{{segment-name}}.additional_trusted_certs ))

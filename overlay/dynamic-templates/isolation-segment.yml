@@ -1,19 +1,81 @@
+---
+genesis:
+  env:           (( grab $GENESIS_ENVIRONMENT ))
+  secrets_mount: (( grab $GENESIS_SECRETS_MOUNT ))
+  vault_prefix:  (( grab $GENESIS_VAULT_PREFIX ))
+  vault_env:     (( grab $GENESIS_VAULT_ENV_SLUG ))
+
 meta:
+  vault: (( concat genesis.secrets_mount genesis.vault_prefix ))
+
   __default_tags:
   - (( grab meta.tag || meta.name ))
+
   __default_vm_extentions:
   - 100GB_ephemeral_disk
 
 instance_groups:
 - name: (( grab meta.name ))
-  azs: (( grab meta.azs || "(( grab meta.azs ))" ))
   instances: (( grab meta.instances || 1 ))
+  azs: (( grab meta.azs || "(( grab meta.azs ))" ))
+  networks:
+  - name: (( grab meta.network_name || "default" ))
   vm_type: (( grab meta.vm_type || "(( grab params.diego-cell_vm_type || params.diego_cell_vm_type || \"small-highmem\" ))" ))
   vm_extensions: (( grab meta.vm_extensions || meta.__default_vm_extentions ))
   stemcell: (( grab meta.stemcell || "default" ))
-  networks:
-  - name: (( grab meta.network_name || "default" ))
   jobs:
+  - name: cfdot
+    .: (( defer inject instance_groups.diego-cell.jobs.cfdot ))
+
+  - name: garden-cni
+    .: (( defer inject instance_groups.diego-cell.jobs.garden-cni ))
+
+  - name: netmon
+    .: (( defer inject instance_groups.diego-cell.jobs.netmon ))
+    consumes:
+      iptables:
+        from: (( concat "iptables-" meta.name ))
+
+  - name: vxlan-policy-agent
+    .: (( defer inject instance_groups.diego-cell.jobs.vxlan-policy-agent ))
+    provides:
+      vpa:
+        as: (( concat "vpa-" meta.name ))
+    consumes:
+      iptables:
+        from: (( concat "iptables-" meta.name ))
+      cni_config:
+        from: (( concat "cni_config-" meta.name ))
+
+  - name: silk-daemon
+    .: (( defer inject instance_groups.diego-cell.jobs.silk-daemon ))
+    consumes:
+      vpa:
+        from: (( concat "vpa-" meta.name ))
+      iptables:
+        from: (( concat "iptables-" meta.name ))
+
+  - name: silk-cni
+    .: (( defer inject instance_groups.diego-cell.jobs.silk-cni ))
+    consumes:
+      vpa:
+        from: (( concat "vpa-" meta.name ))
+    provides:
+      cni_config:
+        as: (( concat "cni_config-" meta.name ))
+
+  - name: loggr-udp-forwarder
+    .: (( defer inject instance_groups.diego-cell.jobs.loggr-udp-forwarder ))
+
+  - name: bosh-dns-adapter
+    properties:
+      internal_domains: ["apps.internal."]
+      dnshttps:
+        client:
+          tls: ((cf_app_sd_client_tls))
+        server:
+          ca: ((cf_app_sd_client_tls.ca))
+    release: cf-networking
   - name: cflinuxfs3-rootfs-setup
     release: cflinuxfs3
     properties:
@@ -25,7 +87,9 @@ instance_groups:
   - name: garden
     release: garden-runc
     provides:
-      iptables: nil
+      iptables:
+        as: (( concat "iptables-" meta.name ))
+
     properties:
       garden:
         containerd_mode: true
@@ -35,6 +99,9 @@ instance_groups:
         graph_cleanup_threshold_in_mb: 0
         deny_networks:
         - 0.0.0.0/0
+        network_plugin: /var/vcap/packages/runc-cni/bin/garden-external-networker
+        network_plugin_extra_args:
+        - --configFile=/var/vcap/jobs/garden-cni/config/adapter.json
       logging:
         format:
           timestamp: "rfc3339"
@@ -81,6 +148,11 @@ instance_groups:
           timestamp: "rfc3339"
   - name: route_emitter
     release: diego
+    consumes:
+      nats:
+        ip_addresses: false
+      nats-tls:
+        ip_addresses: false
     properties:
       bpm:
         enabled: true
@@ -111,8 +183,10 @@ instance_groups:
       uaa:
         ca_cert: "((uaa_ssl.ca))"
         client_secret: "((uaa_clients_tcp_emitter_secret))"
+
 addons:
-- jobs:
+- name: bosh-dns-aliases
+  jobs:
   - name: bosh-dns-aliases
     properties:
       aliases:
@@ -125,4 +199,4 @@ addons:
           network: (( grab meta.network_name || "default" ))
           query: _
     release: bosh-dns-aliases
-  name: bosh-dns-aliases
+

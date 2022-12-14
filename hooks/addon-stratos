@@ -1,0 +1,127 @@
+#!/bin/bash
+set -eu
+
+stratos_version="4.4.0"
+
+exodus_path=$(lookup --partial genesis.exodus_base)
+
+system_api_domain="$(exodus api_domain)"
+
+secrets_mount=$(lookup genesis.secrets_mount)
+vault_env=$(lookup genesis.env)
+
+case "${GENESIS_REQUESTED_FEATURES}" in
+  (*ocfp*)
+    echo "Looking up OCFP information from the manifest, this will take a few moments..."
+    tf_path=$(lookup --partial meta.ocfp.vault.tf)
+    secrets_mount=$(lookup --partial genesis.secrets_mount)
+    vault_env=$(lookup --partial genesis.vault_env)
+    env_path="${secrets_mount}${vault_env}"
+
+    stratos_domain=$(safe get ${tf_path}/ocf/fqdns:stratos) 
+
+    echo "Looking up database credentials from vault at ${env_path}/stratos/db/stratos ..."
+    stratos_db_scheme=$(  safe get ${env_path}/stratos/db/stratos:scheme)
+    stratos_db_hostname=$(safe get ${env_path}/stratos/db/stratos:hostname)
+    stratos_db_username=$(safe get ${env_path}/stratos/db/stratos:username)
+    stratos_db_password=$(safe get ${env_path}/stratos/db/stratos:password)
+    stratos_db_port=$(    safe get ${env_path}/stratos/db/stratos:port)
+    stratos_db_database=$(safe get ${env_path}/stratos/db/stratos:database)
+    stratos_db_sslmode="verify-ca"
+    ;;
+  (*)
+    stratos_domain="console.$(exodus apps_domain)"
+
+    stratos_db_scheme="postgres"
+    stratos_db_hostname=$(lookup params.db_hostname)
+    stratos_db_username=$(lookup params.db_username "stratos")
+    stratos_db_password=$(lookup params.db_password "stratos")
+    stratos_db_port=$(    lookup params.db_port     5432)
+    stratos_db_database=$(lookup params.db_database "stratos")
+    stratos_db_sslmode=$( lookup params.db_sslmode  "disabled") # verify-ca
+    ;;
+esac
+
+stratos_session_store_sekret=$(echo $RANDOM | sha256sum | awk '{print $1}')
+
+stratos_client=$(safe get ${exodus_path}:stratos_client)
+stratos_client_secret=$(safe get ${exodus_path}:stratos_secret)
+
+shift # run
+create_sgs=
+while [[ $# > 0 ]]
+do
+  arg="$1" ; shift
+  case $arg in
+    (file)
+      file="$1"
+      shift || fail "Expected a filename after 'file'"
+      ;;
+    (sgs)
+      create_sgs=true
+      ;;
+  esac
+done
+
+
+if [[ -s "${1:-}" ]] ; then
+  shift
+  unzip -o "$1"
+else
+  echo "Downloading Stratos ${stratos_version}..."
+  wget https://github.com/orange-cloudfoundry/stratos-ui-cf-packager/releases/download/${stratos_version}/stratos-ui-packaged.zip &&
+    unzip -o stratos-ui-packaged.zip && rm stratos-ui-packaged.zip
+fi
+
+cf create-space -o system stratos
+cf target -o system -s stratos
+
+cf cups console_db_tls_verify_ca  -p "$( cat <<-EOF
+{ "uri": "${stratos_db_scheme}://", "username":"${stratos_db_username}", "password":"${stratos_db_password}", "hostname":"${stratos_db_hostname}", "port":"${stratos_db_port}", "dbname":"${stratos_db_database}", "sslmode":"${stratos_db_sslmode}" }'
+EOF
+)" || true
+
+if [[ -n ${create_sgs} ]]
+then # Security group that allows to talk to VPC IP Range
+  cat > vpc-sg.json <<EOF
+[
+  {
+    "protocol": "all",
+    "destination": "10.0.0.0-10.255.255.255"
+  }
+]
+EOF
+  cf create-security-group vpc ${PWD}/vpc-sg.json || true
+  cf bind-staging-security-group vpc || true
+  cf bind-running-security-group vpc || true
+fi
+
+################################################################################
+# To the Stratosphere!
+################################################################################
+
+cat > manifest.yml <<-APPMANIFEST
+---
+applications:
+  - name: apps
+    memory: 1512M
+    disk_quota: 1024M
+    host: console
+    timeout: 180
+    buildpack: binary_buildpack
+    health-check-type: port
+    env:
+      CF_API_URL: https://${system_api_domain}
+      CF_CLIENT: ${stratos_client}
+      CF_CLIENT_SECRET: ${stratos_client_secret}
+      SESSION_STORE_SECRET: ${stratos_session_store_sekret}
+      SSO_OPTIONS: "nosplash, logout"
+      SSO_WHITELIST: "https://${stratos_domain}/*"
+      SSO_LOGIN: "true"
+      DB_SSL_MODE: "${stratos_db_sslmode}"
+    services:
+    - console_db_tls_verify_ca
+APPMANIFEST
+
+cf push -f manifest.yml
+

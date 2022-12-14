@@ -1,0 +1,8 @@
+---
+params:
+  isolation_segments:
+  - name: {{segment-name}}
+    additional_trusted_certs:
+      - (( append ))
+      - (( grab meta.ocfp.certs.trusted ))
+

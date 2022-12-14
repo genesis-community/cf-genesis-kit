@@ -1,0 +1,14 @@
+---
+meta:
+  ocfp:
+    azs:
+      - (( concat genesis.env "-z1" ))
+      - (( concat genesis.env "-z2" ))
+      - (( concat genesis.env "-z3" ))
+---
+# OCFP Cloud Config accounts for larger ephemeral disks vvv
+- type: remove
+  path: /instance_groups/name=diego-cell/vm_extensions
+- type: remove
+  path: /instance_groups/name=api/vm_extensions
+

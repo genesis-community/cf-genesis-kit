@@ -1,0 +1,26 @@
+---
+- type: replace
+  path: /addons/name=bosh-dns-aliases/jobs/name=bosh-dns-aliases/properties/aliases/domain=_.cell.service.cf.internal/targets/-
+  value:
+    query: '_'
+    instance_group: {{segment-name}}
+    deployment: ((deployment_name))
+    network: (( grab meta.network_name || "default" ))
+    domain: bosh
+- type: replace
+  path: /instance_groups/name={{segment-name}}/jobs/name=bosh-dns-adapter?
+  value:
+    name: bosh-dns-adapter
+    properties:
+      internal_domains: ["apps.internal."]
+      dnshttps:
+        client:
+          tls: ((cf_app_sd_client_tls))
+        server:
+          ca: ((cf_app_sd_server_tls.ca))
+    release: cf-networking
+- type: replace
+  path: /instance_groups/name={{segment-name}}/jobs/name=route_emitter/properties/internal_routes?
+  value:
+    enabled: true
+

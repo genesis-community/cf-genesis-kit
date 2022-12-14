@@ -1,0 +1,355 @@
+---
+meta:
+  db:
+    cc: # ccdb, cc-worker, cc-clock, cc-deployment-updater
+      scheme:   (( vault meta.vault "/db/cloud_controller:scheme"   ))
+      username: (( vault meta.vault "/db/cloud_controller:username" ))
+      password: (( vault meta.vault "/db/cloud_controller:password" ))
+      hostname: (( vault meta.vault "/db/cloud_controller:hostname" ))
+      port:     5432 # Components fail on strings so hardcoding this... :|
+      database: (( vault meta.vault "/db/cloud_controller:database" ))
+      ca:       (( vault meta.vault "/db/cloud_controller:ca" ))
+      tls:      true
+
+    credhub:
+      scheme:   (( vault meta.vault "/db/credhub:scheme"   ))
+      username: (( vault meta.vault "/db/credhub:username" ))
+      password: (( vault meta.vault "/db/credhub:password" ))
+      hostname: (( vault meta.vault "/db/credhub:hostname" ))
+      port:     5432 # Components fail on strings so hardcoding this... :|
+      database: (( vault meta.vault "/db/credhub:database" ))
+      ca:       (( vault meta.vault "/db/credhub:ca"       ))
+      tls:      true
+
+    diego: # bbs
+      scheme:   (( vault meta.vault "/db/diego:scheme"   ))
+      username: (( vault meta.vault "/db/diego:username" ))
+      password: (( vault meta.vault "/db/diego:password" ))
+      hostname: (( vault meta.vault "/db/diego:hostname" ))
+      port:     5432 # Components fail on strings so hardcoding this... :|
+      database: (( vault meta.vault "/db/diego:database" ))
+      ca:       (( vault meta.vault "/db/diego:ca"       ))
+      tls:      true
+
+    locket:
+      scheme:   (( vault meta.vault "/db/locket:scheme"   ))
+      username: (( vault meta.vault "/db/locket:username" ))
+      password: (( vault meta.vault "/db/locket:password" ))
+      hostname: (( vault meta.vault "/db/locket:hostname" ))
+      port:     5432 # Components fail on strings so hardcoding this... :|
+      database: (( vault meta.vault "/db/locket:database" ))
+      ca:       (( vault meta.vault "/db/locket:ca"       ))
+      tls:      true
+
+    network_connectivity: # silk
+      scheme:   (( vault meta.vault "/db/network_connectivity:scheme"   ))
+      username: (( vault meta.vault "/db/network_connectivity:username" ))
+      password: (( vault meta.vault "/db/network_connectivity:password" ))
+      hostname: (( vault meta.vault "/db/network_connectivity:hostname" ))
+      port:     5432 # Components fail on strings so hardcoding this... :|
+      database: (( vault meta.vault "/db/network_connectivity:database" ))
+      ca:       (( vault meta.vault "/db/network_connectivity:ca"       ))
+      tls:      true
+
+    network_policy: # policy_server
+      scheme:   (( vault meta.vault "/db/network_policy:scheme"   ))
+      username: (( vault meta.vault "/db/network_policy:username" ))
+      password: (( vault meta.vault "/db/network_policy:password" ))
+      hostname: (( vault meta.vault "/db/network_policy:hostname" ))
+      port:     5432 # Components fail on strings so hardcoding this... :|
+      database: (( vault meta.vault "/db/network_policy:database" ))
+      ca:       (( vault meta.vault "/db/network_policy:ca"       ))
+      tls:      true
+
+    routing_api:
+      scheme:   (( vault meta.vault "/db/routing_api:scheme"   ))
+      username: (( vault meta.vault "/db/routing_api:username" ))
+      password: (( vault meta.vault "/db/routing_api:password" ))
+      hostname: (( vault meta.vault "/db/routing_api:hostname" ))
+      port:     5432 # Components fail on strings so hardcoding this... :|
+      database: (( vault meta.vault "/db/routing_api:database" ))
+      ca:       (( vault meta.vault "/db/routing_api:ca"       ))
+      tls:      true
+
+    uaa: # uaadb
+      scheme:   "postgresql" # uaa is different than the rest that use 'postgres'
+      username: (( vault meta.vault "/db/uaa:username" ))
+      password: (( vault meta.vault "/db/uaa:password" ))
+      hostname: (( vault meta.vault "/db/uaa:hostname" ))
+      port:     5432 # Components fail on strings so hardcoding this... :|
+      database: (( vault meta.vault "/db/uaa:database" ))
+      ca:       
+        - (( vault meta.vault "/db/uaa:ca"       ))
+      tls:      "enabled"
+---
+# UAA
+- type: replace
+  path: /instance_groups/name=uaa/jobs/name=uaa/properties/uaadb/db_scheme
+  value: (( grab meta.db.uaa.scheme ))
+- type: replace
+  path: /instance_groups/name=uaa/jobs/name=uaa/properties/uaadb/port
+  value: (( grab meta.db.uaa.port ))
+- type: replace
+  path: /instance_groups/name=uaa/jobs/name=uaa/properties/uaadb/databases/tag=uaa/name
+  value: (( grab meta.db.uaa.database ))
+- type: replace
+  path: /instance_groups/name=uaa/jobs/name=uaa/properties/uaadb/address?
+  value: (( grab meta.db.uaa.hostname ))
+- type: replace
+  path: /instance_groups/name=uaa/jobs/name=uaa/properties/uaadb/roles/name=uaa/password
+  value: (( grab meta.db.uaa.password ))
+- type: replace
+  path: /instance_groups/name=uaa/jobs/name=uaa/properties/uaadb/roles/name=uaa/name
+  value: (( grab meta.db.uaa.username ))
+- type: replace
+  path: /instance_groups/name=uaa/jobs/name=uaa/properties/uaa?/ca_certs/-
+  value: (( join "" meta.db.uaa.ca ))
+- type: replace
+  path: /instance_groups/name=uaa/jobs/name=uaa/properties/uaadb/tls?
+  value: (( grab meta.db.uaa.tls ))
+
+# API - Cloud Controller
+- type: replace
+  path: /instance_groups/name=api/jobs/name=cloud_controller_ng/properties/ccdb/db_scheme
+  value: (( grab meta.db.cc.scheme ))
+- type: replace
+  path: /instance_groups/name=api/jobs/name=cloud_controller_ng/properties/ccdb/port
+  value: (( grab meta.db.cc.port ))
+- type: replace
+  path: /instance_groups/name=api/jobs/name=cloud_controller_ng/properties/ccdb/databases/tag=cc/name
+  value: (( grab meta.db.cc.database ))
+- type: replace
+  path: /instance_groups/name=api/jobs/name=cloud_controller_ng/properties/ccdb/address?
+  value: (( grab meta.db.cc.hostname ))
+- type: replace
+  path: /instance_groups/name=api/jobs/name=cloud_controller_ng/properties/ccdb/roles/name=cloud_controller/password
+  value: (( grab meta.db.cc.password ))
+- type: replace
+  path: /instance_groups/name=api/jobs/name=cloud_controller_ng/properties/ccdb/roles/name=cloud_controller/name
+  value: (( grab meta.db.cc.username ))
+- type: replace
+  path: /instance_groups/name=api/jobs/name=cloud_controller_ng/properties/ccdb/ca_cert?
+  value: (( grab meta.db.cc.ca ))
+
+# Cloud Controller Worker
+- type: replace
+  path: /instance_groups/name=cc-worker/jobs/name=cloud_controller_worker/properties/ccdb/db_scheme
+  value: (( grab meta.db.cc.scheme ))
+- type: replace
+  path: /instance_groups/name=cc-worker/jobs/name=cloud_controller_worker/properties/ccdb/port
+  value: (( grab meta.db.cc.port ))
+- type: replace
+  path: /instance_groups/name=cc-worker/jobs/name=cloud_controller_worker/properties/ccdb/databases/tag=cc/name
+  value: (( grab meta.db.cc.database ))
+- type: replace
+  path: /instance_groups/name=cc-worker/jobs/name=cloud_controller_worker/properties/ccdb/address?
+  value: (( grab meta.db.cc.hostname ))
+- type: replace
+  path: /instance_groups/name=cc-worker/jobs/name=cloud_controller_worker/properties/ccdb/roles/name=cloud_controller/password
+  value: (( grab meta.db.cc.password ))
+- type: replace
+  path: /instance_groups/name=cc-worker/jobs/name=cloud_controller_worker/properties/ccdb/roles/name=cloud_controller/name
+  value: (( grab meta.db.cc.username ))
+- type: replace
+  path: /instance_groups/name=cc-worker/jobs/name=cloud_controller_worker/properties/ccdb/ca_cert?
+  value: (( grab meta.db.cc.ca ))
+
+# Scheduler - Cloud Controller Clock
+- type: replace
+  path: /instance_groups/name=scheduler/jobs/name=cloud_controller_clock/properties/ccdb/db_scheme
+  value: (( grab meta.db.cc.scheme ))
+- type: replace
+  path: /instance_groups/name=scheduler/jobs/name=cloud_controller_clock/properties/ccdb/port
+  value: (( grab meta.db.cc.port ))
+- type: replace
+  path: /instance_groups/name=scheduler/jobs/name=cloud_controller_clock/properties/ccdb/databases/tag=cc/name
+  value: (( grab meta.db.cc.database ))
+- type: replace
+  path: /instance_groups/name=scheduler/jobs/name=cloud_controller_clock/properties/ccdb/address?
+  value: (( grab meta.db.cc.hostname ))
+- type: replace
+  path: /instance_groups/name=scheduler/jobs/name=cloud_controller_clock/properties/ccdb/roles/name=cloud_controller/password
+  value: (( grab meta.db.cc.password ))
+- type: replace
+  path: /instance_groups/name=scheduler/jobs/name=cloud_controller_clock/properties/ccdb/roles/name=cloud_controller/name
+  value: (( grab meta.db.cc.username ))
+- type: replace
+  path: /instance_groups/name=scheduler/jobs/name=cloud_controller_clock/properties/ccdb/ca_cert?
+  value: (( grab meta.db.cc.ca ))
+
+# Scheduler - Cloud Controller Deployment Updater
+- type: replace
+  path: /instance_groups/name=scheduler/jobs/name=cc_deployment_updater/properties/ccdb/db_scheme
+  value: (( grab meta.db.cc.scheme ))
+- type: replace
+  path: /instance_groups/name=scheduler/jobs/name=cc_deployment_updater/properties/ccdb/port
+  value: (( grab meta.db.cc.port ))
+- type: replace
+  path: /instance_groups/name=scheduler/jobs/name=cc_deployment_updater/properties/ccdb/databases/tag=cc/name
+  value: (( grab meta.db.cc.database ))
+- type: replace
+  path: /instance_groups/name=scheduler/jobs/name=cc_deployment_updater/properties/ccdb/address?
+  value: (( grab meta.db.cc.hostname ))
+- type: replace
+  path: /instance_groups/name=scheduler/jobs/name=cc_deployment_updater/properties/ccdb/roles/name=cloud_controller/password
+  value: (( grab meta.db.cc.password ))
+- type: replace
+  path: /instance_groups/name=scheduler/jobs/name=cc_deployment_updater/properties/ccdb/roles/name=cloud_controller/name
+  value: (( grab meta.db.cc.username ))
+- type: replace
+  path: /instance_groups/name=scheduler/jobs/name=cc_deployment_updater/properties/ccdb/ca_cert?
+  value: (( grab meta.db.cc.ca ))
+
+# Diego API - BBS
+- type: replace
+  path: /instance_groups/name=diego-api/jobs/name=bbs/properties/diego/bbs/sql/db_driver
+  value: (( grab meta.db.diego.scheme ))
+- type: replace
+  path: /instance_groups/name=diego-api/jobs/name=bbs/properties/diego/bbs/sql/db_port
+  value: (( grab meta.db.diego.port ))
+- type: replace
+  path: /instance_groups/name=diego-api/jobs/name=bbs/properties/diego/bbs/sql/db_schema
+  value: (( grab meta.db.diego.database ))
+- type: replace
+  path: /instance_groups/name=diego-api/jobs/name=bbs/properties/diego/bbs/sql/db_host?
+  value: (( grab meta.db.diego.hostname ))
+- type: replace
+  path: /instance_groups/name=diego-api/jobs/name=bbs/properties/diego/bbs/sql/db_password
+  value: (( grab meta.db.diego.password ))
+- type: replace
+  path: /instance_groups/name=diego-api/jobs/name=bbs/properties/diego/bbs/sql/db_username
+  value: (( grab meta.db.diego.username ))
+- type: replace
+  path: /instance_groups/name=diego-api/jobs/name=bbs/properties/diego/bbs/sql/ca_cert?
+  value: (( grab meta.db.diego.ca ))
+- type: replace
+  path: /instance_groups/name=diego-api/jobs/name=bbs/properties/diego/bbs/sql/require_ssl?
+  value: (( grab meta.db.diego.tls ))
+
+# API - Routing API
+- type: replace
+  path: /instance_groups/name=api/jobs/name=routing-api/properties/routing_api/sqldb/type
+  value: (( grab meta.db.routing_api.scheme ))
+- type: replace
+  path: /instance_groups/name=api/jobs/name=routing-api/properties/routing_api/sqldb/port
+  value: (( grab meta.db.routing_api.port ))
+- type: replace
+  path: /instance_groups/name=api/jobs/name=routing-api/properties/routing_api/sqldb/schema
+  value: (( grab meta.db.routing_api.database ))
+- type: replace
+  path: /instance_groups/name=api/jobs/name=routing-api/properties/routing_api/sqldb/host?
+  value: (( grab meta.db.routing_api.hostname ))
+- type: replace
+  path: /instance_groups/name=api/jobs/name=routing-api/properties/routing_api/sqldb/password
+  value: (( grab meta.db.routing_api.password ))
+- type: replace
+  path: /instance_groups/name=api/jobs/name=routing-api/properties/routing_api/sqldb/username
+  value: (( grab meta.db.routing_api.username ))
+- type: replace
+  path: /instance_groups/name=api/jobs/name=routing-api/properties/routing_api/sqldb/ca_cert?
+  value: (( grab meta.db.routing_api.ca ))
+
+# API - Policy Server
+- type: replace
+  path: /instance_groups/name=api/jobs/name=policy-server/properties/database/type
+  value: (( grab meta.db.network_policy.scheme ))
+- type: replace
+  path: /instance_groups/name=api/jobs/name=policy-server/properties/database/username
+  value: (( grab meta.db.network_policy.username ))
+- type: replace
+  path: /instance_groups/name=api/jobs/name=policy-server/properties/database/password
+  value: (( grab meta.db.network_policy.password ))
+- type: replace
+  path: /instance_groups/name=api/jobs/name=policy-server/properties/database/host
+  value: (( grab meta.db.network_policy.hostname ))
+- type: replace
+  path: /instance_groups/name=api/jobs/name=policy-server/properties/database/port
+  value: (( grab meta.db.network_policy.port ))
+- type: replace
+  path: /instance_groups/name=api/jobs/name=policy-server/properties/database/name
+  value: (( grab meta.db.network_policy.database ))
+- type: replace
+  path: /instance_groups/name=api/jobs/name=policy-server/properties/database/ca_cert?
+  value: (( grab meta.db.network_policy.ca ))
+- type: replace
+  path: /instance_groups/name=api/jobs/name=policy-server/properties/database/require_ssl?
+  value: (( grab meta.db.network_policy.tls ))
+
+# Diego API - Silk Controller
+- type: replace
+  path: /instance_groups/name=diego-api/jobs/name=silk-controller/properties/database/type
+  value: (( grab meta.db.network_connectivity.scheme ))
+- type: replace
+  path: /instance_groups/name=diego-api/jobs/name=silk-controller/properties/database/username
+  value: (( grab meta.db.network_connectivity.username ))
+- type: replace
+  path: /instance_groups/name=diego-api/jobs/name=silk-controller/properties/database/password
+  value: (( grab meta.db.network_connectivity.password ))
+- type: replace
+  path: /instance_groups/name=diego-api/jobs/name=silk-controller/properties/database/host
+  value: (( grab meta.db.network_connectivity.hostname ))
+- type: replace
+  path: /instance_groups/name=diego-api/jobs/name=silk-controller/properties/database/port
+  value: (( grab meta.db.network_connectivity.port ))
+- type: replace
+  path: /instance_groups/name=diego-api/jobs/name=silk-controller/properties/database/name
+  value: (( grab meta.db.network_connectivity.database ))
+- type: replace
+  path: /instance_groups/name=diego-api/jobs/name=silk-controller/properties/database/ca_cert?
+  value: (( grab meta.db.network_connectivity.ca ))
+- type: replace
+  path: /instance_groups/name=diego-api/jobs/name=silk-controller/properties/database/require_ssl?
+  value: (( grab meta.db.network_connectivity.tls ))
+
+# Diego API - Locket
+- type: replace
+  path: /instance_groups/name=diego-api/jobs/name=locket/properties/diego/locket/sql/db_driver
+  value: (( grab meta.db.locket.scheme ))
+- type: replace
+  path: /instance_groups/name=diego-api/jobs/name=locket/properties/diego/locket/sql/db_port
+  value: (( grab meta.db.locket.port ))
+- type: replace
+  path: /instance_groups/name=diego-api/jobs/name=locket/properties/diego/locket/sql/db_schema
+  value: (( grab meta.db.locket.database ))
+- type: replace
+  path: /instance_groups/name=diego-api/jobs/name=locket/properties/diego/locket/sql/db_host?
+  value: (( grab meta.db.locket.hostname ))
+- type: replace
+  path: /instance_groups/name=diego-api/jobs/name=locket/properties/diego/locket/sql/db_password
+  value: (( grab meta.db.locket.password ))
+- type: replace
+  path: /instance_groups/name=diego-api/jobs/name=locket/properties/diego/locket/sql/db_username
+  value: (( grab meta.db.locket.username ))
+- type: replace
+  path: /instance_groups/name=diego-api/jobs/name=locket/properties/diego/locket/sql/ca_cert?
+  value: (( grab meta.db.locket.ca ))
+- type: replace
+  path: /instance_groups/name=diego-api/jobs/name=locket/properties/diego/locket/sql/require_ssl?
+  value: (( grab meta.db.locket.tls ))
+
+# Diego API - Credhub
+- type: replace
+  path: /instance_groups/name=credhub/jobs/name=credhub/properties/credhub/data_storage/type
+  value: (( grab meta.db.credhub.scheme ))
+- type: replace
+  path: /instance_groups/name=credhub/jobs/name=credhub/properties/credhub/data_storage/username
+  value: (( grab meta.db.credhub.username ))
+- type: replace
+  path: /instance_groups/name=credhub/jobs/name=credhub/properties/credhub/data_storage/password
+  value: (( grab meta.db.credhub.password ))
+- type: replace
+  path: /instance_groups/name=credhub/jobs/name=credhub/properties/credhub/data_storage/host
+  value: (( grab meta.db.credhub.hostname ))
+- type: replace
+  path: /instance_groups/name=credhub/jobs/name=credhub/properties/credhub/data_storage/port
+  value: (( grab meta.db.credhub.port ))
+- type: replace
+  path: /instance_groups/name=credhub/jobs/name=credhub/properties/credhub/data_storage/database
+  value: (( grab meta.db.credhub.database ))
+- type: replace
+  path: /instance_groups/name=credhub/jobs/name=credhub/properties/credhub/data_storage/tls_ca?
+  value: (( grab meta.db.credhub.ca ))
+- type: replace
+  path: /instance_groups/name=credhub/jobs/name=credhub/properties/credhub/data_storage/require_tls?
+  value: (( grab meta.db.credhub.tls ))
+

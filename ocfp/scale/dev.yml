@@ -1,0 +1,75 @@
+---
+params:
+  api_instances: 3
+  cc_worker_instances: 3
+  credhub_instances: 3
+  diego_api_instances: 3
+  diego_cell_instances: 1
+  doppler_instances: 3
+  log_api_instances: 3
+  nats_instances: 3
+  router_instances: 3
+  scheduler_instances: 3
+  tcp_router_instances: 3
+  uaa_instances: 3
+
+  api_vm_type: "api-dev"
+  cc_worker_vm_type: "cc-worker-dev"
+  credhub_vm_type: "credhub-dev"
+  diego_api_vm_type: "diego-api-dev"
+  diego_cell_vm_type: "diego-cell-dev"
+  doppler_vm_type: "doppler-dev"
+  errand_vm_type: "errand-dev"
+  log_api_vm_type: "log-api-dev"
+  nats_vm_type: "nats-dev"
+  router_vm_type: "router-dev"
+  scheduler_vm_type: "scheduler-dev"
+  tcp_router_vm_type: "tcp-router-dev"
+  uaa_vm_type: "uaa-dev"
+  windows_diego_cell_vm_type: "windows-cell-dev"
+
+---
+# VM Types
+- type: replace
+  path: /instance_groups/name=diego-cell/vm_type
+  value: diego-cell-dev
+- type: replace
+  path: /instance_groups/name=diego-api/vm_type
+  value: diego-api-dev
+- type: replace
+  path: /instance_groups/name=nats/vm_type
+  value: nats-dev
+- type: replace
+  path: /instance_groups/name=uaa/vm_type
+  value: uaa-dev
+- type: replace
+  path: /instance_groups/name=api/vm_type
+  value: api-dev
+- type: replace
+  path: /instance_groups/name=cc-worker/vm_type
+  value: cc-worker-dev
+- type: replace
+  path: /instance_groups/name=scheduler/vm_type
+  value: scheduler-dev
+- type: replace
+  path: /instance_groups/name=router/vm_type
+  value: router-dev
+- type: replace
+  path: /instance_groups/name=tcp-router/vm_type
+  value: tcp-router-dev
+- type: replace
+  path: /instance_groups/name=doppler/vm_type
+  value: doppler-dev
+- type: replace
+  path: /instance_groups/name=log-api/vm_type
+  value: log-api-dev
+- type: replace
+  path: /instance_groups/name=credhub/vm_type
+  value: credhub-dev
+- type: replace
+  path: /instance_groups/name=rotate-cc-database-key?/vm_type
+  value: default-dev
+- type: replace
+  path: /instance_groups/name=smoke-tests/vm_type
+  value: default-dev
+

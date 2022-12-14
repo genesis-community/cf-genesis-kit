@@ -1,0 +1,23 @@
+---
+meta:
+  ocfp:
+    env:
+      scale: (( grab params.ocfp_env_scale || "dev" ))
+
+    vault:
+      tf: (( concat genesis.secrets_mount "tf/" genesis.vault_env ))
+
+    certs:
+      trusted:
+        - (( append )) # Account for unexpected merge orders.
+        - (( vault genesis.secrets_mount "certs/org:ca" )) # Organization CA, if exists
+        - (( vault genesis.secrets_mount "certs/dbs:ca" )) # External Databases CA
+        # TODO: Add Blacksmith Services CA here, add in blacksmith integration
+
+    cf:
+      fqdns:
+        base:   (( vault meta.ocfp.vault.tf "/ocf/fqdns:base" ))
+        system: (( vault meta.ocfp.vault.tf "/ocf/fqdns:system" ))
+        apps:
+        - (( vault meta.ocfp.vault.tf "/ocf/fqdns:apps" ))
+

@@ -1,0 +1,10 @@
+instance_groups:
+- name: windows2019-cell
+  jobs:
+    - name: rep_windows
+      properties:
+        containers:
+          trusted_ca_certificates:
+            - (( append ))
+            - (( join "" meta.ocfp.certs.trusted ))
+

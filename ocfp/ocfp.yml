@@ -1,0 +1,39 @@
+---
+params:
+  base_domain:   (( grab meta.ocfp.cf.fqdns.base ))
+  system_domain: (( grab meta.ocfp.cf.fqdns.system ))
+  apps_domains:  (( grab meta.ocfp.cf.fqdns.apps ))
+
+  skip_ssl_validation: true # Using self-signed certs
+
+  cf_core_network:    (( concat genesis.env "-ocf" ))
+  cf_edge_network:    (( concat genesis.env "-ocf" ))
+  cf_runtime_network: (( concat genesis.env "-ocf" ))
+  cf_db_network:      (( concat genesis.env "-ocf" ))
+
+instance_groups:
+- name: router
+  vm_extensions:
+  - ((replace))
+  - cf-system-apps-lb
+
+- name: scheduler
+  vm_extensions:
+  - ((replace))
+  - cf-ssh-lb
+
+- name: tcp-router
+  vm_extensions:
+  - ((replace))
+  - (( grab params.tcp_lb_vm_ext || "cf-tcp-lb" ))
+
+- name: diego-cell
+  update:
+    max_in_flight: 3
+
+#stemcells default
+#      NOTE: See codex2 for 
+#NOTE: Okta feature - LATER 
+#
+#NOTE: update `check` to check for feature required vault things
+

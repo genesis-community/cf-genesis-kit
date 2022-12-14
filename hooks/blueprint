@@ -1,39 +1,37 @@
 #!/bin/bash
-set -u
-#Version check
-min_version="2.7.0"
-genesis_version="$(genesis -v 2>&1 | grep '^Genesis v' | sed -e 's/Genesis v\(.*\) (.*$/\1/')"
-if ! [[ "$genesis_version" =~ -dev$ ]] && ! new_enough "$genesis_version" "$min_version" ; then
-  describe >&2 "" "#R{[ERROR]} This kit needs Genesis $min_version.  Please upgrade before continuing" ""
-  exit 1
-fi
-set -e
+
+################################################################################
+# Utility Functions
+################################################################################
+warn()  { warn=1  ; describe >&2 "#Y{[WARNING]} $(echo -e "$*")\n" ; }
+abort() { abort=1 ; describe >&2 "#R{[ERROR]} $(echo -e "$*")\n" ; }
+fail()  { bail "#R{[ERROR]} $(echo -e "$*")\n" ; exit 1 ; }
 
 switch_cf_version() {
   describe >&2 "" \
     "- #y{Experimental Feature Enabled:} Custom cf-deployment version: $version"
   cfd_file="$GENESIS_ROOT/.genesis/kits/addons/cf-deployment-${version}.tar.gz"
-  if ! [[ -f "$cfd_file" ]] ; then
-    # Download
+  cfd_url="https://github.com/cloudfoundry/cf-deployment/archive/v${version}.tar.gz"
+  if ! [[ -s "${cfd_file}" ]]
+  then
     describe >&2 \
       "  #i{Fetching cf-deployment-${version} release from cloudfoundry/cf-deployment}" \
       "  #i{on github.com}"
-    mkdir -p "$GENESIS_ROOT/.genesis/kits/addons/"
-    curl -sSL -o "$cfd_file" "https://github.com/cloudfoundry/cf-deployment/archive/v${version}.tar.gz" > /dev/null
-    if ! [[ -f "$cfd_file" ]] ; then
-      describe >&2 "" \
-        "  #R{[ERROR]} Failed to download cf-deployment v$version -- cannot continue" ""
-      exit 1
-    fi
+
+    mkdir -p "${GENESIS_ROOT}/.genesis/kits/addons/"
+
+    curl -sSL -o "${cfd_file}" "${cfd_url}" > /dev/null
+
+    [[ -s "${cfd_file}" ]]  ||
+      fail "Failed to download cf-deployment v${version} -- cannot continue"
+
     topdir="$(tar -ztf "$cfd_file" | awk '{print $NF}' | cut -d'/' -f1 | uniq)"
-    if [[ $topdir != "cf-deployment-$version" ]] ; then
-      describe >&2 "" \
-        "  #R{[ERROR]} Downloaded cf-deployment v$version doesn't look like a valid release  -- cannot continue" ""
+    if [[ ${topdir} != "cf-deployment-${version}" ]] ; then
+      fail "Downloaded cf-deployment v${version} doesn't look like a valid release -- cannot continue"
       exit 1
     fi
   else
-    describe >&2 \
-      "  #i{Using cached copy of cf-deployment-${version} release}"
+    describe >&2 "  #i{Using cached copy of cf-deployment-${version} release}"
   fi
 
   rm -rf "./cf-deployment"
@@ -42,707 +40,1005 @@ switch_cf_version() {
   echo >&2
 }
 
-generate_dynamic_isolation_segments() {
-  isolation_groups="$(echo "$1" | jq -r '.isolation_segments[] | .name')"
+################################################################################
+# Go-Patch
+################################################################################
+gopatch::replace() {
+  local _path="$1" _value="$2"
+  echo -e "  - type: replace\n    path: ${_path}\n    value: ${_value}\n"
+}
 
-  iso_seg_merges=();
-  if ! want_feature "bare" || want_feature "partitioned-network" ; then
-    iso_seg_merges+=( overlay/dynamic-templates/isolation-segment-network.yml  )
+gopatch::remove() {
+  local _path="$1"
+  echo -e "  - type: remove\n    path: ${_path}\n"
+}
+
+################################################################################
+# Dynamic Isolation Segments
+################################################################################
+dynamic::isolation::segments() {
+  declare -a isolation_groups
+  declare -a iso_seg_merges
+
+  iso_seg_merges=()
+  isolation_groups=($(echo "$1" | jq -r '.isolation_segments[] | .name'))
+
+  if ! want_feature bare || want_feature partitioned-network
+  then iso_seg_merges+=( "overlay/dynamic-templates/isolation-segment-network.yml" )
   fi
-  if want_feature "nfs-volume-services" ; then
-    iso_seg_merges+=( overlay/dynamic-templates/isolation-segment-nfs.yml )
-    if want_feature "nfs-ldap" || want_feature "nfs-ldap-tls" ; then
-      iso_seg_merges+=( overlay/dynamic-templates/isolation-segment-nfs-ldap.yml )
-      if want_feature "nfs-ldap-tls" ; then
-        iso_seg_merges+=( overlay/dynamic-templates/isolation-segment-nfs-ldap-tls.yml )
+
+  if want_feature nfs-volume-services
+  then
+    iso_seg_merges+=( "overlay/dynamic-templates/isolation-segment-nfs.yml" )
+
+    if want_feature nfs-ldap || want_feature nfs-ldap-tls
+    then
+      iso_seg_merges+=( "overlay/dynamic-templates/isolation-segment-nfs-ldap.yml" )
+
+      if want_feature nfs-ldap-tls
+      then iso_seg_merges+=( "overlay/dynamic-templates/isolation-segment-nfs-ldap-tls.yml" )
+      fi
+
+      if want_feature ocfp
+      then
+        iso_seg_merges+=(
+        "overlay/dynamic-templates/isolation-segment-nfs-ldap-ocfp.yml"
+        "ocfp/nfs-ldap-data.yml"
+        )
       fi
     fi
   fi
-  if want_feature "smb-volume-services" ; then
-    iso_seg_merges+=( overlay/dynamic-templates/isolation-segment-smb.yml )
+
+  if want_feature smb-volume-services
+  then iso_seg_merges+=( "overlay/dynamic-templates/isolation-segment-smb.yml" )
   fi
 
-  for group in $isolation_groups; do
-    additional_trusted_certs=''
-    if jq -e --arg v "$group" '.isolation_segments[] | select( .name == $v ) | .additional_trusted_certs//[] | length > 0' <<<"$1" &>/dev/null  ; then
-      additional_trusted_certs='overlay/dynamic-templates/isolation-segment-additional-trusted-certs.yml'
+  if want_feature ocfp
+  then
+    iso_seg_merges+=( "ocfp/meta.yml" )
+    if want_feature trust-blacksmith-ca
+    then iso_seg_merges+=( "ocfp/trust-blacksmith-ca.yml" )
     fi
-    dynamic_segment_fragment_file="overlay/dynamic/isolation_segments_$group.yml"
-    spruce merge --prune "meta" "overlay/dynamic-templates/isolation-segment.yml" \
-      ${iso_seg_merges[@]+"${iso_seg_merges[@]}"} $additional_trusted_certs \
-      <(echo "$1" | jq --arg v "$group" '.isolation_segments[] | select(.name == $v ) | {"meta": .}') \
+  fi
+
+  for group in "${isolation_groups[@]}"
+  do
+    additional_trusted_certs=''
+    if want_feature ocfp || jq -e --arg v "$group" \
+      '.isolation_segments[] | select( .name == $v ) | .additional_trusted_certs//[] | length > 0' <<<"$1" &>/dev/null
+    then
+      additional_trusted_certs="$(dynamic::isolation::template::render "additional-trusted-certs" "$group")"
+      want_feature ocfp &&
+        additional_trusted_certs+=" $(dynamic::isolation::template::render "ocfp-trusted-certs" "$group")"
+    fi
+
+    dynamic_segment_fragment_file="overlay/dynamic/isolation-segments-$group.yml"
+
+    spruce merge -m --prune meta \
+      "overlay/dynamic-templates/isolation-segment.yml" \
+      ${iso_seg_merges[@]+"${iso_seg_merges[@]}"} \
+      ${additional_trusted_certs} \
+      <(echo "$1" | sed -e 's#"(( *#"(( defer #g' | jq --arg v "$group" '.isolation_segments[] | select(.name == $v ) | {"meta": .}') \
       <(echo '{"instance_groups": [ "((prepend))", "((defer append))" ]}') \
-      > "$dynamic_segment_fragment_file"
-    echo "$dynamic_segment_fragment_file"
+      > "${dynamic_segment_fragment_file}"
+
+    echo "${dynamic_segment_fragment_file}"
+
+    dynamic::isolation::template::render "dns-sd" "$group"
+
+    want_feature nfs-volume-services && want_feature ocfp && \
+      dynamic::isolation::template::render "nfs-ldap-config" "$group"
   done
 }
 
+dynamic::isolation::template::render() {
+  local _tmpl=$1 _name="$2"
 
-### ============================================================================
-### Main
-### ============================================================================
+  local _srcdir='overlay/dynamic-templates'
+  local _dstdir='overlay/dynamic'
+  local _src="${_srcdir}/isolation-segment-${_tmpl}.yml"
+  local _dst="${_dstdir}/isolation-segment-${_name}-${_tmpl}.yml"
 
-declare -a manifest
+  sed -e 's/{{segment-name}}/'"${_name}"'/g' < "${_src}" > "${_dst}"
+  echo "${_dst}"
+}
 
-### Base configuration with minimal injections required for Genesis compliance
-manifest=( \
-  "cf-deployment/cf-deployment.yml" \
-  "overlay/base.yml" \
-  "overlay/upstream_version.yml" \
-)
-
-cpi="$(bosh_cpi)" || true
-
-### Minimal injections required for Genesis compliance
-if ! want_feature "bare" || want_feature "partitioned-network" ; then
-  manifest+=( "operations/rename-network-and-deployment.yml" )
-else
-  manifest+=( "cf-deployment/operations/rename-network-and-deployment.yml" )
-fi
-
-### Set up some best practices if not bare
-if ! want_feature "bare" ; then
-  manifest+=( \
-    "overlay/identity.yml" \
-    "overlay/override-app-domains.yml" \
-    "overlay/ten-year-ca-expiry.yml" \
-    "overlay/uaa-branding.yml" \
-  )
-
-  # Change vm types - must be done before operations delete unused instance_types
-  if want_feature v1-vm-types ; then
-    manifest+=( "overlay/addons/v1-vm-types.yml" )
-  fi
-
-  # Deal with availability zones - has to be done to core instance groups
-  # before they potentially get removed by further features
-  if [[ $cpi == 'azure' ]] || want_feature "small-footprint" || \
-     want_feature "cf-deployment/operations/scale-to-one-az"; then
-    manifest+=( \
-      "cf-deployment/operations/scale-to-one-az.yml" \
-      "operations/scale-to-one-az.yml" \
-    )
-  fi
-  manifest+=( "operations/custom-azs.yml" )
-
-  # Temporary override of specific releases - keep but leave empty when upstream catches up
-  manifest+=(  "overlay/override-releases/static.yml" )
-
-fi
-
-version=""
-abort=
-warn=
-db_specified=
-declare -a features; features=()
-
-opsdir="ops"
-[[ -n "${PREVIOUS_ENV:-}" ]] && opsdir=".genesis/cached/${PREVIOUS_ENV}/$opsdir"
-
-for want in $GENESIS_REQUESTED_FEATURES; do
-  if [[ "$want" =~ ^cf-deployment-version- ]] ; then
-    # Check if explicit verison of cf-deployment is requested
-    [[ -z "$version" ]] || bail "#R{[ERROR]} You cannot specify more than one cf-deployment-version-* feature"
-    version="${want#"cf-deployment-version-"}"
-  else
-    # Validate requrested features
-    case "$want" in
-    shield-dbs|shield-blobstores)
-      warn=1
-      describe >&2 \
-        "#Y{[WARNING]} The #c{$want} feature has been deprecated, in favor of BOSH add-ons"
-      ;;
-    omit-haproxy|local-blobstore|blobstore-webdav|container-routing-integrity|routing-api|loggregator-forwarder-agent)
-      warn=1
-      describe >&2 \
-        "#Y{[WARNING]} The #c{$want} feature is now the default behaviour and doesn't need" \
-        "          to be specified in the environment file"
-      ;;
-    blobstore-aws|blobstore-azure|blobstore-gcp)
-      warn=1
-      describe >&2 \
-        "#Y{[WARNING]} The #c{$want} feature has been renamed to #c{${want#blobstore-}-blobstore}"
-      features+=( "${want#blobstore-}-blobstore" )
-      ;;
-    db-external-mysql|db-external-postgres)
-      warn=1
-      describe >&2 \
-        "#Y{[WARNING]} The #c{$want} flag has been renamed to #c{${want#db-external-}-db}"
-      features+=( "${want#db-external-}-db" )
-      ;;
-    db-internal-postgres|local-db)
-      warn=1
-      describe >&2 \
-        "#Y{[WARNING]} The #c{$want} flag has been renamed to #c{local-postgres-db}"
-      db_specified=1
-      features+=( "local-postgres-db" )
-      ;;
-    haproxy-tls)
-      warn=1
-      describe >&2 \
-        "#Y{[WARNING]} The #c{haproxy-tls} feature flag has been deprecated." \
-        "          Please replace it with the #c{haproxy} and #c{tls} flags."
-      features+=( "haproxy" "tls" )
-      ;;
-    haproxy-self-signed)
-      warn=1
-      describe >&2 \
-        "#Y{[WARNING]} The #c{haproxy-self-signed} feature flag has been deprecated." \
-        "          Please replace it with the #c{haproxy} and #c{self-signed} flags."
-      features+=( "haproxy" "self-signed" )
-      ;;
-    haproxy-notls)
-      warn=1
-      describe >&2 \
-        "#Y{[WARNING]} The #c{haproxy-notls} feature flag has been deprecated." \
-        "          Please replace it with the #c{haproxy} feature flag." \
-        "          You are HIGHLY ENCOURAGED to also add the #c{tls} flag."
-      features+=( "haproxy" )
-      ;;
-    minimum-vms)
-      warn=1
-      describe >&2 \
-        "#Y{[WARNING]} The 'minimum-vms' feature flag has been renamed to 'small-footprint'"
-      features+=( "small-footprint" )
-      ;;
-    azure)
-      warn=1
-      describe >&2 \
-        "#Y{[WARNING]} The #c{azure} feature does not have to be specified, as it will" \
-        "          automatically be applied when deploying via an Azure CPI"
-      ;;
-    cflinuxfs2)
-      abort=1
-      describe >&2 \
-        "#Y{[ERROR]} The #c{cflinuxfs2} feature is no longer able to be supported."
-      ;;
-    local-ha-db)
-      abort=1
-      describe >&2 \
-        "#R{[ERROR]} The #c{local-ha-db} feature is no longer able to be supported.  Consider using" \
-        "        external database for high-availability."
-      ;;
-    autoscaler|autoscaler-postgres)
-      abort=1
-      describe >&2 \
-        "#R{[ERROR]} The #c{$want} feature is no longer embedded in the #c{cf} kit.  Please see the" \
-        "        cf-app-autoscaler genesis kit."
-      ;;
-    native-garden-runc)
-      warn=1
-      describe >&2 \
-        "#Y{[WARNING]} The #c{$want} feature is no longer supported; it has been replaced by the" \
-        "          upstream #c{cf-deployment/operations/experimental/use-native-garden-runc-runner}" \
-        "          feature."
-      features+=( "cf-deployment/operations/experimental/use-native-garden-runc-runner" )
-      ;;
-    app-bosh-dns|dns-service-discovery)
-      warn=1
-      describe >&2 \
-        "#Y{[WARNING]} The #c{$want} feature is no longer supported; it has been replaced by the" \
-        "          upstream #c{cf-deployment/operations/enable-service-discovery} feature."
-      #features+=( "cf-deployment/operations/enable-service-discovery" )
-      features+=( "enable-service-discovery" ) #FIXME once spruce can go-patch over (( grabs ))
-      ;;
-    cf-deployment/operations/enable-service-discovery)
-      if ! want_feature "bare" ; then
-        features+=( "enable-service-discovery" ) #FIXME remove once spruce can go-patch over (( grabs ))
-      fi
-      ;;
-    compiled-releases)
-      want_feature "cf-deployment/operations/use-compiled-releases" || features+=( "compiled-releases" )
-      ;;
-    small-footprint|cf-deployment/operations/scale-to-one-az)
-      # dealt with above, but kept for interoperability checks with other features
-      features+=( "small-footprint" );
-      ;;
-    nfs-volume-services|cf-deployments/operations/enable-nfs-volume-services) features+=( "nfs-volume-services" ) ;;
-    smb-volume-services|cf-deployments/operations/enable-smb-volume-services) features+=( "smb-volume-services" ) ;;
-    nfs-ldap|nfs-ldap-tls|cf-deployments/operations/enable-nfs-ldap)
-      if ! want_feature 'nfs-volume-services' && ! want_feature "cf-deployments/operations/enable-nfs-volume-services" ; then
-        abort=1
-        describe >&2 \
-          "#R[ERROR]} Feature #c{$want} cannot be specified without feature #c{nfs-volume-services}"
-      fi
-      if [[ $want == "nfs-ldap-tls" ]] ; then
-        features+=( "nfs-ldap-tls" )
-      else
-        features+=( "nfs-ldap" )
-      fi
-      ;;
-    local-postgres-db|local-mysql-db|mysql-db|postgres-db) db_specified=1; features+=( "$want" ) ;;
-    bare|partitioned-network|haproxy|tls|no-nats-tls|self-signed|isolation-segments) features+=( "$want" ) ;;
-    minio-blobstore|aws-blobstore|aws-blobstore-iam|azure-blobstore|gcp-blobstore|gcp-use-access-key) features+=( "$want" ) ;;
-    enable-service-discovery|ssh-proxy-on-routers|no-tcp-routers) features+=( "$want" ) ;;
-    app-scheduler-integration|app-autoscaler-integration|prometheus-integration|v2-nats-credentials) features+=( "$want" ) ;;
-    windows-diego-cells) features+=( "$want" ) ;;
-    +migrated-v1-env|+override-db-names) features+=( "$want" ) ;;
-    v1-vm-types|no-v1-vm-types)
-      : # no-op, dealt with above
-      ;;
-    cf-deployment/*)
-      if [[ -f "$want.yml" ]] ; then
-        features+=( "$want" )
-      else
-        abort=1
-        describe >&2 \
-          "#R[ERROR]} #c{$want} is not an upstream operation -- see cf-deployment for valid operations."
-      fi
-      ;;
-    *)
-      if [[ -f "$GENESIS_ROOT/${opsdir}/$want.yml" || -f "$GENESIS_ROOT/ops/$want.yml" ]] ; then
-        features+=( "$want" )
-      else
-        abort=1
-        describe >&2 \
-          "#R{[ERROR]} The #c{$want} feature is not supported. See the manual for list" \
-          "        of valid features."
-      fi
-      ;;
-    esac
-  fi
-done
-
-[[ "$abort" == "1" ]] && bail "#R{Cannot continue} - fix your #C{$GENESIS_ENVIRONMENT.yml} file to resolve these issues."
-[[ "$warn"  == "1" ]] && describe >&2 "" "Update your #C{$GENESIS_ENVIRONMENT.yml} file to remove these warnings." ""
-
-[[ -n $version ]] && switch_cf_version "$version"
-[[ -z "$db_specified" ]] && ! want_feature 'bare' && features+=( "local-postgres-db" )
-
-if [[ "${#features[@]}" -gt 0 ]] ; then
-  GENESIS_REQUESTED_FEATURES="${features[*]}"
-else
-  GENESIS_REQUESTED_FEATURES=""
-fi
-declare -a blobstores; blobstores=()
-declare -a databases; databases=()
-
-if want_feature "+migrated-v1-env" || want_feature "azure-blobstore" || want_feature 'minio-blobstore' || want_feature 'aws-blobstore' || want_feature 'gcp-blobstore' ; then
-  want_feature 'bare' && bail "Cannot have #C{bare} feature when migrating from v1"
-  manifest+=( "overlay/blobstore/meta.yml" )
-fi
-
-params="$(lookup "params" "{}")"
-has_availability_zones="$(jq -r '.|has("availability_zones")' <(echo "$params"))"
-randomize_az_placement="$(jq -r '.randomize_az_placement//false' <(echo "$params"))"
-
-for want in $GENESIS_REQUESTED_FEATURES; do
-  if [[ $want =~ cf-deployment/.* ]] ; then
-    if [[ -f "$want.yml" ]] ; then
-      manifest+=( "$want.yml" )
-    else
-      bail "#R[ERROR]} Kit $GENESIS_KIT_NAME/$GENESIS_KIT_VERSION does not support the $want feature" ""
-    fi
-  elif [[ -f "$GENESIS_ROOT/${opsdir}/$want.yml" ]] ; then
-    manifest+=( "$GENESIS_ROOT/${opsdir}/$want.yml" )
-  elif [[ -f "$GENESIS_ROOT/ops/$want.yml" ]] ; then
-    manifest+=( "$GENESIS_ROOT/ops/$want.yml" )
-  else
-    case "$want" in
-
-    ###-----------------------------------------------------------------------------
-    ## Blobstore
-    #
-    azure-blobstore)
-      blobstores+=( "$want" )
-      manifest+=( \
-        "overlay/blobstore/external.yml" \
-        "overlay/blobstore/azure.yml" \
-        "cf-deployment/operations/use-external-blobstore.yml" \
-        "cf-deployment/operations/use-azure-storage-blobstore.yml" \
-      )
-      ;;
-    aws-blobstore|aws-blobstore-iam)
-      blobstores+=( "$want" )
-      manifest+=( \
-        "overlay/blobstore/external.yml" \
-        "overlay/blobstore/aws.yml" \
-        "cf-deployment/operations/use-external-blobstore.yml" \
-      )
-      want_feature "aws-blobstore-iam" && \
-        manifest+=( "overlay/blobstore/aws-iam.yml" )
-      ;;
-    minio-blobstore)
-      blobstores+=( "$want" )
-      manifest+=( \
-        "overlay/blobstore/external.yml" \
-        "overlay/blobstore/minio.yml" \
-        "cf-deployment/operations/use-external-blobstore.yml" \
-      )
-      ;;
-    gcp-blobstore)
-      blobstores+=( "$want" )
-      if want_feature gcp-use-access-key ; then
-        manifest+=( \
-          "overlay/blobstore/external.yml" \
-          "cf-deployment/operations/use-external-blobstore.yml" \
-          "cf-deployment/operations/use-gcs-blobstore-access-key.yml" \
-        )
-      else
-        manifest+=( \
-          "overlay/blobstore/external.yml" \
-          "cf-deployment/operations/use-external-blobstore.yml" \
-          "cf-deployment/operations/use-gcs-blobstore-service-account.yml" \
-        )
-      fi
-      ;;
-
-    ###-----------------------------------------------------------------------------
-    ## Database
-    #
-
-    mysql-db|postgres-db)
-      databases+=( "$want" )
-      manifest+=( \
-        "cf-deployment/operations/use-external-dbs.yml" \
-        "operations/use-external-dbs-ports.yml" \
-        "overlay/db/external.yml" \
-        "overlay/db/external-${want%-db}.yml" \
-      )
-      ;;
-
-    local-postgres-db)
-      databases+=( "$want" )
-      manifest+=( "cf-deployment/operations/use-postgres.yml" )
-      if want_feature '+override-db-names' ; then
-        manifest+=( \
-          "operations/db-override-names.yml" \
-          "operations/db-override-postgres-names.yml" \
-          "overlay/db/internal-overrides.yml" \
-        )
-        if want_feature '+migrated-v1-env' ; then
-          manifest+=( "overlay/addons/migration-db-override-names.yml" )
-        fi
-      fi
-      ;;
-
-    local-mysql-db)
-      databases+=( "$want" )
-      manifest+=( "overlay/db/local-mysql-db.yml" )
-      if want_feature '+override-db-names' ; then
-        manifest+=( \
-          "operations/db-override-names.yml" \
-          "operations/db-override-mysql-names.yml" \
-          "overlay/db/internal-overrides.yml" \
-        )
-        if want_feature '+migrated-v1-env' ; then
-          manifest+=( "overlay/addons/migration-db-override-names.yml" )
-        fi
-      fi
-      ;;
-
-    ###-----------------------------------------------------------------------------
-    ## Addons
-    #
-
-    compiled-releases)
-      manifest+=( \
-        "cf-deployment/operations/use-compiled-releases.yml" \
-        "overlay/override-releases/compiled.yml"
-      ) ;;
-    small-footprint)
-      : ;; # already dealt with
-    nfs-volume-services)
-      manifest+=( \
-        "cf-deployment/operations/enable-nfs-volume-service.yml" \
-      )
-      if ! want_feature "bare" ; then
-        manifest+=( \
-          "overlay/addons/nfs-volume-service.yml" \
-        )
-      fi
-      if want_feature "nfs-ldap" || want_feature "nfs-ldap-tls" ; then
-        manifest+=( \
-          "cf-deployment/operations/enable-nfs-ldap.yml" \
-          "overlay/addons/nfs-ldap.yml" \
-        )
-        if want_feature "nfs-ldap-tls"; then
-          manifest+=( overlay/addons/nfs-ldap-tls.yml )
-          # If user provided their own nfs-ldap-ca path, delete the default
-          if jq <<<"$params" -e '."nfs-ldap-ca-cert-ca"' &> /dev/null ; then
-            remove_unused_secret_ops_file="operations/dynamic/remove-unused-nfs-ldap-ca-cert.yml"
-            cat <<EOF > "$remove_unused_secret_ops_file"
-- type: remove
-  path: /variables/name=nfs-ldap-ca-cert
-EOF
-            manifest+=( "$remove_unused_secret_ops_file" )
-          fi
-        fi
-      fi
-      ;;
-    smb-volume-services)
-      manifest+=( \
-        "cf-deployment/operations/enable-smb-volume-service.yml" \
-      )
-      if ! want_feature "bare" ; then
-        manifest+=( \
-          "overlay/addons/smb-volume-service.yml" \
-        )
-      fi
-    ;;
-    enable-service-discovery)
-      manifest+=( "overlay/enable-service-discovery.yml" ) ;;
-    app-autoscaler-integration)
-      manifest+=( "overlay/addons/autoscaler.yml" ) ;;
-    app-scheduler-integration)
-      manifest+=( "overlay/addons/app-scheduler.yml" ) ;;
-    prometheus-integration)
-      manifest+=( "overlay/addons/prometheus.yml" ) ;;
-    ssh-proxy-on-routers)
-      manifest+=( "overlay/addons/ssh-proxy-on-routers.yml" ) ;;
-    no-tcp-routers)
-      manifest+=( "overlay/addons/no-tcp-routers.yml" ) ;;
-    windows-diego-cells)
-      manifest+=( \
-        "cf-deployment/operations/windows2019-cell.yml" \
-        "cf-deployment/operations/use-online-windows2019fs.yml" \
-        "cf-deployment/operations/use-latest-windows2019-stemcell.yml" \
-        "overlay/override-releases/static-windows.yml" \
-      )
-      if want_feature "compiled-releases"; then
-        manifest+=( \
-          "cf-deployment/operations/experimental/use-compiled-releases-windows.yml" \
-          "overlay/override-releases/compiled-windows.yml" \
-        )
-      fi
-      if ! want_feature "bare" ; then
-        manifest+=( \
-          "overlay/windows.yml" \
-        )
-      fi
-      ;;
-    isolation-segments)
-      while read -r segment; do
-        manifest+=( "${segment}" )
-      done < <(generate_dynamic_isolation_segments "$params")
-      ;;
-    +migrated-v1-env)
-      manifest+=( "overlay/addons/migration.yml" ) ;;
-
-    esac
-
-    ###-----------------------------------------------------------------------------
-    ## HAProxy
-    #
-
-    if [[ "$want" ==  "haproxy" ]]; then
-      manifest+=( "overlay/routing/haproxy.yml" )
-      if jq  -e '(.cf_lb_network // "") != ""'  <(echo "$params") &>/dev/null; then
-        manifest+=( "overlay/routing/haproxy-public-network.yml" )
-      fi
-      if want_feature "tls"; then
-        manifest+=( "overlay/routing/haproxy-tls.yml" )
-        if ! want_feature "self-signed"; then
-          manifest+=( "overlay/routing/haproxy-provided-cert.yml" )
-        fi
-      fi
-      want_feature "small-footprint" && manifest+=( "overlay/routing/haproxy-small-footprint.yml" )
-    fi
-
-  fi
-done
-
-if [[ "${#blobstores[@]}" -gt 1 ]] ; then
-  bail "#R{[ERROR]} Too many blobstores selected; pick only one of: ${blobstores[*]}"
-fi
-if [[ "${#databases[@]}" -gt 1 ]] ; then
-  bail "#R{[ERROR]} Too many databases selected; pick only one of: ${databases[*]}"
-fi
-
-if [[ "$has_availability_zones" == 'true' || "$randomize_az_placement" == 'true' ]] ; then
-  if want_feature "bare"; then
-    bail "#R{[ERROR]} #M{params.availibility_zones} and #M{params.randomize_az_placement} are not compatible" \
-         "        with features #C{bare}."
-  fi
-fi
-if ! want_feature "bare" ; then
-
-  want_feature "no-nats-tls" || manifest+=( "overlay/nats-tls.yml" )
-  if want_feature '+migrated-v1-env' && ! want_feature 'v2-nats-credentials'; then
-    manifest+=( "overlay/addons/migration-v1-nats-credentials.yml" )
-    want_feature "no-nats-tls" ||  manifest+=( "overlay/addons/migration-v1-nats-credentials-tls.yml" )
-  fi
-
-  # Handle ssl validation
-  skip_ssl_validation="$(jq -r '.skip_ssl_validation' <(echo "$params"))"
-  if [[ "$skip_ssl_validation" == 'false' ]] ; then
-    if ! want_feature "cf-deployment/operations/stop-skipping-tls-validation"; then
-      manifest+=(  "cf-deployment/operations/stop-skipping-tls-validation" )
-    fi
-  fi
-
-  if [[ "${#databases}" == 0 ]]; then
-    manifest+=( "cf-deployment/operations/use-postgres.yml" )
-  fi
-
-  ###-----------------------------------------------------------------------------
-  ## IaaS
-  #
-
-  # Deal with IaaS peculiarities
-  case "$cpi" in
-  azure)
-    # TODO: if this turns out needed, we may re-introduce `azure` feature to include it when bare is specified
-    if [[ "$has_availability_zones" == 'true' || "$randomize_az_placement" == 'true' ]] ; then
-      bail "#R{[ERROR]} #M{params.availibility_zones} and #M{params.randomize_az_placement} are not compatible" \
-           "        with deployments to Azure infrastructure."
-    fi
-    manifest+=( \
-      "cf-deployment/operations/azure.yml"
-      "overlay/azure_availability_sets.yml" \
-    )
-    ;;
-  warden)
-    manifest+=( "cf-deployment/operations/bosh-lite.yml" )
-    ;;
-  esac
-
-  ###-----------------------------------------------------------------------------
-  ## Dynamic instance counts
-  #
-  instance_group_counts="$(
-    echo "$params" | \
-    jq -r 'with_entries(if (.key|test("_instances$")) then {key: (.key|capture("(?<k>.*)_instances$")|.k), value: .value} else empty end )|to_entries | .[] | "\(.key) \(.value)"' \
+################################################################################
+# Dynamic Instance VM Types
+################################################################################
+dynamic::instance::vm::types() {
+  instance_types="$( echo "$params" |
+    jq -r 'with_entries(if (.key|test("_vm_type$")) then {key: (.key|capture("(?<k>.*)_vm_type$")|.k), value: .value} else empty end )|to_entries | .[] | "\(.key) \(.value)"'
   )"
-  if [[ -n "$instance_group_counts" ]] ; then
-    used=''
-    counts_op_file="operations/dynamic/instance_counts.yml"
-    echo "--- # Dynamically created instance count overrides" > "$counts_op_file"
-    while read -r inst_grp count; do
-      [[ $inst_grp == "errand" ]]      && continue # dealt with above
-      [[ $inst_grp == "haproxy" ]]     && continue # dealt with elsewhere
-      [[ $inst_grp == "cell" ]]        && inst_grp="diego_cell" && echo >&2 "WARNING: params.cell_instances has been translated as params.diego_cell_instances";
-      [[ $inst_grp == "diego" ]]       && inst_grp="scheduler" && echo >&2 "WARNING: params.diego_instances has been translated as params.scheduler_instances";
-      [[ $inst_grp == "bbs" ]]         && inst_grp="diego_api" && echo >&2 "WARNING: params.bbs_instances has been translated as params.diego_api_instances";
-      [[ $inst_grp == "loggregator" ]] && inst_grp="log_api" && echo >&2 "WARNING: params.loggregator_instances has been translated as params.log_api_instances";
-      [[ $inst_grp == "postgres" ]]    && inst_grp="database" && echo >&2 "WARNING: params.postgres_instances has been translated as params.database_instances";
-      [[ $inst_grp == "blobstore" ]]   && inst_grp="singleton-blobstore" && echo >&2 "WARNING: params.blobstore_instances has been translated as params.singleton_blobstore_instances";
-      [[ $inst_grp == "windows_diego_cell" ]]     && inst_grp="windows2019-cell" && echo >&2 "WARNING: params.windows_diego_cell_instances has been translated as params.windows2019-cell_instances";
 
-      dashed_inst_grp="$(echo "$inst_grp" | tr _ -)" # convert any _ into -
-      found=''
-      if [[ $dashed_inst_grp =~ ^(api|cc-worker|credhub|database|diego-(api|cell)|doppler|errand|haproxy|log-api|nats|windows2019-cell|rotate-cc-database-key|(tcp-)?router|scheduler|singleton-blobstore|smoke-tests|uaa)$ ]] ; then
-        inst_grp="$dashed_inst_grp";
-        found=1
-      fi
-      cat <<EOF >> "$counts_op_file"
-  - type: replace
-    path: /instance_groups/name=${inst_grp}/instances
-    value: ${count}
-EOF
-      used="$(echo "$used"; echo "$inst_grp")"
-      if [[ -z "$found" ]] ; then
-        describe >&2 \
-          "#R{[WARNING]} Unknown instance group $inst_grp - this may be bug in your environment files." \
-          "        Expected instance groups are:" \
-          "          api, cc-worker, credhub, database, diego-api, diego-cell, doppler," \
-          "          errand, haproxy, log-api, nats, rotate-cc-database-key, router, scheduler," \
-          "          singleton-blobstore, smoke-tests, tcp-router, and uaa" ""
-      fi
-    done < <(echo "$instance_group_counts")
-
-    # Deal with errand meta-type
-    errand_instances="$(echo "$params" | jq -r '.errand_instances//""')"
-    if [[ -n "$errand_instances" ]] ;then
-      for errand_name in smoke-tests rotate-cc-database-key ; do
-        if ! echo "$used" | grep "^$errand_name\$" &>/dev/null; then
-          cat <<EOF >> "$counts_op_file"
-  - type: replace
-    path: /instance_groups/name=${errand_name}/instances
-    value: ${errand_instances}
-EOF
-          used="$(echo "$used";echo "$errand_name")"
-        fi
-      done
-    fi
-
-    # Check for dups
-    dups="$(echo "$used"|sort|uniq -d)";
-    if [[ -n "$dups" ]] ; then
-      bail \
-        "#R{[ERROR]} Instance counts specified (or translated as) multiple times:" "$dups"
-    fi
-    manifest+=( "$counts_op_file" )
-  fi
-
-  ###-----------------------------------------------------------------------------
-  ## Dynamic instance vm types
-  #
-  instance_types="$(
-    echo "$params" | \
-    jq -r 'with_entries(if (.key|test("_vm_type$")) then {key: (.key|capture("(?<k>.*)_vm_type$")|.k), value: .value} else empty end )|to_entries | .[] | "\(.key) \(.value)"' \
-  )"
   if [[ -n "$instance_types" ]] ; then
     used=''
     types_op_file="operations/dynamic/instance_types.yml"
     echo "--- # Dynamically created instance type overrides" > "$types_op_file"
     while read -r inst_grp type; do
-      [[ $inst_grp == "errand" ]]      && continue # dealt with below
-      [[ $inst_grp == "haproxy" ]]     && continue # dealt with elsewhere
-      [[ $inst_grp == "cell" ]]        && inst_grp="diego_cell" && echo >&2 "WARNING: params.cell_vm_type has been translated as params.diego_cell_vm_type";
-      [[ $inst_grp == "diego" ]]       && inst_grp="scheduler" && echo >&2 "WARNING: params.diego_vm_type has been translated as params.scheduler_vm_type";
-      [[ $inst_grp == "bbs" ]]         && inst_grp="diego_api" && echo >&2 "WARNING: params.bbs_vm_type has been translated as params.diego_api_vm_type";
-      [[ $inst_grp == "loggregator" ]] && inst_grp="log_api" && echo >&2 "WARNING: params.loggregator_vm_type has been translated as params.log_api_vm_type";
-      [[ $inst_grp == "postgres" ]]    && inst_grp="database" && echo >&2 "WARNING: params.postgres_vm_type has been translated as params.database_vm_type";
-      [[ $inst_grp == "blobstore" ]]   && inst_grp="singleton-blobstore" && echo >&2 "WARNING: params.blobstore_vm_type has been translated as params.singleton_blobstore_vm_type";
-      [[ $inst_grp == "windows_diego_cell" ]]     && inst_grp="windows2019-cell" && echo >&2 "WARNING: params.windows_diego_cell_vm_type has been translated as params.windows2019-cell_vm_type";
+      case ${inst_grp} in
+        (errand|haproxy)
+          continue # dealt with elsewhere
+          ;;
+        (cell)
+          inst_grp="diego_cell"
+          warn "Translated: params.cell_vm_type => params.diego_cell_vm_type"
+          ;;
+        (diego)
+          inst_grp="scheduler"
+          warn "Translated: params.diego_vm_type => params.scheduler_vm_type"
+          ;;
+        (bbs)
+          inst_grp="diego_api"
+          warn "Translated: params.bbs_vm_type => params.diego_api_vm_type"
+          ;;
+        (loggregator)
+          inst_grp="log_api"
+          warn "Translated: params.loggregator_vm_type => params.log_api_vm_type"
+          ;;
+        (postgres)
+          inst_grp="database"
+          warn "Translated: params.postgres_vm_type => params.database_vm_type"
+          ;;
+        (blobstore)
+          inst_grp="singleton-blobstore"
+          warn "Translated: params.blobstore_vm_type => params.singleton_blobstore_vm_type"
+          ;;
+        (windows_diego_cell)
+          inst_grp="windows2019-cell"
+          warn "Translated: params.windows_diego_cell_vm_type => params.windows2019-cell_vm_type"
+          ;;
+      esac
 
       dashed_inst_grp="$(echo "$inst_grp" | tr _ -)" # convert any _ into -
-      found=''
-      if [[ $dashed_inst_grp =~ ^(api|cc-worker|credhub|database|diego-(api|cell)|doppler|errand|haproxy|windows2019-cell|log-api|nats|rotate-cc-database-key|(tcp-)?router|scheduler|singleton-blobstore|smoke-tests|uaa)$ ]] ; then
-        inst_grp="$dashed_inst_grp";
-        found=1
-      fi
-      cat <<EOF >> "$types_op_file"
-  - type: replace
-    path: /instance_groups/name=${inst_grp}/vm_type
-    value: ${type}
-EOF
-      used="$(echo "$used";echo "$inst_grp")"
-      if [[ -z "$found" ]] ; then
-        describe >&2 \
-          "#R{[WARNING]} Unknown instance group $inst_grp - this may be bug in your environment files." \
-          "        Expected instance groups are:" \
-          "          api, cc-worker, credhub, database, diego-api, diego-cell, doppler," \
-          "          errand, haproxy, log-api, nats, rotate-cc-database-key, router, scheduler," \
-          "          singleton-blobstore, smoke-tests, tcp-router, uaa, and windows2019-cell" ""
-      fi
-    done < <(echo "$instance_types")
 
-    # Deal with errand meta-type
+      if [[ ! $dashed_inst_grp =~ ^(api|cc-worker|credhub|database|diego-(api|cell)|doppler|errand|haproxy|windows2019-cell|log-api|nats|rotate-cc-database-key|(tcp-)?router|scheduler|singleton-blobstore|smoke-tests|uaa)$ ]]
+      then
+        inst_grp="$dashed_inst_grp";
+
+        warn "Unknown instance group $inst_grp - this may be bug in your environment files." \
+          "\n\tExpected instance groups are:" \
+          "\n\tapi, cc-worker, credhub, database, diego-api, diego-cell, doppler," \
+          "\n\terrand, haproxy, log-api, nats, rotate-cc-database-key, router, scheduler," \
+          "\n\tsingleton-blobstore, smoke-tests, tcp-router, uaa, and windows2019-cell\n"
+      fi
+
+      gopatch::replace "/instance_groups/name=${dashed_inst_grp}/vm_type" "${type}" \
+        >> "$types_op_file"
+
+      used="$(echo "$used"; echo "$dashed_inst_grp")"
+
+    done < <(echo "$instance_types")
     errand_vm_type="$(echo "$params" | jq -r '.errand_vm_type//""')"
-    if [[ -n "$errand_vm_type" ]] ;then
-      for errand_name in smoke-tests rotate-cc-database-key ; do
-        if ! echo "$used" | grep "^$errand_name\$" &>/dev/null ; then
-          cat <<EOF >> "$types_op_file"
-  - type: replace
-    path: /instance_groups/name=${errand_name}/vm_type
-    value: ${errand_vm_type}
-EOF
+    if [[ -n "$errand_vm_type" ]]
+    then # Deal with errand meta-type
+      for errand_name in smoke-tests rotate-cc-database-key
+      do
+        if ! echo "$used" | grep "^$errand_name\$" &>/dev/null
+        then
+          gopatch::replace "/instance_groups/name=${errand_name}/vm_type" \
+            "${errand_vm_type}" >> "$types_op_file"
+
           used="$(echo "$used";echo "$errand_name")"
         fi
       done
     fi
 
-    # Check for dups
     dups="$(echo "$used"|sort|uniq -d)";
-    if [[ -n "$dups" ]] ; then
-      bail \
-        "#R{[ERROR]} Instance vm types specified (or translated as) multiple times:" "$dups"
+
+    [[ -z "$dups" ]] ||
+      fail "Instance vm types specified (or translated as) multiple times:" "$dups"
+
+    manifests+=( "$types_op_file" )
+  fi
+}
+
+################################################################################
+# Dynamic Instance Counts
+################################################################################
+dynamic::instance::counts() {
+  instance_group_counts="$( echo "$params" |
+    jq -r 'with_entries(if (.key | test("_instances$")) then { key: (.key | capture("(?<k>.*)_instances$") | .k), value: .value } else empty end) | to_entries | .[] | "\(.key) \(.value)"'
+  )"
+
+  if [[ -n "$instance_group_counts" ]] ; then
+    used=''
+    counts_opsfile="operations/dynamic/instance_counts.yml"
+
+    echo "--- # Dynamically created instance counts" > "$counts_opsfile"
+
+    while read -r inst_grp count; do
+      case ${inst_grp} in
+        (errand|haproxy)
+          continue # dealt with elsewhere
+          ;;
+        (cell)
+          inst_grp="diego_cell"
+          warn "Translated: params.cell_instances => params.diego_cell_instances"
+          ;;
+        (diego)
+          inst_grp="scheduler"
+          warn "Translated: params.diego_instances => params.scheduler_instances"
+          ;;
+        (bbs)
+          inst_grp="diego_api"
+          warn "Translated: params.bbs_instances => params.diego_api_instances"
+          ;;
+        (loggregator)
+          inst_grp="log_api"
+          warn "Translated: params.loggregator_instances => params.log_api_instances"
+          ;;
+        (postgres)
+          inst_grp="database"
+          warn "Translated: params.postgres_instances => params.database_instances"
+          ;;
+        (blobstore)
+          inst_grp="singleton-blobstore"
+          warn "Translated: params.blobstore_instances => params.singleton_blobstore_instances"
+          ;;
+        (windows_diego_cell)
+          inst_grp="windows2019-cell"
+          warn "Translated: params.windows_diego_cell_instances => params.windows2019-cell_instances"
+          ;;
+      esac
+
+      dashed_inst_grp="$(echo "$inst_grp" | tr _ -)" # convert any _ into -
+
+      if [[ ! $dashed_inst_grp =~ ^(api|cc-worker|credhub|database|diego-(api|cell)|doppler|errand|haproxy|log-api|nats|windows2019-cell|rotate-cc-database-key|(tcp-)?router|scheduler|singleton-blobstore|smoke-tests|uaa)$ ]]
+      then
+        inst_grp="$dashed_inst_grp";
+
+        warn \
+          "Unknown instance group $inst_grp - this may be bug in your environment files." \
+          "\n\tExpected instance groups are:" \
+          "\n\t\tapi, cc-worker, credhub, database, diego-api, diego-cell, doppler," \
+          "\n\t\terrand, haproxy, log-api, nats, rotate-cc-database-key, router, scheduler," \
+          "\n\t\tsingleton-blobstore, smoke-tests, tcp-router, and uaa" ""
+      fi
+
+      gopatch::replace "/instance_groups/name=${dashed_inst_grp}?/instances" \
+        "${count}" >> "$counts_opsfile"
+
+      used="$(echo "$used"; echo "$dashed_inst_grp")"
+    done < <(echo "$instance_group_counts")
+
+    errand_instances="$(echo "$params" | jq -r '.errand_instances//""')"
+
+    if [[ -n "$errand_instances" ]]
+    then # Deal with errand meta-type
+      for errand_name in smoke-tests rotate-cc-database-key
+      do
+        if ! echo "$used" | grep "^$errand_name\$" &>/dev/null
+        then
+          gopatch::replace "/instance_groups/name=${errand_name}?/instances" \
+            "${errand_instances}" >> "$counts_opsfile"
+
+          used="$(echo "$used"; echo "$errand_name")"
+        fi
+      done
     fi
-    manifest+=( "$types_op_file" )
+
+    dups="$(echo "$used" | sort | uniq -d)";
+    if [[ -n "$dups" ]] ; then
+      fail "Instance counts specified (or translated as) multiple times:" "$dups"
+    fi
+
+    manifests+=( "$counts_opsfile" )
   fi
+}
+
+################################################################################
+# Features Validation
+################################################################################
+features::validate() {
+  for want in $GENESIS_REQUESTED_FEATURES; do
+    # Validate requrested features
+    case "$want" in
+      (cf-deployment-version-*) # Check if explicit verison of cf-deployment is requested
+        [[ -z "$version" ]] ||
+          fail "You cannot specify more than one cf-deployment-version-* feature"
+        version="${want#"cf-deployment-version-"}"
+        break
+        ;;
+      (shield-dbs|shield-blobstores)
+        warn "The #c{$want} feature has been deprecated, in favor of BOSH add-ons"
+        ;;
+      (omit-haproxy|local-blobstore|blobstore-webdav|container-routing-integrity|routing-api|loggregator-forwarder-agent)
+        warn "The #c{$want} feature is now the default behaviour and doesn't need" \
+          "\n\tto be specified in the environment file"
+        ;;
+      (blobstore-aws|blobstore-azure|blobstore-gcp)
+        warn "The #c{$want} feature has been renamed to #c{${want#blobstore-}-blobstore}"
+        features+=( "${want#blobstore-}-blobstore" )
+        ;;
+      (db-external-mysql|db-external-postgres)
+        warn "The #c{$want} flag has been renamed to #c{${want#db-external-}-db}"
+        features+=( "${want#db-external-}-db" )
+        ;;
+      (db-internal-postgres|local-db)
+        warn "The #c{$want} flag has been renamed to #c{local-postgres-db}"
+        features+=( "local-postgres-db" )
+        db_specified=1
+        ;;
+      (haproxy-tls)
+        warn "The #c{haproxy-tls} feature flag has been deprecated." \
+          "\n\tPlease replace it with the #c{haproxy} and #c{tls} flags."
+        features+=( "haproxy" "tls" )
+        ;;
+      (haproxy-self-signed)
+        warn "The #c{haproxy-self-signed} feature flag has been deprecated." \
+          "\n\tPlease replace it with the #c{haproxy} and #c{self-signed} flags."
+        features+=( "haproxy" "self-signed" )
+        ;;
+      (haproxy-notls)
+        warn "The #c{haproxy-notls} feature flag has been deprecated." \
+          "\n\tPlease replace it with the #c{haproxy} feature flag." \
+          "\n\tYou are HIGHLY ENCOURAGED to also add the #c{tls} flag."
+        features+=( "haproxy" )
+        ;;
+      (minimum-vms)
+        warn "The 'minimum-vms' feature flag has been renamed to 'small-footprint'"
+        features+=( "small-footprint" )
+        ;;
+      (azure)
+        warn "The #c{azure} feature does not have to be specified, as it will" \
+          "          automatically be applied when deploying via an Azure CPI"
+        ;;
+      (cflinuxfs2)
+        abort "The #c{cflinuxfs2} feature is no longer able to be supported."
+        ;;
+      (local-ha-db)
+        abort "The #c{local-ha-db} feature is no longer able to be supported." \
+          "\n\tConsider using external database for high-availability."
+        ;;
+      (autoscaler|autoscaler-postgres)
+        abort "The #c{$want} feature is no longer embedded in the #c{cf} kit." \
+          "\n\tPlease see the cf-app-autoscaler genesis kit."
+        ;;
+      (native-garden-runc)
+        warn "The #c{$want} feature is no longer supported; it is replaced by the upstream" \
+          "\n\t#c{cf-deployment/operations/experimental/use-native-garden-runc-runner} feature."
+        features+=( "cf-deployment/operations/experimental/use-native-garden-runc-runner" )
+        ;;
+      (app-bosh-dns|dns-service-discovery)
+        warn "The #c{$want} feature is no longer supported; it has been replaced by the" \
+          "\n\tupstream #c{cf-deployment/operations/enable-service-discovery} feature."
+        #features+=( "cf-deployment/operations/enable-service-discovery" )
+        features+=( "enable-service-discovery" ) #FIXME once spruce can go-patch over (( grabs ))
+        ;;
+      (cf-deployment/operations/enable-service-discovery)
+        if ! want_feature "bare" ; then
+          features+=( "enable-service-discovery" ) #FIXME remove once spruce can go-patch over (( grabs ))
+        fi
+        ;;
+      (compiled-releases)
+        want_feature "cf-deployment/operations/use-compiled-releases" || features+=( "compiled-releases" )
+        ;;
+      (small-footprint|cf-deployment/operations/scale-to-one-az)
+        # dealt with above, but kept for interoperability checks with other features
+        features+=( "small-footprint" );
+        ;;
+      (nfs-volume-services|cf-deployments/operations/enable-nfs-volume-services)
+        features+=( "nfs-volume-services" )
+        ;;
+      (smb-volume-services|cf-deployments/operations/enable-smb-volume-services)
+        features+=( "smb-volume-services" )
+        ;;
+      (nfs-ldap|nfs-ldap-tls|cf-deployments/operations/enable-nfs-ldap)
+        if ! want_feature 'nfs-volume-services' &&
+           ! want_feature "cf-deployments/operations/enable-nfs-volume-services"
+        then abort "Feature #c{$want} cannot be specified without feature #c{nfs-volume-services}"
+        fi
+        features+=( "$want" )
+        ;;
+      (local-postgres-db|local-mysql-db|mysql-db|postgres-db)
+        features+=( "$want" )
+        db_specified=1;
+        ;;
+      (bare|partitioned-network|haproxy|tls|no-nats-tls|self-signed|isolation-segments)
+        features+=( "$want" )
+        ;;
+      (minio-blobstore|aws-blobstore|aws-blobstore-iam|azure-blobstore|gcp-blobstore)
+        if want_feature ocfp
+        then abort "Cannot specify blobstore with ocfp feature. \n\tWith ocfp feature blobstore specifies you."
+        fi
+        features+=( "$want" )
+        ;;
+      (gcp-use-access-key)
+        features+=( "$want" )
+        ;;
+      (enable-service-discovery|ssh-proxy-on-routers|no-tcp-routers)
+        features+=( "$want" )
+        ;;
+      (blacksmith-integration|trust-blacksmith-ca|app-scheduler-integration|app-autoscaler-integration|prometheus-integration|stratos-integration|v2-nats-credentials)
+        features+=( "$want" )
+        ;;
+      (windows-diego-cells)
+        features+=( "$want" )
+        ;;
+      (+migrated-v1-env|+override-db-names)
+        features+=( "$want" )
+        ;;
+      (v1-vm-types|no-v1-vm-types)
+        true # no-op, dealt with above
+        ;;
+      (uaa-admin-client)
+        features+=( "$want" )
+        ;;
+      (cf-deployment/*)
+        if [[ -f "$want.yml" ]]
+        then features+=( "$want" )
+        else
+          abort "#c{$want} was not found in upstream files." \
+            "\n\tSee cf-deployment for valid ops files."
+        fi
+        ;;
+      (ocfp)
+        features+=(
+          "enable-service-discovery"
+          "$want"
+        )
+
+        want_feature uaa-admin-client ||
+          features+=( "uaa-admin-client" )
+        ;;
+      (*)
+        if [[ -f "$GENESIS_ROOT/${opsdir}/$want.yml" ||
+              -f "$GENESIS_ROOT/ops/$want.yml" ]]
+        then features+=( "$want" )
+        else
+          abort "The #c{$want} feature is not supported, see MANUAL.md for valid features."
+        fi
+        ;;
+    esac
+  done
+
+  if want_feature ocfp ; then
+    case $cpi in
+      (aws|azure|gcp) features+=( "${iaas}-blobstore" ) ;;
+      (vsphere) features+=( "minio-blobstore" ) ;;
+      (*) abort "Blobstores are not supported on #c{${iaas}} yet." ;;
+    esac
+  fi
+
+  [[ -z "$db_specified" ]] && ! want_feature 'bare' &&
+    features+=( "local-postgres-db" )
+
+  [[ "$abort" == "1" ]] &&
+    fail "#R{Cannot continue} - fix the #C{$GENESIS_ENVIRONMENT.yml} file."
+
+  [[ "$warn"  == "1" ]] &&
+    warn "Adjust your #C{$GENESIS_ENVIRONMENT.yml} file to remove warnings."
+}
+
+################################################################################
+# Features Processing Setup
+################################################################################
+features::setup() {
+  # Minimal injections required for Genesis compliance
+  if ! want_feature "bare" || want_feature "partitioned-network" ; then
+    manifests+=( "operations/rename-network-and-deployment.yml" )
+  else
+    manifests+=( "cf-deployment/operations/rename-network-and-deployment.yml" )
+  fi
+
+  # Set up some best practices if not bare
+  if ! want_feature "bare" ; then
+    manifests+=(
+      "overlay/identity.yml"
+      "overlay/override-app-domains.yml"
+      "overlay/ten-year-ca-expiry.yml"
+      "overlay/uaa-branding.yml"
+    )
+
+    # Change vm types - must be done before operations delete unused instance_types
+    if want_feature v1-vm-types ; then
+      manifests+=( "overlay/addons/v1-vm-types.yml" )
+    fi
+
+    # Deal with availability zones - has to be done to core instance groups
+    # before they potentially get removed by further features
+    if [[ $cpi == 'azure' ]] || want_feature "small-footprint" ||
+      want_feature "cf-deployment/operations/scale-to-one-az"
+    then
+      manifests+=(
+        "cf-deployment/operations/scale-to-one-az.yml"
+        "operations/scale-to-one-az.yml"
+      )
+    fi
+    manifests+=( "operations/custom-azs.yml" )
+
+    # Temporary override of specific releases - keep but leave empty when upstream catches up
+    manifests+=( "overlay/override-releases/static.yml" )
+  fi
+}
+
+################################################################################
+# Version 1 features check
+################################################################################
+features::v1::check() {
+  if want_feature "+migrated-v1-env" || want_feature "azure-blobstore" ||
+     want_feature 'minio-blobstore' || want_feature 'aws-blobstore' ||
+     want_feature 'gcp-blobstore'
+  then
+    want_feature 'bare' &&
+      fail "Cannot have #C{bare} feature when migrating from v1"
+
+    manifests+=( "overlay/blobstore/meta.yml" )
+  fi
+}
+
+################################################################################
+# Process Requested Features
+################################################################################
+features::process() {
+  for want in $GENESIS_REQUESTED_FEATURES; do
+    case "$want" in
+      ############################################################################
+      # Blobstore
+      ############################################################################
+      (azure-blobstore)
+        blobstores+=( "$want" )
+        manifests+=( \
+          "overlay/blobstore/external.yml" \
+          "overlay/blobstore/azure.yml" \
+          "cf-deployment/operations/use-external-blobstore.yml" \
+          "cf-deployment/operations/use-azure-storage-blobstore.yml" \
+        )
+        ;;
+      (aws-blobstore|aws-blobstore-iam)
+        blobstores+=( "$want" )
+        manifests+=( \
+          "overlay/blobstore/external.yml" \
+          "overlay/blobstore/aws.yml" \
+          "cf-deployment/operations/use-external-blobstore.yml" \
+        )
+        want_feature "aws-blobstore-iam" && \
+          manifests+=( "overlay/blobstore/aws-iam.yml" )
+        ;;
+      (minio-blobstore)
+        blobstores+=( "$want" )
+        manifests+=( \
+          "overlay/blobstore/external.yml" \
+          "overlay/blobstore/minio.yml" \
+          "cf-deployment/operations/use-external-blobstore.yml" \
+        )
+        ;;
+      (gcp-blobstore)
+        blobstores+=( "$want" )
+        if want_feature gcp-use-access-key ; then
+          manifests+=( \
+            "overlay/blobstore/external.yml" \
+            "cf-deployment/operations/use-external-blobstore.yml" \
+            "cf-deployment/operations/use-gcs-blobstore-access-key.yml" \
+          )
+        else
+          manifests+=( \
+            "overlay/blobstore/external.yml" \
+            "cf-deployment/operations/use-external-blobstore.yml" \
+            "cf-deployment/operations/use-gcs-blobstore-service-account.yml" \
+          )
+        fi
+        ;;
+
+      ############################################################################
+      # Database
+      ############################################################################
+      (mysql-db|postgres-db)
+        databases+=( "$want" )
+        manifests+=(
+          "cf-deployment/operations/use-external-dbs.yml"
+          "operations/use-external-dbs-ports.yml"
+          "overlay/db/external.yml"
+          "overlay/db/external-${want%-db}.yml"
+        )
+        ;;
+
+      (local-postgres-db)
+        databases+=( "$want" )
+        manifests+=( "cf-deployment/operations/use-postgres.yml" )
+        if want_feature '+override-db-names'; then
+          manifests+=(
+            "operations/db-override-names.yml"
+            "operations/db-override-postgres-names.yml"
+            "overlay/db/internal-overrides.yml"
+          )
+          if want_feature '+migrated-v1-env' ; then
+            manifests+=( "overlay/addons/migration-db-override-names.yml" )
+          fi
+        fi
+        ;;
+
+      (local-mysql-db)
+        databases+=( "$want" )
+        manifests+=( "overlay/db/local-mysql-db.yml" )
+        if want_feature '+override-db-names' ; then
+          manifests+=(
+            "operations/db-override-names.yml"
+            "operations/db-override-mysql-names.yml"
+            "overlay/db/internal-overrides.yml"
+          )
+          if want_feature '+migrated-v1-env' ; then
+            manifests+=( "overlay/addons/migration-db-override-names.yml" )
+          fi
+        fi
+        ;;
+
+      ############################################################################
+      # Addons
+      ############################################################################
+      (compiled-releases)
+        manifests+=(
+          "cf-deployment/operations/use-compiled-releases.yml"
+          "overlay/override-releases/compiled.yml"
+        )
+        ;;
+      (small-footprint)
+        true
+        ;; # already dealt with
+      (nfs-volume-services)
+        manifests+=( "cf-deployment/operations/enable-nfs-volume-service.yml" )
+
+        if ! want_feature "bare" ; then
+          manifests+=( "overlay/addons/nfs-volume-service.yml" )
+        fi
+
+        if want_feature "nfs-ldap" || want_feature "nfs-ldap-tls" ; then
+          manifests+=(
+            "cf-deployment/operations/enable-nfs-ldap.yml"
+            "overlay/addons/nfs-ldap.yml"
+          )
+          if want_feature ocfp
+          then manifests+=( "overlay/addons/nfs-ldap-config.yml" )
+          fi
+
+          if want_feature "nfs-ldap-tls"; then
+            manifests+=( "overlay/addons/nfs-ldap-tls.yml" )
+            # If user provided their own nfs-ldap-ca path, delete the default
+            if jq <<<"$params" -e '."nfs-ldap-ca-cert-ca"' &> /dev/null
+            then
+              remove_unused_variables_opsfile="operations/dynamic/remove-unused-nfs-ldap-ca-cert.yml"
+              {
+                echo -e "--- # Remove unused variabels\n"
+                gopatch::remove "/variables/name=nfs-ldap-ca-cert"
+              } > "$remove_unused_variables_opsfile"
+
+              manifests+=( "$remove_unused_variables_opsfile" )
+            fi
+          fi
+        fi
+        ;;
+      (smb-volume-services)
+        manifests+=( "cf-deployment/operations/enable-smb-volume-service.yml" )
+        if ! want_feature "bare" ; then
+          manifests+=( "overlay/addons/smb-volume-service.yml" )
+        fi
+        ;;
+      (enable-service-discovery)
+        manifests+=( "overlay/enable-service-discovery.yml" )
+        ;;
+      (trust-blacksmith-ca)
+        manifests+=( "overlay/addons/trust-blacksmith-ca.yml" )
+        if want_feature ocfp
+        then manifests+=( "ocfp/trust-blacksmith-ca.yml" )
+        fi
+        ;;
+      (app-autoscaler-integration)
+        manifests+=( "overlay/addons/autoscaler.yml" )
+        ;;
+      (app-scheduler-integration)
+        manifests+=( "overlay/addons/app-scheduler.yml" )
+        ;;
+      (scs-integration)
+        manifests+=( "overlay/addons/scs.yml" )
+        ;;
+      (prometheus-integration)
+        manifests+=( "overlay/addons/prometheus.yml" )
+        ;;
+      (stratos-integration)
+        manifests+=( "overlay/addons/stratos.yml" )
+        ;;
+      (ssh-proxy-on-routers)
+        manifests+=( "overlay/addons/ssh-proxy-on-routers.yml" )
+        ;;
+      (no-tcp-routers)
+        manifests+=( "overlay/addons/no-tcp-routers.yml" )
+        ;;
+      (windows-diego-cells)
+        manifests+=(
+          "cf-deployment/operations/windows2019-cell.yml"
+          "cf-deployment/operations/use-online-windows2019fs.yml"
+          "cf-deployment/operations/use-latest-windows2019-stemcell.yml"
+          "overlay/override-releases/static-windows.yml"
+        )
+
+        if want_feature "compiled-releases"; then
+          manifests+=(
+            "cf-deployment/operations/experimental/use-compiled-releases-windows.yml"
+            "overlay/override-releases/compiled-windows.yml"
+          )
+        fi
+
+        if ! want_feature "bare" ; then
+          manifests+=( "overlay/windows.yml")
+        fi
+        ;;
+      (isolation-segments)
+        # process outside of base features so that base features can be called within iso segs
+        true
+        ;;
+
+      (uaa-admin-client)
+        manifests+=( "overlay/addons/uaa-admin-client.yml" )
+        ;;
+
+      (+migrated-v1-env)
+        manifests+=( "overlay/addons/migration.yml" )
+        ;;
+      (*)
+        if [[ $want =~ cf-deployment/.* ]] ; then
+          if [[ -s "$want.yml" ]] ; then
+            manifests+=( "$want.yml" )
+          else
+            fail "Kit $GENESIS_KIT_NAME/$GENESIS_KIT_VERSION does not support the '$want' feature."
+          fi
+        elif [[ -s "$GENESIS_ROOT/${opsdir}/$want.yml" ]] ; then
+          if want_feature ocfp
+          then
+            opsfiles+=( "$GENESIS_ROOT/${opsdir}/$want.yml" )
+          else
+            manifests+=( "$GENESIS_ROOT/${opsdir}/$want.yml" )
+          fi
+        elif [[ -s "$GENESIS_ROOT/ops/$want.yml" ]] ; then
+          if want_feature ocfp
+          then
+            opsfiles+=( "$GENESIS_ROOT/ops/$want.yml" )
+          else
+            manifests+=( "$GENESIS_ROOT/ops/$want.yml" )
+          fi
+        fi
+        ;;
+    esac
+
+    ############################################################################
+    # HAProxy
+    ############################################################################
+    if [[ "$want" ==  "haproxy" ]]; then
+      manifests+=( "overlay/routing/haproxy.yml" )
+
+      if jq  -e '(.cf_lb_network // "") != ""' <(echo "$params") &>/dev/null
+      then manifests+=( "overlay/routing/haproxy-public-network.yml" )
+      fi
+
+      if want_feature "tls"; then
+        manifests+=( "overlay/routing/haproxy-tls.yml" )
+        if ! want_feature "self-signed"; then
+          manifests+=( "overlay/routing/haproxy-provided-cert.yml" )
+        fi
+      fi
+
+      want_feature "small-footprint" &&
+        manifests+=( "overlay/routing/haproxy-small-footprint.yml" )
+    fi
+  done
+
+  if (( "${#blobstores[@]}" > 1 ))
+  then fail "Too many blobstores selected; pick only one of: ${blobstores[*]}"
+  fi
+
+  if (( "${#databases[@]}" > 1 ))
+  then fail "Too many databases selected; pick only one of: ${databases[*]}"
+  fi
+
+  if [[ "$has_availability_zones" == 'true' || "$randomize_az_placement" == 'true' ]]
+  then
+    if want_feature "bare"; then
+      fail "#M{params.availibility_zones} and #M{params.randomize_az_placement}" \
+        "\n\tare not compatible with feature '#C{bare}'."
+    fi
+  fi
+
+  if ! want_feature "bare"
+  then
+    want_feature "no-nats-tls" ||
+      manifests+=( "overlay/nats-tls.yml" )
+
+    if want_feature '+migrated-v1-env' && ! want_feature 'v2-nats-credentials'
+    then
+      manifests+=( "overlay/addons/migration-v1-nats-credentials.yml" )
+
+      want_feature "no-nats-tls" ||
+        manifests+=( "overlay/addons/migration-v1-nats-credentials-tls.yml" )
+    fi
+
+    skip_ssl_validation="$(jq -r '.skip_ssl_validation' <(echo "$params"))"
+    if [[ "$skip_ssl_validation" == 'false' ]] ; then
+      if ! want_feature "cf-deployment/operations/stop-skipping-tls-validation"
+      then manifests+=( "cf-deployment/operations/stop-skipping-tls-validation" )
+      fi
+    fi
+
+    if [[ "${#databases[@]}" == 0 ]]
+    then manifests+=( "cf-deployment/operations/use-postgres.yml" )
+    fi
+
+    ##############################################################################
+    # IaaS - Deal with IaaS peculiarities
+    ##############################################################################
+    case "$cpi" in
+      (azure)
+        # TODO: if this turns out needed, we may re-introduce `azure` feature to include it when bare is specified
+        if [[ "$has_availability_zones" == 'true' || "$randomize_az_placement" == 'true' ]]
+        then
+          fail "#M{params.availibility_zones} and #M{params.randomize_az_placement} are" \
+            "\n\tnot compatible with deployments to Azure infrastructure."
+        fi
+        manifests+=(
+          "cf-deployment/operations/azure.yml"
+          "overlay/azure_availability_sets.yml"
+        )
+        ;;
+      (warden)
+        manifests+=( "cf-deployment/operations/bosh-lite.yml" )
+        ;;
+    esac
+
+    dynamic::instance::counts
+
+    dynamic::instance::vm::types
+  fi
+
+  # Include the migration manifest fragments
+  version="$(exodus kit_version)"
+  if [[ -n "${version}" ]] &&
+    ! new_enough "${version}" "2.0.0-rc0"
+  then
+    manifests+=( "operations/migrate/cells.yml")
+    if want_feature "local-postgres-db"; then # TODO: or postgres-db external??
+      manifests+=( "operations/migrate/postgres.yml" )
+    fi
+  fi
+}
+
+################################################################################
+# Isolation Segments Feature
+################################################################################
+features::isos() {
+  want_feature isolation-segments || return 0
+  manifests+=( "operations/diego-cells-networking.yml" )
+
+  while read -r segment
+  do manifests+=( "${segment}" )
+  done < <(dynamic::isolation::segments "$params")
+}
+
+################################################################################
+# OCFP Features
+################################################################################
+features::ocfp() {
+  want_feature ocfp || return 0
+
+  env_scale=$(lookup "params.ocfp_env_scale" "dev")
+
+  manifests+=(
+    "overlay/addons/autoscaler.yml"
+    "overlay/addons/app-scheduler.yml"
+    "overlay/addons/scs.yml"
+    "overlay/addons/prometheus.yml"
+    "overlay/blobstore/meta.yml"
+  )
+
+  # OCFP Overrides
+  manifests+=(
+    "ocfp/meta.yml"
+    "ocfp/ocfp.yml"
+    "ocfp/external-db-prep.yml"
+    "ocfp/external-db.yml"
+    "ocfp/external-blobstore.yml"
+    "ocfp/trusted-certs.yml"
+  )
+
+  manifests+=(
+    "ocfp/${iaas}/ocf.yml"
+    "ocfp/${iaas}/azs.yml"
+    "ocfp/${iaas}/blobstore.yml"
+  )
+
+  if want_feature "windows-diego-cells"
+  then
+    manifests+=(
+      "ocfp/${iaas}/windows.yml"
+      "ocfp/trusted-certs-windows.yml"
+    )
+  fi
+
+  manifests+=( "ocfp/scale/${env_scale}.yml" )
+
+  for want in "${GENESIS_REQUESTED_FEATURES[@]}"
+  do
+    case "${want}" in
+      (stratos-integration)
+        manifests+=( "ocfp/stratos.yml" )
+        ;;
+      (nfs-volume-services)
+        manifests+=( "ocfp/nfs-ldap.yml" )
+        manifests+=( "ocfp/nfs-ldap-data.yml" )
+        ;;
+      (smb-volume-services)
+        manifests+=( "ocfp/smb-broker.yml" )
+        ;;
+      (*)
+        true # Skip what we don't care about
+        ;;
+    esac
+  done
+}
+
+################################################################################
+# Genesis Version Check
+################################################################################
+set -ue
+genesis_min_version="2.8.5"
+genesis_version="$(genesis -v 2>&1 | awk '{gsub("v",""); print $2}')"
+if ! [[ "${genesis_version}" =~ -dev$ ]] &&
+   ! new_enough "${genesis_version}" "${genesis_min_version}"
+then
+  fail "This kit needs at least Genesis '${genesis_min_version}'." \
+    "\n\tPlease upgrade and try again."
+  exit 1
 fi
 
-# Include the migration manifest fragments
-version="$(exodus kit_version)"
-if [[ -n "${version}" ]] && ! new_enough "${version}" "2.0.0-rc0"; then
-  manifest+=( "operations/migrate/cells.yml")
+################################################################################
+# Variables
+################################################################################
+declare -a manifests;  manifests=()
+declare -a features;   features=()
+declare -a opsfiles;   opsfiles=()
+declare -a blobstores; blobstores=()
+declare -a databases;  databases=()
 
-  if want_feature "local-postgres-db"; then # TODO: or postgres-db external??
-    manifest+=( "operations/migrate/postgres.yml" )
-  fi
-  :
+version=""
+abort=
+warn=
+db_specified=
+cpi="$(bosh_cpi)" || true
+iaas="$cpi"
+[[ $iaas == 'google' ]] && iaas='gcp'
+opsdir="ops"
+[[ -n "${PREVIOUS_ENV:-}" ]] &&
+  opsdir=".genesis/cached/${PREVIOUS_ENV}/${opsdir}"
+
+# Base configuration with minimal injections required for Genesis compliance
+manifests=(
+  "cf-deployment/cf-deployment.yml"
+  "overlay/base.yml"
+  "overlay/upstream_version.yml"
+)
+
+[[ -n $version ]] && switch_cf_version "$version"
+
+params="$(lookup "params" "{}")"
+has_availability_zones="$(jq -r '.|has("availability_zones")' <(echo "$params"))"
+randomize_az_placement="$(jq -r '.randomize_az_placement//false' <(echo "$params"))"
+
+################################################################################
+# Features
+################################################################################
+features::validate
+features::setup
+
+if (( ${#features[@]} > 0 ))
+then GENESIS_REQUESTED_FEATURES="${features[*]}"
+else GENESIS_REQUESTED_FEATURES=""
 fi
 
-echo "${manifest[@]}"
+features::v1::check
+features::process
+features::isos # Then we process isolation segments
+features::ocfp # ocfp overrides base manifests
+
+if want_feature ocfp
+then manifests+=( ${opsfiles[@]+"${opsfiles[@]}"} ) # opsfiles override everything in ocfp arch
+fi
+
+echo "${manifests[@]}" # Finally, we print out the list of yamls to be merged

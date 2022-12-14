@@ -1,0 +1,76 @@
+---
+params:
+  api_instances: 3
+  cc_worker_instances: 3
+  credhub_instances: 3
+  diego_api_instances: 3
+  diego_cell_instances: 10
+  doppler_instances: 3
+  log_api_instances: 3
+  nats_instances: 3
+  router_instances: 3
+  scheduler_instances: 3
+  tcp_router_instances: 3
+  uaa_instances: 3
+  # windows_diego_cell_instances: 1
+
+  api_vm_type: "api-prod"
+  cc_worker_vm_type: "cc-worker-prod"
+  credhub_vm_type: "credhub-prod"
+  diego_api_vm_type: "diego-api-prod"
+  diego_cell_vm_type: "diego-cell-prod"
+  doppler_vm_type: "doppler-prod"
+  errand_vm_type: "errand-prod"
+  log_api_vm_type: "log-api-prod"
+  nats_vm_type: "nats-prod"
+  router_vm_type: "router-prod"
+  scheduler_vm_type: "scheduler-prod"
+  tcp_router_vm_type: "tcp-router-prod"
+  uaa_vm_type: "uaa-prod"
+  windows_diego_cell_vm_type: "windows-cell-prod"
+
+---
+# VM Types
+- type: replace
+  path: /instance_groups/name=diego-cell/vm_type
+  value: diego-cell-prod
+- type: replace
+  path: /instance_groups/name=diego-api/vm_type
+  value: diego-api-prod
+- type: replace
+  path: /instance_groups/name=nats/vm_type
+  value: nats-prod
+- type: replace
+  path: /instance_groups/name=uaa/vm_type
+  value: uaa-prod
+- type: replace
+  path: /instance_groups/name=api/vm_type
+  value: api-prod
+- type: replace
+  path: /instance_groups/name=cc-worker/vm_type
+  value: cc-worker-prod
+- type: replace
+  path: /instance_groups/name=scheduler/vm_type
+  value: scheduler-prod
+- type: replace
+  path: /instance_groups/name=router/vm_type
+  value: router-prod
+- type: replace
+  path: /instance_groups/name=tcp-router/vm_type
+  value: tcp-router-prod
+- type: replace
+  path: /instance_groups/name=doppler/vm_type
+  value: doppler-prod
+- type: replace
+  path: /instance_groups/name=log-api/vm_type
+  value: log-api-prod
+- type: replace
+  path: /instance_groups/name=credhub/vm_type
+  value: credhub-prod
+- type: replace
+  path: /instance_groups/name=rotate-cc-database-key?/vm_type
+  value: default-prod
+- type: replace
+  path: /instance_groups/name=smoke-tests/vm_type
+  value: default-prod
+

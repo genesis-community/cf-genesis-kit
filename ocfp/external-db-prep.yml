@@ -1,0 +1,66 @@
+---
+# Remove MySQL
+- type: remove
+  path: /instance_groups/name=database?
+- type: remove
+  path: /releases/name=pxc?
+
+# Remove MySQL variables
+- type: remove
+  path: /variables/name=cf_mysql_mysql_admin_password?
+- type: remove
+  path: /variables/name=cf_mysql_mysql_cluster_health_password?
+- type: remove
+  path: /variables/name=cf_mysql_mysql_galera_healthcheck_endpoint_password?
+- type: remove
+  path: /variables/name=cf_mysql_mysql_galera_healthcheck_password?
+- type: remove
+  path: /variables/name=cf_mysql_proxy_api_password?
+- type: remove
+  path: /variables/name=network_policy_database_password?
+- type: remove
+  path: /variables/name=network_connectivity_database_password?
+- type: remove
+  path: /variables/name=routing_api_database_password?
+- type: remove
+  path: /variables/name=locket_database_password?
+- type: remove
+  path: /variables/name=cc_database_password?
+- type: remove
+  path: /variables/name=credhub_database_password?
+- type: remove
+  path: /variables/name=diego_database_password?
+- type: remove
+  path: /variables/name=uaa_database_password?
+- type: remove
+  path: /variables/name=pxc_galera_ca?
+- type: remove
+  path: /variables/name=pxc_server_ca?
+- type: remove
+  path: /variables/name=galera_server_certificate?
+- type: remove
+  path: /variables/name=mysql_server_certificate?
+
+# nil out database bosh links
+- type: replace
+  path: /instance_groups/name=uaa/jobs/name=uaa/consumes?
+  value: {database: nil}
+- type: replace
+  path: /instance_groups/name=api/jobs/name=cloud_controller_ng/consumes?
+  value: {database: nil}
+- type: replace
+  path: /instance_groups/name=cc-worker/jobs/name=cloud_controller_worker/consumes?
+  value: {database: nil}
+- type: replace
+  path: /instance_groups/name=scheduler/jobs/name=cloud_controller_clock/consumes?
+  value: {database: nil}
+- type: replace
+  path: /instance_groups/name=scheduler/jobs/name=cc_deployment_updater/consumes?
+  value: {database: nil}
+- type: replace
+  path: /instance_groups/name=diego-api/jobs/name=silk-controller/consumes?
+  value: {database: nil}
+- type: replace
+  path: /instance_groups/name=api/jobs/name=policy-server/consumes?
+  value: {database: nil}
+

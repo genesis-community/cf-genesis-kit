@@ -1,0 +1,4 @@
+---
+exodus:
+  uaa_admin_client:        admin
+  uaa_admin_client_secret: ((uaa_admin_client_secret))
