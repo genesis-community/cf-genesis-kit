@@ -185,6 +185,16 @@ addons:
           query: _
         - deployment: isolation-segments-extended-cf
           domain: bosh
+          instance_group: custom-params-group
+          network: default
+          query: _
+        - deployment: isolation-segments-extended-cf
+          domain: bosh
+          instance_group: default-params-group
+          network: default
+          query: _
+        - deployment: isolation-segments-extended-cf
+          domain: bosh
           instance_group: default-params-group
           network: default
           query: _
@@ -1793,6 +1803,9 @@ instance_groups:
       logging:
         format:
           timestamp: rfc3339
+    provides:
+      iptables:
+        as: iptables-runtime
     release: garden-runc
   - name: rep
     properties:
@@ -1883,24 +1896,46 @@ instance_groups:
       cni_config_dir: /var/vcap/jobs/silk-cni/config/cni
       cni_plugin_dir: /var/vcap/packages/silk-cni/bin
     release: cf-networking
-  - name: netmon
+  - consumes:
+      iptables:
+        from: iptables-runtime
+    name: netmon
     release: silk
-  - name: vxlan-policy-agent
+  - consumes:
+      cni_config:
+        from: cni_config_runtime
+      iptables:
+        from: iptables-runtime
+    name: vxlan-policy-agent
     properties:
       ca_cert: <!{credhub}:network_policy_client.ca!>
       client_cert: <!{credhub}:network_policy_client.certificate!>
       client_key: <!{credhub}:network_policy_client.private_key!>
+    provides:
+      vpa:
+        as: vpa-runtime
     release: silk
-  - name: silk-daemon
+  - consumes:
+      iptables:
+        from: iptables-runtime
+      vpa:
+        from: vpa-runtime
+    name: silk-daemon
     properties:
       ca_cert: <!{credhub}:silk_daemon.ca!>
       client_cert: <!{credhub}:silk_daemon.certificate!>
       client_key: <!{credhub}:silk_daemon.private_key!>
     release: silk
-  - name: silk-cni
+  - consumes:
+      vpa:
+        from: vpa-runtime
+    name: silk-cni
     properties:
       dns_servers:
       - 169.254.0.2
+    provides:
+      cni_config:
+        as: cni_config_runtime
     release: silk
   - name: loggr-udp-forwarder
     properties:
@@ -2139,9 +2174,130 @@ instance_groups:
   stemcell: default
   vm_type: minimal
 - azs:
+  - zoneA
+  - zoneB
+  - zoneC
+  - zoneD
+  instances: 1
+  jobs:
+  - name: nfsbrokerpush
+    properties:
+      nfsbrokerpush:
+        app_domain: system.cf.testing.example
+        app_name: nfs-broker
+        cf:
+          client_id: nfs-broker-push-client
+          client_secret: <!{credhub}:nfs-broker-push-uaa-client-secret!>
+        create_credhub_security_group: true
+        create_sql_security_group: false
+        credhub:
+          uaa_ca_cert: <!{credhub}:uaa_ssl.ca!>
+          uaa_client_id: nfs-broker-credhub-client
+          uaa_client_secret: <!{credhub}:nfs-broker-credhub-uaa-client-secret!>
+        domain: system.cf.testing.example
+        ldap_enabled: true
+        organization: system
+        password: <!{credhub}:nfs-broker-password!>
+        skip_cert_verify: true
+        space: nfs-broker-space
+        store_id: nfsbroker
+        syslog_url: ""
+        username: nfs-broker
+    provides:
+      nfsbrokerpush:
+        as: ignore-me
+    release: nfs-volume
+  - name: cf-cli-7-linux
+    release: cf-cli
+  lifecycle: errand
+  name: nfs-broker-push
+  networks:
+  - name: cf-core
+  stemcell: default
+  vm_type: minimal
+- azs:
   - custom-az
   instances: 5
   jobs:
+  - name: cfdot
+    properties:
+      tls:
+        ca_certificate: <!{credhub}:diego_rep_client.ca!>
+        certificate: <!{credhub}:diego_rep_client.certificate!>
+        private_key: <!{credhub}:diego_rep_client.private_key!>
+    release: diego
+  - name: garden-cni
+    properties:
+      cni_config_dir: /var/vcap/jobs/silk-cni/config/cni
+      cni_plugin_dir: /var/vcap/packages/silk-cni/bin
+    release: cf-networking
+  - consumes:
+      iptables:
+        from: iptables-custom-params-group
+    name: netmon
+    release: silk
+  - consumes:
+      cni_config:
+        from: cni_config-custom-params-group
+      iptables:
+        from: iptables-custom-params-group
+    name: vxlan-policy-agent
+    properties:
+      ca_cert: <!{credhub}:network_policy_client.ca!>
+      client_cert: <!{credhub}:network_policy_client.certificate!>
+      client_key: <!{credhub}:network_policy_client.private_key!>
+    provides:
+      vpa:
+        as: vpa-custom-params-group
+    release: silk
+  - consumes:
+      iptables:
+        from: iptables-custom-params-group
+      vpa:
+        from: vpa-custom-params-group
+    name: silk-daemon
+    properties:
+      ca_cert: <!{credhub}:silk_daemon.ca!>
+      client_cert: <!{credhub}:silk_daemon.certificate!>
+      client_key: <!{credhub}:silk_daemon.private_key!>
+    release: silk
+  - consumes:
+      vpa:
+        from: vpa-custom-params-group
+    name: silk-cni
+    properties:
+      dns_servers:
+      - 169.254.0.2
+    provides:
+      cni_config:
+        as: cni_config-custom-params-group
+    release: silk
+  - name: loggr-udp-forwarder
+    properties:
+      loggregator:
+        tls:
+          ca: <!{credhub}:loggregator_tls_agent.ca!>
+          cert: <!{credhub}:loggregator_tls_agent.certificate!>
+          key: <!{credhub}:loggregator_tls_agent.private_key!>
+      metrics:
+        ca_cert: <!{credhub}:loggr_udp_forwarder_tls.ca!>
+        cert: <!{credhub}:loggr_udp_forwarder_tls.certificate!>
+        key: <!{credhub}:loggr_udp_forwarder_tls.private_key!>
+        server_name: loggr_udp_forwarder_metrics
+    release: loggregator-agent
+  - name: bosh-dns-adapter
+    properties:
+      dnshttps:
+        client:
+          tls:
+            ca: <!{credhub}:cf_app_sd_client_tls.ca!>
+            certificate: <!{credhub}:cf_app_sd_client_tls.certificate!>
+            private_key: <!{credhub}:cf_app_sd_client_tls.private_key!>
+        server:
+          ca: <!{credhub}:cf_app_sd_server_tls.ca!>
+      internal_domains:
+      - apps.internal.
+    release: cf-networking
   - name: cflinuxfs3-rootfs-setup
     properties:
       cflinuxfs3-rootfs:
@@ -2160,11 +2316,15 @@ instance_groups:
         - 0.0.0.0/0
         destroy_containers_on_start: true
         graph_cleanup_threshold_in_mb: 0
+        network_plugin: /var/vcap/packages/runc-cni/bin/garden-external-networker
+        network_plugin_extra_args:
+        - --configFile=/var/vcap/jobs/garden-cni/config/adapter.json
       logging:
         format:
           timestamp: rfc3339
     provides:
-      iptables: nil
+      iptables:
+        as: iptables-custom-params-group
     release: garden-runc
   - name: rep
     properties:
@@ -2208,7 +2368,12 @@ instance_groups:
         cert: <!{credhub}:diego_rep_agent_v2.certificate!>
         key: <!{credhub}:diego_rep_agent_v2.private_key!>
     release: diego
-  - name: route_emitter
+  - consumes:
+      nats:
+        ip_addresses: false
+      nats-tls:
+        ip_addresses: false
+    name: route_emitter
     properties:
       bpm:
         enabled: true
@@ -2273,6 +2438,85 @@ instance_groups:
   - z1
   instances: 1
   jobs:
+  - name: cfdot
+    properties:
+      tls:
+        ca_certificate: <!{credhub}:diego_rep_client.ca!>
+        certificate: <!{credhub}:diego_rep_client.certificate!>
+        private_key: <!{credhub}:diego_rep_client.private_key!>
+    release: diego
+  - name: garden-cni
+    properties:
+      cni_config_dir: /var/vcap/jobs/silk-cni/config/cni
+      cni_plugin_dir: /var/vcap/packages/silk-cni/bin
+    release: cf-networking
+  - consumes:
+      iptables:
+        from: iptables-default-params-group
+    name: netmon
+    release: silk
+  - consumes:
+      cni_config:
+        from: cni_config-default-params-group
+      iptables:
+        from: iptables-default-params-group
+    name: vxlan-policy-agent
+    properties:
+      ca_cert: <!{credhub}:network_policy_client.ca!>
+      client_cert: <!{credhub}:network_policy_client.certificate!>
+      client_key: <!{credhub}:network_policy_client.private_key!>
+    provides:
+      vpa:
+        as: vpa-default-params-group
+    release: silk
+  - consumes:
+      iptables:
+        from: iptables-default-params-group
+      vpa:
+        from: vpa-default-params-group
+    name: silk-daemon
+    properties:
+      ca_cert: <!{credhub}:silk_daemon.ca!>
+      client_cert: <!{credhub}:silk_daemon.certificate!>
+      client_key: <!{credhub}:silk_daemon.private_key!>
+    release: silk
+  - consumes:
+      vpa:
+        from: vpa-default-params-group
+    name: silk-cni
+    properties:
+      dns_servers:
+      - 169.254.0.2
+    provides:
+      cni_config:
+        as: cni_config-default-params-group
+    release: silk
+  - name: loggr-udp-forwarder
+    properties:
+      loggregator:
+        tls:
+          ca: <!{credhub}:loggregator_tls_agent.ca!>
+          cert: <!{credhub}:loggregator_tls_agent.certificate!>
+          key: <!{credhub}:loggregator_tls_agent.private_key!>
+      metrics:
+        ca_cert: <!{credhub}:loggr_udp_forwarder_tls.ca!>
+        cert: <!{credhub}:loggr_udp_forwarder_tls.certificate!>
+        key: <!{credhub}:loggr_udp_forwarder_tls.private_key!>
+        server_name: loggr_udp_forwarder_metrics
+    release: loggregator-agent
+  - name: bosh-dns-adapter
+    properties:
+      dnshttps:
+        client:
+          tls:
+            ca: <!{credhub}:cf_app_sd_client_tls.ca!>
+            certificate: <!{credhub}:cf_app_sd_client_tls.certificate!>
+            private_key: <!{credhub}:cf_app_sd_client_tls.private_key!>
+        server:
+          ca: <!{credhub}:cf_app_sd_server_tls.ca!>
+      internal_domains:
+      - apps.internal.
+    release: cf-networking
   - name: cflinuxfs3-rootfs-setup
     properties:
       cflinuxfs3-rootfs:
@@ -2291,11 +2535,15 @@ instance_groups:
         - 0.0.0.0/0
         destroy_containers_on_start: true
         graph_cleanup_threshold_in_mb: 0
+        network_plugin: /var/vcap/packages/runc-cni/bin/garden-external-networker
+        network_plugin_extra_args:
+        - --configFile=/var/vcap/jobs/garden-cni/config/adapter.json
       logging:
         format:
           timestamp: rfc3339
     provides:
-      iptables: nil
+      iptables:
+        as: iptables-default-params-group
     release: garden-runc
   - name: rep
     properties:
@@ -2340,7 +2588,12 @@ instance_groups:
         cert: <!{credhub}:diego_rep_agent_v2.certificate!>
         key: <!{credhub}:diego_rep_agent_v2.private_key!>
     release: diego
-  - name: route_emitter
+  - consumes:
+      nats:
+        ip_addresses: false
+      nats-tls:
+        ip_addresses: false
+    name: route_emitter
     properties:
       bpm:
         enabled: true
@@ -2400,48 +2653,6 @@ instance_groups:
   vm_extensions:
   - 100GB_ephemeral_disk
   vm_type: xlarge
-- azs:
-  - zoneA
-  - zoneB
-  - zoneC
-  - zoneD
-  instances: 1
-  jobs:
-  - name: nfsbrokerpush
-    properties:
-      nfsbrokerpush:
-        app_domain: system.cf.testing.example
-        app_name: nfs-broker
-        cf:
-          client_id: nfs-broker-push-client
-          client_secret: <!{credhub}:nfs-broker-push-uaa-client-secret!>
-        create_credhub_security_group: true
-        create_sql_security_group: false
-        credhub:
-          uaa_ca_cert: <!{credhub}:uaa_ssl.ca!>
-          uaa_client_id: nfs-broker-credhub-client
-          uaa_client_secret: <!{credhub}:nfs-broker-credhub-uaa-client-secret!>
-        domain: system.cf.testing.example
-        ldap_enabled: true
-        organization: system
-        password: <!{credhub}:nfs-broker-password!>
-        skip_cert_verify: true
-        space: nfs-broker-space
-        store_id: nfsbroker
-        syslog_url: ""
-        username: nfs-broker
-    provides:
-      nfsbrokerpush:
-        as: ignore-me
-    release: nfs-volume
-  - name: cf-cli-7-linux
-    release: cf-cli
-  lifecycle: errand
-  name: nfs-broker-push
-  networks:
-  - name: cf-core
-  stemcell: default
-  vm_type: minimal
 manifest_version: v16.25.0
 name: isolation-segments-extended-cf
 releases:

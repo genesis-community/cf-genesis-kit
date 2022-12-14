@@ -126,7 +126,7 @@ dynamic::isolation::segments() {
 
     dynamic::isolation::template::render "dns-sd" "$group"
 
-    want_feature nfs-volume-services &&
+    want_feature nfs-volume-services && want_feature ocfp && \
       dynamic::isolation::template::render "nfs-ldap-config" "$group"
   done
 }
@@ -687,8 +687,10 @@ features::process() {
           manifests+=(
             "cf-deployment/operations/enable-nfs-ldap.yml"
             "overlay/addons/nfs-ldap.yml"
-            "overlay/addons/nfs-ldap-config.yml"
           )
+          if want_feature ocfp
+          then manifests+=( "overlay/addons/nfs-ldap-config.yml" )
+          fi
 
           if want_feature "nfs-ldap-tls"; then
             manifests+=( "overlay/addons/nfs-ldap-tls.yml" )
