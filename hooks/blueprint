@@ -126,8 +126,9 @@ dynamic::isolation::segments() {
 
     dynamic::isolation::template::render "dns-sd" "$group"
 
-    want_feature nfs-volume-services && want_feature ocfp && \
-      dynamic::isolation::template::render "nfs-ldap-config" "$group"
+    if want_feature nfs-volume-services && want_feature ocfp
+    then dynamic::isolation::template::render "nfs-ldap-config" "$group"
+    fi
   done
 }
 
@@ -954,7 +955,7 @@ features::ocfp() {
 
   manifests+=( "ocfp/scale/${env_scale}.yml" )
 
-  for want in "${GENESIS_REQUESTED_FEATURES[@]}"
+  for want in $GENESIS_REQUESTED_FEATURES
   do
     case "${want}" in
       (stratos-integration)
@@ -978,7 +979,7 @@ features::ocfp() {
 # Genesis Version Check
 ################################################################################
 set -ue
-genesis_min_version="2.8.5"
+genesis_min_version="2.8.6"
 genesis_version="$(genesis -v 2>&1 | awk '{gsub("v",""); print $2}')"
 if ! [[ "${genesis_version}" =~ -dev$ ]] &&
    ! new_enough "${genesis_version}" "${genesis_min_version}"
