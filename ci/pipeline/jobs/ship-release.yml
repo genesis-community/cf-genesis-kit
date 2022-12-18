@@ -39,7 +39,7 @@ jobs:
       params:
         name:   gh/name
         tag:    gh/tag
-        body:   (( concat "release-notes/"  meta.github.release_notes.file ))
+        body:   gh/notes.md
         globs: [gh/artifacts/*]
     - put: version
       params:
