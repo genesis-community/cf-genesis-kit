@@ -115,5 +115,5 @@ EOS
 
 echo
 echo "--------------------------------------------------------------------------------"
-echo "FORCED FAILURE, NO SUCCESS"
-exit 1
+echo "SUCCESS"
+exit 0
