@@ -11,7 +11,7 @@ version="${1:-}"
 
 #Config
 upstream_name="${UPSTREAM_PATH:-cf-deployment}"
-upstream_path="https://github.com/cloudfoundry/${upstream_name}/archive/v${version}.tar.gz"
+upstream_path="https://github.com/cloudfoundry/${upstream_name}/archive/refs/tags/v${version}.tar.gz"
 upstream_url="https://github.com/cloudfoundry/${upstream_name}/releases/tag/v${version}"
 upstream_file="${upstream_name}-${version}.tar.gz"
 upstream_dir="$upstream_name"

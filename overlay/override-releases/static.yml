@@ -1,13 +1,13 @@
 ---
 releases:
 
-- name: "credhub"
-  version: "2.11.1"
-  url: "https://bosh.io/d/github.com/pivotal-cf/credhub-release?v=2.11.1"
-  sha1: "f5b5ce04eee1251d352f337a6ecb794c4dba8a39"
-- name: "uaa"
-  version: "75.14.0"
-  url: "https://bosh.io/d/github.com/cloudfoundry/uaa-release?v=75.14.0"
-  sha1: "57ffc783177cbca45a983cc573b591b636d0c0bf"
+- name: credhub
+  url: https://bosh.io/d/github.com/pivotal-cf/credhub-release?v=2.12.27
+  version: 2.12.27
+  sha1: 3717ef633086e455eb3e06c01111284ad528a1e4
+- name: uaa
+  url: https://bosh.io/d/github.com/cloudfoundry/uaa-release?v=76.11.0
+  version: 76.11.0
+  sha1: 5cb4a87fca890d8602ef7e10da2ddb27325a7fb4
 exodus:
   cf-deployment-hotfixes: true
