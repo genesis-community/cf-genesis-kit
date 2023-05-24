@@ -106,12 +106,7 @@
           cert: ((diego_rep_agent_v2.certificate))
           key: ((diego_rep_agent_v2.private_key))
       release: diego
-    - consumes:
-        nats:
-          ip_addresses: false
-        nats-tls:
-          ip_addresses: false
-      name: route_emitter_windows
+    - name: route_emitter_windows
       properties:
         diego:
           route_emitter:
@@ -159,6 +154,7 @@
             cert: ((syslog_agent_api_tls.certificate))
             cn: binding-cache
             key: ((syslog_agent_api_tls.private_key))
+        drain_ca_cert: ((log_cache_syslog_tls.ca))
         metrics:
           ca_cert: ((syslog_agent_metrics_tls.ca))
           cert: ((syslog_agent_metrics_tls.certificate))
@@ -213,7 +209,7 @@
   value:
     alias: windows2019
     os: windows2019
-    version: "2019.40"
+    version: "2019.61"
 - path: /instance_groups/name=api/jobs/name=cloud_controller_ng/properties/cc/stacks/name=windows2016?
   type: replace
   value:
@@ -253,20 +249,20 @@
   type: replace
   value:
     name: hwc-buildpack
-    sha1: d23998512071991a9b85470661b77f9be3d41bc8
-    url: https://bosh.io/d/github.com/cloudfoundry-incubator/hwc-buildpack-release?v=3.1.19
-    version: 3.1.19
+    sha1: 3f4916f587c20abad83e24435f5baa7b2656046e
+    url: https://bosh.io/d/github.com/cloudfoundry-incubator/hwc-buildpack-release?v=3.1.30
+    version: 3.1.30
 - path: /releases/name=winc?
   type: replace
   value:
     name: winc
-    sha1: 365690f87e7bea56a6eef15c92e0492165669d03
-    url: https://bosh.io/d/github.com/cloudfoundry-incubator/winc-release?v=2.3.0
-    version: 2.3.0
+    sha1: 7d438612503843bfdb7896f2305a227fb30def15
+    url: https://bosh.io/d/github.com/cloudfoundry-incubator/winc-release?v=2.11.1
+    version: 2.11.1
 - path: /releases/name=windows-utilities?
   type: replace
   value:
     name: windows-utilities
-    sha1: 7886ffd43b84d4eced06560ba601ce1eb97c6616
-    url: https://bosh.io/d/github.com/cloudfoundry-incubator/windows-utilities-release?v=0.14.0
-    version: 0.14.0
+    sha1: 52f489fe0806ee8915f5613f79c9173773871e8b
+    url: https://bosh.io/d/github.com/cloudfoundry-incubator/windows-utilities-release?v=0.20.0
+    version: 0.20.0
