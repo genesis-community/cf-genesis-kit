@@ -14,18 +14,26 @@ instance_groups:
             override: true
             authorized-grant-types: client_credentials,refresh_token
             authorities: cloud_controller.admin_read_only
-            scope: openid,cloud_controller.admin_read_only
+            scopes: 
+            - openid
+            - cloud_controller.admin_read_only
             secret: "((uaa_clients_cf_exporter_secret))"
           firehose_exporter:
             override: true
             authorized-grant-types: client_credentials,refresh_token
             authorities: doppler.firehose
-            scope: openid,doppler.firehose
+            scopes: 
+            - openid 
+            - doppler.firehose
             secret: "((uaa_clients_firehose_exporter_secret))"
           combined_exporter: # for old prometheus kit
             authorized-grant-types: client_credentials, refresh_token
             authorities: doppler.firehose,cloud_controller.admin_read_only
-            scope: openid,oauth.approvals,scim.userids,cloud_controller.admin_read_only
+            scopes: 
+            - openid 
+            - oauth.approvals 
+            - scim.userids 
+            - cloud_controller.admin_read_only
             secret:  "((uaa_clients_firehose_exporter_secret))"
 
 variables:
