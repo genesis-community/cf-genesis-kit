@@ -40,6 +40,6 @@ meta:
     access_token: ((github.access_token))
 
   shout:
-    url:      ((shout.url)
+    url:      ((shout.url))
     username: ((shout.username))
     password: ((shout.password))
