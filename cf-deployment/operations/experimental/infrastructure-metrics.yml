@@ -2,9 +2,9 @@
   path: /releases/-
   value:
     name: node-exporter
-    sha1: cea1edc938873b7204b889173002e0e9fa813e54
-    url: https://bosh.io/d/github.com/cloudfoundry-community/node-exporter-boshrelease?v=5.0.0
-    version: 5.0.0
+    sha1: 121bdbd99c65cd7815716d987b958f3877bc5812
+    url: https://bosh.io/d/github.com/cloudfoundry-community/node-exporter-boshrelease?v=5.2.0
+    version: 5.2.0
 - type: replace
   path: /addons/-
   value:
@@ -16,6 +16,7 @@
       stemcell:
       - os: ubuntu-xenial
       - os: ubuntu-bionic
+      - os: ubuntu-jammy
     jobs:
     - name: node_exporter
       properties:
