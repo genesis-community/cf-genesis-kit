@@ -7,6 +7,7 @@ addons:
     stemcell:
     - os: ubuntu-xenial
     - os: ubuntu-bionic
+    - os: ubuntu-jammy
   jobs:
   - name: loggregator_agent
     properties:
@@ -29,6 +30,7 @@ addons:
     stemcell:
     - os: ubuntu-xenial
     - os: ubuntu-bionic
+    - os: ubuntu-jammy
   jobs:
   - name: loggr-forwarder-agent
     properties:
@@ -51,6 +53,7 @@ addons:
     stemcell:
     - os: ubuntu-xenial
     - os: ubuntu-bionic
+    - os: ubuntu-jammy
   jobs:
   - name: loggr-syslog-agent
     properties:
@@ -60,6 +63,7 @@ addons:
           cert: <!{credhub}:syslog_agent_api_tls.certificate!>
           cn: binding-cache
           key: <!{credhub}:syslog_agent_api_tls.private_key!>
+      drain_ca_cert: <!{credhub}:log_cache_syslog_tls.ca!>
       metrics:
         ca_cert: <!{credhub}:syslog_agent_metrics_tls.ca!>
         cert: <!{credhub}:syslog_agent_metrics_tls.certificate!>
@@ -80,6 +84,7 @@ addons:
     stemcell:
     - os: ubuntu-xenial
     - os: ubuntu-bionic
+    - os: ubuntu-jammy
   jobs:
   - name: prom_scraper
     properties:
@@ -104,6 +109,7 @@ addons:
     stemcell:
     - os: ubuntu-xenial
     - os: ubuntu-bionic
+    - os: ubuntu-jammy
   jobs:
   - name: metrics-discovery-registrar
     properties:
@@ -125,6 +131,7 @@ addons:
     stemcell:
     - os: ubuntu-xenial
     - os: ubuntu-bionic
+    - os: ubuntu-jammy
   jobs:
   - name: metrics-agent
     properties:
@@ -148,6 +155,7 @@ addons:
     stemcell:
     - os: ubuntu-xenial
     - os: ubuntu-bionic
+    - os: ubuntu-jammy
   jobs:
   - name: bpm
     release: bpm
@@ -336,10 +344,10 @@ exodus:
   apps_domain: run.cf.testing.examle
   base_domain: cf.testing.examle
   bosh: compiled-releases
-  cf-deployment-date: 2022-Feb-14 03:48:47 UTC
+  cf-deployment-date: 2023-Jun-06 00:28:49 UTC
   cf-deployment-hotfixes: true
-  cf-deployment-url: https://github.com/cloudfoundry/cf-deployment/releases/tag/v16.25.0
-  cf-deployment-version: 16.25.0
+  cf-deployment-url: https://github.com/cloudfoundry/cf-deployment/releases/tag/v29.0.0
+  cf-deployment-version: 29.0.0
   core_network: cf-core
   db_network: cf-core
   edge_network: cf-edge
@@ -373,7 +381,7 @@ instance_groups:
         skip_ssl_validation: true
         space: cf_smoke_tests_space
     release: cf-smoke-tests
-  - name: cf-cli-7-linux
+  - name: cf-cli-8-linux
     release: cf-cli
   lifecycle: errand
   name: smoke-tests
@@ -386,29 +394,17 @@ instance_groups:
   - z2
   instances: 2
   jobs:
-  - name: nats
-    properties:
-      nats:
-        hostname: nats.service.cf.internal
-        internal:
-          tls:
-            ca: <!{credhub}:nats_internal_cert.ca!>
-            certificate: <!{credhub}:nats_internal_cert.certificate!>
-            enabled: true
-            private_key: <!{credhub}:nats_internal_cert.private_key!>
-        password: <!{credhub}:nats_password!>
-        user: nats
-    provides:
-      nats:
-        as: nats
-        shared: true
-    release: nats
   - custom_provider_definitions:
     - name: nats-tls-address
       type: address
     name: nats-tls
     properties:
       nats:
+        client:
+          tls:
+            ca: <!{credhub}:nats_client_cert.ca!>
+            certificate: <!{credhub}:nats_client_cert.certificate!>
+            private_key: <!{credhub}:nats_client_cert.private_key!>
         external:
           tls:
             ca: <!{credhub}:nats_client_cert.ca!>
@@ -656,7 +652,9 @@ instance_groups:
           cc-service-dashboards:
             authorities: clients.read,clients.write,clients.admin
             authorized-grant-types: client_credentials
-            scope: openid,cloud_controller_service_permissions.read
+            scopes:
+            - openid
+            - cloud_controller_service_permissions.read
             secret: <!{credhub}:uaa_clients_cc-service-dashboards_secret!>
           cc_routing:
             authorities: routing.router_groups.read
@@ -672,15 +670,33 @@ instance_groups:
             authorized-grant-types: password,refresh_token
             override: true
             refresh-token-validity: 2592000
-            scope: network.admin,network.write,cloud_controller.read,cloud_controller.write,openid,password.write,cloud_controller.admin,scim.read,scim.write,doppler.firehose,uaa.user,routing.router_groups.read,routing.router_groups.write,cloud_controller.admin_read_only,cloud_controller.global_auditor,perm.admin,clients.read
+            scopes:
+            - network.admin
+            - network.write
+            - cloud_controller.read
+            - cloud_controller.write
+            - openid
+            - password.write
+            - cloud_controller.admin
+            - scim.read
+            - scim.write
+            - doppler.firehose
+            - uaa.user
+            - routing.router_groups.read
+            - routing.router_groups.write
+            - cloud_controller.admin_read_only
+            - cloud_controller.global_auditor
+            - perm.admin
+            - clients.read
             secret: ""
           cf_smoke_tests:
             authorities: cloud_controller.admin,clients.read
             authorized-grant-types: client_credentials
             secret: <!{credhub}:uaa_clients_cf_smoke_tests_secret!>
           cloud_controller_username_lookup:
-            authorities: scim.userids
+            authorities: scim.userids,scim.read
             authorized-grant-types: client_credentials
+            override: true
             secret: <!{credhub}:uaa_clients_cloud_controller_username_lookup_secret!>
           credhub_admin_client:
             authorities: credhub.read,credhub.write
@@ -708,7 +724,11 @@ instance_groups:
             autoapprove: true
             override: true
             redirect-uri: https://uaa.system.cf.testing.examle/login
-            scope: openid,cloud_controller.read,cloud_controller.write,cloud_controller.admin
+            scopes:
+            - openid
+            - cloud_controller.read
+            - cloud_controller.write
+            - cloud_controller.admin
             secret: <!{credhub}:uaa_clients_ssh-proxy_secret!>
           tcp_emitter:
             authorities: routing.routes.write,routing.routes.read
@@ -795,7 +815,7 @@ instance_groups:
   networks:
   - name: cf-core
   stemcell: default
-  vm_type: minimal
+  vm_type: small
 - azs:
   - z1
   instances: 1
@@ -866,7 +886,6 @@ instance_groups:
             private_endpoint: https://blobstore.service.cf.internal:4443
             public_endpoint: https://blobstore.system.cf.testing.examle
             username: blobstore-user
-        bulk_api_password: <!{credhub}:cc_bulk_api_password!>
         database_encryption:
           current_key_label: encryption_key_0
           keys:
@@ -875,11 +894,25 @@ instance_groups:
         default_running_security_groups:
         - public_networks
         - dns
+        default_stack: cflinuxfs4
         default_staging_security_groups:
         - public_networks
         - dns
         diego:
-          docker_staging_stack: cflinuxfs3
+          docker_staging_stack: cflinuxfs4
+          droplet_destinations:
+            cflinuxfs3: /home/vcap
+            cflinuxfs4: /home/vcap
+            windows: /Users/vcap
+            windows2012R2: /
+            windows2016: /Users/vcap
+          lifecycle_bundles:
+            buildpack/cflinuxfs3: buildpack_app_lifecycle/buildpack_app_lifecycle.tgz
+            buildpack/cflinuxfs4: buildpack_app_lifecycle/buildpack_app_lifecycle.tgz
+            buildpack/windows: buildpack_app_lifecycle/buildpack_app_lifecycle.tgz
+            buildpack/windows2012R2: windows_app_lifecycle/windows_app_lifecycle.tgz
+            buildpack/windows2016: buildpack_app_lifecycle/buildpack_app_lifecycle.tgz
+            docker: docker_app_lifecycle/docker_app_lifecycle.tgz
         droplets:
           blobstore_type: webdav
           webdav_config:
@@ -912,7 +945,30 @@ instance_groups:
           package: r-buildpack-cflinuxfs3
         - name: binary_buildpack
           package: binary-buildpack-cflinuxfs3
-        internal_api_password: <!{credhub}:cc_internal_api_password!>
+        - name: staticfile_buildpack
+          package: staticfile-buildpack-cflinuxfs4
+        - name: java_buildpack
+          package: java-buildpack-cflinuxfs4
+        - name: ruby_buildpack
+          package: ruby-buildpack-cflinuxfs4
+        - name: dotnet_core_buildpack
+          package: dotnet-core-buildpack-cflinuxfs4
+        - name: nodejs_buildpack
+          package: nodejs-buildpack-cflinuxfs4
+        - name: go_buildpack
+          package: go-buildpack-cflinuxfs4
+        - name: python_buildpack
+          package: python-buildpack-cflinuxfs4
+        - name: php_buildpack
+          package: php-buildpack-cflinuxfs4
+        - name: nginx_buildpack
+          package: nginx-buildpack-cflinuxfs4
+        - name: r_buildpack
+          package: r-buildpack-cflinuxfs4
+        - name: binary_buildpack
+          package: binary-buildpack-cflinuxfs4
+        logcache:
+          host: log-cache.service.cf.internal
         logcache_tls:
           certificate: <!{credhub}:cc_logcache_tls.certificate!>
           private_key: <!{credhub}:cc_logcache_tls.private_key!>
@@ -931,6 +987,10 @@ instance_groups:
             private_endpoint: https://blobstore.service.cf.internal:4443
             public_endpoint: https://blobstore.system.cf.testing.examle
             username: blobstore-user
+        prom_scraper_tls:
+          ca_cert: <!{credhub}:cc_prom_scraper_scrape_tls.ca!>
+          private_key: <!{credhub}:cc_prom_scraper_scrape_tls.private_key!>
+          public_cert: <!{credhub}:cc_prom_scraper_scrape_tls.certificate!>
         public_tls:
           ca_cert: <!{credhub}:cc_public_tls.ca!>
           certificate: <!{credhub}:cc_public_tls.certificate!>
@@ -968,6 +1028,8 @@ instance_groups:
         stacks:
         - description: Cloud Foundry Linux-based filesystem (Ubuntu 18.04)
           name: cflinuxfs3
+        - description: Cloud Foundry Linux-based filesystem (Ubuntu 22.04)
+          name: cflinuxfs4
         staging_upload_password: <!{credhub}:cc_staging_upload_password!>
         staging_upload_user: staging_user
         temporary_use_logcache: true
@@ -1060,6 +1122,16 @@ instance_groups:
           tls_port: 4002
           uris:
           - api.system.cf.testing.examle/networking
+        - health_check:
+            name: routing-api-health-check
+            script_path: /var/vcap/jobs/routing-api/bin/routing_api_health_check
+            timeout: 6s
+          name: routing-api
+          registration_interval: 20s
+          server_cert_domain_san: routing-api.service.cf.internal
+          tls_port: 3001
+          uris:
+          - api.system.cf.testing.examle/routing
     release: routing
   - name: statsd_injector
     properties:
@@ -1137,6 +1209,19 @@ instance_groups:
       server_cert: <!{credhub}:network_policy_server.certificate!>
       server_key: <!{credhub}:network_policy_server.private_key!>
     release: cf-networking
+  - name: policy-server-asg-syncer
+    properties:
+      cc_internal:
+        client_cert: <!{credhub}:policy_server_asg_syncer_cc_client.certificate!>
+        client_key: <!{credhub}:policy_server_asg_syncer_cc_client.private_key!>
+      locket:
+        address: locket.service.cf.internal:8891
+        ca_cert: <!{credhub}:asg_syncer_locket_client.ca!>
+        client_cert: <!{credhub}:asg_syncer_locket_client.certificate!>
+        client_key: <!{credhub}:asg_syncer_locket_client.private_key!>
+      uaa_ca: <!{credhub}:uaa_ssl.ca!>
+      uaa_client_secret: <!{credhub}:uaa_clients_network_policy_secret!>
+    release: cf-networking
   - name: cc_uploader
     properties:
       capi:
@@ -1192,6 +1277,20 @@ instance_groups:
           keys:
             encryption_key_0: <!{credhub}:cc_db_encryption_key!>
         db_encryption_key: <!{credhub}:cc_db_encryption_key!>
+        diego:
+          droplet_destinations:
+            cflinuxfs3: /home/vcap
+            cflinuxfs4: /home/vcap
+            windows: /Users/vcap
+            windows2012R2: /
+            windows2016: /Users/vcap
+          lifecycle_bundles:
+            buildpack/cflinuxfs3: buildpack_app_lifecycle/buildpack_app_lifecycle.tgz
+            buildpack/cflinuxfs4: buildpack_app_lifecycle/buildpack_app_lifecycle.tgz
+            buildpack/windows: buildpack_app_lifecycle/buildpack_app_lifecycle.tgz
+            buildpack/windows2012R2: windows_app_lifecycle/windows_app_lifecycle.tgz
+            buildpack/windows2016: buildpack_app_lifecycle/buildpack_app_lifecycle.tgz
+            docker: docker_app_lifecycle/docker_app_lifecycle.tgz
         droplets:
           blobstore_type: webdav
           webdav_config:
@@ -1201,7 +1300,6 @@ instance_groups:
             private_endpoint: https://blobstore.service.cf.internal:4443
             public_endpoint: https://blobstore.system.cf.testing.examle
             username: blobstore-user
-        internal_api_password: <!{credhub}:cc_internal_api_password!>
         mutual_tls:
           ca_cert: <!{credhub}:cc_tls.ca!>
           private_key: <!{credhub}:cc_tls.private_key!>
@@ -1249,6 +1347,19 @@ instance_groups:
           cc_routing:
             secret: <!{credhub}:uaa_clients_cc-routing_secret!>
     release: capi
+  - name: loggr-udp-forwarder
+    properties:
+      loggregator:
+        tls:
+          ca: <!{credhub}:loggregator_tls_agent.ca!>
+          cert: <!{credhub}:loggregator_tls_agent.certificate!>
+          key: <!{credhub}:loggregator_tls_agent.private_key!>
+      metrics:
+        ca_cert: <!{credhub}:loggr_udp_forwarder_tls.ca!>
+        cert: <!{credhub}:loggr_udp_forwarder_tls.certificate!>
+        key: <!{credhub}:loggr_udp_forwarder_tls.private_key!>
+        server_name: loggr_udp_forwarder_metrics
+    release: loggregator-agent
   name: cc-worker
   networks:
   - name: cf-core
@@ -1312,6 +1423,20 @@ instance_groups:
           keys:
             encryption_key_0: <!{credhub}:cc_db_encryption_key!>
         db_encryption_key: <!{credhub}:cc_db_encryption_key!>
+        diego:
+          droplet_destinations:
+            cflinuxfs3: /home/vcap
+            cflinuxfs4: /home/vcap
+            windows: /Users/vcap
+            windows2012R2: /
+            windows2016: /Users/vcap
+          lifecycle_bundles:
+            buildpack/cflinuxfs3: buildpack_app_lifecycle/buildpack_app_lifecycle.tgz
+            buildpack/cflinuxfs4: buildpack_app_lifecycle/buildpack_app_lifecycle.tgz
+            buildpack/windows: buildpack_app_lifecycle/buildpack_app_lifecycle.tgz
+            buildpack/windows2012R2: windows_app_lifecycle/windows_app_lifecycle.tgz
+            buildpack/windows2016: buildpack_app_lifecycle/buildpack_app_lifecycle.tgz
+            docker: docker_app_lifecycle/docker_app_lifecycle.tgz
         droplets:
           blobstore_type: webdav
           webdav_config:
@@ -1321,7 +1446,6 @@ instance_groups:
             private_endpoint: https://blobstore.service.cf.internal:4443
             public_endpoint: https://blobstore.system.cf.testing.examle
             username: blobstore-user
-        internal_api_password: <!{credhub}:cc_internal_api_password!>
         mutual_tls:
           ca_cert: <!{credhub}:cc_tls.ca!>
           private_key: <!{credhub}:cc_tls.private_key!>
@@ -1374,7 +1498,25 @@ instance_groups:
   - name: cc_deployment_updater
     properties:
       cc:
+        database_encryption:
+          current_key_label: encryption_key_0
+          keys:
+            encryption_key_0: <!{credhub}:cc_db_encryption_key!>
         db_encryption_key: <!{credhub}:cc_db_encryption_key!>
+        diego:
+          droplet_destinations:
+            cflinuxfs3: /home/vcap
+            cflinuxfs4: /home/vcap
+            windows: /Users/vcap
+            windows2012R2: /
+            windows2016: /Users/vcap
+          lifecycle_bundles:
+            buildpack/cflinuxfs3: buildpack_app_lifecycle/buildpack_app_lifecycle.tgz
+            buildpack/cflinuxfs4: buildpack_app_lifecycle/buildpack_app_lifecycle.tgz
+            buildpack/windows: buildpack_app_lifecycle/buildpack_app_lifecycle.tgz
+            buildpack/windows2012R2: windows_app_lifecycle/windows_app_lifecycle.tgz
+            buildpack/windows2016: buildpack_app_lifecycle/buildpack_app_lifecycle.tgz
+            docker: docker_app_lifecycle/docker_app_lifecycle.tgz
         mutual_tls:
           ca_cert: <!{credhub}:cc_tls.ca!>
           private_key: <!{credhub}:cc_tls.private_key!>
@@ -1466,6 +1608,7 @@ instance_groups:
     release: diego
   - name: loggr-syslog-binding-cache
     properties:
+      aggregate_drains: syslog-tls://log-cache.service.cf.internal:6067?include-metrics-deprecated=true&ssl-strict-internal=true
       api:
         tls:
           ca_cert: <!{credhub}:cc_tls.ca!>
@@ -1521,13 +1664,15 @@ instance_groups:
         tls_enabled: true
       router:
         backends:
+          ca: <!{credhub}:gorouter_backend_tls.ca!>
           cert_chain: <!{credhub}:gorouter_backend_tls.certificate!>
           private_key: <!{credhub}:gorouter_backend_tls.private_key!>
-        ca_certs: |
-          <!{credhub}:diego_instance_identity_ca.ca!>
-          <!{credhub}:cc_tls.ca!>
-          <!{credhub}:uaa_ssl.ca!>
-          <!{credhub}:network_policy_server_external.ca!>
+        ca_certs:
+        - <!{credhub}:diego_instance_identity_ca.ca!>
+        - <!{credhub}:cc_tls.ca!>
+        - <!{credhub}:uaa_ssl.ca!>
+        - <!{credhub}:network_policy_server_external.ca!>
+        - <!{credhub}:routing_api_tls.ca!>
         enable_ssl: true
         route_services_secret: <!{credhub}:router_route_services_secret!>
         status:
@@ -1607,21 +1752,8 @@ instance_groups:
 - azs:
   - z1
   - z2
-  instances: 4
+  instances: 1
   jobs:
-  - name: doppler
-    properties:
-      loggregator:
-        tls:
-          ca_cert: <!{credhub}:loggregator_tls_doppler.ca!>
-          doppler:
-            cert: <!{credhub}:loggregator_tls_doppler.certificate!>
-            key: <!{credhub}:loggregator_tls_doppler.private_key!>
-    provides:
-      doppler:
-        as: doppler
-        shared: true
-    release: loggregator
   - name: log-cache
     properties:
       health_addr: localhost:6060
@@ -1649,21 +1781,16 @@ instance_groups:
       proxy_cert: <!{credhub}:log_cache_proxy_tls.certificate!>
       proxy_key: <!{credhub}:log_cache_proxy_tls.private_key!>
     release: log-cache
-  - consumes:
-      reverse_log_proxy:
-        from: reverse_log_proxy
-    name: log-cache-nozzle
+  - name: log-cache-syslog-server
     properties:
-      logs_provider:
-        tls:
-          ca_cert: <!{credhub}:logs_provider.ca!>
-          cert: <!{credhub}:logs_provider.certificate!>
-          key: <!{credhub}:logs_provider.private_key!>
       metrics:
-        ca_cert: <!{credhub}:log_cache_nozzle_metrics_tls.ca!>
-        cert: <!{credhub}:log_cache_nozzle_metrics_tls.certificate!>
-        key: <!{credhub}:log_cache_nozzle_metrics_tls.private_key!>
-        server_name: log_cache_nozzle_metrics
+        ca_cert: <!{credhub}:log_cache_syslog_server_metrics_tls.ca!>
+        cert: <!{credhub}:log_cache_syslog_server_metrics_tls.certificate!>
+        key: <!{credhub}:log_cache_syslog_server_metrics_tls.private_key!>
+        server_name: log_cache_syslog_server_metrics
+      tls:
+        cert: <!{credhub}:log_cache_syslog_tls.certificate!>
+        key: <!{credhub}:log_cache_syslog_tls.private_key!>
     release: log-cache
   - name: route_registrar
     properties:
@@ -1703,6 +1830,29 @@ instance_groups:
         client_secret: <!{credhub}:uaa_clients_doppler_secret!>
         internal_addr: https://uaa.service.cf.internal:8443
     release: log-cache
+  name: log-cache
+  networks:
+  - name: default
+  stemcell: default
+  vm_type: small-highmem
+- azs:
+  - z1
+  - z2
+  instances: 3
+  jobs:
+  - name: doppler
+    properties:
+      loggregator:
+        tls:
+          ca_cert: <!{credhub}:loggregator_tls_doppler.ca!>
+          doppler:
+            cert: <!{credhub}:loggregator_tls_doppler.certificate!>
+            key: <!{credhub}:loggregator_tls_doppler.private_key!>
+    provides:
+      doppler:
+        as: doppler
+        shared: true
+    release: loggregator
   name: doppler
   networks:
   - name: cf-core
@@ -1734,6 +1884,14 @@ instance_groups:
         - <!{credhub}:credhub_tls.ca!>
         - <!{credhub}:uaa_ssl.ca!>
     release: cflinuxfs3
+  - name: cflinuxfs4-rootfs-setup
+    properties:
+      cflinuxfs4-rootfs:
+        trusted_certs:
+        - <!{credhub}:diego_instance_identity_ca.ca!>
+        - <!{credhub}:credhub_tls.ca!>
+        - <!{credhub}:uaa_ssl.ca!>
+    release: cflinuxfs4
   - name: garden
     properties:
       garden:
@@ -1776,6 +1934,7 @@ instance_groups:
         rep:
           preloaded_rootfses:
           - cflinuxfs3:/var/vcap/packages/cflinuxfs3/rootfs.tar
+          - cflinuxfs4:/var/vcap/packages/cflinuxfs4/rootfs.tar
       enable_consul_service_registration: false
       enable_declarative_healthcheck: true
       logging:
@@ -1798,12 +1957,7 @@ instance_groups:
         certificate: <!{credhub}:diego_rep_client.certificate!>
         private_key: <!{credhub}:diego_rep_client.private_key!>
     release: diego
-  - consumes:
-      nats:
-        ip_addresses: false
-      nats-tls:
-        ip_addresses: false
-    name: route_emitter
+  - name: route_emitter
     properties:
       bpm:
         enabled: true
@@ -1847,6 +2001,11 @@ instance_groups:
       ca_cert: <!{credhub}:network_policy_client.ca!>
       client_cert: <!{credhub}:network_policy_client.certificate!>
       client_key: <!{credhub}:network_policy_client.private_key!>
+      loggregator:
+        ca_cert: <!{credhub}:loggregator_tls_agent.ca!>
+        cert: <!{credhub}:loggregator_tls_agent.certificate!>
+        key: <!{credhub}:loggregator_tls_agent.private_key!>
+        use_v2_api: true
     release: silk
   - name: silk-daemon
     properties:
@@ -2061,234 +2220,241 @@ instance_groups:
   - name: cf-core
   stemcell: default
   vm_type: minimal
-manifest_version: v16.25.0
+manifest_version: v29.0.0
 name: compiled-releases-cf
 releases:
 - name: binary-buildpack
-  sha1: e7a659af0fdf43a73aaf95bc8bc597a8ff68f1b7
+  sha1: d87dc41af0afa20f8f021c3a5639cf157c78661c
   stemcell:
-    os: ubuntu-xenial
-    version: "621.5"
-  url: https://storage.googleapis.com/cf-deployment-compiled-releases/binary-buildpack-1.0.40-ubuntu-xenial-621.5-20210902-161851-5718983.tgz
-  version: 1.0.40
+    os: ubuntu-jammy
+    version: "1.80"
+  url: https://storage.googleapis.com/cf-deployment-compiled-releases/binary-buildpack-1.1.4-ubuntu-jammy-1.80-20230417-231704-983984549.tgz
+  version: 1.1.4
 - name: bpm
-  sha1: b9531b0b072345aab5b02531b79c0e83d26efd82
+  sha1: 664fed1be3f6581fcdf3acd12ca570eac5379e68
   stemcell:
-    os: ubuntu-xenial
-    version: "621.5"
-  url: https://storage.googleapis.com/cf-deployment-compiled-releases/bpm-1.1.14-ubuntu-xenial-621.5-20211008-005524-583637955.tgz
-  version: 1.1.14
+    os: ubuntu-jammy
+    version: "1.80"
+  url: https://storage.googleapis.com/cf-deployment-compiled-releases/bpm-1.2.1-ubuntu-jammy-1.80-20230509-234408-561948945.tgz
+  version: 1.2.1
 - name: capi
-  sha1: e7c4adfe45d79640f9b97f8008fbe9191fd63768
+  sha1: cebde6492330bddd4432365d27058fa553878092
   stemcell:
-    os: ubuntu-xenial
-    version: "621.5"
-  url: https://storage.googleapis.com/cf-deployment-compiled-releases/capi-1.119.0-ubuntu-xenial-621.5-20211006-002351-607653472.tgz
-  version: 1.119.0
+    os: ubuntu-jammy
+    version: "1.80"
+  url: https://storage.googleapis.com/cf-deployment-compiled-releases/capi-1.152.0-ubuntu-jammy-1.80-20230510-141129-392502529.tgz
+  version: 1.152.0
 - name: cf-networking
-  sha1: 6a35883ce42039b5f96b8ba45194015815bec25f
+  sha1: b6ef5d6a3f56e6d74e429f0e86ae46645d39d31a
   stemcell:
-    os: ubuntu-xenial
-    version: "621.5"
-  url: https://storage.googleapis.com/cf-deployment-compiled-releases/cf-networking-2.39.0-ubuntu-xenial-621.5-20211007-161629-702462326.tgz
-  version: 2.39.0
+    os: ubuntu-jammy
+    version: "1.80"
+  url: https://storage.googleapis.com/cf-deployment-compiled-releases/cf-networking-3.25.1-ubuntu-jammy-1.80-20230510-064549-861753062.tgz
+  version: 3.25.1
 - name: cf-smoke-tests
-  sha1: 959ba3c9324a8fbc8514dd17c9ccb1c5e9ed8eaa
+  sha1: a26e3373bfaac8e6bcf56b12ab0ffe4e32b6a349
   stemcell:
-    os: ubuntu-xenial
-    version: "621.5"
-  url: https://storage.googleapis.com/cf-deployment-compiled-releases/cf-smoke-tests-41.0.2-ubuntu-xenial-621.5-20200922-004143-171268098.tgz
-  version: 41.0.2
+    os: ubuntu-jammy
+    version: "1.80"
+  url: https://storage.googleapis.com/cf-deployment-compiled-releases/cf-smoke-tests-42.0.69-ubuntu-jammy-1.80-20230510-103600-453753599.tgz
+  version: 42.0.69
 - name: cflinuxfs3
-  sha1: e4ca2bd260c5fb5f453d6690c43c970c64fd88f9
+  sha1: e18a9f8c7735497b75b7249a884410675cf7bc5a
   stemcell:
-    os: ubuntu-xenial
-    version: "621.5"
-  url: https://storage.googleapis.com/cf-deployment-compiled-releases/cflinuxfs3-0.262.0-ubuntu-xenial-621.5-20211008-223403-912443494.tgz
-  version: 0.262.0
+    os: ubuntu-jammy
+    version: "1.80"
+  url: https://storage.googleapis.com/cf-deployment-compiled-releases/cflinuxfs3-0.364.0-ubuntu-jammy-1.80-20230425-234815-624315892.tgz
+  version: 0.364.0
+- name: cflinuxfs4
+  sha1: b1848ebe9cbb0c25c26571f1958d16c1b50dbd66
+  stemcell:
+    os: ubuntu-jammy
+    version: "1.80"
+  url: https://storage.googleapis.com/cf-deployment-compiled-releases/cflinuxfs4-1.8.0-ubuntu-jammy-1.80-20230426-013233-626076592.tgz
+  version: 1.8.0
 - name: credhub
   sha1: f5b5ce04eee1251d352f337a6ecb794c4dba8a39
   stemcell:
-    os: ubuntu-xenial
-    version: "621.5"
+    os: ubuntu-jammy
+    version: "1.80"
   url: https://bosh.io/d/github.com/pivotal-cf/credhub-release?v=2.11.1
   version: 2.11.1
 - name: diego
-  sha1: e9e5a4bcdb41ef1b75011d9bd9ae1ace186c0510
+  sha1: 2ea4c2a6a283cf3c3521819faae0f6adeba4548b
   stemcell:
-    os: ubuntu-xenial
-    version: "621.5"
-  url: https://storage.googleapis.com/cf-deployment-compiled-releases/diego-2.53.0-ubuntu-xenial-621.5-20210918-033819-066775025.tgz
-  version: 2.53.0
+    os: ubuntu-jammy
+    version: "1.80"
+  url: https://storage.googleapis.com/cf-deployment-compiled-releases/diego-2.76.0-ubuntu-jammy-1.80-20230510-113949-796017044.tgz
+  version: 2.76.0
 - name: dotnet-core-buildpack
-  sha1: 46b7b07e259a4a0c1f1c01ecb919c6a40c31343e
+  sha1: 94db512e461f549f82be0b93e818bfb645a43927
   stemcell:
-    os: ubuntu-xenial
-    version: "621.5"
-  url: https://storage.googleapis.com/cf-deployment-compiled-releases/dotnet-core-buildpack-2.3.34-ubuntu-xenial-621.5-20210902-161753-439994186.tgz
-  version: 2.3.34
+    os: ubuntu-jammy
+    version: "1.80"
+  url: https://storage.googleapis.com/cf-deployment-compiled-releases/dotnet-core-buildpack-2.4.10-ubuntu-jammy-1.80-20230417-231846-947624677.tgz
+  version: 2.4.10
 - name: garden-runc
-  sha1: 7e5e48f6a9c1cdf4ed67b320ba3e5953716251d5
+  sha1: ce2d5c6e51042b7c0b3e444f314d78b018baa21d
   stemcell:
-    os: ubuntu-xenial
-    version: "621.5"
-  url: https://storage.googleapis.com/cf-deployment-compiled-releases/garden-runc-1.19.30-ubuntu-xenial-621.5-20210820-171741-866896742.tgz
-  version: 1.19.30
+    os: ubuntu-jammy
+    version: "1.80"
+  url: https://storage.googleapis.com/cf-deployment-compiled-releases/garden-runc-1.29.0-ubuntu-jammy-1.80-20230509-170600-467037209.tgz
+  version: 1.29.0
 - name: go-buildpack
-  sha1: 52f23d15a3eba8e687ae5f783d96dcbcf7b78f8f
+  sha1: 0227c92ae1c9c139cf030fe3bda31fb4bff8fbda
   stemcell:
-    os: ubuntu-xenial
-    version: "621.5"
-  url: https://storage.googleapis.com/cf-deployment-compiled-releases/go-buildpack-1.9.36-ubuntu-xenial-621.5-20210930-222135-495098565.tgz
-  version: 1.9.36
+    os: ubuntu-jammy
+    version: "1.80"
+  url: https://storage.googleapis.com/cf-deployment-compiled-releases/go-buildpack-1.10.8-ubuntu-jammy-1.80-20230417-202105-584974207.tgz
+  version: 1.10.8
 - name: java-buildpack
-  sha1: da737bdb7103e8518f270a1d1bfa2a8eba9a7a95
+  sha1: c906ae79768e48b3a08d88e82e9fbc3b45645949
   stemcell:
-    os: ubuntu-xenial
-    version: "621.5"
-  url: https://storage.googleapis.com/cf-deployment-compiled-releases/java-buildpack-4.42-ubuntu-xenial-621.5-20210921-132122-828628893.tgz
-  version: "4.42"
+    os: ubuntu-jammy
+    version: "1.80"
+  url: https://storage.googleapis.com/cf-deployment-compiled-releases/java-buildpack-4.58-ubuntu-jammy-1.80-20230510-143552-338854136.tgz
+  version: "4.58"
 - name: loggregator
-  sha1: 835db08dbc371683716825e7e5d759c13588ca02
+  sha1: 6a2106bc5c9f26f83b4b757f2b532371010aa9f0
   stemcell:
-    os: ubuntu-xenial
-    version: "621.5"
-  url: https://storage.googleapis.com/cf-deployment-compiled-releases/loggregator-106.6.0-ubuntu-xenial-621.5-20210511-203806-611258205.tgz
-  version: 106.6.0
+    os: ubuntu-jammy
+    version: "1.80"
+  url: https://storage.googleapis.com/cf-deployment-compiled-releases/loggregator-107.0.4-ubuntu-jammy-1.80-20230509-195948-171094471.tgz
+  version: 107.0.4
 - name: metrics-discovery
-  sha1: 18c13cb8e2ef67798b93cac4abc69cc1040d0cec
+  sha1: ebe904b248ef6a3a75a0defa4197045c5df8c517
   stemcell:
-    os: ubuntu-xenial
-    version: "621.5"
-  url: https://storage.googleapis.com/cf-deployment-compiled-releases/metrics-discovery-3.0.6-ubuntu-xenial-621.5-20210615-231306-866442869.tgz
-  version: 3.0.6
+    os: ubuntu-jammy
+    version: "1.80"
+  url: https://storage.googleapis.com/cf-deployment-compiled-releases/metrics-discovery-3.2.9-ubuntu-jammy-1.80-20230510-084857-483891122.tgz
+  version: 3.2.9
 - name: nats
-  sha1: 3c01c52494f741905e699e524978e4d3c2c57207
+  sha1: 2b3f9aa60e8dcf2260aa653cd8679fb934d9cf67
   stemcell:
-    os: ubuntu-xenial
-    version: "621.5"
-  url: https://storage.googleapis.com/cf-deployment-compiled-releases/nats-40-ubuntu-xenial-621.5-20210609-220059-858441787.tgz
-  version: "40"
+    os: ubuntu-jammy
+    version: "1.80"
+  url: https://storage.googleapis.com/cf-deployment-compiled-releases/nats-56.2.0-ubuntu-jammy-1.80-20230509-130735-253304527.tgz
+  version: 56.2.0
 - name: nginx-buildpack
-  sha1: 86fc554c07273042ab6d992b0387fc92c22e8d1a
+  sha1: b2f6342a0a4d958c7da22ffb27d24dd9589bacce
   stemcell:
-    os: ubuntu-xenial
-    version: "621.5"
-  url: https://storage.googleapis.com/cf-deployment-compiled-releases/nginx-buildpack-1.1.32-ubuntu-xenial-621.5-20210930-220617-985462983.tgz
-  version: 1.1.32
+    os: ubuntu-jammy
+    version: "1.80"
+  url: https://storage.googleapis.com/cf-deployment-compiled-releases/nginx-buildpack-1.2.2-ubuntu-jammy-1.80-20230418-020527-523846065.tgz
+  version: 1.2.2
 - name: r-buildpack
-  sha1: 6d35097f22987e2f53daea31cee3a40dbc834051
+  sha1: 86876eb5952ae92ea64c68387490d3136636650e
   stemcell:
-    os: ubuntu-xenial
-    version: "621.5"
-  url: https://storage.googleapis.com/cf-deployment-compiled-releases/r-buildpack-1.1.22-ubuntu-xenial-621.5-20210930-222144-955028618.tgz
-  version: 1.1.22
+    os: ubuntu-jammy
+    version: "1.80"
+  url: https://storage.googleapis.com/cf-deployment-compiled-releases/r-buildpack-1.2.1-ubuntu-jammy-1.80-20230417-201752-852874388.tgz
+  version: 1.2.1
 - name: nodejs-buildpack
-  sha1: 8a142b96998ae3d54fbbe4803a3b259c3f41f532
+  sha1: 2b26cf818868c92e47198e45cb7792381f8c802d
   stemcell:
-    os: ubuntu-xenial
-    version: "621.5"
-  url: https://storage.googleapis.com/cf-deployment-compiled-releases/nodejs-buildpack-1.7.62-ubuntu-xenial-621.5-20211001-152756-414651036.tgz
-  version: 1.7.62
+    os: ubuntu-jammy
+    version: "1.80"
+  url: https://storage.googleapis.com/cf-deployment-compiled-releases/nodejs-buildpack-1.8.9-ubuntu-jammy-1.80-20230417-202426-66105072.tgz
+  version: 1.8.9
 - name: php-buildpack
-  sha1: 26e8ae63c09fbb57924bb6a7dd8da04faf556035
+  sha1: a7c7b0fcb3a53fc268117d41232a7b119121ffbc
   stemcell:
-    os: ubuntu-xenial
-    version: "621.5"
-  url: https://storage.googleapis.com/cf-deployment-compiled-releases/php-buildpack-4.4.46-ubuntu-xenial-621.5-20210930-211934-301931864.tgz
-  version: 4.4.46
+    os: ubuntu-jammy
+    version: "1.80"
+  url: https://storage.googleapis.com/cf-deployment-compiled-releases/php-buildpack-4.6.4-ubuntu-jammy-1.80-20230417-231006-475284026.tgz
+  version: 4.6.4
 - name: pxc
-  sha1: da2899f915caf4b9e73c9749b035cd9668ae8074
+  sha1: 6ae91526d8d0186ca2f6d7a5dc5717b51ee15c4f
   stemcell:
-    os: ubuntu-xenial
-    version: "621.5"
-  url: https://storage.googleapis.com/cf-deployment-compiled-releases/pxc-0.39.0-ubuntu-xenial-621.5-20211005-144331-171812002.tgz
-  version: 0.39.0
+    os: ubuntu-jammy
+    version: "1.80"
+  url: https://storage.googleapis.com/cf-deployment-compiled-releases/pxc-1.0.11-ubuntu-jammy-1.80-20230510-174302-743407709.tgz
+  version: 1.0.11
 - name: python-buildpack
-  sha1: f0ae6053a7532c6c221d6f12f1c69261c0fa115c
+  sha1: fa47b652893be9c394f4ce98b890a1c7540055cc
   stemcell:
-    os: ubuntu-xenial
-    version: "621.5"
-  url: https://storage.googleapis.com/cf-deployment-compiled-releases/python-buildpack-1.7.46-ubuntu-xenial-621.5-20210930-233522-034921645.tgz
-  version: 1.7.46
+    os: ubuntu-jammy
+    version: "1.80"
+  url: https://storage.googleapis.com/cf-deployment-compiled-releases/python-buildpack-1.8.9-ubuntu-jammy-1.80-20230418-085707-503750686.tgz
+  version: 1.8.9
 - name: routing
-  sha1: 84853488c7b7cebb733f2669cd07d25a45ab9d5a
+  sha1: 2451da0f1f58c231bdaa3da08573ef56913629de
   stemcell:
-    os: ubuntu-xenial
-    version: "621.5"
-  url: https://storage.googleapis.com/cf-deployment-compiled-releases/routing-0.225.0-ubuntu-xenial-621.5-20210924-164959-996034787.tgz
-  version: 0.225.0
+    os: ubuntu-jammy
+    version: "1.80"
+  url: https://storage.googleapis.com/cf-deployment-compiled-releases/routing-0.266.0-ubuntu-jammy-1.80-20230509-170937-716903069.tgz
+  version: 0.266.0
 - name: ruby-buildpack
-  sha1: 0c2759f126a274ecb6d1880d636cb6825d213664
+  sha1: 38f56578c49803b6b53f6dbadb09d8a089dc2e38
   stemcell:
-    os: ubuntu-xenial
-    version: "621.5"
-  url: https://storage.googleapis.com/cf-deployment-compiled-releases/ruby-buildpack-1.8.47-ubuntu-xenial-621.5-20210930-224917-774866808.tgz
-  version: 1.8.47
+    os: ubuntu-jammy
+    version: "1.80"
+  url: https://storage.googleapis.com/cf-deployment-compiled-releases/ruby-buildpack-1.10.1-ubuntu-jammy-1.80-20230418-012226-840494111.tgz
+  version: 1.10.1
 - name: silk
-  sha1: 8cb1c9d93c2b3e5a1342bd9bb95e10bd089c6436
+  sha1: efaecbda13d15cd4586a271a6d2982e7036bf0ab
   stemcell:
-    os: ubuntu-xenial
-    version: "621.5"
-  url: https://storage.googleapis.com/cf-deployment-compiled-releases/silk-2.39.0-ubuntu-xenial-621.5-20211007-161451-662510062.tgz
-  version: 2.39.0
+    os: ubuntu-jammy
+    version: "1.80"
+  url: https://storage.googleapis.com/cf-deployment-compiled-releases/silk-3.25.1-ubuntu-jammy-1.80-20230508-154855-85837854.tgz
+  version: 3.25.1
 - name: staticfile-buildpack
-  sha1: c51218ae3c353891d856800161a91d7114a954e5
+  sha1: 8e1083972c3d9e9bff706fb35385adaae24365ad
   stemcell:
-    os: ubuntu-xenial
-    version: "621.5"
-  url: https://storage.googleapis.com/cf-deployment-compiled-releases/staticfile-buildpack-1.5.25-ubuntu-xenial-621.5-20210930-203959-665426806.tgz
-  version: 1.5.25
+    os: ubuntu-jammy
+    version: "1.80"
+  url: https://storage.googleapis.com/cf-deployment-compiled-releases/staticfile-buildpack-1.6.2-ubuntu-jammy-1.80-20230418-020854-683059672.tgz
+  version: 1.6.2
 - name: statsd-injector
-  sha1: 36fa23483487d5134857201f412d68b53513733c
+  sha1: cf89868a3ef2e6930c220eff72adb3265cce618a
   stemcell:
-    os: ubuntu-xenial
-    version: "621.5"
-  url: https://storage.googleapis.com/cf-deployment-compiled-releases/statsd-injector-1.11.16-ubuntu-xenial-621.5-20210611-185755-356047559.tgz
-  version: 1.11.16
+    os: ubuntu-jammy
+    version: "1.80"
+  url: https://storage.googleapis.com/cf-deployment-compiled-releases/statsd-injector-1.11.30-ubuntu-jammy-1.80-20230509-204258-423841349.tgz
+  version: 1.11.30
 - name: uaa
   sha1: 57ffc783177cbca45a983cc573b591b636d0c0bf
   stemcell:
-    os: ubuntu-xenial
-    version: "621.5"
+    os: ubuntu-jammy
+    version: "1.80"
   url: https://bosh.io/d/github.com/cloudfoundry/uaa-release?v=75.14.0
   version: 75.14.0
 - name: loggregator-agent
-  sha1: f4c33b0253f36aff880db3e619651389ce89e305
+  sha1: 38f4d47d8d4e200cdcb1ab6f290ed6d6b5a2e1b1
   stemcell:
-    os: ubuntu-xenial
-    version: "621.5"
-  url: https://storage.googleapis.com/cf-deployment-compiled-releases/loggregator-agent-6.3.4-ubuntu-xenial-621.5-20210812-165634-782948492.tgz
-  version: 6.3.4
+    os: ubuntu-jammy
+    version: "1.80"
+  url: https://storage.googleapis.com/cf-deployment-compiled-releases/loggregator-agent-7.2.1-ubuntu-jammy-1.80-20230510-094113-840681489.tgz
+  version: 7.2.1
 - name: log-cache
-  sha1: 39f889529a74b48022df1eeba2ed4aa206fc8ec3
+  sha1: c1d5a4c6c13c6c01f4f90b8b3d8c12dcab5a9d40
   stemcell:
-    os: ubuntu-xenial
-    version: "621.5"
-  url: https://storage.googleapis.com/cf-deployment-compiled-releases/log-cache-2.11.4-ubuntu-xenial-621.5-20211007-191505-317761889.tgz
-  version: 2.11.4
+    os: ubuntu-jammy
+    version: "1.80"
+  url: https://storage.googleapis.com/cf-deployment-compiled-releases/log-cache-3.0.2-ubuntu-jammy-1.80-20230510-085132-149032405.tgz
+  version: 3.0.2
 - name: bosh-dns-aliases
-  sha1: 57fb6f0a1c00ec58985b8c154586ccfd49c2abe6
+  sha1: 48bcc0ace404f44dd71938c95a7e80e3de4be84e
   stemcell:
-    os: ubuntu-xenial
-    version: "621.5"
-  url: https://storage.googleapis.com/cf-deployment-compiled-releases/bosh-dns-aliases-0.0.4-ubuntu-xenial-621.5-20210517-184256-782500497.tgz
+    os: ubuntu-jammy
+    version: "1.80"
+  url: https://storage.googleapis.com/cf-deployment-compiled-releases/bosh-dns-aliases-0.0.4-ubuntu-jammy-1.80-20230207-093820-286069196.tgz
   version: 0.0.4
 - name: cf-cli
-  sha1: d4b06254cc1633295d32bb526d66c0aadcb1b4d8
+  sha1: 7c0a9494e55e6a0d0116aa08bf445ecc77f6c126
   stemcell:
-    os: ubuntu-xenial
-    version: "621.5"
-  url: https://storage.googleapis.com/cf-deployment-compiled-releases/cf-cli-1.34.0-ubuntu-xenial-621.5-20210929-173058-494349751.tgz
-  version: 1.34.0
+    os: ubuntu-jammy
+    version: "1.80"
+  url: https://storage.googleapis.com/cf-deployment-compiled-releases/cf-cli-1.44.0-ubuntu-jammy-1.80-20230302-202958-149992869.tgz
+  version: 1.44.0
 - name: postgres
-  sha1: e44bbe8f8a7cdde1cda67b202e399a239d104db6
-  url: https://bosh.io/d/github.com/cloudfoundry/postgres-release?v=43
-  version: "43"
+  sha1: 582b1de9522077102dfa44ff7164cd8f499dbfc8
+  url: https://bosh.io/d/github.com/cloudfoundry/postgres-release?v=44
+  version: "44"
 stemcells:
 - alias: default
-  os: ubuntu-bionic
-  version: "1.54"
+  os: ubuntu-jammy
+  version: "1.108"
 update:
   canaries: 1
   canary_watch_time: 30000-1200000

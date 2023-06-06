@@ -2,6 +2,10 @@ application_ca:
   ca: <!{credhub}:application_ca.ca!>
   certificate: <!{credhub}:application_ca.certificate!>
   private_key: <!{credhub}:application_ca.private_key!>
+asg_syncer_locket_client:
+  ca: <!{credhub}:asg_syncer_locket_client.ca!>
+  certificate: <!{credhub}:asg_syncer_locket_client.certificate!>
+  private_key: <!{credhub}:asg_syncer_locket_client.private_key!>
 binding_cache_api_tls:
   ca: <!{credhub}:binding_cache_api_tls.ca!>
   certificate: <!{credhub}:binding_cache_api_tls.certificate!>
@@ -28,14 +32,16 @@ cc_bridge_tps:
   ca: <!{credhub}:cc_bridge_tps.ca!>
   certificate: <!{credhub}:cc_bridge_tps.certificate!>
   private_key: <!{credhub}:cc_bridge_tps.private_key!>
-cc_bulk_api_password: <!{credhub}:cc_bulk_api_password!>
 cc_database_password: <!{credhub}:cc_database_password!>
 cc_db_encryption_key: <!{credhub}:cc_db_encryption_key!>
-cc_internal_api_password: <!{credhub}:cc_internal_api_password!>
 cc_logcache_tls:
   ca: <!{credhub}:cc_logcache_tls.ca!>
   certificate: <!{credhub}:cc_logcache_tls.certificate!>
   private_key: <!{credhub}:cc_logcache_tls.private_key!>
+cc_prom_scraper_scrape_tls:
+  ca: <!{credhub}:cc_prom_scraper_scrape_tls.ca!>
+  certificate: <!{credhub}:cc_prom_scraper_scrape_tls.certificate!>
+  private_key: <!{credhub}:cc_prom_scraper_scrape_tls.private_key!>
 cc_public_tls:
   ca: <!{credhub}:cc_public_tls.ca!>
   certificate: <!{credhub}:cc_public_tls.certificate!>
@@ -145,14 +151,18 @@ log_cache_metrics_tls:
   ca: <!{credhub}:log_cache_metrics_tls.ca!>
   certificate: <!{credhub}:log_cache_metrics_tls.certificate!>
   private_key: <!{credhub}:log_cache_metrics_tls.private_key!>
-log_cache_nozzle_metrics_tls:
-  ca: <!{credhub}:log_cache_nozzle_metrics_tls.ca!>
-  certificate: <!{credhub}:log_cache_nozzle_metrics_tls.certificate!>
-  private_key: <!{credhub}:log_cache_nozzle_metrics_tls.private_key!>
 log_cache_proxy_tls:
   ca: <!{credhub}:log_cache_proxy_tls.ca!>
   certificate: <!{credhub}:log_cache_proxy_tls.certificate!>
   private_key: <!{credhub}:log_cache_proxy_tls.private_key!>
+log_cache_syslog_server_metrics_tls:
+  ca: <!{credhub}:log_cache_syslog_server_metrics_tls.ca!>
+  certificate: <!{credhub}:log_cache_syslog_server_metrics_tls.certificate!>
+  private_key: <!{credhub}:log_cache_syslog_server_metrics_tls.private_key!>
+log_cache_syslog_tls:
+  ca: <!{credhub}:log_cache_syslog_tls.ca!>
+  certificate: <!{credhub}:log_cache_syslog_tls.certificate!>
+  private_key: <!{credhub}:log_cache_syslog_tls.private_key!>
 log_cache_to_loggregator_agent:
   ca: <!{credhub}:log_cache_to_loggregator_agent.ca!>
   certificate: <!{credhub}:log_cache_to_loggregator_agent.certificate!>
@@ -217,10 +227,6 @@ loggregator_trafficcontroller_tls:
   ca: <!{credhub}:loggregator_trafficcontroller_tls.ca!>
   certificate: <!{credhub}:loggregator_trafficcontroller_tls.certificate!>
   private_key: <!{credhub}:loggregator_trafficcontroller_tls.private_key!>
-logs_provider:
-  ca: <!{credhub}:logs_provider.ca!>
-  certificate: <!{credhub}:logs_provider.certificate!>
-  private_key: <!{credhub}:logs_provider.private_key!>
 metric_scraper_ca:
   ca: <!{credhub}:metric_scraper_ca.ca!>
   certificate: <!{credhub}:metric_scraper_ca.certificate!>
@@ -288,6 +294,10 @@ nfsv3driver_client_cert:
   ca: <!{credhub}:nfsv3driver_client_cert.ca!>
   certificate: <!{credhub}:nfsv3driver_client_cert.certificate!>
   private_key: <!{credhub}:nfsv3driver_client_cert.private_key!>
+policy_server_asg_syncer_cc_client:
+  ca: <!{credhub}:policy_server_asg_syncer_cc_client.ca!>
+  certificate: <!{credhub}:policy_server_asg_syncer_cc_client.certificate!>
+  private_key: <!{credhub}:policy_server_asg_syncer_cc_client.private_key!>
 prom_scraper_metrics_tls:
   ca: <!{credhub}:prom_scraper_metrics_tls.ca!>
   certificate: <!{credhub}:prom_scraper_metrics_tls.certificate!>
