@@ -4,8 +4,8 @@ platform: linux
 image_resource:
   type: registry-image
   source:
-    repository: starkandwayne/concourse-go
-    tag: '1.18'
+    repository: ((image.concourse_go.url))
+    tag:        ((image.concourse_go.tag))
 
 inputs:
 - name: git
