@@ -4,8 +4,8 @@ platform: linux
 image_resource:
   type: registry-image
   source:
-    repository: ((image/genesis.url))
-    tag:        ((image/genesis.tag))
+    repository: ((image-registry.account))/genesis
+    tag:        ((image-registry.genesis_tag))
 
 inputs:
 - name: version
