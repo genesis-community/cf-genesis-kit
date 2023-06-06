@@ -1,6 +1,6 @@
 ---
 genesis:
-  bosh_env:  snw-genesis-ci
+  bosh_env:   rsat-bc-genesis-ci
 
 meta:
-  _ip_prefix: "10.128."
+  _ip_prefix: "172.20."

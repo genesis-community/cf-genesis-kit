@@ -2,8 +2,8 @@
 meta:
   kit:             cf
   release:         CF Genesis Kit
-  target:          cloudpipes/genesis
-  url:             https://cloudpipes.starkandwayne.com
+  target:          pipes/genesis
+  url:             https://pipes.scalecf.net
   iaas:            gcp
   exposed:         no
   version_file:    version
