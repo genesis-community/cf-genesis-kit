@@ -35,8 +35,8 @@ meta:
     name:  Genesis CI Bot
 
   image:
-    name: ((image.genesis.url))
-    tag:  ((image.genesis.tag))
+    name: ((image/genesis.url))
+    tag:  ((image/genesis.tag))
 
   aws:
     bucket:      genesis-pipeline
