@@ -51,6 +51,10 @@
   value: ((cf_core_network))
 
 - type: replace
+  path: /instance_groups/name=log-cache/networks/name=default/name
+  value: ((cf_core_network))
+
+- type: replace
   path: /instance_groups/name=database/networks/name=default/name
   value: ((cf_db_network))
 
@@ -182,6 +186,13 @@
       deployment: ((deployment_name))
       network: ((cf_core_network))
       domain: bosh
+  - domain: log-cache.service.cf.internal
+    targets:
+    - query: '*'
+      instance_group: log-cache
+      deployment: ((deployment_name))
+      network: ((cf_core_network))
+      domain: bosh
   - domain: file-server.service.cf.internal
     targets:
     - query: '*'
@@ -207,6 +218,20 @@
     targets:
     - query: '*'
       instance_group: log-api
+      deployment: ((deployment_name))
+      network: ((cf_core_network))
+      domain: bosh
+  - domain: nats.service.cf.internal
+    targets:
+    - query: '*'
+      instance_group: nats
+      deployment: ((deployment_name))
+      network: ((cf_core_network))
+      domain: bosh
+  - domain: _.nats.service.cf.internal
+    targets:
+    - query: '_'
+      instance_group: nats
       deployment: ((deployment_name))
       network: ((cf_core_network))
       domain: bosh
@@ -263,20 +288,6 @@
     targets:
     - query: '*'
       instance_group: uaa
-      deployment: ((deployment_name))
-      network: ((cf_core_network))
-      domain: bosh
-  - domain: nats.service.cf.internal
-    targets:
-    - query: '*'
-      instance_group: nats
-      deployment: ((deployment_name))
-      network: ((cf_core_network))
-      domain: bosh
-  - domain: _.nats.service.cf.internal
-    targets:
-    - query: '_'
-      instance_group: nats
       deployment: ((deployment_name))
       network: ((cf_core_network))
       domain: bosh
