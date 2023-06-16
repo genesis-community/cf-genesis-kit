@@ -4,7 +4,8 @@ platform: linux
 image_resource:
   type: registry-image
   source:
-    repository: starkandwayne/genesis
+    repository: ((image/genesis.url))
+    tag:        ((image/genesis.tag))
 
 inputs:
 - name: version
@@ -23,8 +24,8 @@ params:
   DEVELOP_BRANCH:   develop
   RELEASE_BRANCH:   main
   GITHUB_OWNER:     genesis-community
-  GIT_EMAIL:        ci@starkandwayne.com
-  GIT_NAME:         Stark & Wayne CI Bot
+  GIT_EMAIL:        genesis-ci@rubidiumstudios.com
+  GIT_NAME:         Genesis CI Bot
 
 run:
   path: git-ci/ci/scripts/release

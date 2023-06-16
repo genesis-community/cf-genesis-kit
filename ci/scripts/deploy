@@ -6,8 +6,8 @@ export CI_ROOT="git-ci"
 export DEPLOY_ENV="${DEPLOY_ENV:-"ci-baseline"}"
 export KEEP_STATE="${KEEP_STATE:-"false"}"
 export VERSION_FROM="version/number"
-export GIT_NAME="${GIT_NAME:-"Stark & Wayne CI Bot"}"
-export GIT_EMAIL="${GIT_EMAIL:-"ci@starkandwayne.com"}"
+export GIT_NAME="${GIT_NAME:-"Genesis CI Bot"}"
+export GIT_EMAIL="${GIT_EMAIL:-"genesis-ci@rubidiumstudios.com"}"
 
 header() {
   echo

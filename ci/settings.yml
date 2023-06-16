@@ -2,8 +2,8 @@
 meta:
   kit:             cf
   release:         CF Genesis Kit
-  target:          cloudpipes/genesis
-  url:             https://cloudpipes.starkandwayne.com
+  target:          pipes/genesis
+  url:             https://pipes.scalecf.net
   iaas:            gcp
   exposed:         no
   version_file:    version
@@ -28,8 +28,8 @@ meta:
     token:     ((vault.token))
 
   aws:
-    access_key: ((aws.access_key_id))
-    secret_key: ((aws.secret_access_key))
+    access_key:  ((cloudfoundry-community-aws.access_key_id))
+    secret_key:  ((cloudfoundry-community-aws.secret_access_key))
 
   github:
     owner:        genesis-community
@@ -40,6 +40,6 @@ meta:
     access_token: ((github.access_token))
 
   shout:
-    url:      ((shout.url)
+    url:      ((shout.url))
     username: ((shout.username))
     password: ((shout.password))
