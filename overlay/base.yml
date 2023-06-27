@@ -49,3 +49,11 @@ params:
   system_domain: (( concat "system." params.base_domain ))
   app_domains: (( grab meta.default_apps_domains meta.internal_app_domains ))
   apps_domain: (( grab params.app_domains[0] ))
+  stemcell_os: ubuntu-jammy
+  stemcell_version: latest
+
+stemcells:
+  - (( merge on alias ))
+  - alias: default
+    os: (( grab params.stemcell_os ))
+    version: (( grab params.stemcell_version ))
