@@ -235,6 +235,13 @@ addons:
           instance_group: doppler
           network: cf-core
           query: '*'
+      - domain: log-cache.service.cf.internal
+        targets:
+        - deployment: router-synergy-cf
+          domain: bosh
+          instance_group: log-cache
+          network: cf-core
+          query: '*'
       - domain: file-server.service.cf.internal
         targets:
         - deployment: router-synergy-cf
@@ -263,6 +270,20 @@ addons:
           instance_group: log-api
           network: cf-core
           query: '*'
+      - domain: nats.service.cf.internal
+        targets:
+        - deployment: router-synergy-cf
+          domain: bosh
+          instance_group: nats
+          network: cf-core
+          query: '*'
+      - domain: _.nats.service.cf.internal
+        targets:
+        - deployment: router-synergy-cf
+          domain: bosh
+          instance_group: nats
+          network: cf-core
+          query: _
       - domain: policy-server.service.cf.internal
         targets:
         - deployment: router-synergy-cf
@@ -319,20 +340,6 @@ addons:
           instance_group: uaa
           network: cf-core
           query: '*'
-      - domain: nats.service.cf.internal
-        targets:
-        - deployment: router-synergy-cf
-          domain: bosh
-          instance_group: nats
-          network: cf-core
-          query: '*'
-      - domain: _.nats.service.cf.internal
-        targets:
-        - deployment: router-synergy-cf
-          domain: bosh
-          instance_group: nats
-          network: cf-core
-          query: _
     release: bosh-dns-aliases
   name: bosh-dns-aliases
 exodus:
@@ -347,7 +354,6 @@ exodus:
   base_domain: cf.testing.example
   bosh: router-synergy
   cf-deployment-date: 2023-Jun-06 00:28:49 UTC
-  cf-deployment-hotfixes: true
   cf-deployment-url: https://github.com/cloudfoundry/cf-deployment/releases/tag/v29.0.0
   cf-deployment-version: 29.0.0
   core_network: cf-core
@@ -1771,7 +1777,7 @@ instance_groups:
   vm_extensions: []
   vm_type: minimal
 - azs:
-  - z1
+  - us-west-2a
   instances: 1
   jobs:
   - name: log-cache
@@ -1852,7 +1858,7 @@ instance_groups:
     release: log-cache
   name: log-cache
   networks:
-  - name: default
+  - name: cf-core
   stemcell: default
   vm_type: small-highmem
 - azs:
@@ -2267,9 +2273,9 @@ releases:
   url: https://bosh.io/d/github.com/cloudfoundry/cflinuxfs4-release?v=1.8.0
   version: 1.8.0
 - name: credhub
-  sha1: f5b5ce04eee1251d352f337a6ecb794c4dba8a39
-  url: https://bosh.io/d/github.com/pivotal-cf/credhub-release?v=2.11.1
-  version: 2.11.1
+  sha1: 3717ef633086e455eb3e06c01111284ad528a1e4
+  url: https://bosh.io/d/github.com/pivotal-cf/credhub-release?v=2.12.27
+  version: 2.12.27
 - name: diego
   sha1: 53ab64c97875bd08d596507f02da2b214db11faf
   url: https://bosh.io/d/github.com/cloudfoundry/diego-release?v=2.76.0
@@ -2347,9 +2353,9 @@ releases:
   url: https://bosh.io/d/github.com/cloudfoundry/statsd-injector-release?v=1.11.30
   version: 1.11.30
 - name: uaa
-  sha1: 57ffc783177cbca45a983cc573b591b636d0c0bf
-  url: https://bosh.io/d/github.com/cloudfoundry/uaa-release?v=75.14.0
-  version: 75.14.0
+  sha1: 5cb4a87fca890d8602ef7e10da2ddb27325a7fb4
+  url: https://bosh.io/d/github.com/cloudfoundry/uaa-release?v=76.11.0
+  version: 76.11.0
 - name: loggregator-agent
   sha1: 623e45f6c19a68d01c313a9a1a504dabc39ac1cf
   url: https://bosh.io/d/github.com/cloudfoundry/loggregator-agent-release?v=7.2.1
@@ -2367,9 +2373,9 @@ releases:
   url: https://bosh.io/d/github.com/bosh-packages/cf-cli-release?v=1.44.0
   version: 1.44.0
 - name: haproxy
-  sha1: 71959d17235a1ce8c9ee58da136b7c04c74e3b31
-  url: https://bosh.io/d/github.com/cloudfoundry-incubator/haproxy-boshrelease?v=9.8.0
-  version: 9.8.0
+  sha1: 70acc9dfcd550c8efbd85287f82ce7a396e46a0a
+  url: https://bosh.io/d/github.com/cloudfoundry-incubator/haproxy-boshrelease?v=12.1.0%2B2.7.7
+  version: 12.1.0+2.7.7
 - name: postgres
   sha1: 582b1de9522077102dfa44ff7164cd8f499dbfc8
   url: https://bosh.io/d/github.com/cloudfoundry/postgres-release?v=44
@@ -2377,7 +2383,7 @@ releases:
 stemcells:
 - alias: default
   os: ubuntu-jammy
-  version: "1.108"
+  version: latest
 update:
   canaries: 1
   canary_watch_time: 30000-1200000
