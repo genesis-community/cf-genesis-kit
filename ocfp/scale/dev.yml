@@ -7,6 +7,7 @@ params:
   diego_cell_instances: 1
   doppler_instances: 3
   log_api_instances: 3
+  log_cache_instances: 3
   nats_instances: 3
   router_instances: 3
   scheduler_instances: 3
@@ -19,57 +20,61 @@ params:
   diego_api_vm_type: "diego-api-dev"
   diego_cell_vm_type: "diego-cell-dev"
   doppler_vm_type: "doppler-dev"
-  errand_vm_type: "errand-dev"
+  errand_vm_type: "default-dev"
   log_api_vm_type: "log-api-dev"
+  log_cache_vm_type: "log-cache-dev"
   nats_vm_type: "nats-dev"
   router_vm_type: "router-dev"
   scheduler_vm_type: "scheduler-dev"
   tcp_router_vm_type: "tcp-router-dev"
   uaa_vm_type: "uaa-dev"
-  windows_diego_cell_vm_type: "windows-cell-dev"
+  windows_diego_cell_vm_type: "windows-cell-dev" # Not in use
 
 ---
 # VM Types
 - type: replace
   path: /instance_groups/name=diego-cell/vm_type
-  value: diego-cell-dev
+  value: (( grab params.diego_cell_vm_type ))
 - type: replace
   path: /instance_groups/name=diego-api/vm_type
-  value: diego-api-dev
+  value: (( grab params.diego_api_vm_type ))
 - type: replace
   path: /instance_groups/name=nats/vm_type
-  value: nats-dev
+  value: (( grab params.nats_vm_type ))
 - type: replace
   path: /instance_groups/name=uaa/vm_type
-  value: uaa-dev
+  value: (( grab params.uaa_vm_type ))
 - type: replace
   path: /instance_groups/name=api/vm_type
-  value: api-dev
+  value: (( grab params.api_vm_type ))
 - type: replace
   path: /instance_groups/name=cc-worker/vm_type
-  value: cc-worker-dev
+  value: (( grab params.cc_worker_vm_type ))
 - type: replace
   path: /instance_groups/name=scheduler/vm_type
-  value: scheduler-dev
+  value: (( grab params.scheduler_vm_type ))
 - type: replace
   path: /instance_groups/name=router/vm_type
-  value: router-dev
+  value: (( grab params.router_vm_type ))
 - type: replace
   path: /instance_groups/name=tcp-router/vm_type
-  value: tcp-router-dev
+  value: (( grab params.tcp_router_vm_type ))
 - type: replace
   path: /instance_groups/name=doppler/vm_type
-  value: doppler-dev
+  value: (( grab params.doppler_vm_type ))
 - type: replace
   path: /instance_groups/name=log-api/vm_type
-  value: log-api-dev
+  value: (( grab params.log_api_vm_type ))
+- type: replace
+  path: /instance_groups/name=log-cache/vm_type
+  value: (( grab params.log_cache_vm_type ))
 - type: replace
   path: /instance_groups/name=credhub/vm_type
-  value: credhub-dev
+  value: (( grab params.credhub_vm_type ))
 - type: replace
   path: /instance_groups/name=rotate-cc-database-key?/vm_type
-  value: default-dev
+  value: (( grab params.errand_vm_type ))
 - type: replace
   path: /instance_groups/name=smoke-tests/vm_type
-  value: default-dev
+  value: (( grab params.errand_vm_type ))
 

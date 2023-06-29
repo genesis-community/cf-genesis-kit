@@ -31,6 +31,9 @@
   path: /instance_groups/name=log-api/azs
   value: (( grab meta.ocfp.azs ))
 - type: replace
+  path: /instance_groups/name=log-cache/azs
+  value: (( grab meta.ocfp.azs ))
+- type: replace
   path: /instance_groups/name=tcp-router/azs
   value: (( grab meta.ocfp.azs ))
 - type: replace
