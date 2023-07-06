@@ -4,6 +4,8 @@
   path: /instance_groups/name=database?
 - type: remove
   path: /releases/name=pxc?
+- type: remove
+  path: /releases/name=postgres
 
 # Remove MySQL variables
 - type: remove
