@@ -84,6 +84,14 @@ instance_groups:
         - ((diego_instance_identity_ca.ca))
         - ((credhub_tls.ca))
         - ((uaa_ssl.ca))
+  - name: cflinuxfs4-rootfs-setup
+    release: cflinuxfs4
+    properties:
+      cflinuxfs4-rootfs:
+        trusted_certs:
+        - ((diego_instance_identity_ca.ca))
+        - ((credhub_tls.ca))
+        - ((uaa_ssl.ca))
   - name: garden
     release: garden-runc
     provides:
@@ -117,6 +125,7 @@ instance_groups:
         rep:
           preloaded_rootfses:
           - cflinuxfs3:/var/vcap/packages/cflinuxfs3/rootfs.tar
+          - cflinuxfs4:/var/vcap/packages/cflinuxfs4/rootfs.tar
           placement_tags: (( grab meta.tags || meta.__default_tags ))
       containers:
         proxy:
@@ -149,8 +158,6 @@ instance_groups:
   - name: route_emitter
     release: diego
     consumes:
-      nats:
-        ip_addresses: false
       nats-tls:
         ip_addresses: false
     properties:
@@ -199,4 +206,3 @@ addons:
           network: (( grab meta.network_name || "default" ))
           query: _
     release: bosh-dns-aliases
-

@@ -6,7 +6,7 @@ params:
     - ((credhub_tls.ca))
     - ((uaa_ssl.ca))
     additional_trusted_certs:
-      - (( append ))
+    - (( append ))
 
 instance_groups:
 - name: (( grab meta.name ))
