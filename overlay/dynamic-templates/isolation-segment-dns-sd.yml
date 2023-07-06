@@ -23,4 +23,3 @@
   path: /instance_groups/name={{segment-name}}/jobs/name=route_emitter/properties/internal_routes?
   value:
     enabled: true
-
