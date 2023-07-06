@@ -7,3 +7,8 @@ params:
 
   # UAA is not a team player, wants to go its own way...
   uaadb_scheme:       postgresql
+
+---
+# Remove requirement of postgres release -- this does not get cleaned up by upstream because it assumes mysql
+- type: remove
+  path: /releases/name=postgres
