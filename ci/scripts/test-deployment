@@ -177,12 +177,18 @@ if [[ "$SKIP_DEPLOY" == "false" ]]; then
 		stemcell_os="$(jq -r '.[0].os' <<<"$stemcell_data")"
 		stemcell_version="$(jq -r '.[0].version' <<<"$stemcell_data")"
 		stemcell_name="bosh-${stemcell_iaas}-${stemcell_os}-go_agent"
+		upload_options=('--version' "${stemcell_version}" '--name' "$stemcell_name")
+		upload_params="?v=${stemcell_version}"
+		if [[ "$stemcell_version" == "latest" ]] ; then
+			stemcell_version='[0-9]\+\.[0-9]\+'
+			upload_options=()
+			upload_params=""
+		fi
 		if ! genesis bosh "$DEPLOY_ENV" stemcells 2>/dev/null \
 		   | grep "^${stemcell_name}" \
 		   | awk '{print $2}' | sed -e 's/\*//' \
-		   | grep "^$stemcell_version\$" ; then
-			genesis bosh "$DEPLOY_ENV" upload-stemcell "https://bosh.io/d/stemcells/$stemcell_name?v=${stemcell_version}" \
-				--version "${stemcell_version}" --name "$stemcell_name"
+		   | grep "^${stemcell_version}\$" ; then
+			genesis bosh "$DEPLOY_ENV" upload-stemcell "https://bosh.io/d/stemcells/$stemcell_name${upload_params}" ${upload_options[@]+"${upload_options[@]}"}
 		fi
 	fi
 
