@@ -9,7 +9,7 @@ genesis:
 
 params:
   disk_type:          default
-  base_domain:        (( concat meta._ip_prefix "9.10.netip.cc" ))
-  postgres_vip:       (( concat meta._ip_prefix "9.9" ))
+  base_domain:        (( concat meta._ip_prefix "8.49.netip.cc" ))
+  postgres_vip:       (( concat meta._ip_prefix "8.48" ))
   availability_zones: [z1]
-  haproxy_ips:        [ (( concat meta._ip_prefix "9.10" )) ]
+  haproxy_ips:        [ (( concat meta._ip_prefix "8.49" )) ]
