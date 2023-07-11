@@ -4,7 +4,7 @@ meta:
   release:         CF Genesis Kit
   target:          pipes/genesis
   url:             https://pipes.scalecf.net
-  iaas:            gcp
+  iaas:            vsphere
   exposed:         no
   version_file:    version
   initial_version: 2.1.0
