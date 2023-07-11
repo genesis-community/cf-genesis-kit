@@ -2367,6 +2367,14 @@ instance_groups:
         - <!{credhub}:credhub_tls.ca!>
         - <!{credhub}:uaa_ssl.ca!>
     release: cflinuxfs3
+  - name: cflinuxfs4-rootfs-setup
+    properties:
+      cflinuxfs4-rootfs:
+        trusted_certs:
+        - <!{credhub}:diego_instance_identity_ca.ca!>
+        - <!{credhub}:credhub_tls.ca!>
+        - <!{credhub}:uaa_ssl.ca!>
+    release: cflinuxfs4
   - name: garden
     properties:
       garden:
@@ -2414,6 +2422,7 @@ instance_groups:
           - custom-params-group
           preloaded_rootfses:
           - cflinuxfs3:/var/vcap/packages/cflinuxfs3/rootfs.tar
+          - cflinuxfs4:/var/vcap/packages/cflinuxfs4/rootfs.tar
       enable_consul_service_registration: false
       enable_declarative_healthcheck: true
       logging:
@@ -2430,8 +2439,6 @@ instance_groups:
         key: <!{credhub}:diego_rep_agent_v2.private_key!>
     release: diego
   - consumes:
-      nats:
-        ip_addresses: false
       nats-tls:
         ip_addresses: false
     name: route_emitter
@@ -2574,6 +2581,14 @@ instance_groups:
         - certificate: first-additional-test-ssl-cert
           private_key: first-additional-test-ssl-private-key
     release: cflinuxfs3
+  - name: cflinuxfs4-rootfs-setup
+    properties:
+      cflinuxfs4-rootfs:
+        trusted_certs:
+        - <!{credhub}:diego_instance_identity_ca.ca!>
+        - <!{credhub}:credhub_tls.ca!>
+        - <!{credhub}:uaa_ssl.ca!>
+    release: cflinuxfs4
   - name: garden
     properties:
       garden:
@@ -2625,6 +2640,7 @@ instance_groups:
           - default-params-group
           preloaded_rootfses:
           - cflinuxfs3:/var/vcap/packages/cflinuxfs3/rootfs.tar
+          - cflinuxfs4:/var/vcap/packages/cflinuxfs4/rootfs.tar
       enable_consul_service_registration: false
       enable_declarative_healthcheck: true
       logging:
@@ -2641,8 +2657,6 @@ instance_groups:
         key: <!{credhub}:diego_rep_agent_v2.private_key!>
     release: diego
   - consumes:
-      nats:
-        ip_addresses: false
       nats-tls:
         ip_addresses: false
     name: route_emitter
