@@ -3,9 +3,9 @@
 ################################################################################
 # Utility Functions
 ################################################################################
-warn()  { warn=1  ; describe >&2 "#Y{[WARNING]} $(echo -e "$*")\n" ; }
-abort() { abort=1 ; describe >&2 "#R{[ERROR]} $(echo -e "$*")\n" ; }
-fail()  { bail "#R{[ERROR]} $(echo -e "$*")\n" ; exit 1 ; }
+warn()  { warn=1  ; describe >&2 "#Y{[WARNING]} $(echo -e "$*")" ; }
+abort() { abort=1 ; describe >&2 "#R{[ERROR]} $(echo -e "$*")" ; }
+fail()  { bail "#R{[ERROR]} $(echo -e "$*")" ; exit 1 ; }
 
 switch_cf_version() {
   describe >&2 "" \
@@ -451,7 +451,7 @@ features::validate() {
       (enable-service-discovery|ssh-proxy-on-routers|no-tcp-routers)
         features+=( "$want" )
         ;;
-      (blacksmith-integration|trust-blacksmith-ca|app-scheduler-integration|app-autoscaler-integration|prometheus-integration|stratos-integration|v2-nats-credentials)
+      (blacksmith-integration|trust-blacksmith-ca|app-scheduler-integration|app-autoscaler-integration|prometheus-integration|stratos-integration|v2-nats-credentials|scs-integration)
         features+=( "$want" )
         ;;
       (windows-diego-cells)
