@@ -20,10 +20,16 @@ list() {
 }
 
 login() {
+  local USE_CF_TARGETS=true
   if ! cf plugins | grep -q '^cf-targets'; then
+    USE_CF_TARGETS=false
     describe "#Y{The cf-targets plugin does not seem to be installed}"
-    echo "Install it first, via 'genesis do $GENESIS_ENVIRONMENT -- setup-cli'"
-    exit 1
+    echo "It is recommended you install it first, via 'genesis do $GENESIS_ENVIRONMENT -- setup-cli'"
+    echo "NOTE:  It is not compatible with Apple M1 (arm) architecture"
+    continue_without_cftargets=
+    prompt_for continue_without_cftargets boolean -i --default n \
+      "Continue anyways?"
+    "$continue_without_cftargets" || exit 1
   fi
 
   api_domain="$(exodus api_domain)"
@@ -34,7 +40,9 @@ login() {
   #TODO enfoce ssl validation
   cf api "$api_url" --skip-ssl-validation
   cf auth "$username" "$password"
-  cf save-target -f "$GENESIS_ENVIRONMENT"
+  if "$USE_CF_TARGETS" ; then
+    cf save-target -f "$GENESIS_ENVIRONMENT"
+  fi
   echo -e "\n\n"
   cf target
 }
