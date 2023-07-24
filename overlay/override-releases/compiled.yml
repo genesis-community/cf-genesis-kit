@@ -1,10 +1,10 @@
---- {}
-# There are no compiled versions of these releases, but we have to override
-# them, so we're overriding them with source releases.
-#releases:
-#- name: credhub <as example>
-#  url: https://bosh.io/d/github.com/pivotal-cf/credhub-release?v=2.12.27
-#  version: 2.12.27
-#  sha1: 3717ef633086e455eb3e06c01111284ad528a1e4
-#exodus:
-#  cf-deployment-hotfixes: true
+---
+releases:
+- name: routing
+  sha1: 6feb59ec3e2687b469aa9451ab72a5922baf8025
+  stemcell:
+    os: ubuntu-jammy
+    version: "1.80"
+  url: https://storage.googleapis.com/cf-deployment-compiled-releases/routing-0.275.0-ubuntu-jammy-1.80-20230712-204705-863429293.tgz
+  version: 0.275.0
+cf-deployment-hotfixes: true

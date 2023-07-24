@@ -1,8 +1,8 @@
---- {}
-#releases:
-#- name: credhub <as example>
-#  url: https://bosh.io/d/github.com/pivotal-cf/credhub-release?v=2.12.27
-#  version: 2.12.27
-#  sha1: 3717ef633086e455eb3e06c01111284ad528a1e4
-#exodus:
-#  cf-deployment-hotfixes: true
+---
+releases:
+- name: "routing"
+  version: "0.275.0"
+  url: "https://bosh.io/d/github.com/cloudfoundry/routing-release?v=0.275.0"
+  sha1: "6dd63d1653bf333ea64fca061a3a16d9be2e750f"
+exodus:
+  cf-deployment-hotfixes: true

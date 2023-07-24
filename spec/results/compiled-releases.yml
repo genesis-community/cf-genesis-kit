@@ -342,6 +342,7 @@ addons:
           query: '*'
     release: bosh-dns-aliases
   name: bosh-dns-aliases
+cf-deployment-hotfixes: true
 exodus:
   admin_password: <!{credhub}:cf_admin_password!>
   admin_username: admin
@@ -352,6 +353,7 @@ exodus:
   base_domain: cf.testing.examle
   bosh: compiled-releases
   cf-deployment-date: 2023-May-24 08:57:36 UTC
+  cf-deployment-hotfixes: true
   cf-deployment-url: https://github.com/cloudfoundry/cf-deployment/releases/tag/v29.0.0
   cf-deployment-version: 29.0.0
   core_network: cf-core
@@ -2384,12 +2386,12 @@ releases:
   url: https://storage.googleapis.com/cf-deployment-compiled-releases/python-buildpack-1.8.9-ubuntu-jammy-1.80-20230418-085707-503750686.tgz
   version: 1.8.9
 - name: routing
-  sha1: 2451da0f1f58c231bdaa3da08573ef56913629de
+  sha1: 6feb59ec3e2687b469aa9451ab72a5922baf8025
   stemcell:
     os: ubuntu-jammy
     version: "1.80"
-  url: https://storage.googleapis.com/cf-deployment-compiled-releases/routing-0.266.0-ubuntu-jammy-1.80-20230509-170937-716903069.tgz
-  version: 0.266.0
+  url: https://storage.googleapis.com/cf-deployment-compiled-releases/routing-0.275.0-ubuntu-jammy-1.80-20230712-204705-863429293.tgz
+  version: 0.275.0
 - name: ruby-buildpack
   sha1: 38f56578c49803b6b53f6dbadb09d8a089dc2e38
   stemcell:

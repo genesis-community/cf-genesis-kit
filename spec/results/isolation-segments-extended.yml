@@ -372,6 +372,7 @@ exodus:
   base_domain: cf.testing.example
   bosh: isolation-segments-extended
   cf-deployment-date: 2023-May-24 08:57:36 UTC
+  cf-deployment-hotfixes: true
   cf-deployment-url: https://github.com/cloudfoundry/cf-deployment/releases/tag/v29.0.0
   cf-deployment-version: 29.0.0
   core_network: cf-core
@@ -2936,9 +2937,9 @@ releases:
   url: https://bosh.io/d/github.com/cloudfoundry/python-buildpack-release?v=1.8.9
   version: 1.8.9
 - name: routing
-  sha1: d57ae8fe0d0d8a9b040cea254a782d1d5e8fa2e3
-  url: https://bosh.io/d/github.com/cloudfoundry/routing-release?v=0.266.0
-  version: 0.266.0
+  sha1: 6dd63d1653bf333ea64fca061a3a16d9be2e750f
+  url: https://bosh.io/d/github.com/cloudfoundry/routing-release?v=0.275.0
+  version: 0.275.0
 - name: ruby-buildpack
   sha1: b66d19f6160f4e9e4c786a2ef33f450c8eff848d
   url: https://bosh.io/d/github.com/cloudfoundry/ruby-buildpack-release?v=1.10.1
