@@ -13,4 +13,10 @@ instance_groups:
           trusted_certs:
             - (( append ))
             - (( join "" meta.ocfp.certs.trusted ))
+    - name: cflinuxfs4-rootfs-setup
+      properties:
+        cflinuxfs4-rootfs:
+          trusted_certs:
+            - (( append ))
+            - (( join "" meta.ocfp.certs.trusted ))
 
