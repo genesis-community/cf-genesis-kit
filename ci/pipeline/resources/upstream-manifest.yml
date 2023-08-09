@@ -1,8 +1,8 @@
 resources:
-  - name: upstream
+  - name: upstream-manifest
     type: git
     check_every: 168h
     source:
-      uri:    (( grab meta.upstream.url ))
+      uri:    (( grab meta.upstream.manifest.url ))
       branch: master
       ignore_paths: [ci/*]

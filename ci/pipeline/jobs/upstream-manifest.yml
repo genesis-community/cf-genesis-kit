@@ -1,5 +1,5 @@
 jobs:
-- name: upstream-sync
+- name: upstream-manifest
   public: true
   serial: true
   plan:
@@ -7,14 +7,14 @@ jobs:
     - in_parallel:
       - { get: git, trigger: false, passed: [spec-tests] }
       - { get: git-ci, trigger: false}
-      - { get: upstream, trigger: true }
-    - task: upstream-sync
-      file: git-ci/ci/tasks/get-latest-upstream.yml
+      - { get: upstream-manifest, trigger: true }
+    - task: upstream-manifest
+      file: git-ci/ci/tasks/get-latest-upstream-manifest.yml
       params:
         GIT_EMAIL:        (( grab meta.git.email ))
         GIT_NAME:         (( grab meta.git.name ))
-        UPSTREAM_PATH:    (( grab meta.upstream.path ))
-        UPSTREAM_REPO:    (( grab meta.upstream.repo ))
+        UPSTREAM_PATH:    (( grab meta.upstream.manifest.path ))
+        UPSTREAM_REPO:    (( grab meta.upstream.manifest.repo ))
     - put: git
       params:
         merge: true

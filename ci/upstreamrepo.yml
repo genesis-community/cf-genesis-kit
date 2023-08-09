@@ -1,0 +1,10 @@
+repos:
+- name: bosh
+  repo: https://github.com/cloudfoundry/bosh
+- name: credhub
+  repo: https://github.com/pivotal/credhub-release
+- name: bpm
+  repo: https://github.com/cloudfoundry/bpm-release
+- name: uaa
+  repo: https://github.com/cloudfoundry/uaa-release
+

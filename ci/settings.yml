@@ -10,7 +10,8 @@ meta:
   initial_version: 2.1.0
 
   upstream:
-    package:  cf-deployment
+    manifest:
+      package:  cf-deployment
 
   bosh:
     uri:      ((bosh.uri))
@@ -38,6 +39,8 @@ meta:
     main-branch:  main
     private_key:  ((github.private_key))
     access_token: ((github.access_token))
+    name:         ((github.name))
+    email:        ((github.email))
 
   shout:
     url:      ((shout.url))

@@ -20,19 +20,20 @@ meta:
   pipeline: (( grab meta.name ))
 
   upstream:
-    package:  example # dummy value for things that don't use upstream
-    path:     (( grab meta.upstream.package ))
-    org:      cloudfoundry
-    repo:     (( concat meta.upstream.org "/" meta.upstream.package ))
-    url:      (( concat "https://github.com/" meta.upstream.repo ".git" ))
+    manifest:
+      package:  example # dummy value for things that don't use upstream
+      path:     (( grab meta.upstream.manifest.package ))
+      org:      cloudfoundry
+      repo:     (( concat meta.upstream.manifest.org "/" meta.upstream.manifest.package ))
+      url:      (( concat "https://github.com/" meta.upstream.manifest.repo ".git" ))
 
   vault:
     url:   (( param "Please provide the address of your Vault" ))
     token: (( param "Please provide a Vault Token" ))
 
   git:
-    email: genesis-ci@rubidiumstudios.com
-    name:  Genesis CI Bot
+    email: ((github.email))
+    name:  ((github.name))
 
   image:
     name: ((image/genesis.url))
@@ -104,7 +105,7 @@ groups:
 
   - name: upstream
     jobs:
-    - upstream-sync
+    - upstream-manifest
 
   - name: versions
     jobs:
