@@ -46,6 +46,7 @@ scs_space_guid=$(cf space ${space} --guid)
 
 memory="256M"
 disk="1048M"
+stack="cflinuxfs4"
 buildpack="go_buildpack"
 release_tag="Greenwich.SR3"
 broker_uri="https://github.com/cloudfoundry-community/scs-broker/archive/refs/tags/v1.1.0.tar.gz"
@@ -77,6 +78,10 @@ do # Process opertor arguments
     (disk)
       disk="${2}"
       shift 2 || fail "Usage: ... disk <#M>"
+      ;;
+    (stack)
+      stack="${2}"
+      shift 2 || fail "Usage: ... stack <stack-name>"
       ;;
     (buildpack)
       buildpack="${2}"
@@ -136,6 +141,7 @@ then
 ---
 applications:
   - name: scs-broker
+    stack: ${stack}
     buildpack: ${buildpack}
     memory: ${memory}
     disk_quota: ${disk}
