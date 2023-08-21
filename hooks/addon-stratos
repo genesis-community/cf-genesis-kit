@@ -1,12 +1,26 @@
 #!/bin/bash
+
 set -eu
 
-stratos_version="4.4.0"
+declare file buildpack stack create_sgs exodus_path system_api_domain \
+  secrets_mount vault_env env_path stratos_domain stratos_db_scheme \
+  stratos_db_hostname stratos_db_username stratos_db_password \
+  stratos_db_port stratos_db_database stratos_db_sslmode \
+  stratos_session_store_sekret stratos_client stratos_client_secret \
+  stratos_version stratos_releases_url memory disk timeout stratos_sso_options
+
+# NOTE: TODO: all of these values come from cli, then vault, then default.
+stratos_version="4.4.1"
+stratos_releases_url="https://github.com/cloudfoundry-community/stratos/releases/download/${stratos_version}/stratos-ui-packaged.zip"
+stratos_sso_options="nosplash, logout" # Question: Should this come from vault?
+buildpack="binary_buildpack"
+stack="cflinuxfs4"
+memory="1512M"
+disk="1024M"
+timeout="180"
 
 exodus_path=$(lookup --partial genesis.exodus_base)
-
 system_api_domain="$(exodus api_domain)"
-
 secrets_mount=$(lookup genesis.secrets_mount)
 vault_env=$(lookup genesis.env)
 
@@ -43,19 +57,37 @@ case "${GENESIS_REQUESTED_FEATURES}" in
 esac
 
 stratos_session_store_sekret=$(echo $RANDOM | sha256sum | awk '{print $1}')
-
 stratos_client=$(safe get ${exodus_path}:stratos_client)
 stratos_client_secret=$(safe get ${exodus_path}:stratos_secret)
 
-shift # run
-create_sgs=
+shift # shift off the "run" argument that genesis passes to hooks
 while [[ $# > 0 ]]
 do
   arg="$1" ; shift
   case $arg in
     (file)
-      file="$1"
-      shift || fail "Expected a filename after 'file'"
+      file="${1}"
+      shift || fail "Usage: ... file <path/name> # default: will download stratos-ui-packaged.zip from github"
+      ;;
+    (buildpack)
+      buildpack="${1}"
+      shift || fail "Usage: ... buildpack <name> # default: binary_buildpack"
+      ;;
+    (stack)
+      stack="${1}"
+      shift || fail "Usage: stack <name> # default: cflinuxfs4" 
+      ;;
+    (memory)
+      memory="${1}"
+      shift || fail "Usage: memory <XXXXM> # default: 1512M" 
+      ;;
+    (disk)
+      disk="${1}"
+      shift || fail "Usage: disk <XXXXM> # default: 1024M" 
+      ;;
+    (timeout)
+      timeout="${1}"
+      shift || fail "Usage: timeout <seconds> # default: 180"
       ;;
     (sgs)
       create_sgs=true
@@ -64,13 +96,13 @@ do
 done
 
 
-if [[ -s "${1:-}" ]] ; then
-  shift
-  unzip -o "$1"
+if [[ -s "${file:-}" ]] ; then
+  unzip -o "${file}"
 else
   echo "Downloading Stratos ${stratos_version}..."
-  wget https://github.com/orange-cloudfoundry/stratos-ui-cf-packager/releases/download/${stratos_version}/stratos-ui-packaged.zip &&
-    unzip -o stratos-ui-packaged.zip && rm stratos-ui-packaged.zip
+  wget "${stratos_releases_url}" &&
+    unzip -o stratos-ui-packaged.zip &&
+      rm stratos-ui-packaged.zip
 fi
 
 cf create-space -o system stratos
@@ -104,18 +136,19 @@ cat > manifest.yml <<-APPMANIFEST
 ---
 applications:
   - name: apps
-    memory: 1512M
-    disk_quota: 1024M
     host: console
-    timeout: 180
-    buildpack: binary_buildpack
     health-check-type: port
+    memory: ${memory}
+    disk_quota: ${disk}
+    timeout: ${timeout}
+    buildpack: ${buildpack}
+    stack: ${stack}
     env:
       CF_API_URL: https://${system_api_domain}
       CF_CLIENT: ${stratos_client}
       CF_CLIENT_SECRET: ${stratos_client_secret}
       SESSION_STORE_SECRET: ${stratos_session_store_sekret}
-      SSO_OPTIONS: "nosplash, logout"
+      SSO_OPTIONS: "${stratos_sso_options}"
       SSO_WHITELIST: "https://${stratos_domain}/*"
       SSO_LOGIN: "true"
       DB_SSL_MODE: "${stratos_db_sslmode}"
