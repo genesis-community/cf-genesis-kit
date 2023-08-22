@@ -7,7 +7,8 @@ declare file buildpack stack create_sgs exodus_path system_api_domain \
   stratos_db_hostname stratos_db_username stratos_db_password \
   stratos_db_port stratos_db_database stratos_db_sslmode \
   stratos_session_store_sekret stratos_client stratos_client_secret \
-  stratos_version stratos_releases_url memory disk timeout stratos_sso_options
+  stratos_version stratos_releases_url memory disk timeout stratos_sso_options \
+  create_sgs
 
 # NOTE: TODO: all of these values come from cli, then vault, then default.
 stratos_version="4.4.1"
@@ -32,15 +33,15 @@ case "${GENESIS_REQUESTED_FEATURES}" in
     vault_env=$(lookup --partial genesis.vault_env)
     env_path="${secrets_mount}${vault_env}"
 
-    stratos_domain=$(safe get ${tf_path}/ocf/fqdns:stratos) 
+    stratos_domain=$(safe get "${tf_path}/ocf/fqdns:stratos") 
 
     echo "Looking up database credentials from vault at ${env_path}/stratos/db/stratos ..."
-    stratos_db_scheme=$(  safe get ${env_path}/stratos/db/stratos:scheme)
-    stratos_db_hostname=$(safe get ${env_path}/stratos/db/stratos:hostname)
-    stratos_db_username=$(safe get ${env_path}/stratos/db/stratos:username)
-    stratos_db_password=$(safe get ${env_path}/stratos/db/stratos:password)
-    stratos_db_port=$(    safe get ${env_path}/stratos/db/stratos:port)
-    stratos_db_database=$(safe get ${env_path}/stratos/db/stratos:database)
+    stratos_db_scheme=$(  safe get "${env_path}/stratos/db/stratos:scheme")
+    stratos_db_hostname=$(safe get "${env_path}/stratos/db/stratos:hostname")
+    stratos_db_username=$(safe get "${env_path}/stratos/db/stratos:username")
+    stratos_db_password=$(safe get "${env_path}/stratos/db/stratos:password")
+    stratos_db_port=$(    safe get "${env_path}/stratos/db/stratos:port")
+    stratos_db_database=$(safe get "${env_path}/stratos/db/stratos:database")
     stratos_db_sslmode="verify-ca"
     ;;
   (*)
@@ -56,12 +57,12 @@ case "${GENESIS_REQUESTED_FEATURES}" in
     ;;
 esac
 
-stratos_session_store_sekret=$(echo $RANDOM | sha256sum | awk '{print $1}')
-stratos_client=$(safe get ${exodus_path}:stratos_client)
-stratos_client_secret=$(safe get ${exodus_path}:stratos_secret)
+stratos_session_store_sekret=$(echo "${RANDOM}" | sha256sum | awk '{print $1}')
+stratos_client=$(safe get "${exodus_path}:stratos_client")
+stratos_client_secret=$(safe get "${exodus_path}:stratos_secret")
 
 shift # shift off the "run" argument that genesis passes to hooks
-while [[ $# > 0 ]]
+while [[ $# -gt 0 ]]
 do
   arg="$1" ; shift
   case $arg in
@@ -123,7 +124,7 @@ then # Security group that allows to talk to VPC IP Range
   }
 ]
 EOF
-  cf create-security-group vpc ${PWD}/vpc-sg.json || true
+  cf create-security-group vpc "${PWD}/vpc-sg.json" || true
   cf bind-staging-security-group vpc || true
   cf bind-running-security-group vpc || true
 fi
