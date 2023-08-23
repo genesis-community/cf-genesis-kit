@@ -19,6 +19,7 @@ stack="cflinuxfs4"
 memory="1512M"
 disk="1024M"
 timeout="180"
+create_sgs=false
 
 exodus_path=$(lookup --partial genesis.exodus_base)
 system_api_domain="$(exodus api_domain)"
@@ -95,7 +96,6 @@ do
       ;;
   esac
 done
-
 
 if [[ -s "${file:-}" ]] ; then
   unzip -o "${file}"
