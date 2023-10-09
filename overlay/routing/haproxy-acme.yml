@@ -2,7 +2,7 @@
 meta:
   ocfp:
     certs:
-      acme_thumbprint:  (( vault $GENESIS_EXODUS_MOUNT genesis.env "/acme/acme:thumbprint" ))
+      acme_thumbprint:  (( vault $GENESIS_EXODUS_MOUNT genesis.env "/acme/settings/cf-cert-management:acme_thumbprint" ))
 instance_groups:
 - name: haproxy
   jobs:
