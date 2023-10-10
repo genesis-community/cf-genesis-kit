@@ -1,6 +1,18 @@
 #!/bin/bash
 set -eu
 
+# Automatically set to 'true' when called by blueprint which removes all echo
+# messages and uses default values for the answers
+: "${SILENT_MODE:=false}"
+
+info()  { echo -e "\n\e[32m$*\e[0m"; }
+
+header() {
+  local token="="
+  local line=$(printf "${token}%.0s" {1..80})
+  info "\n${line}\n${token} $*\n${line}"
+}
+
 list() {
   echo "The following addons are defined:"
   echo
@@ -16,6 +28,10 @@ list() {
   echo "                    api instance group."
   echo
   echo "  stratos           Deploy Stratos, the Cloud Foundry web console."
+  echo 
+  echo "  acme-client       Install and configure the acme-client for stateless"
+  echo "                    crtificate renewal - preequisite for enabling"
+  echo "                    the '- haproxy-acme' feature"
   echo 
 }
 
@@ -47,10 +63,86 @@ login() {
   cf target
 }
 
-case $GENESIS_ADDON_SCRIPT in
-  (list) list ; exit 0 ;;
+installacme(){
+  email="$(git config --global user.email)"
+  if [[ $SILENT_MODE != true ]]; then
+  header "Installing acme.sh shell script"
+
+    prompt_for email line --default "$email"  \
+    'Type your email address'
+  fi
+  curl -s https://get.acme.sh | sh -s email=$email > /dev/null 2>&1
+}
+
+
+
+registeracme(){
+  if [[ $SILENT_MODE != true ]]; then  
+    header "Registering acme client and setting vault credential"
+
+    lab_targets=($(safe targets --json 2>/dev/null | jq -r '.[].name'))
+
+    echo -e "Available targets: ${lab_targets[*]}"
+    current_target=$(safe target --json 2>/dev/null | jq -r '.name')
+
+    echo -e "You are currently targeting: '${current_target}'"
+    prompt_for change_target boolean --default false \
+    "Would you like to use another target?"
+
+    if [[ $change_target == "true" ]]; then
+      prompt_for new_target line 'Type your target'
+      safe target "$new_target"
+    fi
+  fi
+  current_thumbprint=$(safe get "$GENESIS_EXODUS_MOUNT$GENESIS_ENVIRONMENT/acme/acme:thumbprint" 2>/dev/null || true)
   
-  (login) login ; exit 0 ;;
+  if [[ -n $current_thumbprint ]]; then
+    if [[ $SILENT_MODE != true ]]; then
+      prompt_for update_thumbprint boolean --default false \
+      "You have already set your thumbprint to '${current_thumbprint}'. Would you like to update it?"
+      else
+        update_thumbprint=false
+    fi
+    else
+      update_thumbprint=true
+  fi
+  
+
+  if [[ $update_thumbprint == true ]]; then
+    thumbprint=$(~/.acme.sh/acme.sh --register-account | awk -F"'" '/ACCOUNT_THUMBPRINT=/{print $2}')
+      if [[ $SILENT_MODE != true ]]; then
+        echo -e "\n$GENESIS_EXODUS_MOUNT$GENESIS_ENVIRONMENT/acme/acme is being set with the following value:"
+      fi
+    safe set "$GENESIS_EXODUS_MOUNT$GENESIS_ENVIRONMENT/acme/acme" thumbprint="$thumbprint"
+    else
+    if [[ $SILENT_MODE != true ]]; then
+      echo "Skipping thumbprint update."
+    fi
+  fi
+}
+
+setup_acme(){
+  if [[ -x ~/.acme.sh/acme.sh ]]; then
+    acme_version=$(~/.acme.sh/acme.sh -v 2>/dev/null || true)
+    url=$(echo "$acme_version" | grep -Eo 'https?://[^ ]+' || true)
+    version=$(echo "$acme_version" | grep -Eo 'v[0-9]+\.[0-9]+\.[0-9]+' || true)
+  fi
+  if [[ -n $version ]]; then
+    if [[ $SILENT_MODE != true ]]; then
+      echo "You are currently using acme.sh '${version}' from '${url}'"
+    fi
+  else
+    installacme
+  fi
+  registeracme
+
+}
+
+
+case $GENESIS_ADDON_SCRIPT in
+  (list) list ;;
+  
+  (login) login ;;
   
   (remigrate)
     # Migrate the secrets
@@ -90,9 +182,13 @@ case $GENESIS_ADDON_SCRIPT in
   (smoketest)
     "$GENESIS_BOSH_COMMAND" -e "$BOSH_ENVIRONMENT" -d "$BOSH_DEPLOYMENT" run-errand smoke_tests
     ;;
-  
+
+  (acme-client)
+    setup_acme
+    ;;
+
   (*) run_extended_addon "$@" ;; # This will run the addon script in the
                             # $GENESIS_ADDON_SCRIPT file, if it exists.
                             # Ex: hooks/addon-stratos
 esac
-
+exit 0
