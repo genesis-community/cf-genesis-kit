@@ -16,5 +16,5 @@ required_configs:
   - cloud
   - runtime
 
-genesis_version_min: 2.7.23-rc1
+genesis_version_min: 2.7.23
 secrets_store: credhub
