@@ -44,6 +44,7 @@ case "${GENESIS_REQUESTED_FEATURES}" in
     stratos_db_port=$(    safe get "${env_path}/stratos/db/stratos:port")
     stratos_db_database=$(safe get "${env_path}/stratos/db/stratos:database")
     stratos_db_sslmode="verify-ca"
+    stratos_vpc_range="10.0.0.0-10.255.255.255"
     ;;
   (*)
     stratos_domain="console.$(exodus apps_domain)"
@@ -55,6 +56,7 @@ case "${GENESIS_REQUESTED_FEATURES}" in
     stratos_db_port=$(    lookup params.db_port     5432)
     stratos_db_database=$(lookup params.db_database "stratos")
     stratos_db_sslmode=$( lookup params.db_sslmode  "disabled") # verify-ca
+    stratos_vpc_range=$(  lookup params.stratos_vpc "172.16.0.0-172.31.255.255")
     ;;
 esac
 
@@ -120,7 +122,7 @@ then # Security group that allows to talk to VPC IP Range
 [
   {
     "protocol": "all",
-    "destination": "10.0.0.0-10.255.255.255"
+    "destination": "10.0.0.0-10.255.255.255,172.16.0.1-172.31.255.255"
   }
 ]
 EOF
@@ -136,8 +138,7 @@ fi
 cat > manifest.yml <<-APPMANIFEST
 ---
 applications:
-  - name: apps
-    host: console
+  - name: console
     health-check-type: port
     memory: ${memory}
     disk_quota: ${disk}
