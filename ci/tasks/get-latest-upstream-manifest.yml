@@ -11,6 +11,7 @@ inputs:
   - name: git-ci
   - name: git
   - name: upstream-manifest
+    path: upstream
 
 outputs:
   - name: git
