@@ -16,7 +16,7 @@ need_command() {
   local cmd=${1:?need_command() - no command name given}
   local url=${2:-}
 
-  if [[ ! -x "$(type -p "$cmd")" ]]; then
+  if [[ ! -x "$(type -P "$cmd")" ]]; then
     echo >&2 "${cmd} is not installed."
     if [[ -n "$url" ]]; then
       echo >&2 "Please download it from ${url}"
@@ -96,7 +96,7 @@ OPTIONS:
              whatever is set in 'meta.exposed' in the settings.yml file)
   -o         Open pipeline in browser if os supports it (mac only currently)
              after applying changes. Specify twice to not do anything else.
-  --fly <x>  Path to fly command, otherwise will use $(type -p fly)
+  --fly <x>  Path to fly command, otherwise will use $(type -P fly)
 
 EOF
   exit $rc
@@ -167,7 +167,7 @@ need_command jq
 
 if [[ -z "$fly" ]] ; then
   need_command fly;
-  fly="$(type -p fly)"
+  fly="$(type -P fly)"
 fi
 
 # -- Get settings file --------------------------------------------------------
@@ -220,7 +220,7 @@ if (( DRYRUN > 0 )) ; then
     if [[ -n "${persistent_file}" ]] ; then
       if [[ "${persistent_file}" =~ '->0x' ]] ; then
         persistent_file=''
-      elif [[ -n "$(type -p realpath || true)" ]] ; then
+      elif [[ -n "$(type -P realpath || true)" ]] ; then
         persistent_file="$(realpath --relative-to="$call_dir" "$persistent_file")"
       fi
     fi

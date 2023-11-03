@@ -1,0 +1,2 @@
+	genesis "do" "${DEPLOY_ENV}" -- setup-cli -f
+	genesis "do" "${DEPLOY_ENV}" -- login

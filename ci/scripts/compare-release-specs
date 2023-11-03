@@ -3,7 +3,7 @@ set -ue
 
 # What branch is the comparison of the current working branch being compared against
 compare_branch="${1:-origin/}"
-check_dirs="spec manifests manifests/releases"
+check_dirs="spec/results manifests"
 
 orig_dir="$(pwd)"
 # needed because of when running locally or in ci
@@ -31,6 +31,11 @@ workdir="$(mktemp -d)"
 mkdir "$workdir/compare"
 cp -R "$(pwd)/.git" "$workdir/compare/"
 pushd "$workdir/compare" > /dev/null
+if ! git show -q "$compare_branch" &>/dev/null ; then
+  echo "The latest release ($compare_branch) is NOT an ancestor to this commit."
+  echo "This should never happen -- Cannot continue!"
+ exit 1
+fi
 git checkout -qf --detach "$compare_branch"
 prev_releases="$(releases)"
 popd > /dev/null
@@ -113,7 +118,7 @@ if [[ "${#changed[@]}" -gt 0 && -n "${changed[0]}" ]] ; then
     echo "$curr_releases" \
     | jq --argjson gitrepos "$upstreamrepo" -r 'reduce .releases[] as {$name, $url, $sha1, $version} ({repos: []};
         ($url
-        | if ($url | test("https?://s3.amazonaws.com")) then
+        | if ($url | test("https?://s3(-.*)?.amazonaws.com")) then
             ($gitrepos.repos | map(select(.name == $name))[0].repo)
           elif ($url | test("https?://storage.googleapis.com")) then
             ($gitrepos.repos | map(select(.name == $name))[0].repo)
