@@ -4,5 +4,5 @@ resources:
     check_every: 168h
     source:
       uri:    (( grab meta.upstream.manifest.url ))
-      branch: master
+      branch: (( grab meta.upstream.manifest.branch || "master" ))
       ignore_paths: [ci/*]

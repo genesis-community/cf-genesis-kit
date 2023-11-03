@@ -12,6 +12,7 @@ meta:
   upstream:
     manifest:
       package:  cf-deployment
+      branch:   main
 
   bosh:
     uri:      ((bosh.uri))
