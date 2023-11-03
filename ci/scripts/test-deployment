@@ -17,7 +17,7 @@ header() {
 }
 
 has_feature() {
-	genesis lookup "$1" kit.features 2>/dev/null | jq -e --arg feature "$2" '. | index($feature)' >/dev/null
+	genesis "$1" lookup kit.features 2>/dev/null | jq -e --arg feature "$2" '. | index($feature)' >/dev/null
 }
 
 is_proto() {
@@ -29,9 +29,9 @@ cleanup_environment() {
 	if [[ -f .genesis/manifests/$env-state.yml ]] ; then
 		header "Preparing to delete proto environment $env"
 		echo "Generating reference manifest..."
-		genesis manifest "$env" --no-redact > manifest.yml 2>/dev/null
+		genesis "$env" manifest --no-redact > manifest.yml 2>/dev/null
 		echo $'\n'"Building BOSH variables file..."
-		genesis lookup --merged "${env}" bosh-variables > vars.yml 2>/dev/null
+		genesis "${env}" lookup --merged bosh-variables > vars.yml 2>/dev/null
 		echo $'\n'"$env state file:"
 		echo "----------------->8------------------"
 		cat ".genesis/manifests/$env-state.yml"
@@ -68,16 +68,8 @@ cleanup() {
 	done
 }
 
-# Replace this with genesis lookup --env once its available (2.8.5)
-cat <<'EOF' > get-env.pl
-#!/usr/bin/env perl
-use lib "$ENV{HOME}/.geese/lib";
-use JSON::PP qw/encode_json/;
-print encode_json(\%ENV);
-EOF
-chmod +x "get-env.pl"
-vault_path="$(genesis sh "${DEPLOY_ENV}" -s "$(pwd)/get-env.pl" 2>/dev/null | grep '^{' | jq -r '.GENESIS_SECRETS_BASE')"
-exodus_path="$(genesis sh "${DEPLOY_ENV}" -s "$(pwd)/get-env.pl" 2>/dev/null | grep '^{' | jq -r '.GENESIS_EXODUS_BASE')"
+vault_path="$(genesis "$DEPLOY_ENV" lookup --env GENESIS_SECRETS_BASE)"
+exodus_path="$(genesis "$DEPLOY_ENV" lookup --env GENESIS_EXODUS_BASE)"
 vault_path="${vault_path%/}" # trim any trailing slash
 # -----
 
@@ -105,10 +97,10 @@ if [[ "$SKIP_REPLACE_SECRETS" == "false" ]] ; then
 
 	# Remove credhub values
 	if ! is_proto "$DEPLOY_ENV" ; then (
-		bosh_env="$(genesis lookup "$DEPLOY_ENV" genesis 2>/dev/null | jq -r '.bosh_env // .env')"
+		bosh_env="$(genesis "$DEPLOY_ENV" lookup genesis 2>/dev/null | jq -r '.bosh_env // .env')"
 		[[ "$bosh_env" =~ / ]] || bosh_env="${bosh_env}/bosh"
 
-		bosh_exodus="$(genesis lookup --exodus-for "$bosh_env" "$DEPLOY_ENV" . "{}" 2>/dev/null)"
+		bosh_exodus="$(genesis "$DEPLOY_ENV" lookup --exodus-for "$bosh_env" . "{}" 2>/dev/null)"
 		CREDHUB_SERVER="$(jq -r '.credhub_url // ""' <<<"$bosh_exodus")"
 		if [[ -n "$CREDHUB_SERVER" ]] ; then
 			echo
@@ -157,8 +149,8 @@ fi
 
 if [[ "$SKIP_DEPLOY" == "false" ]]; then
 	header "Deploying ${DEPLOY_ENV} environment to verify functionality..."
-	genesis "do" "${DEPLOY_ENV}" -- list
-	genesis add-secrets "${DEPLOY_ENV}"
+	genesis "${DEPLOY_ENV}" "do" -- list
+	genesis "${DEPLOY_ENV}" add-secrets
 
 	# get and upload stemcell version if needed (handled by bosh cli if version and name are supplied)
 	stemcell_iaas=
@@ -173,7 +165,7 @@ if [[ "$SKIP_DEPLOY" == "false" ]]; then
 	esac
 
 	if [[ -n "$stemcell_iaas" ]] ; then
-		stemcell_data="$(genesis lookup --merged "${DEPLOY_ENV}" stemcells)"
+		stemcell_data="$(genesis "${DEPLOY_ENV}" lookup --merged stemcells)"
 		stemcell_os="$(jq -r '.[0].os' <<<"$stemcell_data")"
 		stemcell_version="$(jq -r '.[0].version' <<<"$stemcell_data")"
 		stemcell_name="bosh-${stemcell_iaas}-${stemcell_os}-go_agent"
@@ -184,15 +176,15 @@ if [[ "$SKIP_DEPLOY" == "false" ]]; then
 			upload_options=()
 			upload_params=""
 		fi
-		if ! genesis bosh "$DEPLOY_ENV" stemcells 2>/dev/null \
+		if ! genesis "${DEPLOY_ENV}" bosh stemcells 2>/dev/null \
 		   | grep "^${stemcell_name}" \
 		   | awk '{print $2}' | sed -e 's/\*//' \
 		   | grep "^${stemcell_version}\$" ; then
-			genesis bosh "$DEPLOY_ENV" upload-stemcell "https://bosh.io/d/stemcells/$stemcell_name${upload_params}" ${upload_options[@]+"${upload_options[@]}"}
+			genesis "${DEPLOY_ENV}" bosh upload-stemcell "https://bosh.io/d/stemcells/$stemcell_name${upload_params}" ${upload_options[@]+"${upload_options[@]}"}
 		fi
 	fi
 
-	genesis deploy -y "${DEPLOY_ENV}"
+	genesis "${DEPLOY_ENV}" deploy -y
 
 	if [[ -f .genesis/manifests/${DEPLOY_ENV}-state.yml ]] ; then
 		echo $'\n'"${DEPLOY_ENV} state file:"
@@ -201,20 +193,25 @@ if [[ "$SKIP_DEPLOY" == "false" ]]; then
 		echo "----------------->8------------------"
 	fi
 
-	genesis info "${DEPLOY_ENV}"
+	genesis "${DEPLOY_ENV}" info
 	if ! is_proto "$DEPLOY_ENV" ; then
-		genesis bosh "${DEPLOY_ENV}" instances --ps
+		genesis "${DEPLOY_ENV}" bosh instances --ps
 	fi
 
 fi
 
 if [[ "$SKIP_SMOKE_TESTS" == "false" ]]; then
-	header "Validating addons..."
-	genesis "do" "${DEPLOY_ENV}" -- setup-cli -f
-	genesis "do" "${DEPLOY_ENV}" -- login
+  if [[ -f "$0/test-addons" ]] ; then 
+    header "Validating addons..."
+    # shellcheck source=/dev/null
+    source "$0/test-addons"
+  fi
 
-	header "Running smoke tests..."
-	genesis "do" "${DEPLOY_ENV}" -- smoketest
+  if [[ -f "$0/smoketests" ]] ; then 
+    header "Running smoke tests..."
+    # shellcheck source=/dev/null
+    source "$0/smoketests"
+  fi
 else
 	echo "Skipping smoke_tests"
 fi
