@@ -10,7 +10,7 @@ image_resource:
 inputs:
   - name: git-ci
   - name: git
-  - name: upstream
+  - name: upstream-manifest
 
 outputs:
   - name: git
