@@ -336,10 +336,7 @@ features::validate() {
     # Validate requrested features
     case "$want" in
       (cf-deployment-version-*) # Check if explicit verison of cf-deployment is requested
-        [[ -z "$version" ]] ||
-          fail "You cannot specify more than one cf-deployment-version-* feature"
-        version="${want#"cf-deployment-version-"}"
-        break
+        : # already dealt with
         ;;
       (shield-dbs|shield-blobstores)
         warn "The #c{$want} feature has been deprecated, in favor of BOSH add-ons"
@@ -999,6 +996,17 @@ declare -a blobstores; blobstores=()
 declare -a databases;  databases=()
 
 version=""
+for want in $GENESIS_REQUESTED_FEATURES; do
+# Check for alternative cf-deployment version
+  case "$want" in
+  (cf-deployment-version-*) # Check if explicit verison of cf-deployment is requested
+    [[ -z "$version" ]] || fail "You cannot specify more than one cf-deployment-version-* feature"
+    version="${want#"cf-deployment-version-"}"
+    ;;
+  esac
+done
+[[ -n $version ]] && switch_cf_version "$version"
+
 abort=
 warn=
 db_specified=
@@ -1016,7 +1024,6 @@ manifests=(
   "overlay/upstream_version.yml"
 )
 
-[[ -n $version ]] && switch_cf_version "$version"
 
 params="$(lookup "params" "{}")"
 has_availability_zones="$(jq -r '.|has("availability_zones")' <(echo "$params"))"
