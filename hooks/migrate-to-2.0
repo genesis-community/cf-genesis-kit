@@ -3,13 +3,15 @@
 migrate_credentials_to_credhub() {
   vault_prefix=${GENESIS_SECRETS_MOUNT}${GENESIS_SECRETS_SLUG}
   vault_paths=$(safe paths --keys ${vault_prefix} | jq -c -R -s 'split("\n") | map(select(length > 0))')
+  [[ -n "$GENESIS_KIT_PATH" ]] || export GENESIS_KIT_PATH="$PWD"
+  [[ -n "$GENESIS_BOSH_COMMAND" ]] || export GENESIS_BOSH_COMMAND=`type -P bosh bosh2 bosh-cli | head -n1`
   credhub import -f <( \
-    bosh int ./hooks/support/vault-credhub-mapping.yml \
-    -v=credhub_prefix=$GENESIS_CREDHUB_ROOT -v=vault_prefix=${vault_prefix#/} | spruce json \
+    $GENESIS_BOSH_COMMAND int "${GENESIS_KIT_PATH}/hooks/support/vault-credhub-mapping.yml" \
+    -v=credhub_prefix="$GENESIS_CREDHUB_ROOT" -v=vault_prefix=${vault_prefix#/} | spruce json \
     | jq --argjson paths $vault_paths '.credentials  | map(select(.value | try .private_key // . | split("\"")[1] | IN($paths[]))) | {credentials: .}' \
     | spruce merge )
 
-  external_db_user=$(credhub get -n ${GENESIS_CREDHUB_ROOT}/external_db_user -j 2>/dev/null | jq -r '.value')
+  external_db_user=$(credhub get -n "${GENESIS_CREDHUB_ROOT}/external_db_user" -j 2>/dev/null | jq -r '.value')
   if [[ ${external_db_user} != "" ]] ; then
     describe >&2 "#Y{{WARNING}} You must set params.external_db_user to '((external_db_user))' "\
       "in your #C{$GENESIS_ENVIRONMENT.yml} to use the username that was located in vault"
