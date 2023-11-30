@@ -3,8 +3,8 @@
 migrate_credentials_to_credhub() {
   vault_prefix=${GENESIS_SECRETS_MOUNT}${GENESIS_SECRETS_SLUG}
   vault_paths=$(safe paths --keys ${vault_prefix} | jq -c -R -s 'split("\n") | map(select(length > 0))')
-  [[ -n "$GENESIS_KIT_PATH" ]] || export GENESIS_KIT_PATH="$PWD"
-  [[ -n "$GENESIS_BOSH_COMMAND" ]] || export GENESIS_BOSH_COMMAND=`type -P bosh bosh2 bosh-cli | head -n1`
+  [[ -n "${GENESIS_KIT_PATH:-''}" ]] || export GENESIS_KIT_PATH="$PWD"
+  [[ -n "${GENESIS_BOSH_COMMAND:-''}" ]] || export GENESIS_BOSH_COMMAND=`type -P bosh bosh2 bosh-cli | head -n1`
   credhub import -f <( \
     $GENESIS_BOSH_COMMAND int "${GENESIS_KIT_PATH}/hooks/support/vault-credhub-mapping.yml" \
     -v=credhub_prefix="$GENESIS_CREDHUB_ROOT" -v=vault_prefix=${vault_prefix#/} | spruce json \
