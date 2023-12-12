@@ -86,8 +86,7 @@ git -C git diff --color=always "$UPSTREAM_PATH" | cat
 
 header "Recreate spec-test results to validate upstream"
 pushd git/spec > /dev/null
-  # TODO: remove spec/{credhub,vault} if needed? because this will regenerate vault.
-  rm -rf results/
+  rm -rf results/ credub/ vault/
   ACK_GINKGO_RC=true ginkgo -p
 popd
 
