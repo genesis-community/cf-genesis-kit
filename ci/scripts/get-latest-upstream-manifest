@@ -86,7 +86,7 @@ git -C git diff --color=always "$UPSTREAM_PATH" | cat
 
 header "Recreate spec-test results to validate upstream"
 pushd git/spec > /dev/null
-  rm -rf results/ credub/ vault/
+  rm -rf results/ credub/ credhub_variables/
   ACK_GINKGO_RC=true ginkgo -p
 popd
 
