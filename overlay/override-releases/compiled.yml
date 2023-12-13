@@ -1,10 +1,11 @@
----
-releases:
-- name: routing
-  sha1: 6feb59ec3e2687b469aa9451ab72a5922baf8025
-  stemcell:
-    os: ubuntu-jammy
-    version: "1.80"
-  url: https://storage.googleapis.com/cf-deployment-compiled-releases/routing-0.275.0-ubuntu-jammy-1.80-20230712-204705-863429293.tgz
-  version: 0.275.0
-cf-deployment-hotfixes: true
+--- {}
+
+# releases:
+# - name: routing
+#   sha1: 6feb59ec3e2687b469aa9451ab72a5922baf8025
+#   stemcell:
+#     os: ubuntu-jammy
+#     version: "1.80"
+#   url: https://storage.googleapis.com/cf-deployment-compiled-releases/routing-0.275.0-ubuntu-jammy-1.80-20230712-204705-863429293.tgz
+#   version: 0.275.0
+# cf-deployment-hotfixes: true

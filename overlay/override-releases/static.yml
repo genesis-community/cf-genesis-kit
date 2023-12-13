@@ -1,8 +1,9 @@
----
-releases:
-- name: "routing"
-  version: "0.275.0"
-  url: "https://bosh.io/d/github.com/cloudfoundry/routing-release?v=0.275.0"
-  sha1: "6dd63d1653bf333ea64fca061a3a16d9be2e750f"
-exodus:
-  cf-deployment-hotfixes: true
+--- {}
+
+# releases:
+# - name: "routing"
+#   version: "0.275.0"
+#   url: "https://bosh.io/d/github.com/cloudfoundry/routing-release?v=0.275.0"
+#   sha1: "6dd63d1653bf333ea64fca061a3a16d9be2e750f"
+# exodus:
+#   cf-deployment-hotfixes: true
