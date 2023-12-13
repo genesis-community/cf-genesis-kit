@@ -1,0 +1,35 @@
+---
+genesis:
+  env:           (( grab $GENESIS_ENVIRONMENT ))
+  secrets_mount: (( grab $GENESIS_SECRETS_MOUNT ))
+  vault_prefix:  (( grab $GENESIS_VAULT_PREFIX ))
+  vault_env:     (( grab $GENESIS_VAULT_ENV_SLUG ))
+
+meta:
+  vault: (( concat genesis.secrets_mount genesis.vault_prefix ))
+
+  __default_tags:
+  - (( grab meta.tag || meta.name ))
+
+  __default_vm_extentions:
+  - 100GB_ephemeral_disk
+
+instance_groups:
+- name: (( grab meta.name ))
+  jobs:
+  - name: cflinuxfs3-rootfs-setup
+    release: cflinuxfs3
+    properties:
+      cflinuxfs3-rootfs:
+        trusted_certs:
+        - ((diego_instance_identity_ca.ca))
+        - ((credhub_tls.ca))
+        - ((uaa_ssl.ca))
+  - name: rep
+    release: diego
+    properties:
+      diego:
+        rep:
+          preloaded_rootfses:
+          - (( prepend ))
+          - cflinuxfs3:/var/vcap/packages/cflinuxfs3/rootfs.tar

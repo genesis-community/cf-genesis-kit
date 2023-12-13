@@ -67,6 +67,11 @@ dynamic::isolation::segments() {
   then iso_seg_merges+=( "overlay/dynamic-templates/isolation-segment-network.yml" )
   fi
 
+  if want_feature cflinuxfs3
+  then
+    iso_seg_merges+=( "overlay/dynamic-templates/isolation-segment-cflinuxfs3.yml" )
+  fi
+
   if want_feature nfs-volume-services
   then
     iso_seg_merges+=( "overlay/dynamic-templates/isolation-segment-nfs.yml" )
@@ -384,6 +389,9 @@ features::validate() {
         ;;
       (cflinuxfs2)
         abort "The #c{cflinuxfs2} feature is no longer able to be supported."
+        ;;
+      (cflinuxfs3)
+        features+=( "$want" )
         ;;
       (local-ha-db)
         abort "The #c{local-ha-db} feature is no longer able to be supported." \
@@ -760,6 +768,9 @@ features::process() {
         if ! want_feature "bare" ; then
           manifests+=( "overlay/windows.yml")
         fi
+        ;;
+      (cflinuxfs3)
+        manifests+=( "operations/use-cflinuxfs3.yml" )
         ;;
       (isolation-segments)
         # process outside of base features so that base features can be called within iso segs

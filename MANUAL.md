@@ -67,6 +67,7 @@ General:
   - `no-tcp-routers` - removes the tcp-router instance group and associated resource allocations for systems that don't need tcp routes.
   - `windows-diego-cells` - Adds Windows Diego cell functionality.
   - `isolation-segments` - enables usage of [isolation segments](https://docs.cloudfoundry.org/adminguide/routing-is.html#overview) using minimal configuration.  Supports nfs-volume-services, nfs-ldap and smb-volume-services features.
+  - `cflinuxfs3` - restore support for cflinuxfs3 to diego cells and isolation segments (by default, only cflinuxfs4 is supported)
 
 Database related - choose one:
   - `postgres-db` - Use an external postgres instance to host persistent data.
