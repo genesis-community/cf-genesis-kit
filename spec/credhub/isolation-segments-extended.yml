@@ -361,6 +361,10 @@ syslog_agent_api_tls:
   ca: <!{credhub}:syslog_agent_api_tls.ca!>
   certificate: <!{credhub}:syslog_agent_api_tls.certificate!>
   private_key: <!{credhub}:syslog_agent_api_tls.private_key!>
+syslog_agent_log_cache_tls:
+  ca: <!{credhub}:syslog_agent_log_cache_tls.ca!>
+  certificate: <!{credhub}:syslog_agent_log_cache_tls.certificate!>
+  private_key: <!{credhub}:syslog_agent_log_cache_tls.private_key!>
 syslog_agent_metrics_tls:
   ca: <!{credhub}:syslog_agent_metrics_tls.ca!>
   certificate: <!{credhub}:syslog_agent_metrics_tls.certificate!>
@@ -384,6 +388,10 @@ uaa_clients_tcp_emitter_secret: <!{credhub}:uaa_clients_tcp_emitter_secret!>
 uaa_clients_tcp_router_secret: <!{credhub}:uaa_clients_tcp_router_secret!>
 uaa_database_password: <!{credhub}:uaa_database_password!>
 uaa_default_encryption_passphrase: <!{credhub}:uaa_default_encryption_passphrase!>
+uaa_jwt_signing_cert:
+  ca: <!{credhub}:uaa_jwt_signing_cert.ca!>
+  certificate: <!{credhub}:uaa_jwt_signing_cert.certificate!>
+  private_key: <!{credhub}:uaa_jwt_signing_cert.private_key!>
 uaa_jwt_signing_key:
   private_key: <!{credhub}:uaa_jwt_signing_key.private_key!>
   public_key: <!{credhub}:uaa_jwt_signing_key.public_key!>

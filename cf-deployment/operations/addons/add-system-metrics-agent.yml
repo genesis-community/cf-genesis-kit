@@ -7,7 +7,6 @@
         release: cf-smoke-tests
     include:
       stemcell:
-      - os: ubuntu-xenial
       - os: ubuntu-bionic
       - os: ubuntu-jammy
     jobs:
@@ -82,16 +81,16 @@
   path: /releases/name=system-metrics?
   value:
     name: system-metrics
-    sha1: 2104028a5155832d5e64054d28ecbc0c41603d99
-    url: https://bosh.io/d/github.com/cloudfoundry/system-metrics-release?v=2.3.1
-    version: 2.3.1
+    sha1: 53eee041268aed8fc45def43035e05e2e26aedf7
+    url: https://bosh.io/d/github.com/cloudfoundry/system-metrics-release?v=3.0.3
+    version: 3.0.3
 - type: replace
   path: /releases/name=system-metrics-scraper?
   value:
     name: system-metrics-scraper
-    sha1: 19e812c706f7cd8be6cbd072955c6050f9ab9f80
-    url: https://bosh.io/d/github.com/cloudfoundry/system-metrics-scraper-release?v=3.3.7
-    version: 3.3.7
+    sha1: 738dd5b48d6edf83603c6d063692652aaa120cda
+    url: https://bosh.io/d/github.com/cloudfoundry/system-metrics-scraper-release?v=4.0.4
+    version: 4.0.4
 - type: replace
   path: /variables/name=leadership_election_tls?
   value:

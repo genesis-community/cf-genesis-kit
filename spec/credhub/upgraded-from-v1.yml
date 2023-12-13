@@ -380,3 +380,11 @@ uaa_ssl:
   ca: <!{credhub}:uaa_ssl.ca!>
   certificate: <!{credhub}:uaa_ssl.certificate!>
   private_key: <!{credhub}:uaa_ssl.private_key!>
+syslog_agent_log_cache_tls:
+  ca: <!{credhub}:syslog_agent_log_cache_tls.ca!>
+  certificate: <!{credhub}:syslog_agent_log_cache_tls.certificate!>
+  private_key: <!{credhub}:syslog_agent_log_cache_tls.private_key!>
+uaa_jwt_signing_cert:
+  ca: <!{credhub}:uaa_jwt_signing_cert.ca!>
+  certificate: <!{credhub}:uaa_jwt_signing_cert.certificate!>
+  private_key: <!{credhub}:uaa_jwt_signing_cert.private_key!>

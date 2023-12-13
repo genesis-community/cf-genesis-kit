@@ -2,9 +2,9 @@
   path: /releases/-
   value:
     name: postgres
-    sha1: 582b1de9522077102dfa44ff7164cd8f499dbfc8
-    url: https://bosh.io/d/github.com/cloudfoundry/postgres-release?v=44
-    version: "44"
+    sha1: eeb3df0d6d8bb174a83d19fcdbac8dd4ed33e73d
+    url: https://bosh.io/d/github.com/cloudfoundry/postgres-release?v=48
+    version: "48"
 - type: remove
   path: /instance_groups/name=database/jobs/name=route_registrar
 - type: remove

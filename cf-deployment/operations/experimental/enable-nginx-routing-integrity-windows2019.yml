@@ -23,6 +23,6 @@
   path: /releases/name=envoy-nginx?
   value:
     name: envoy-nginx
-    sha1: 764c7f555a4087b7e5ff276789e79eb9acc8d21c
-    url: https://bosh.io/d/github.com/cloudfoundry-incubator/envoy-nginx-release?v=0.15.0
-    version: 0.15.0
+    sha1: 5e70bd6e58b632df3249c6ce42a3e42388427bb0
+    url: https://bosh.io/d/github.com/cloudfoundry-incubator/envoy-nginx-release?v=0.22.0
+    version: 0.22.0

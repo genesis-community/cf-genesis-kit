@@ -2,11 +2,17 @@
   path: /instance_groups/name=windows2019-cell/jobs/name=windows2019fs?
   value:
     name: windows2019fs
+    properties:
+      windows-rootfs:
+        trusted_certs: |
+          ((diego_instance_identity_ca.ca))
+          ((credhub_tls.ca))
+          ((uaa_ssl.ca))
     release: windowsfs
 - type: replace
   path: /releases/name=windowsfs?
   value:
     name: windowsfs
-    sha1: 1eb3f6634d9b9475757a354260a9058ca29eb0fa
-    url: https://bosh.io/d/github.com/cloudfoundry/windowsfs-online-release?v=2.51.0
-    version: 2.51.0
+    sha1: 84c1ff72408bd6d7f7be9bb7d6d6cc1af529a27d
+    url: https://bosh.io/d/github.com/cloudfoundry/windowsfs-online-release?v=2.60.0
+    version: 2.60.0
