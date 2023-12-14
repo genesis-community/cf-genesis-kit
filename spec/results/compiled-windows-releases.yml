@@ -367,7 +367,6 @@ addons:
           key: <!{credhub}:prom_scraper_scrape_tls.private_key!>
     release: metrics-discovery
   name: metrics-discovery-windows2019
-cf-deployment-hotfixes: true
 exodus:
   admin_password: <!{credhub}:cf_admin_password!>
   admin_username: admin
@@ -378,7 +377,6 @@ exodus:
   base_domain: cf.testing.examle
   bosh: compiled-windows-releases
   cf-deployment-date: 2023-Dec-13 05:43:13 UTC
-  cf-deployment-hotfixes: true
   cf-deployment-url: https://github.com/cloudfoundry/cf-deployment/releases/tag/v33.10.0
   cf-deployment-version: 33.10.0
   core_network: cf-core
@@ -2615,12 +2613,12 @@ releases:
   url: https://storage.googleapis.com/cf-deployment-compiled-releases/python-buildpack-1.8.15-ubuntu-jammy-1.80-20231019-182954-186119642.tgz
   version: 1.8.15
 - name: routing
-  sha1: 6feb59ec3e2687b469aa9451ab72a5922baf8025
+  sha1: c1e4f8b712d68b316e7b176c131bea7f02abd55a
   stemcell:
     os: ubuntu-jammy
     version: "1.80"
-  url: https://storage.googleapis.com/cf-deployment-compiled-releases/routing-0.275.0-ubuntu-jammy-1.80-20230712-204705-863429293.tgz
-  version: 0.275.0
+  url: https://storage.googleapis.com/cf-deployment-compiled-releases/routing-0.284.0-ubuntu-jammy-1.80-20231109-024852-395709975.tgz
+  version: 0.284.0
 - name: ruby-buildpack
   sha1: 425ebffc23b41dc869242464c3f3dcfc1fe73ef9
   stemcell:

@@ -364,7 +364,6 @@ exodus:
   base_domain: cf.testing.example
   bosh: isolation-segments
   cf-deployment-date: 2023-Dec-13 05:43:13 UTC
-  cf-deployment-hotfixes: true
   cf-deployment-url: https://github.com/cloudfoundry/cf-deployment/releases/tag/v33.10.0
   cf-deployment-version: 33.10.0
   core_network: cf-core
@@ -2318,14 +2317,6 @@ instance_groups:
       internal_domains:
       - apps.internal.
     release: cf-networking
-  - name: cflinuxfs3-rootfs-setup
-    properties:
-      cflinuxfs3-rootfs:
-        trusted_certs:
-        - <!{credhub}:diego_instance_identity_ca.ca!>
-        - <!{credhub}:credhub_tls.ca!>
-        - <!{credhub}:uaa_ssl.ca!>
-    release: cflinuxfs3
   - name: cflinuxfs4-rootfs-setup
     properties:
       cflinuxfs4-rootfs:
@@ -2380,7 +2371,6 @@ instance_groups:
           placement_tags:
           - custom-params-group
           preloaded_rootfses:
-          - cflinuxfs3:/var/vcap/packages/cflinuxfs3/rootfs.tar
           - cflinuxfs4:/var/vcap/packages/cflinuxfs4/rootfs.tar
       enable_consul_service_registration: false
       enable_declarative_healthcheck: true
@@ -2528,9 +2518,9 @@ instance_groups:
       internal_domains:
       - apps.internal.
     release: cf-networking
-  - name: cflinuxfs3-rootfs-setup
+  - name: cflinuxfs4-rootfs-setup
     properties:
-      cflinuxfs3-rootfs:
+      cflinuxfs4-rootfs:
         trusted_certs:
         - <!{credhub}:diego_instance_identity_ca.ca!>
         - <!{credhub}:credhub_tls.ca!>
@@ -2539,14 +2529,6 @@ instance_groups:
           private_key: second-additional-test-ssl-private-key
         - certificate: first-additional-test-ssl-cert
           private_key: first-additional-test-ssl-private-key
-    release: cflinuxfs3
-  - name: cflinuxfs4-rootfs-setup
-    properties:
-      cflinuxfs4-rootfs:
-        trusted_certs:
-        - <!{credhub}:diego_instance_identity_ca.ca!>
-        - <!{credhub}:credhub_tls.ca!>
-        - <!{credhub}:uaa_ssl.ca!>
     release: cflinuxfs4
   - name: garden
     properties:
@@ -2598,7 +2580,6 @@ instance_groups:
           placement_tags:
           - default-params-group
           preloaded_rootfses:
-          - cflinuxfs3:/var/vcap/packages/cflinuxfs3/rootfs.tar
           - cflinuxfs4:/var/vcap/packages/cflinuxfs4/rootfs.tar
       enable_consul_service_registration: false
       enable_declarative_healthcheck: true
@@ -2745,9 +2726,9 @@ releases:
   url: https://bosh.io/d/github.com/cloudfoundry/python-buildpack-release?v=1.8.15
   version: 1.8.15
 - name: routing
-  sha1: 6dd63d1653bf333ea64fca061a3a16d9be2e750f
-  url: https://bosh.io/d/github.com/cloudfoundry/routing-release?v=0.275.0
-  version: 0.275.0
+  sha1: 69701cfd2786d7d6fdb1cf1166076439becedc29
+  url: https://bosh.io/d/github.com/cloudfoundry/routing-release?v=0.284.0
+  version: 0.284.0
 - name: ruby-buildpack
   sha1: 5c31809b5d8d125fde2ee25020d438dc1ba0778b
   url: https://bosh.io/d/github.com/cloudfoundry/ruby-buildpack-release?v=1.10.5

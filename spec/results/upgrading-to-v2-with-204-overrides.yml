@@ -344,7 +344,6 @@ exodus:
   base_domain: cf.testing.examle
   bosh: upgrading-to-v2-with-204-overrides
   cf-deployment-date: 2023-Dec-13 05:43:13 UTC
-  cf-deployment-hotfixes: true
   cf-deployment-url: https://github.com/cloudfoundry/cf-deployment/releases/tag/v33.10.0
   cf-deployment-version: 33.10.0
   core_network: cf-core
@@ -2330,9 +2329,9 @@ releases:
   url: https://bosh.io/d/github.com/cloudfoundry/python-buildpack-release?v=1.8.15
   version: 1.8.15
 - name: routing
-  sha1: 6dd63d1653bf333ea64fca061a3a16d9be2e750f
-  url: https://bosh.io/d/github.com/cloudfoundry/routing-release?v=0.275.0
-  version: 0.275.0
+  sha1: 69701cfd2786d7d6fdb1cf1166076439becedc29
+  url: https://bosh.io/d/github.com/cloudfoundry/routing-release?v=0.284.0
+  version: 0.284.0
 - name: ruby-buildpack
   sha1: 5c31809b5d8d125fde2ee25020d438dc1ba0778b
   url: https://bosh.io/d/github.com/cloudfoundry/ruby-buildpack-release?v=1.10.5

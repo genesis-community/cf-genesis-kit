@@ -3,9 +3,10 @@ kit:
   name:    dev
   version: 2.1.2
   features:
-    - isolation-segments
-    - nfs-volume-services
-    - nfs-ldap
+  - isolation-segments
+  - nfs-volume-services
+  - nfs-ldap
+  - cflinuxfs3
 
 genesis:
   env: isolation-segments-extended

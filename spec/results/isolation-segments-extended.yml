@@ -364,13 +364,12 @@ exodus:
   base_domain: cf.testing.example
   bosh: isolation-segments-extended
   cf-deployment-date: 2023-Dec-13 05:43:13 UTC
-  cf-deployment-hotfixes: true
   cf-deployment-url: https://github.com/cloudfoundry/cf-deployment/releases/tag/v33.10.0
   cf-deployment-version: 33.10.0
   core_network: cf-core
   db_network: cf-core
   edge_network: cf-edge
-  features: isolation-segments,nfs-volume-services,nfs-ldap
+  features: isolation-segments,nfs-volume-services,nfs-ldap,cflinuxfs3
   is_director: false
   runtime_network: cf-core
   system_domain: system.cf.testing.example
@@ -945,10 +944,12 @@ instance_groups:
         diego:
           docker_staging_stack: cflinuxfs4
           droplet_destinations:
+            cflinuxfs3: /home/vcap
             cflinuxfs4: /home/vcap
             windows: /Users/vcap
             windows2016: /Users/vcap
           lifecycle_bundles:
+            buildpack/cflinuxfs3: buildpack_app_lifecycle/buildpack_app_lifecycle.tgz
             buildpack/cflinuxfs4: buildpack_app_lifecycle/buildpack_app_lifecycle.tgz
             buildpack/windows: buildpack_app_lifecycle/buildpack_app_lifecycle.tgz
             buildpack/windows2016: buildpack_app_lifecycle/buildpack_app_lifecycle.tgz
@@ -963,6 +964,28 @@ instance_groups:
             public_endpoint: https://blobstore.system.cf.testing.example
             username: blobstore-user
         install_buildpacks:
+        - name: staticfile_buildpack
+          package: staticfile-buildpack-cflinuxfs3
+        - name: java_buildpack
+          package: java-buildpack-cflinuxfs3
+        - name: ruby_buildpack
+          package: ruby-buildpack-cflinuxfs3
+        - name: dotnet_core_buildpack
+          package: dotnet-core-buildpack-cflinuxfs3
+        - name: nodejs_buildpack
+          package: nodejs-buildpack-cflinuxfs3
+        - name: go_buildpack
+          package: go-buildpack-cflinuxfs3
+        - name: python_buildpack
+          package: python-buildpack-cflinuxfs3
+        - name: php_buildpack
+          package: php-buildpack-cflinuxfs3
+        - name: nginx_buildpack
+          package: nginx-buildpack-cflinuxfs3
+        - name: r_buildpack
+          package: r-buildpack-cflinuxfs3
+        - name: binary_buildpack
+          package: binary-buildpack-cflinuxfs3
         - name: staticfile_buildpack
           package: staticfile-buildpack-cflinuxfs4
         - name: java_buildpack
@@ -1044,6 +1067,8 @@ instance_groups:
             ports: "53"
             protocol: udp
         stacks:
+        - description: Cloud Foundry Linux-based filesystem (Ubuntu 18.04)
+          name: cflinuxfs3
         - description: Cloud Foundry Linux-based filesystem (Ubuntu 22.04)
           name: cflinuxfs4
         staging_upload_password: <!{credhub}:cc_staging_upload_password!>
@@ -1299,10 +1324,12 @@ instance_groups:
         db_encryption_key: <!{credhub}:cc_db_encryption_key!>
         diego:
           droplet_destinations:
+            cflinuxfs3: /home/vcap
             cflinuxfs4: /home/vcap
             windows: /Users/vcap
             windows2016: /Users/vcap
           lifecycle_bundles:
+            buildpack/cflinuxfs3: buildpack_app_lifecycle/buildpack_app_lifecycle.tgz
             buildpack/cflinuxfs4: buildpack_app_lifecycle/buildpack_app_lifecycle.tgz
             buildpack/windows: buildpack_app_lifecycle/buildpack_app_lifecycle.tgz
             buildpack/windows2016: buildpack_app_lifecycle/buildpack_app_lifecycle.tgz
@@ -1444,10 +1471,12 @@ instance_groups:
         db_encryption_key: <!{credhub}:cc_db_encryption_key!>
         diego:
           droplet_destinations:
+            cflinuxfs3: /home/vcap
             cflinuxfs4: /home/vcap
             windows: /Users/vcap
             windows2016: /Users/vcap
           lifecycle_bundles:
+            buildpack/cflinuxfs3: buildpack_app_lifecycle/buildpack_app_lifecycle.tgz
             buildpack/cflinuxfs4: buildpack_app_lifecycle/buildpack_app_lifecycle.tgz
             buildpack/windows: buildpack_app_lifecycle/buildpack_app_lifecycle.tgz
             buildpack/windows2016: buildpack_app_lifecycle/buildpack_app_lifecycle.tgz
@@ -1521,10 +1550,12 @@ instance_groups:
         db_encryption_key: <!{credhub}:cc_db_encryption_key!>
         diego:
           droplet_destinations:
+            cflinuxfs3: /home/vcap
             cflinuxfs4: /home/vcap
             windows: /Users/vcap
             windows2016: /Users/vcap
           lifecycle_bundles:
+            buildpack/cflinuxfs3: buildpack_app_lifecycle/buildpack_app_lifecycle.tgz
             buildpack/cflinuxfs4: buildpack_app_lifecycle/buildpack_app_lifecycle.tgz
             buildpack/windows: buildpack_app_lifecycle/buildpack_app_lifecycle.tgz
             buildpack/windows2016: buildpack_app_lifecycle/buildpack_app_lifecycle.tgz
@@ -1903,6 +1934,14 @@ instance_groups:
       internal_domains:
       - apps.internal.
     release: cf-networking
+  - name: cflinuxfs3-rootfs-setup
+    properties:
+      cflinuxfs3-rootfs:
+        trusted_certs:
+        - <!{credhub}:diego_instance_identity_ca.ca!>
+        - <!{credhub}:credhub_tls.ca!>
+        - <!{credhub}:uaa_ssl.ca!>
+    release: cflinuxfs3
   - name: cflinuxfs4-rootfs-setup
     properties:
       cflinuxfs4-rootfs:
@@ -1955,6 +1994,7 @@ instance_groups:
           instance_identity_key: <!{credhub}:diego_instance_identity_ca.private_key!>
         rep:
           preloaded_rootfses:
+          - cflinuxfs3:/var/vcap/packages/cflinuxfs3/rootfs.tar
           - cflinuxfs4:/var/vcap/packages/cflinuxfs4/rootfs.tar
       enable_consul_service_registration: false
       enable_declarative_healthcheck: true
@@ -2826,6 +2866,10 @@ releases:
   sha1: 4c215d73dbe1762f92a4649be04b358056e0d3d9
   url: https://bosh.io/d/github.com/cloudfoundry/cf-smoke-tests-release?v=42.0.113
   version: 42.0.113
+- name: cflinuxfs3
+  sha1: 5463400cd5490e9d847326668d504a8833cf3e4e
+  url: https://bosh.io/d/github.com/cloudfoundry/cflinuxfs3-release?v=0.369.0
+  version: 0.369.0
 - name: cflinuxfs4
   sha1: 74b1e641b80ce77fcbcc2ed17a8c8c0b2c8961d8
   url: https://bosh.io/d/github.com/cloudfoundry/cflinuxfs4-release?v=1.51.0
@@ -2891,9 +2935,9 @@ releases:
   url: https://bosh.io/d/github.com/cloudfoundry/python-buildpack-release?v=1.8.15
   version: 1.8.15
 - name: routing
-  sha1: 6dd63d1653bf333ea64fca061a3a16d9be2e750f
-  url: https://bosh.io/d/github.com/cloudfoundry/routing-release?v=0.275.0
-  version: 0.275.0
+  sha1: 69701cfd2786d7d6fdb1cf1166076439becedc29
+  url: https://bosh.io/d/github.com/cloudfoundry/routing-release?v=0.284.0
+  version: 0.284.0
 - name: ruby-buildpack
   sha1: 5c31809b5d8d125fde2ee25020d438dc1ba0778b
   url: https://bosh.io/d/github.com/cloudfoundry/ruby-buildpack-release?v=1.10.5
