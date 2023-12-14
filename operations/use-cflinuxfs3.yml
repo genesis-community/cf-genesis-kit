@@ -83,7 +83,7 @@
   path: /instance_groups/name=scheduler/jobs/name=cc_deployment_updater/properties/cc/diego/lifecycle_bundles/buildpack~1cflinuxfs3?
   value: buildpack_app_lifecycle/buildpack_app_lifecycle.tgz
 - type: replace
-  path: /instance_groups/name=diego-cell/jobs/name=cflinuxfs3-rootfs-setup?
+  path: /instance_groups/name=diego-cell/jobs/name=cflinuxfs4-rootfs-setup:before
   value:
     name: cflinuxfs3-rootfs-setup
     properties:

@@ -17,14 +17,7 @@ meta:
 instance_groups:
 - name: (( grab meta.name ))
   jobs:
-  - name: cflinuxfs3-rootfs-setup
-    release: cflinuxfs3
-    properties:
-      cflinuxfs3-rootfs:
-        trusted_certs:
-        - ((diego_instance_identity_ca.ca))
-        - ((credhub_tls.ca))
-        - ((uaa_ssl.ca))
+  - (( merge on name ))
   - name: rep
     release: diego
     properties:
@@ -33,3 +26,12 @@ instance_groups:
           preloaded_rootfses:
           - (( prepend ))
           - cflinuxfs3:/var/vcap/packages/cflinuxfs3/rootfs.tar
+  - (( insert before "cflinuxfs4-rootfs-setup" ))
+  - name: cflinuxfs3-rootfs-setup
+    release: cflinuxfs3
+    properties:
+      cflinuxfs3-rootfs:
+        trusted_certs:
+        - ((diego_instance_identity_ca.ca))
+        - ((credhub_tls.ca))
+        - ((uaa_ssl.ca))

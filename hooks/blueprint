@@ -113,6 +113,8 @@ dynamic::isolation::segments() {
       '.isolation_segments[] | select( .name == $v ) | .additional_trusted_certs//[] | length > 0' <<<"$1" &>/dev/null
     then
       additional_trusted_certs="$(dynamic::isolation::template::render "additional-trusted-certs" "$group")"
+      want_feature cflinuxfs3 &&
+        additional_trusted_certs+=" $(dynamic::isolation::template::render "additional-trusted-certs-cflinuxfs3" "$group")"
       want_feature ocfp &&
         additional_trusted_certs+=" $(dynamic::isolation::template::render "ocfp-trusted-certs" "$group")"
     fi
@@ -725,9 +727,10 @@ features::process() {
         ;;
       (trust-blacksmith-ca)
         manifests+=( "overlay/addons/trust-blacksmith-ca.yml" )
-        if want_feature ocfp
-        then manifests+=( "ocfp/trust-blacksmith-ca.yml" )
-        fi
+        want_feature cflinuxfs3 && \
+          manifests+=( "overlay/addons/trust-blacksmith-ca-cflinuxfs3.yml" )
+        want_feature ocfp && \
+          manifests+=( "ocfp/trust-blacksmith-ca.yml" )
         ;;
       (app-autoscaler-integration)
         manifests+=( "overlay/addons/autoscaler.yml" )

@@ -1,0 +1,4 @@
+---
+- type: replace
+  path: /instance_groups/name=diego-cell/jobs/name=cflinuxfs3-rootfs-setup/properties/cflinuxfs3-rootfs/trusted_certs/-
+  value: (( vault $GENESIS_EXODUS_MOUNT genesis.env "/blacksmith:blacksmith_ca" ))
