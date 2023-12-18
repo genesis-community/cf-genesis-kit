@@ -13,6 +13,6 @@ require (
 	github.com/onsi/gomega v1.10.1
 	github.com/stretchr/testify v1.5.1 // indirect
 	github.com/texttheater/golang-levenshtein v0.0.0-20191208221605-eb6844b05fc6 // indirect
-	golang.org/x/crypto v0.1.0 // indirect
+	golang.org/x/crypto v0.17.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )
