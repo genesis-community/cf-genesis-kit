@@ -395,6 +395,9 @@ features::validate() {
       (cflinuxfs3)
         features+=( "$want" )
         ;;
+      (no-nats-tls)
+        abort "The #c{no-nats-tls} feature is no longer able to be supported."
+        ;;
       (local-ha-db)
         abort "The #c{local-ha-db} feature is no longer able to be supported." \
           "\n\tConsider using external database for high-availability."
@@ -443,7 +446,7 @@ features::validate() {
         features+=( "$want" )
         db_specified=1;
         ;;
-      (bare|partitioned-network|haproxy|tls|no-nats-tls|self-signed|isolation-segments)
+      (bare|partitioned-network|haproxy|tls|self-signed|isolation-segments)
         features+=( "$want" )
         ;;
       (minio-blobstore|aws-blobstore|aws-blobstore-iam|azure-blobstore|gcp-blobstore)
@@ -852,15 +855,9 @@ features::process() {
 
   if ! want_feature "bare"
   then
-    want_feature "no-nats-tls" ||
-      manifests+=( "overlay/nats-tls.yml" )
-
     if want_feature '+migrated-v1-env' && ! want_feature 'v2-nats-credentials'
     then
       manifests+=( "overlay/addons/migration-v1-nats-credentials.yml" )
-
-      want_feature "no-nats-tls" ||
-        manifests+=( "overlay/addons/migration-v1-nats-credentials-tls.yml" )
     fi
 
     skip_ssl_validation="$(jq -r '.skip_ssl_validation' <(echo "$params"))"
