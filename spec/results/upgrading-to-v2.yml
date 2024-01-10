@@ -395,10 +395,7 @@ instance_groups:
   - z3
   instances: 2
   jobs:
-  - custom_provider_definitions:
-    - name: nats-tls-address
-      type: address
-    name: nats-tls
+  - name: nats-tls
     properties:
       nats:
         client:
@@ -408,7 +405,7 @@ instance_groups:
             private_key: <!{credhub}:nats_client_cert.private_key!>
         external:
           tls:
-            ca: <!{credhub}:nats_client_cert.ca!>
+            ca: <!{credhub}:nats_server_cert.ca!>
             certificate: <!{credhub}:nats_server_cert.certificate!>
             private_key: <!{credhub}:nats_server_cert.private_key!>
         fail_deployment_if_v1: true
@@ -420,7 +417,7 @@ instance_groups:
             enabled: true
             private_key: <!{credhub}:nats_internal_cert.private_key!>
         password: <!{credhub}:nats_password!>
-        user: nats_user
+        user: nats
     provides:
       nats-tls:
         as: nats-tls

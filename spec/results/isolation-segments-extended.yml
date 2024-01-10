@@ -416,10 +416,7 @@ instance_groups:
   - zoneD
   instances: 2
   jobs:
-  - custom_provider_definitions:
-    - name: nats-tls-address
-      type: address
-    name: nats-tls
+  - name: nats-tls
     properties:
       nats:
         client:
@@ -429,7 +426,7 @@ instance_groups:
             private_key: <!{credhub}:nats_client_cert.private_key!>
         external:
           tls:
-            ca: <!{credhub}:nats_client_cert.ca!>
+            ca: <!{credhub}:nats_server_cert.ca!>
             certificate: <!{credhub}:nats_server_cert.certificate!>
             private_key: <!{credhub}:nats_server_cert.private_key!>
         fail_deployment_if_v1: true
