@@ -7,8 +7,8 @@ github.com/egymgmbh/go-prefix-writer v0.0.0-20180609083313-7326ea162eca h1:7oodh
 github.com/egymgmbh/go-prefix-writer v0.0.0-20180609083313-7326ea162eca/go.mod h1:UhMFM+dnOcm1f0Pve8uqRaxAhEYki+/CuA2BTDp2T04=
 github.com/fsnotify/fsnotify v1.6.0 h1:n+5WquG0fcWoWp6xPWfHdbskMCQaFnG6PfBrh1Ky4HY=
 github.com/fsnotify/fsnotify v1.6.0/go.mod h1:sl3t1tCWJFWoRz9R8WJCbQihKKwmorjAbSClcnxKAGw=
-github.com/genesis-community/testkit v0.0.0-20240513054001-28411d729985 h1:GHK/6HxCdiol06XOICtgKvzfAjYpRt/0A/oemJCMzxw=
-github.com/genesis-community/testkit v0.0.0-20240513054001-28411d729985/go.mod h1:bFPcSW4fBCa3NFpb/8i3Wr+9RMK/VHca1hSrtu+9flk=
+github.com/genesis-community/testkit/v2 v2.0.1 h1:Q+KjG6fu9EPcg+KlCobnE9SjoYaBT/YBdEMoyJG42cU=
+github.com/genesis-community/testkit/v2 v2.0.1/go.mod h1:6ih7fTCzjz7McOlX6dOU1je4Pgl/gurZ6YKYD612KsI=
 github.com/go-logr/logr v1.4.1 h1:pKouT5E8xu9zeFC39JXRDukb6JFQPXM5p5I91188VAQ=
 github.com/go-logr/logr v1.4.1/go.mod h1:9T104GzyrTigFIr8wt5mBrctHMim0Nb2HLGrmQ40KvY=
 github.com/go-task/slim-sprig/v3 v3.0.0 h1:sUs3vkvUymDpBKi3qH1YSqBQk9+9D/8M2mN1vB6EwHI=

@@ -5,7 +5,7 @@ module github.com/genesis-community/cf-genesis-kit/spec
 go 1.22
 
 require (
-	github.com/genesis-community/testkit v0.0.0-20240513054001-28411d729985
+	github.com/genesis-community/testkit/v2 v2.0.1
 	github.com/onsi/ginkgo/v2 v2.17.3
 	github.com/onsi/gomega v1.33.1
 )
