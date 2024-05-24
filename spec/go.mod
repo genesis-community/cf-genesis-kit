@@ -5,13 +5,14 @@ module github.com/genesis-community/cf-genesis-kit/spec
 go 1.22
 
 require (
-	github.com/genesis-community/testkit/v2 v2.0.1
+	github.com/genesis-community/testkit/v2 v2.0.2
 	github.com/onsi/ginkgo/v2 v2.17.3
 	github.com/onsi/gomega v1.33.1
 )
 
 require (
 	github.com/BurntSushi/toml v1.3.2 // indirect
+	github.com/blang/semver/v4 v4.0.0 // indirect
 	github.com/egymgmbh/go-prefix-writer v0.0.0-20180609083313-7326ea162eca // indirect
 	github.com/go-logr/logr v1.4.1 // indirect
 	github.com/go-task/slim-sprig/v3 v3.0.0 // indirect
