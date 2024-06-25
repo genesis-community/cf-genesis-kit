@@ -4,15 +4,16 @@ import (
 	"path/filepath"
 	"runtime"
 
-	. "github.com/genesis-community/testkit/testing"
-	. "github.com/onsi/ginkgo"
+	. "github.com/genesis-community/testkit/v2/testing"
+	. "github.com/onsi/ginkgo/v2"
 )
 
+var _ = BeforeSuite(func() {
+	_, filename, _, _ := runtime.Caller(0)
+	KitDir, _ = filepath.Abs(filepath.Join(filepath.Dir(filename), "../"))
+})
+
 var _ = Describe("Interal Kit", func() {
-	BeforeSuite(func() {
-		_, filename, _, _ := runtime.Caller(0)
-		KitDir, _ = filepath.Abs(filepath.Join(filepath.Dir(filename), "../"))
-	})
 
 	Test(Environment{
 		Name:          "bare",
