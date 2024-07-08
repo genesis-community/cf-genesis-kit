@@ -147,13 +147,13 @@
   path: /releases/-
   value:
     name: nfs-volume
-    sha1: e510ca81e083d2697fec43cda74fb03dc985be1a
-    url: https://bosh.io/d/github.com/cloudfoundry/nfs-volume-release?v=7.1.42
-    version: 7.1.42
+    sha1: 17b321ae8fd82d4c383915033f53a3963c4505ac
+    url: https://bosh.io/d/github.com/cloudfoundry/nfs-volume-release?v=7.1.66
+    version: 7.1.66
 - type: replace
   path: /releases/name=mapfs?
   value:
     name: mapfs
-    sha1: ebd56b880e6e2d6fe1419169f2820a736cb33242
-    url: https://bosh.io/d/github.com/cloudfoundry/mapfs-release?v=1.2.51
-    version: 1.2.51
+    sha1: e814d97f941dd588c10939a915a2ed6ae55607f8
+    url: https://bosh.io/d/github.com/cloudfoundry/mapfs-release?v=1.2.71
+    version: 1.2.71
