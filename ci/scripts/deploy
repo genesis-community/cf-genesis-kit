@@ -46,6 +46,7 @@ fi
 header "Setting up git..."
 git config --global user.name  "$GIT_NAME"
 git config --global user.email "$GIT_EMAIL"
+git config --global init.defaultBranch develop
 
 header "Connecting to vault..."
 safe target da-vault "$VAULT_URI" -k
@@ -64,7 +65,7 @@ else
   header "Setting up Genesis deployment directory for $KIT_SHORTNAME v$VERSION..."
   rm -rf work/*; mkdir -p work/
   genesis -v
-  genesis -C work/ init -k "$KIT" --vault da-vault
+  genesis -C "$(dirname "$WORKDIR")"  init -k "$KIT" --vault da-vault -d "$(basename "$WORKDIR")"
 fi
 
 header "Copying test environment YAMLs from $CI_ROOT/ci/envs..."
