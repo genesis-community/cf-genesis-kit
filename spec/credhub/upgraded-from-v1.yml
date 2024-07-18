@@ -232,14 +232,14 @@ metric_scraper_ca:
   ca: <!{credhub}:metric_scraper_ca.ca!>
   certificate: <!{credhub}:metric_scraper_ca.certificate!>
   private_key: <!{credhub}:metric_scraper_ca.private_key!>
-metrics_agent_tls:
-  ca: <!{credhub}:metrics_agent_tls.ca!>
-  certificate: <!{credhub}:metrics_agent_tls.certificate!>
-  private_key: <!{credhub}:metrics_agent_tls.private_key!>
-metrics_discovery_metrics_tls:
-  ca: <!{credhub}:metrics_discovery_metrics_tls.ca!>
-  certificate: <!{credhub}:metrics_discovery_metrics_tls.certificate!>
-  private_key: <!{credhub}:metrics_discovery_metrics_tls.private_key!>
+blobstore_public:
+  ca: <!{credhub}:blobstore_public.ca!>
+  certificate: <!{credhub}:blobstore_public.certificate!>
+  private_key: <!{credhub}:blobstore_public.private_key!>
+gorouter_lb_health_tls:
+  ca: <!{credhub}:gorouter_lb_health_tls.ca!>
+  certificate: <!{credhub}:gorouter_lb_health_tls.certificate!>
+  private_key: <!{credhub}:gorouter_lb_health_tls.private_key!>
 nats_ca:
   ca: <!{credhub}:nats_ca.ca!>
   certificate: <!{credhub}:nats_ca.certificate!>
@@ -318,10 +318,10 @@ routing_api_tls_client:
   ca: <!{credhub}:routing_api_tls_client.ca!>
   certificate: <!{credhub}:routing_api_tls_client.certificate!>
   private_key: <!{credhub}:routing_api_tls_client.private_key!>
-scrape_config_generator_metrics_tls:
-  ca: <!{credhub}:scrape_config_generator_metrics_tls.ca!>
-  certificate: <!{credhub}:scrape_config_generator_metrics_tls.certificate!>
-  private_key: <!{credhub}:scrape_config_generator_metrics_tls.private_key!>
+tcp_router_lb_health_tls:
+  ca: <!{credhub}:tcp_router_lb_health_tls.ca!>
+  certificate: <!{credhub}:tcp_router_lb_health_tls.certificate!>
+  private_key: <!{credhub}:tcp_router_lb_health_tls.private_key!>
 service_cf_internal_ca:
   ca: <!{credhub}:service_cf_internal_ca.ca!>
   certificate: <!{credhub}:service_cf_internal_ca.certificate!>
