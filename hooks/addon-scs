@@ -48,10 +48,11 @@ memory="256M"
 disk="1048M"
 stack="cflinuxfs4"
 buildpack="go_buildpack"
-release_tag="Greenwich.SR3"
-broker_uri="https://github.com/cloudfoundry-community/scs-broker/archive/refs/tags/v1.1.0.tar.gz"
-configserver_jar_uri="https://github.com/cloudfoundry-community/cf-spring-cloud-config-server/releases/download/1.1.0/spring-cloud-config-server-1.1.0-2.5.14.SCS.3.1.37.jar"
-registry_jar_uri="https://github.com/cloudfoundry-community/scs-service-registry/releases/download/v1.2.0-3.1.37/service-registry-1.2.0-3.1.37.jar"
+release_tag="2023.0.1"
+broker_uri="https://github.com/cloudfoundry-community/scs-broker/archive/refs/tags/v1.1.2.tar.gz"
+configserver_jar_uri="https://github.com/cloudfoundry-community/cf-spring-cloud-config-server/releases/download/v2.0.0-2023.0.1/spring-cloud-config-server-2.0.0-2023.0.1.jar"
+registry_jar_uri="https://github.com/cloudfoundry-community/scs-service-registry/releases/download/v2.0.0-3.4.0/service-registry-2.0.0-3.4.0.jar"
+java_version="17.+"
 
 broker_name="scs-broker"
 broker_old_name="scs-broker"
@@ -119,6 +120,10 @@ do # Process opertor arguments
       register=1
       shift
       ;;
+    (java_version)
+      java_version="${2}"
+      shift 2 || fail "Usage: ... java_version <version>"
+      ;;
     (*)
       fail "Unknown argument: ${1}"
       ;;
@@ -137,6 +142,7 @@ then
 
   fetch::artifacts
 
+  echo "1.22" > .go-version
   cat > manifest.yml <<-APPMANIFEST
 ---
 applications:
@@ -150,6 +156,7 @@ applications:
     health-check-type: port
     env:
       GOPACKAGENAME: scs-broker
+      GO_VERSION: 1.22
       SCS_BROKER_CONFIG: |-
         {
           "broker_id": "${broker_name}",
@@ -188,7 +195,10 @@ applications:
               "service_description": "Broker to create Service Registries",
               "service_download_uri": "${registry_jar_uri}"
             }
-          ]
+          ],
+          "java_config": {
+            "JBP_CONFIG_OPEN_JDK_JRE": "{ \\"jre\\": { \\"version\\": \\"${java_version}\\" } }"
+          }
         }
 
 APPMANIFEST
