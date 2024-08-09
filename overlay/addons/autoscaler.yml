@@ -10,6 +10,9 @@ exodus:
   loggregator_agent_metrics_tls_ca: ((loggregator_agent_metrics_tls.ca))
   loggregator_agent_metrics_tls_certificate: ((loggregator_agent_metrics_tls.certificate))
   loggregator_agent_metrics_tls_private_key: ((loggregator_agent_metrics_tls.private_key))
+  cloud_controller_tls_ca:    ((cc_tls.ca))
+  cloud_controller_tls_certificate: ((cc_tls.certificate))
+  cloud_controller_tls_private_key: ((cc_tls.private_key))
 
 instance_groups:
 - name: uaa
