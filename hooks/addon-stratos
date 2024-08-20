@@ -109,10 +109,32 @@ fi
 cf create-space -o system stratos
 cf target -o system -s stratos
 
-cf cups console_db_tls_verify_ca  -p "$( cat <<-EOF
+################################################################################
+echo "Configuring Stratos Database Connection via CUPS Services"
+################################################################################
+svc_name="console_db_tls_verify_ca"
+org=system
+space=stratos
+org_guid="$(cf org ${org} --guid)"
+space_guid="$(cf space ${space} --guid)"
+svc="$(cf curl "/v3/service_instances?organization_guids=${org_guid}&space_guids=${space_guid}" |
+    jq -r '.resources[]|select(.name|test("'${svc_name}'"))|.name'
+)"
+
+if [[ ${svc} = "${svc_name}" ]]
+then
+  echo "Service ${svc_name} was found, update existing cups service definition."
+  cf uups console_db_tls_verify_ca  -p "$( cat <<-EOF
 { "uri": "${stratos_db_scheme}://", "username":"${stratos_db_username}", "password":"${stratos_db_password}", "hostname":"${stratos_db_hostname}", "port":"${stratos_db_port}", "dbname":"${stratos_db_database}", "sslmode":"${stratos_db_sslmode}" }'
 EOF
-)" || true
+)"
+else
+  echo "Service ${svc_name} was not found, creating cups service definition."
+  cf cups console_db_tls_verify_ca  -p "$( cat <<-EOF
+{ "uri": "${stratos_db_scheme}://", "username":"${stratos_db_username}", "password":"${stratos_db_password}", "hostname":"${stratos_db_hostname}", "port":"${stratos_db_port}", "dbname":"${stratos_db_database}", "sslmode":"${stratos_db_sslmode}" }'
+EOF
+)"
+fi
 
 if [[ -n ${create_sgs} ]]
 then # Security group that allows to talk to VPC IP Range
