@@ -50,7 +50,9 @@ stack="cflinuxfs4"
 buildpack="go_buildpack"
 release_tag="2023.0.1"
 broker_uri="https://github.com/cloudfoundry-community/scs-broker/archive/refs/tags/v1.1.2.tar.gz"
+configserver_buildpack="java_buildpack"
 configserver_jar_uri="https://github.com/cloudfoundry-community/cf-spring-cloud-config-server/releases/download/v2.0.0-2023.0.1/spring-cloud-config-server-2.0.0-2023.0.1.jar"
+registry_buildpack="java_buildpack"
 registry_jar_uri="https://github.com/cloudfoundry-community/scs-service-registry/releases/download/v2.0.0-3.4.0/service-registry-2.0.0-3.4.0.jar"
 java_version="17.+"
 
@@ -86,7 +88,15 @@ do # Process opertor arguments
       ;;
     (buildpack)
       buildpack="${2}"
-      shift 2 || fail "Usage: ... buildpack <buildpack-name>"
+      shift 2 || fail "Usage: ... buildpack <go-buildpack-name>"
+      ;;
+    (registry_buildpack)
+      registry_buildpack="${2}"
+      shift 2 || fail "Usage: ... registry_buildpack <java-buildpack-name>"
+      ;;
+    (configserver_buildpack)
+      configserver_buildpack="${2}"
+      shift 2 || fail "Usage: ... configserver_buildpack <java-buildpack-name>"
       ;;
     (release_tag)
       release_tag="${2}"
@@ -185,6 +195,7 @@ applications:
               "service_plan_id": "default-cs",
               "service_plan_name": "default",
               "service_description": "Broker to create Config Servers",
+              "service_buildpack": "${configserver_buildpack}",
               "service_download_uri": "${configserver_jar_uri}"
             },
             {
@@ -193,6 +204,7 @@ applications:
               "service_plan_id": "default-sr",
               "service_plan_name": "default",
               "service_description": "Broker to create Service Registries",
+              "service_buildpack": "${registry_buildpack}",
               "service_download_uri": "${registry_jar_uri}"
             }
           ],
