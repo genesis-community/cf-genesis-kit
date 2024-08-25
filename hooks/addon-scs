@@ -196,7 +196,7 @@ applications:
               "service_plan_name": "default",
               "service_description": "Broker to create Config Servers",
               "service_buildpack": "${configserver_buildpack}",
-              "service_stack": "${stack}"
+              "service_stack": "${stack}",
               "service_download_uri": "${configserver_jar_uri}"
             },
             {
@@ -206,7 +206,7 @@ applications:
               "service_plan_name": "default",
               "service_description": "Broker to create Service Registries",
               "service_buildpack": "${registry_buildpack}",
-              "service_stack": "${stack}"
+              "service_stack": "${stack}",
               "service_download_uri": "${registry_jar_uri}"
             }
           ],
