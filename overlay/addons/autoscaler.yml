@@ -10,9 +10,15 @@ exodus:
   loggregator_agent_metrics_tls_ca: ((loggregator_agent_metrics_tls.ca))
   loggregator_agent_metrics_tls_certificate: ((loggregator_agent_metrics_tls.certificate))
   loggregator_agent_metrics_tls_private_key: ((loggregator_agent_metrics_tls.private_key))
-  cloud_controller_tls_ca:    ((cc_tls.ca))
-  cloud_controller_tls_certificate: ((cc_tls.certificate))
-  cloud_controller_tls_private_key: ((cc_tls.private_key))
+  syslog_agent_api_tls_ca:    ((syslog_agent_api_tls.ca))
+  syslog_agent_api_tls_certificate: ((syslog_agent_api_tls.certificate))
+  syslog_agent_api_tls_private_key: ((syslog_agent_api_tls.private_key))
+  syslog_agent_metrics_tls_ca: ((syslog_agent_metrics_tls.ca))
+  syslog_agent_metrics_tls_certificate: ((syslog_agent_metrics_tls.certificate))
+  syslog_agent_metrics_tls_private_key: ((syslog_agent_metrics_tls.private_key))
+  forwarder_agent_metrics_tls_ca: ((forwarder_agent_metrics_tls.ca))
+  forwarder_agent_metrics_tls_certificate: ((forwarder_agent_metrics_tls.certificate))
+  forwarder_agent_metrics_tls_private_key: ((forwarder_agent_metrics_tls.private_key))
 
 instance_groups:
 - name: uaa
