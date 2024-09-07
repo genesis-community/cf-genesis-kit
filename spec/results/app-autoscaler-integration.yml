@@ -302,17 +302,13 @@ exodus:
   cf-deployment-version: 40.12.0
   core_network: cf-core
   db_network: cf-core
+  diego_instance_identity_ca: <!{credhub}:diego_instance_identity_ca.certificate!>
   edge_network: cf-edge
   features: app-autoscaler-integration
   is_director: false
-  loggregator_agent_metrics_tls_ca: <!{credhub}:loggregator_agent_metrics_tls.ca!>
-  loggregator_agent_metrics_tls_certificate: <!{credhub}:loggregator_agent_metrics_tls.certificate!>
-  loggregator_agent_metrics_tls_private_key: <!{credhub}:loggregator_agent_metrics_tls.private_key!>
-  loggregator_ca: <!{credhub}:loggregator_ca.certificate!>
-  loggregator_tls_agent_cert: <!{credhub}:loggregator_tls_agent.certificate!>
-  loggregator_tls_agent_key: <!{credhub}:loggregator_tls_agent.private_key!>
-  loggregator_tls_rlp_cert: <!{credhub}:loggregator_tls_rlp.certificate!>
-  loggregator_tls_rlp_key: <!{credhub}:loggregator_tls_rlp.private_key!>
+  log_cache_ca: <!{credhub}:log_cache.ca!>
+  log_cache_cert: <!{credhub}:log_cache.certificate!>
+  log_cache_key: <!{credhub}:log_cache.private_key!>
   runtime_network: cf-runtime
   system_domain: system.cf.testing.examle
   system_org: system
