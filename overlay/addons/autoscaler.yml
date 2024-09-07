@@ -42,7 +42,13 @@ instance_groups:
                 authorized-grant-types: client_credentials
                 authorities: cloud_controller.read,cloud_controller.admin,uaa.resource
                 secret: "((uaa_clients_app_autoscaler_secret))"
-
+  - name: scheduler
+    jobs:
+      - name: loggr-syslog-binding-cache
+        provides:
+          binding_cache:
+            as: binding_cache
+            shared: true
 variables:
   - name: uaa_clients_app_autoscaler_secret
     type: password
