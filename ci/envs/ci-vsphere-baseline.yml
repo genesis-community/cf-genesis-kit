@@ -3,9 +3,12 @@ kit:
   features:
     - ((append))
     - small-footprint
+    - app-autoscaler-integration
+    - app-scheduler-integration
 
 genesis:
-  env:   ci-vsphere-baseline
+  env:         ci-vsphere-baseline
+  min_version: 3.0.8
 
 params:
   disk_type:          default
