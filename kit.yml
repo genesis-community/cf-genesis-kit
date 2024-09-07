@@ -1,6 +1,6 @@
 ---
 name:    cf
-version: 2.0.0
+version: 2.5.2
 authors: [ Dennis Bell <dennis@rubidiumstudios.com> ]
 docs:    https://github.com/genesis-community/cf-genesis-kit
 code:    https://github.com/genesis-community/cf-genesis-kit
@@ -16,5 +16,5 @@ required_configs:
   - cloud
   - runtime
 
-genesis_version_min: 2.8.6
+genesis_version_min: 2.8.11
 secrets_store: credhub
