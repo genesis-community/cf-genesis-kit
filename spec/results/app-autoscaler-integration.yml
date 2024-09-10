@@ -305,11 +305,28 @@ exodus:
   diego_instance_identity_ca: <!{credhub}:diego_instance_identity_ca.certificate!>
   edge_network: cf-edge
   features: app-autoscaler-integration
+  forwarder_agent_metrics_tls_ca: <!{credhub}:forwarder_agent_metrics_tls.ca!>
+  forwarder_agent_metrics_tls_certificate: <!{credhub}:forwarder_agent_metrics_tls.certificate!>
+  forwarder_agent_metrics_tls_private_key: <!{credhub}:forwarder_agent_metrics_tls.private_key!>
   is_director: false
   log_cache_ca: <!{credhub}:log_cache.ca!>
   log_cache_cert: <!{credhub}:log_cache.certificate!>
   log_cache_key: <!{credhub}:log_cache.private_key!>
+  loggregator_agent_metrics_tls_ca: <!{credhub}:loggregator_agent_metrics_tls.ca!>
+  loggregator_agent_metrics_tls_certificate: <!{credhub}:loggregator_agent_metrics_tls.certificate!>
+  loggregator_agent_metrics_tls_private_key: <!{credhub}:loggregator_agent_metrics_tls.private_key!>
+  loggregator_ca: <!{credhub}:loggregator_ca.certificate!>
+  loggregator_tls_agent_cert: <!{credhub}:loggregator_tls_agent.certificate!>
+  loggregator_tls_agent_key: <!{credhub}:loggregator_tls_agent.private_key!>
+  loggregator_tls_rlp_cert: <!{credhub}:loggregator_tls_rlp.certificate!>
+  loggregator_tls_rlp_key: <!{credhub}:loggregator_tls_rlp.private_key!>
   runtime_network: cf-runtime
+  syslog_agent_api_tls_ca: <!{credhub}:syslog_agent_api_tls.ca!>
+  syslog_agent_api_tls_certificate: <!{credhub}:syslog_agent_api_tls.certificate!>
+  syslog_agent_api_tls_private_key: <!{credhub}:syslog_agent_api_tls.private_key!>
+  syslog_agent_metrics_tls_ca: <!{credhub}:syslog_agent_metrics_tls.ca!>
+  syslog_agent_metrics_tls_certificate: <!{credhub}:syslog_agent_metrics_tls.certificate!>
+  syslog_agent_metrics_tls_private_key: <!{credhub}:syslog_agent_metrics_tls.private_key!>
   system_domain: system.cf.testing.examle
   system_org: system
   system_space: system
@@ -1564,6 +1581,10 @@ instance_groups:
         cert: <!{credhub}:binding_cache_tls.certificate!>
         cn: binding-cache
         key: <!{credhub}:binding_cache_tls.private_key!>
+    provides:
+      binding_cache:
+        as: binding_cache
+        shared: true
     release: loggregator-agent
   - name: loggr-udp-forwarder
     properties:
