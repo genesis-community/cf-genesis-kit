@@ -65,7 +65,7 @@ else
   header "Setting up Genesis deployment directory for $KIT_SHORTNAME v$VERSION..."
   rm -rf work/*; mkdir -p work/
   genesis -v
-  genesis -C "$(dirname "$WORKDIR")"  init -k "$KIT" --vault da-vault -d "$(basename "$WORKDIR")"
+  genesis -C "$(dirname "$WORKDIR")" init -k "$KIT" --vault da-vault -d "$(basename "$WORKDIR")"
 fi
 
 header "Copying test environment YAMLs from $CI_ROOT/ci/envs..."

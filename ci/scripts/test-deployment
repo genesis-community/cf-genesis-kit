@@ -21,17 +21,26 @@ has_feature() {
 }
 
 is_proto() {
-	has_feature "$1" 'proto' # This will need to be changed in v2.8.0
+  "$(genesis "$1" lookup genesis.use_create_env false 2>/dev/null)" || has_feature "$1" 'proto'
 }
 
 cleanup_environment() {
 	local env="$1"
+  # FIXME: This needs to be updated when genesis 3.1 is released because
+  # .genesis/manifests directory will be gone.  However, by using safe instead
+  # of local files, we won't have lost deployments:
+  # if [[ $(genesis version major) -eq 3 && $(genesis version minor) -ge 1 ]] ; then
+  #  data="$(genesis "$env" lookup --historic latest --type state .)" --or--
+  #  data="$(genesis "$env" deployment-history|dh|history <ts> --all|--json|--file <file>|--extract-to <path>)" --default is deployed manifest
+  #  ...
+  # fi
 	if [[ -f .genesis/manifests/$env-state.yml ]] ; then
 		header "Preparing to delete proto environment $env"
 		echo "Generating reference manifest..."
-		genesis "$env" manifest --no-redact > manifest.yml 2>/dev/null
+		genesis "$env" manifest > manifest.yml 2>/dev/null
 		echo $'\n'"Building BOSH variables file..."
-		genesis "${env}" lookup --merged bosh-variables > vars.yml 2>/dev/null
+
+		genesis "${env}" manifest -s 'bosh-vars' > vars.yml 2>/dev/null
 		echo $'\n'"$env state file:"
 		echo "----------------->8------------------"
 		cat ".genesis/manifests/$env-state.yml"
@@ -62,7 +71,7 @@ cleanup() {
 		if is_proto "$deployment" ; then
 			cleanup_environment "$deployment"
 		else ( # run in a subshell to prevent pollution
-			eval "$(genesis bosh --connect "${deployment}" 2>/dev/null)"
+			eval "$(genesis "${deployment}" bosh --connect  2>/dev/null)"
 			cleanup_deployment "$deployment-${KIT_SHORTNAME}"
 		); fi
 	done
@@ -164,7 +173,7 @@ if [[ "$SKIP_DEPLOY" == "false" ]]; then
 		*)           echo >&2 "Unknown or missing INFRASTRUCTURE value -- cannot upload stemcell" ;;
 	esac
 
-	if [[ -n "$stemcell_iaas" ]] ; then
+	if [[ -n "$stemcell_iaas" ]] && ! is_proto "$DEPLOY_ENV" ; then
 		stemcell_data="$(genesis "${DEPLOY_ENV}" lookup --merged stemcells)"
 		stemcell_os="$(jq -r '.[0].os' <<<"$stemcell_data")"
 		stemcell_version="$(jq -r '.[0].version' <<<"$stemcell_data")"
@@ -186,6 +195,7 @@ if [[ "$SKIP_DEPLOY" == "false" ]]; then
 
 	genesis "${DEPLOY_ENV}" deploy -y
 
+  # FIXME for genesis 3.1 here too
 	if [[ -f .genesis/manifests/${DEPLOY_ENV}-state.yml ]] ; then
 		echo $'\n'"${DEPLOY_ENV} state file:"
 		echo "----------------->8------------------"

@@ -10,12 +10,18 @@ for my $r (@{$data->{releases} || []}) {
 	$sha1 =~ s/ .*//;
 
 	if ($r->{sha1} eq $sha1) {
-		print "[ok] $r->{name} sha1 checkums are correct.\n";
+		print "[ok] $r->{name} (v$r->{version}) sha1 checkums are correct.\n";
 	} else {
-		print "[!!] $r->{name} sha1 checkums are INCORRECT.\n";
+		print "[!!] $r->{name} (v$r->{version}) sha1 checkums are INCORRECT.\n";
 		print "[!!]     the kit has '$r->{sha1}' (wrong)\n";
 		print "[!!]    actually got '$sha1' (correct)\n";
 		$rc = 1;
 	}
+}
+
+if ($rc) {
+	print "\n[31m[!!] sha1 check failed.[0m\n";
+} else {
+	print "\n[32m[ok] sha1 check passed.[0m\n";
 }
 exit $rc;
