@@ -1,4 +1,13 @@
 ---
+kit:
+  ci:
+    job: acceptance-tests
+    after: upgrade
+    type: custom
+    resources:
+    - cats
+    blocking: false # set true if a pass is required to proceed
+
 genesis:
   env:   ci-vsphere-cats
 

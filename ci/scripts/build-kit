@@ -4,6 +4,7 @@ set -eu
 # Resource Directories
 export REPO_ROOT="git"
 export BUILD_ROOT="build"
+export RELEASE_CACHE_DIR="release-cache"
 export CI_ROOT="git-ci"
 export VERSION_FROM="version/number"
 

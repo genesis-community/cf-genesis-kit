@@ -1,0 +1,180 @@
+#!/bin/bash -
+set -ue
+base_dir="$(cd "$(dirname "$0")/.." && pwd)"
+mkdir -p "${base_dir}/pipeline/tests/"
+
+_lookup() {
+ echo "${1}" | jq -recM "${2}"
+}
+
+_job_params() {
+  local env_name="${1:?_job_params() - missing environment name}"
+  shift
+  local skip_fresh skip_replace_secrets skip_smoke_tests skip_clean
+  [[ "$*" =~ skip_fresh ]] && skip_fresh=true
+  [[ "$*" =~ skip_replace_secrets ]] && skip_replace_secrets=true
+  [[ "$*" =~ skip_smoke_tests ]] && skip_smoke_tests=true
+  [[ "$*" =~ skip_clean ]] && skip_clean=true
+
+  cat <<EOF
+      params:
+        .: (( inject meta.task_connectivity_params ))
+        DEPLOY_ENV:           $env_name
+        KIT_SHORTNAME:        (( grab meta.kit ))
+        SKIP_FRESH:           ${skip_fresh:-false}
+        SKIP_REPLACE_SECRETS: ${skip_replace_secrets:-false}
+        SKIP_SMOKE_TESTS:     ${skip_smoke_tests:-false}
+        SKIP_CLEAN:           ${skip_clean:-false}
+EOF
+}
+
+_extra_params() {
+  local extra_params="${1:?_extra_params() - missing extra params}"
+  [[ "$extra_params" == "{}" ]] && return
+  local entry
+  while IFS= read -r entry ; do
+    echo "        $entry"
+  done < <(jq -r 'to_entries[] | "\(.key): \(.value)"' <<<"$extra_params")
+}
+
+test_group=()
+passed=()
+settings="$(spruce merge "$base_dir/pipeline/base.yml" "$base_dir/settings.yml" | spruce json | jq -r '.meta//{}')"
+uses_spec_test=''
+
+iaas="$(_lookup "$settings" '.iaas//""')"
+if [[ -z "$iaas" ]] ; then
+  echo >&2 "Missing iaas in settings.yml"
+  exit 1
+fi
+env_prefix="ci-$iaas-"
+read -d '' -r -a envs < <(cd "$base_dir/envs" && echo "$env_prefix"*.yml) || true
+echo >&2 $'\n'"${#envs[@]} environments found: ${envs[*]}"$'\n'
+for env in "${envs[@]+"${envs[@]}"}" ; do
+  env="${env%.yml}"
+  env_name="${env#"${env_prefix}"}"
+  env_hierarchy=()
+  subpath=''
+  for fragment in ${env//-/ -}; do
+    subpath=$subpath$fragment
+    [[ -f "$base_dir/envs/$subpath.yml" ]] || continue
+    env_hierarchy+=( "$base_dir/envs/$subpath.yml" )
+  done
+  env_ci="$(spruce merge --skip-eval "${env_hierarchy[@]}" | spruce json | jq -r '.kit.ci//{}')"
+
+  [[ $(_lookup "$env_ci" '.skip//false') == "true" ]] && continue
+
+  job="$(_lookup "$env_ci" '.job//""')"
+  [[ -z "$job" ]] && job="deploy-$env_name"
+  test_group+=( "$job" )
+
+  if [[ $(_lookup "$env_ci" '.blocking') != "false" ]] ; then
+    passed+=( "$job" )
+  fi
+
+  serial_group="$(_lookup "$env_ci" '.serial_groups//"[]"')"
+  spec_tests="$(_lookup "$env_ci" '.spec_tests')" || true
+  pass_spec_tests=""
+  if [[ $spec_tests != "false" ]] ; then
+		pass_spec_tests=", spec-tests"
+		uses_spec_test=true
+	fi
+
+  # WIP: after="$(_lookup "$env_ci" '.after//[]')"
+
+  file="$base_dir/pipeline/tests/$job.yml"
+  type="$(_lookup "$env_ci" '.type//"deploy"')"
+  if [[ $type == 'custom' ]] ; then
+    src="$(_lookup "$env_ci" '.path//"pipeline/custom-jobs/'"$job"'.yml"')"
+    echo >&2 "Building custom test job for env $env_name using $src"
+    if [[ ! -f "$base_dir/$src" ]] ; then
+      echo >&2 "Custom job file not found: $src"
+      exit 1
+    fi
+    cp "$base_dir/$src" "$file"
+    while read -r resource; do
+      if [[ ! -f "$base_dir/pipeline/custom-resources/${resource}.yml" ]] ; then
+        echo >&2 "Custom resource file for $job not found: $resource"
+        exit 1
+      fi
+      cp "$base_dir/pipeline/custom-resources/${resource}.yml" "$base_dir/pipeline/tests/"
+    done < <(_lookup "$env_ci" '.resources//[] | .[]')
+    continue
+  fi
+
+  echo >&2 "Building $type test job for env $env_name"
+
+  (
+    echo "jobs:"
+
+    cat <<EOF
+- name: "$job"
+  public: true
+  serial_groups: $serial_group
+  plan:
+  - do:
+    - in_parallel:
+      - { get: version,    passed: [spec-check${pass_spec_tests}]}
+      - { get: build,      passed: [spec-check${pass_spec_tests}], trigger: true }
+      - { get: spec-check, passed: [spec-check]}
+      - { get: git,        passed: [spec-check${pass_spec_tests}]}
+      - { get: git-ci }
+EOF
+    if [[ $type == 'deploy' ]] ; then
+      echo "    - task: test-$job"
+      echo "      file: git-ci/ci/tasks/deploy.yml"
+      _job_params "$env_prefix$env_name"
+      _extra_params "$(_lookup "$env_ci" '.test_deploy_params//{}')"
+    elif [[ $type == 'upgrade' ]] ; then
+      echo "      - { get: git-latest-tag }"
+      echo "    - task: deploy-stable"
+      echo "      file: git-ci/ci/tasks/deploy-stable.yml"
+      _job_params "$env_prefix$env_name" skip_smoke_tests skip_clean
+      _extra_params "$(_lookup "$env_ci" '.stable_deploy_params//{}')"
+      echo "    - task: upgrade"
+      echo "      file: git-ci/ci/tasks/upgrade.yml"
+      _job_params "$env_prefix$env_name" skip_fresh skip_replace_secrets
+      _extra_params "$(_lookup "$env_ci" '.upgrade_deploy_params//{}')"
+    else
+      echo >&2 "Unknown job type for $env.yml: $type"
+      exit 1
+    fi
+    cat <<EOF
+    on_failure:
+      put: notify
+      params:
+        topic:   (( concat meta.shout.topic "-\$BUILD_JOB_NAME" ))
+        message: tests job '\$BUILD_JOB_NAME' failed.
+        ok:      no
+        link:    (( grab meta.shout.links.build ))
+EOF
+  ) > "$file"
+
+done
+
+group_file="$base_dir/pipeline/tests/_test_group.yml"
+if [[ "${#test_group[@]}" -gt 0 ]] ; then
+  (
+  echo "meta:"
+  echo "  blocking_tests:"
+  for job in ${passed[@]+"${passed[@]}"} ; do
+    echo "  - $job"
+  done
+
+  echo "groups:"
+  echo "- (( merge on name ))"
+  echo "- name: (( grab meta.pipeline ))"
+  echo "  jobs:"
+	echo "  - (( insert after 2 ))"
+  if [[ "$uses_spec_test" == "true" ]] ; then
+		echo "  - spec-tests"
+		cp "$base_dir/pipeline/optional-jobs/spec-tests.yml" "$base_dir/pipeline/tests/spec-tests.yml"
+	fi
+  for job in ${test_group[@]+"${test_group[@]}"} ; do
+    echo "  - $job"
+  done
+  ) > "$group_file"
+else
+  echo >&2 "No test jobs found - you must include at least one environment ci/envs/$env_prefix*.yml"
+  exit 1
+fi

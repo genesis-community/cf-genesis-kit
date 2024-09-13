@@ -9,6 +9,7 @@ jobs:
       - { get: git,                        passed: [prepare] }
       - { get: spec-check, trigger: false, passed: [prepare] }
       - { get: release-notes}
+      - { get: release-cache }
       - { get: git-ci }
       - { get: git-main }
       - { get: git-latest-tag }

@@ -8,6 +8,7 @@ jobs:
       - { get: version, params: {pre: rc} }
       - { get: git, trigger: true }
       - { get: git-ci }
+      - { get: release-cache }
     - task: build-kit
       file: git-ci/ci/tasks/build-kit.yml
       params:
@@ -20,6 +21,11 @@ jobs:
         acl: public-read
     - put: version
       params: {file: version/number}
+    - put: release-cache
+      params:
+        file: release-cache/release-lookup-cache.json
+        acl: public-read
+        content-type: application/json
     on_success:
       put: notify
       params:

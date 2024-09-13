@@ -14,17 +14,6 @@ meta:
       package:  cf-deployment
       branch:   main
 
-  bosh:
-    uri:      ((bosh.uri))
-    username: ((bosh.username))
-    password: ((bosh.password))
-    cacert:   ((bosh.ca))
-
-  credhub:
-    url:      ((bosh.credhub_url))
-    username: ((bosh.credhub_username))
-    password: ((bosh.credhub_password))
-
   vault:
     url:       ((vault.url))
     token:     ((vault.token))
@@ -47,3 +36,12 @@ meta:
     url:      ((shout.url))
     username: ((shout.username))
     password: ((shout.password))
+
+  cats_params:
+    .: (( inject meta.task_connectivity_params ))
+    DEPLOY_ENV:           (( concat "ci-" meta.iaas "-cats" ))
+    KIT_SHORTNAME:        (( grab meta.kit ))
+    SKIP_CATS:            false
+    FAILFAST:             true
+    VERBOSE:              false
+    CATS_NODES:           6

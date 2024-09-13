@@ -1,10 +1,13 @@
 ---
 kit:
   features:
-    - ((append))
-    - small-footprint
-    - app-autoscaler-integration
-    - app-scheduler-integration
+  - ((append))
+  - small-footprint
+  - app-autoscaler-integration
+  - app-scheduler-integration
+  ci:
+    job: deploy
+    serial_groups: [deployment]
 
 genesis:
   env:         ci-vsphere-baseline

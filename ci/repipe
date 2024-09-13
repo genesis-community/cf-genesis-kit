@@ -138,7 +138,7 @@ while [[ -n "${1:-""}" ]] ; do
             P) PAUSE="pause" ;;
             X) EXPOSE="expose" ;;
             H) EXPOSE="hide" ;;
-            h) usage; exit 0;;
+            h) usage;;
             o) (( OPEN++ )) ;;
             -) ;; # ignore -- TBD: if we ever need to support --, ...
             *) usage "Unknown option '$opt'";;
@@ -181,9 +181,13 @@ echo >&2 "Using settings found in ${settings_file}"
 
 # --  Extract pipeline target information and compare -------------------------
 set -e
-trap "rm -rf .deploy.yml pipeline/upstream" QUIT TERM EXIT INT
+# shellcheck disable=SC2064
+trap "rm -rf '${base_dir}/.deploy.yml' '${base_dir}/pipeline/upstream' '${base_dir}/pipeline/tests'" QUIT TERM EXIT INT
+[[ -x "${base_dir}/scripts/build-test-jobs" ]] && "${base_dir}/scripts/build-test-jobs"
 [[ -x "${base_dir}/scripts/build-upstream-jobs" ]] && "${base_dir}/scripts/build-upstream-jobs"
+GLOBIGNORE="pipeline/custom*/*.yml:pipeline/optional*/*.yml"
 config="$(spruce merge --fallback-append pipeline/base.yml pipeline/*/*.yml "${settings_file}")"
+unset GLOBIGNORE
 meta="$(spruce merge --skip-eval --cherry-pick meta <<<"$config" | spruce json)"
 spruce merge --skip-eval --prune meta <<<"$config" > .deploy.yml
 target=$(jq -r --arg t "${CONCOURSE_TARGET:-}" '.meta.target // $t' <<<"$meta")
@@ -225,6 +229,7 @@ if (( DRYRUN > 0 )) ; then
       fi
     fi
   fi
+  exit 0
 fi
 
 declare -a cmd
@@ -241,7 +246,7 @@ else
   set_cmd=( "${cmd[@]}" set-pipeline --pipeline "${pipeline}" --config "${persistent_file:-".deploy.yml"}" )
   [[ -n "$YES" ]] && set_cmd+=( --non-interactive )
   preface_cmds upload
-  run_cmd "${set_cmd[@]}"
+  run_cmd "${set_cmd[@]}" || exit 1
   run_cmd "${cmd[@]}" "${PAUSE}-pipeline"  --pipeline "${pipeline}"
   run_cmd "${cmd[@]}" "${EXPOSE}-pipeline" --pipeline "${pipeline}"
 fi

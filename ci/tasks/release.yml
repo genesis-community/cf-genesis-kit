@@ -15,6 +15,7 @@ inputs:
 - name: spec-check
 - name: build
 - name: release-notes
+- name: release-cache
 
 outputs:
 - name: gh

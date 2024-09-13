@@ -11,9 +11,11 @@ inputs:
 - name: version
 - name: git
 - name: git-ci
+- name: release-cache
 
 outputs:
 - name: build
+- name: release-cache
 
 params:
   GENESIS_HONOR_ENV: 1

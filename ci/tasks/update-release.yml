@@ -1,0 +1,24 @@
+---
+platform: linux
+
+image_resource:
+  type: registry-image
+  source:
+    repository: ((image/concourse_go.url))
+    tag:        ((image/concourse_go.tag))
+
+inputs:
+- name: git
+- name: git-ci
+- name: bosh-release
+
+outputs:
+- name: git
+
+run:
+  path: git-ci/ci/scripts/update-release
+
+params:
+  RELEASE_NAME:
+  RELEASE_PATH:
+  BRANCH:

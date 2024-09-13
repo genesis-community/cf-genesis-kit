@@ -18,10 +18,11 @@ meta:
   target:   (( param "Please identify the name of the target Concourse CI" ))
   url:      (( param "Please specify the full url of the target Concourse CI" ))
   pipeline: (( grab meta.name ))
+  blocking_tests: []
 
   upstream:
     manifest:
-      package:  example # dummy value for things that don't use upstream
+      package:  ~
       path:     (( grab meta.upstream.manifest.package ))
       org:      cloudfoundry
       repo:     (( concat meta.upstream.manifest.org "/" meta.upstream.manifest.package ))
@@ -81,34 +82,18 @@ meta:
     VAULT_TOKEN:          (( grab meta.vault.token ))
     INFRASTRUCTURE:       (( grab meta.iaas ))
 
-  cats_params:
-    .: (( inject meta.task_connectivity_params ))
-    DEPLOY_ENV:           (( concat "ci-" meta.iaas "-cats" ))
-    KIT_SHORTNAME:        (( grab meta.kit ))
-    SKIP_CATS:            false
-    FAILFAST:             true
-    VERBOSE:              false
-    CATS_NODES:           6
 
 groups:
-  - name: (( grab meta.pipeline ))
-    jobs:
-    - build-kit
-    - spec-tests
-    - spec-check
-    - ship-prerelease
-    - deploy
-    - upgrade
-    - acceptance-tests
-    - prepare
-    - ship-release
+- name: (( grab meta.pipeline ))
+  jobs:
+  - build-kit
+  - spec-check
+  - ship-prerelease
+  - prepare
+  - ship-release
 
-  - name: upstream
-    jobs:
-    - upstream-manifest
-
-  - name: versions
-    jobs:
-    - major
-    - minor
-    - patch
+- name: versions
+  jobs:
+  - major
+  - minor
+  - patch

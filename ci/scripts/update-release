@@ -1,0 +1,110 @@
+#!/bin/bash
+
+set -e
+set -o pipefail
+export TERM=xterm-256color
+
+header() {
+  echo
+  echo "================================================================================"
+  echo "$1"
+  echo "--------------------------------------------------------------------------------"
+  echo
+}
+
+bail() {
+  echo >&2 "[1;31m[ERROR][0m $*  Did you misconfigure Concourse?"
+  exit 2
+}
+
+test -n "${GIT_EMAIL:-}"      || bail "GIT_EMAIL must be set to an email address to use for Git commits."
+test -n "${GIT_NAME:-}"       || bail "GIT_NAME must be set to something; it will be used for Git commits."
+test -n "${RELEASE_NAME:-}"   || bail "RELEASE_NAME must be set to whatever the release name is."
+test -n "${RELEASE_PATH:-}"   || bail "RELEASE_PATH must be set to the relative position of the release override file."
+test -n "${BRANCH:-}"         || bail "BRANCH must be set to the branch to update."
+
+# Get release details
+pushd bosh-release &> /dev/null
+release_name=$RELEASE_NAME
+release_version="$( cat version )"
+url="$( cat url )"
+
+if [[ "$url" =~ https://bosh.io/d/github.com/([^/]*)/([^/\?]*)\?v=(.*) ]] ; then 
+	org="${BASH_REMATCH[1]}/"
+	repo="${BASH_REMATCH[2]}"
+elif [[ "$url" =~ https://github.com/([^/]*)/([^/]*)/releases ]] ; then
+	org="${BASH_REMATCH[1]}/"
+	repo="${BASH_REMATCH[2]}"
+else
+	org=''
+	repo="$release_name"
+fi
+
+if [[ -f sha1 ]] ; then # bosh-io-release
+  sha1=$( cat sha1 )
+else # github-release (maybe others?)
+  filename="$( compgen -G "$release_name"*"$release_version.tar.gz" \
+            || compgen -G "$release_name"*"$release_version.tar" \
+            || compgen -G "$release_name"*"$release_version.tgz" \
+            || compgen -G "$release_name"*"$release_version.zip" )"
+  if [[ "$url" =~ https://github.com.*releases/tag/v?$release_version ]] ; then
+    url="${url/\/tag\//\/download\/}/$filename"
+  fi
+  sha1="$( sha1sum "$filename" | cut -d' ' -f1)"
+fi
+popd &> /dev/null
+
+# Create ops-file
+if ! grep -q "version: \\+${release_version}\$" "git/${RELEASE_PATH}"; then
+
+  cat > "git/${RELEASE_PATH}" <<YML
+releases:
+- name: ${release_name}
+  version: ${release_version}
+  url: ${url}
+  sha1: ${sha1}
+YML
+
+  header "Release file changes:"
+  results="$(git -C git diff -b --color=always "${RELEASE_PATH}" | cat)"
+  if echo "$results" | grep -q '.' ; then
+    echo "$results"
+  else
+    echo "No differences found"
+    exit 0
+  fi
+
+  header "Recreate spec-test results to validate upstream"
+  pushd git/spec &> /dev/null
+  # TODO: remove spec/{credhub,vault} if needed? because this will regenerate vault.
+  rm -rf results/
+  ACK_GINKGO_RC=true ginkgo -p .
+  popd &> /dev/null
+
+  header "Spec file changes:"
+  git -C git diff --color=always spec/results/ | cat
+
+  if [[ -n $(git -C git status -s) ]]; then
+
+    header "Commiting updates to git"
+    git config --global user.name  "${GIT_NAME}"
+    git config --global user.email "${GIT_EMAIL}"
+
+    pushd git &>/dev/null
+    git add "${RELEASE_PATH}"
+    git add spec/
+    git commit -m "Release ${org}${repo} updated to version ${release_version}"
+
+    # The following is done to ensure a clean push to the develop branch, while
+    # basing the input on a version that last passed the spec-tests.
+    https_url="$(git remote -v | grep '(fetch)' | sed -e 's/.*github.com:\(.*\) (fetch)/https:\/\/github.com\/\1/')"
+    git remote add live "$https_url"
+    git pull --rebase=merges live "$BRANCH" -X theirs --no-edit
+    git remote remove live
+    popd &> /dev/null
+  else
+    echo "No changes detected."
+  fi
+else
+  echo "Nothing to do as versions are the same"
+fi

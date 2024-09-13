@@ -1,27 +1,112 @@
 #!/usr/bin/perl
 use strict;
 use warnings;
-use JSON::PP qw/decode_json/;
+use JSON::PP qw/decode_json encode_json/;
+use Time::Piece;
 
 my $rc = 0;
 my $data = decode_json(do { local $/; <> });
+my $release_cache = decode_json(scalar `cat ./$ENV{RELEASE_CACHE_DIR}/release-lookup-cache.json`);
+my $changed_cache = 0;
 for my $r (@{$data->{releases} || []}) {
+	# Get the HEAD metadata for the URL
+	chomp(my $head = `curl -LskI "$r->{url}"`);
+	my %responses = map {$_ =~ s/^HTTP\/[^\s]+\s+(\d+)(\s.*)?$/$1/r} 
+	                grep {$_}
+	                map {$_ =~ s/^\s*//r =~ s/\s*$//r}
+	                (split(/(^HTTP.*)/m, $head));
+
+	my ($timestamp, $etag, $size) = (undef, undef, undef);
+	if ($responses{'200'}) { # Happy path
+		# Parse out size, timestamp and etag
+		(my $last_modified, $etag, $size) =
+			$responses{'200'} =~ /last-modified: ([^\n\r]+).*etag:\s([^\n\r]+).*content-length:\s+(\d+)/is;
+		$timestamp = Time::Piece->strptime($last_modified, "%a, %d %b %Y %T %Z")->epoch;
+		$etag =~ s/\"//g;
+
+		# FIXME: validate we got good data from the head request -- order may change...
+
+		# Check if we have a cached value
+		if ($release_cache->{$r->{url}}) {
+			my $cached = $release_cache->{$r->{url}};
+			if ($cached->{size} != $size) {
+				print "\e[33m[??]\e[0m $r->{name} (v$r->{version}) size differs from cache -- will recompute.\n";
+				print "     - expected: $cached->{size}, got: $size\n";
+			} elsif ($cached->{timestamp} ne $timestamp) {
+				print "\e[33m[??]\e[0m $r->{name} (v$r->{version}) timestamp differs from cache -- will recompute.\n";
+				print "     - expected: $cached->{timestamp}, got: $timestamp\n";
+			} elsif ($cached->{etag} ne $etag) {
+				print "\e[33m[??]\e[0m $r->{name} (v$r->{version}) etag differs from cache -- will recompute.\n";
+				print "     - expected: $cached->{etag}, got: $etag\n";
+			} else {
+				if ($cached->{sha1}) {
+					print "\e[36m[><]\e[0m $r->{name} (v$r->{version}) found in cache.\n";
+					if($cached->{sha1} eq $r->{sha1}) {
+						print "\e[32m[ok]\e[0m $r->{name} (v$r->{version}) sha1 checkums are correct.\n\n";
+					} else {
+						print "\e[31m[!!]\e[0m $r->{name} (v$r->{version}) sha1 checkums are INCORRECT.\n\n";
+						print "               the kit has '$r->{sha1}' (wrong)\n";
+						print "       the cache specified '$cached->{sha1}' (correct)\n";
+						$rc = 1;
+					}
+					next
+				}
+			}
+		}
+	} elsif ($responses{'404'}) {
+		print "\e[31m[!!]\e[0m $r->{name} (v$r->{version}) not found.\e[0m\n";
+		next;
+	} else {
+		my @r4xx = grep {$_ =~ /^4/} keys (%responses);
+		if (@r4xx) {
+			print "\e[31m[!!]\e[0m $r->{name} (v$r->{version}) returned a 4xx (client-error) response.\e[0m\n";
+			print "\e[35m$head\e[0m\n\n";
+			$rc = 1;
+			next;
+		}
+		my @r5xx = grep {$_ =~ /^5/} keys (%responses);
+		if (@r5xx) {
+			print "\e[31;1m[!!] $r->{name} (v$r->{version}) returned a 5xx (server-error) response.\e[0m\n";
+			print "\e[35m$head\e[0m\n\n";
+			$rc = 1;
+			next;
+		}
+		print "\e[33;1m[!!]\e[0m $r->{name} (v$r->{version}) returned an unexpected response - will not be cached.\e[0m\n";
+		print "\e[35m$head\e[0m\n\n";
+	}
+
+	print "\e[36;1m[<<]\e[0m $r->{name} (v$r->{version}) being fetched from provider...\n";
 	chomp(my $sha1 = `curl -Lsk "$r->{url}" | sha1sum`);
 	$sha1 =~ s/ .*//;
 
 	if ($r->{sha1} eq $sha1) {
-		print "[ok] $r->{name} (v$r->{version}) sha1 checkums are correct.\n";
+		print "\e[32m[ok]\e[0m $r->{name} (v$r->{version}) sha1 checkums are correct.\n\n";
+		if ($timestamp && $etag && $size) {
+			$changed_cache = 1;
+			$release_cache->{$r->{url}} = {
+				timestamp => $timestamp,
+				etag => $etag,
+				size => $size,
+				sha1 => $sha1,
+			};
+		}
 	} else {
-		print "[!!] $r->{name} (v$r->{version}) sha1 checkums are INCORRECT.\n";
-		print "[!!]     the kit has '$r->{sha1}' (wrong)\n";
-		print "[!!]    actually got '$sha1' (correct)\n";
+		print "\e[31m[!!]\e[0m $r->{name} (v$r->{version}) sha1 checkums are INCORRECT.\n";
+		print "         the kit has '$r->{sha1}' (wrong)\n";
+		print "        actually got '$sha1' (correct)\n\n";
 		$rc = 1;
 	}
 }
 
+if ($changed_cache) {
+	open(my $fh, '>', "./$ENV{RELEASE_CACHE_DIR}/release-lookup-cache.json");
+	print $fh encode_json($release_cache);
+	close($fh);
+}
+
 if ($rc) {
-	print "\n[31m[!!] sha1 check failed.[0m\n";
+	print "\n\e[31;1m[!!] sha1 check failed.\e[0m\n";
 } else {
-	print "\n[32m[ok] sha1 check passed.[0m\n";
+	print "\n\e[32;1m[ok] sha1 check passed.\e[0m\n";
 }
 exit $rc;

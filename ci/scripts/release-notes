@@ -85,7 +85,7 @@ sub parse_commits {
 	unless ($ENV{NO_UPSTREAM_SYNC}) {
 		print STDERR "  - determining upstream synchronization\n";
 		@commits = grep {
-			if ($_->{subject} =~ /^Update to ([^\/]*)\/(.*)@(.*)$/) {
+			if ($_->{subject} =~ /^Release ([^\/]*)\/([^ ]*) updated to version (.*)$/) {
 				$last_update = $_; $updates++; 0;
 			} else {
 				1;
@@ -95,7 +95,7 @@ sub parse_commits {
 
 	my %messages;
 	if ($last_update) {
-		$last_update->{subject} =~ /Update to ([^\/]*)\/(.*)@(.*)$/;
+		$last_update->{subject} =~ /^Release ([^\/]*)\/([^ ]*) updated to version (.*)$/;
 		$messages{'Upstream Convergence'} = [
 			sprintf(
 				'* Synchronized embedded %s to [@%s](https://github.com/%s/%s/tree/%s)',
