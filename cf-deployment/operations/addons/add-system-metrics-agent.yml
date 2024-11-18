@@ -81,16 +81,16 @@
   path: /releases/name=system-metrics?
   value:
     name: system-metrics
-    sha1: 89b966f573bd02c611d6499b9cbd7888d09e62af
-    url: https://bosh.io/d/github.com/cloudfoundry/system-metrics-release?v=3.0.7
-    version: 3.0.7
+    sha1: 30ae3f4f0df1d30a0a1c7433c3bc54852fdd9e2c
+    url: https://bosh.io/d/github.com/cloudfoundry/system-metrics-release?v=3.0.8
+    version: 3.0.8
 - type: replace
   path: /releases/name=system-metrics-scraper?
   value:
     name: system-metrics-scraper
-    sha1: 59aa1c2a79bea13f4aa8931119ce19663d5e2b51
-    url: https://bosh.io/d/github.com/cloudfoundry/system-metrics-scraper-release?v=4.0.8
-    version: 4.0.8
+    sha1: 1a311672b0c74ac16536b189c044181dca333456
+    url: https://bosh.io/d/github.com/cloudfoundry/system-metrics-scraper-release?v=4.0.11
+    version: 4.0.11
 - type: replace
   path: /variables/name=leadership_election_tls?
   value:

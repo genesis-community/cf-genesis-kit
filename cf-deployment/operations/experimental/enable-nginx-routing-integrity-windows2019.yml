@@ -2,6 +2,9 @@
   path: /instance_groups/name=windows2019-cell/jobs/name=rep_windows/properties/containers?/proxy/enabled
   value: true
 - type: replace
+  path: /instance_groups/name=windows2019-cell/jobs/name=rep_windows/properties/containers?/proxy/enable_unproxied_port_mappings
+  value: false
+- type: replace
   path: /instance_groups/name=windows2019-cell/jobs/name=rep_windows/properties/containers?/proxy/require_and_verify_client_certificates
   value: true
 - type: replace
@@ -9,11 +12,16 @@
   value:
   - ((gorouter_backend_tls.ca))
   - ((ssh_proxy_backends_tls.ca))
+    ((tcp_router_backend_tls.ca))
 - type: replace
   path: /instance_groups/name=windows2019-cell/jobs/name=rep_windows/properties/containers?/proxy/verify_subject_alt_name
   value:
   - gorouter.service.cf.internal
   - ssh-proxy.service.cf.internal
+  - tcp-router.service.cf.internal
+- type: replace
+  path: /instance_groups/name=windows2019-cell/jobs/name=route_emitter_windows/properties/tcp?/enable_tls
+  value: true
 - type: replace
   path: /instance_groups/name=windows2019-cell/jobs/-
   value:
@@ -23,6 +31,6 @@
   path: /releases/name=envoy-nginx?
   value:
     name: envoy-nginx
-    sha1: 60a3a8b13938856f1ada7efbf7ae2d4134e465f2
-    url: https://bosh.io/d/github.com/cloudfoundry-incubator/envoy-nginx-release?v=0.25.0
-    version: 0.25.0
+    sha1: 7a4a575262b1a7cbf582302ee8e1f11d6e31fc21
+    url: https://bosh.io/d/github.com/cloudfoundry-incubator/envoy-nginx-release?v=0.29.0
+    version: 0.29.0

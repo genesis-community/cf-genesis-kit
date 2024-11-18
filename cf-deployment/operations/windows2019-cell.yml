@@ -86,6 +86,8 @@
                 client_cert: ((nats_client_cert.certificate))
                 client_key: ((nats_client_cert.private_key))
                 enabled: true
+        internal_routes:
+          enabled: true
         logging:
           format:
             timestamp: rfc3339
@@ -94,6 +96,11 @@
           cert: ((loggregator_tls_agent.certificate))
           key: ((loggregator_tls_agent.private_key))
           use_v2_api: true
+        tcp:
+          enabled: true
+        uaa:
+          ca_cert: ((uaa_ssl.ca))
+          client_secret: ((uaa_clients_tcp_emitter_secret))
       release: diego
     - name: loggregator_agent_windows
       properties:
@@ -175,7 +182,7 @@
   value:
     alias: windows2019
     os: windows2019
-    version: "2019.73"
+    version: "2019.78"
 - path: /instance_groups/name=api/jobs/name=cloud_controller_ng/properties/cc/stacks/name=windows?
   type: replace
   value:
@@ -200,16 +207,16 @@
   type: replace
   value:
     name: hwc-buildpack
-    sha1: d79dc46ba0b69bfc900ee8d2f96c7e42aa44dd4c
-    url: https://bosh.io/d/github.com/cloudfoundry-incubator/hwc-buildpack-release?v=3.1.36
-    version: 3.1.36
+    sha1: f8c9ada22af7f5b0f22f4315fd90ac3fea6dbf92
+    url: https://bosh.io/d/github.com/cloudfoundry-incubator/hwc-buildpack-release?v=3.1.38
+    version: 3.1.38
 - path: /releases/name=winc?
   type: replace
   value:
     name: winc
-    sha1: 5268822fa6b283463a51caba3c03f6a9dbda5543
-    url: https://bosh.io/d/github.com/cloudfoundry-incubator/winc-release?v=2.24.0
-    version: 2.24.0
+    sha1: 0b217a694f1b8b39112b14442befe20d17afad6c
+    url: https://bosh.io/d/github.com/cloudfoundry-incubator/winc-release?v=2.29.0
+    version: 2.29.0
 - path: /releases/name=windows-utilities?
   type: replace
   value:
