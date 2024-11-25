@@ -52,5 +52,9 @@ meta:
 - type: replace
   path: /instance_groups/name=smoke-tests/azs
   value: (( grab meta.ocfp.azs ))
-
-
+- type: replace
+  path: /instance_groups/name=database/azs
+  value: (( grab meta.ocfp.azs ))
+- type: replace
+  path: /instance_groups/name=singleton-blobstore/azs
+  value: (( grab meta.ocfp.azs ))
