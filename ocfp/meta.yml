@@ -3,6 +3,7 @@ meta:
   ocfp:
     env:
       scale: (( grab params.ocfp_env_scale || "dev" ))
+      cloud: (( concat genesis.env "." genesis.type "." ))
 
     vault:
       config_prefix: (( grab params.ocfp_vault_config_prefix || "config/" ))
