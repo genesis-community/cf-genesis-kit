@@ -24,31 +24,31 @@ sub perform {
 	my ($self) = @_;
 	return 1 if $self->completed;
 
-  my @vm_type_names = qw/
-    api cc-worker credhub diego-api diego-cell doppler default log-api log-cache
-    nats router scheduler tcp-router uaa
-  /;
+	my @vm_type_names = qw/
+	api cc-worker credhub diego-api diego-cell doppler default log-api log-cache
+	nats router scheduler tcp-router uaa
+	/;
 
 	push @vm_type_names, 'database'
-		if $self->wants_feature('+internal-db');
+	if $self->wants_feature('+internal-db');
 
 	push @vm_type_names, 'blobstore'
-		if $self->wants_feature('+internal-blobstore');
+	if $self->wants_feature('+internal-blobstore');
 
-  my $common_vm_type_def = {
-    cloud_properties_for_iaas => {
-      openstack => {
-        'instance_type' => $self->for_scale({
-            dev => 'm1.2',
-            prod => 'm1.3'
-          }, 'm1.2'),
-        'boot_from_volume' => $self->TRUE,
-        'root_disk' => {
-          'size' => 32 # in gigabytes
-        },
-      },
-    },
-  };
+	my $common_vm_type_def = {
+		cloud_properties_for_iaas => {
+			openstack => {
+				'instance_type' => $self->for_scale({
+						dev => 'm1.2',
+						prod => 'm1.3'
+					}, 'm1.2'),
+				'boot_from_volume' => $self->TRUE,
+				'root_disk' => {
+					'size' => 32 # in gigabytes
+				},
+			},
+		},
+	};
 
 	my $config = $self->build_cloud_config({
 		'networks' => [
@@ -68,13 +68,18 @@ sub perform {
 			)
 		],
 		'vm_types' => [ map {
-        $self->vm_type_definition($_, %$common_vm_type_def)
-      } (@vm_type_names)
-    ],
+				$self->vm_type_definition($_, %$common_vm_type_def)
+			} (@vm_type_names)
+		],
+		'vm_extensions' => [
+			$self->vm_extension_definition('diego-ssh-proxy-network-properties'),
+			$self->vm_extension_definition('cf-router-network-properties'),
+			$self->vm_extension_definition('cf-tcp-router-network-properties'),
+		],
 		'disk_types' => [
-			$self->disk_type_definition('10GB',
+			$self->disk_type_definition('database',
 				common => {
-          disk_size => gigabytes(10),
+					disk_size => gigabytes(10),
 				},
 				cloud_properties_for_iaas => {
 					openstack => {
@@ -82,7 +87,7 @@ sub perform {
 					},
 				},
 			),
-	  	$self->disk_type_definition('100GB',
+			$self->disk_type_definition('blobstore',
 				common => {
 					disk_size => gigabytes(100),
 				},

@@ -6,87 +6,100 @@ params:
 
   skip_ssl_validation: true # Using self-signed certs
 
-  cf_core_network:    (( concat meta.ocfp.env.cloud "net-ocf" ))
-  cf_edge_network:    (( concat meta.ocfp.env.cloud "net-ocf" ))
-  cf_runtime_network: (( concat meta.ocfp.env.cloud "net-ocf" ))
-  cf_db_network:      (( concat meta.ocfp.env.cloud "net-ocf" ))
+  cf_core_network:     (( concat meta.ocfp.env.cloud "net-ocf" ))
+  cf_edge_network:     (( concat meta.ocfp.env.cloud "net-ocf" ))
+  cf_runtime_network:  (( concat meta.ocfp.env.cloud "net-ocf" ))
+  cf_db_network:       (( concat meta.ocfp.env.cloud "net-ocf" ))
 
-  api_vm_type:        (( concat meta.ocfp.env.cloud "vm-api" ))
-  blobstore_vm_type:  (( concat meta.ocfp.env.cloud "vm-blobstore" ))
-  cc_worker_vm_type:  (( concat meta.ocfp.env.cloud "vm-cc-worker" ))
-  credhub_vm_type:    (( concat meta.ocfp.env.cloud "vm-credhub" ))
-  database_vm_type:   (( concat meta.ocfp.env.cloud "vm-database" ))
-  diego_api_vm_type:  (( concat meta.ocfp.env.cloud "vm-diego-api" ))
-  diego_cell_vm_type: (( concat meta.ocfp.env.cloud "vm-diego-cell" ))
-  doppler_vm_type:    (( concat meta.ocfp.env.cloud "vm-doppler" ))
-  errand_vm_type:     (( concat meta.ocfp.env.cloud "vm-default" ))
-  log_api_vm_type:    (( concat meta.ocfp.env.cloud "vm-log-api" ))
-  log_cache_vm_type:  (( concat meta.ocfp.env.cloud "vm-log-cache" ))
-  nats_vm_type:       (( concat meta.ocfp.env.cloud "vm-nats" ))
-  router_vm_type:     (( concat meta.ocfp.env.cloud "vm-router" ))
-  scheduler_vm_type:  (( concat meta.ocfp.env.cloud "vm-scheduler" ))
-  tcp_router_vm_type: (( concat meta.ocfp.env.cloud "vm-tcp-router" ))
-  uaa_vm_type:        (( concat meta.ocfp.env.cloud "vm-uaa" ))
+  database_disk_type:  (( concat meta.ocfp.env.cloud "disk-database" ))
+  blobstore_disk_type: (( concat meta.ocfp.env.cloud "disk-blobstore" ))
+
+  api_vm_type:         (( concat meta.ocfp.env.cloud "vm-api" ))
+  blobstore_vm_type:   (( concat meta.ocfp.env.cloud "vm-blobstore" ))
+  cc_worker_vm_type:   (( concat meta.ocfp.env.cloud "vm-cc-worker" ))
+  credhub_vm_type:     (( concat meta.ocfp.env.cloud "vm-credhub" ))
+  database_vm_type:    (( concat meta.ocfp.env.cloud "vm-database" ))
+  diego_api_vm_type:   (( concat meta.ocfp.env.cloud "vm-diego-api" ))
+  diego_cell_vm_type:  (( concat meta.ocfp.env.cloud "vm-diego-cell" ))
+  doppler_vm_type:     (( concat meta.ocfp.env.cloud "vm-doppler" ))
+  errand_vm_type:      (( concat meta.ocfp.env.cloud "vm-default" ))
+  log_api_vm_type:     (( concat meta.ocfp.env.cloud "vm-log-api" ))
+  log_cache_vm_type:   (( concat meta.ocfp.env.cloud "vm-log-cache" ))
+  nats_vm_type:        (( concat meta.ocfp.env.cloud "vm-nats" ))
+  router_vm_type:      (( concat meta.ocfp.env.cloud "vm-router" ))
+  scheduler_vm_type:   (( concat meta.ocfp.env.cloud "vm-scheduler" ))
+  tcp_router_vm_type:  (( concat meta.ocfp.env.cloud "vm-tcp-router" ))
+  uaa_vm_type:         (( concat meta.ocfp.env.cloud "vm-uaa" ))
   windows_diego_cell_vm_type: (( concat meta.ocfp.env.cloud "vm-windows-cell" )) # Not in use
+
+  cf_router_vmx:       (( concat meta.ocfp.env.cloud "vmx-cf-router-network-properties" ))
+  cf_tcp_router_vmx:   (( concat meta.ocfp.env.cloud "vmx-cf-tcp-router-network-properties" ))
+  diego_cell_vmx:      (( concat meta.ocfp.env.cloud "vmx-diego-ssh-proxy-network-properties" ))
 
 instance_groups:
 - name: diego-cell
+  vm_type: (( grab params.diego_cell_vm_type ))
+  vm_extensions:
+  - (( replace ))
+  - (( grab meta.ocfp.cf.diego_cell_vm_ext ))
   update:
     max_in_flight: 3
 
----
-# VM Types
-- type: replace
-  path: /instance_groups/name=diego-cell/vm_type
-  value: (( grab params.diego_cell_vm_type ))
-- type: replace
-  path: /instance_groups/name=diego-api/vm_type
-  value: (( grab params.diego_api_vm_type ))
-- type: replace
-  path: /instance_groups/name=nats/vm_type
-  value: (( grab params.nats_vm_type ))
-- type: replace
-  path: /instance_groups/name=uaa/vm_type
-  value: (( grab params.uaa_vm_type ))
-- type: replace
-  path: /instance_groups/name=api/vm_type
-  value: (( grab params.api_vm_type ))
-- type: replace
-  path: /instance_groups/name=cc-worker/vm_type
-  value: (( grab params.cc_worker_vm_type ))
-- type: replace
-  path: /instance_groups/name=scheduler/vm_type
-  value: (( grab params.scheduler_vm_type ))
-- type: replace
-  path: /instance_groups/name=router/vm_type
-  value: (( grab params.router_vm_type ))
-- type: replace
-  path: /instance_groups/name=tcp-router/vm_type
-  value: (( grab params.tcp_router_vm_type ))
-- type: replace
-  path: /instance_groups/name=doppler/vm_type
-  value: (( grab params.doppler_vm_type ))
-- type: replace
-  path: /instance_groups/name=log-api/vm_type
-  value: (( grab params.log_api_vm_type ))
-- type: replace
-  path: /instance_groups/name=log-cache/vm_type
-  value: (( grab params.log_cache_vm_type ))
-- type: replace
-  path: /instance_groups/name=credhub/vm_type
-  value: (( grab params.credhub_vm_type ))
-- type: replace
-  path: /instance_groups/name=rotate-cc-database-key?/vm_type
-  value: (( grab params.errand_vm_type ))
-- type: replace
-  path: /instance_groups/name=smoke-tests/vm_type
-  value: (( grab params.errand_vm_type ))
-- type: replace
-  path: /instance_groups/name=database/vm_type
-  value: (( grab params.database_vm_type ))
-- type: replace
-  path: /instance_groups/name=singleton-blobstore/vm_type
-  value: (( grab params.blobstore_vm_type ))
+- name: database
+  vm_type: (( grab params.database_vm_type ))
+  persistent_disk_type: (( grab database_disk_type ))
+
+- name: singleton-blobstore
+  vm_type: (( grab params.blobstore_vm_type ))
+  persistent_disk_type: (( grab blobstore_disk_type ))
+
+- name: diego-api
+  vm_type: (( grab params.diego_api_vm_type ))
+
+- name: nats
+  vm_type: (( grab params.nats_vm_type ))
+
+- name: uaa
+  vm_type: (( grab params.uaa_vm_type ))
+
+- name: api
+  vm_type: (( grab params.api_vm_type ))
+
+- name: cc-worker
+  vm_type: (( grab params.cc_worker_vm_type ))
+
+- name: scheduler
+  vm_type: (( grab params.scheduler_vm_type ))
+
+- name: router
+  vm_type: (( grab params.router_vm_type ))
+  vm_extensions:
+  - (( replace ))
+  - (( grab meta.ocfp.cf.router_vm_ext ))
+
+- name: tcp-router
+  vm_type: (( grab params.tcp_router_vm_type ))
+  vm_extensions:
+  - (( replace ))
+  - (( grab meta.ocfp.cf.tcp_router_vm_ext ))
+
+- name: doppler
+  vm_type: (( grab params.doppler_vm_type ))
+
+- name: log-api
+  vm_type: (( grab params.log_api_vm_type ))
+
+- name: log-cache
+  vm_type: (( grab params.log_cache_vm_type ))
+
+- name: credhub
+  vm_type: (( grab params.credhub_vm_type ))
+
+- name: rotate-cc-database-key
+  vm_type: (( grab params.errand_vm_type ))
+
+- name: smoke-tests
+  vm_type: (( grab params.errand_vm_type ))
 
 #stemcells default
 #      NOTE: See codex2 for
