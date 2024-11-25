@@ -72,9 +72,9 @@ sub perform {
 			} (@vm_type_names)
 		],
 		'vm_extensions' => [
-			$self->vm_extension_definition('diego-ssh-proxy-network-properties'),
-			$self->vm_extension_definition('cf-router-network-properties'),
-			$self->vm_extension_definition('cf-tcp-router-network-properties'),
+			$self->vm_extension_definition('diego-ssh-proxy-network-properties', common => {}),
+			$self->vm_extension_definition('cf-router-network-properties', common => {}),
+			$self->vm_extension_definition('cf-tcp-router-network-properties', common => {}),
 		],
 		'disk_types' => [
 			$self->disk_type_definition('database',

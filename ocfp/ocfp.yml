@@ -32,16 +32,9 @@ params:
   uaa_vm_type:         (( concat meta.ocfp.env.cloud "vm-uaa" ))
   windows_diego_cell_vm_type: (( concat meta.ocfp.env.cloud "vm-windows-cell" )) # Not in use
 
-  cf_router_vmx:       (( concat meta.ocfp.env.cloud "vmx-cf-router-network-properties" ))
-  cf_tcp_router_vmx:   (( concat meta.ocfp.env.cloud "vmx-cf-tcp-router-network-properties" ))
-  diego_cell_vmx:      (( concat meta.ocfp.env.cloud "vmx-diego-ssh-proxy-network-properties" ))
-
 instance_groups:
 - name: diego-cell
   vm_type: (( grab params.diego_cell_vm_type ))
-  vm_extensions:
-  - (( replace ))
-  - (( grab meta.ocfp.cf.diego_cell_vm_ext ))
   update:
     max_in_flight: 3
 
@@ -73,15 +66,9 @@ instance_groups:
 
 - name: router
   vm_type: (( grab params.router_vm_type ))
-  vm_extensions:
-  - (( replace ))
-  - (( grab meta.ocfp.cf.router_vm_ext ))
 
 - name: tcp-router
   vm_type: (( grab params.tcp_router_vm_type ))
-  vm_extensions:
-  - (( replace ))
-  - (( grab meta.ocfp.cf.tcp_router_vm_ext ))
 
 - name: doppler
   vm_type: (( grab params.doppler_vm_type ))
