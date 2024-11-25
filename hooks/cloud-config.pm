@@ -30,10 +30,10 @@ sub perform {
   /;
 
 	push @vm_type_names, 'database'
-		if $self->env->want_feature('+internal-database');
+		if $self->wants_feature('+internal-database');
 
 	push @vm_type_names, 'blobstore'
-		if $self->env->want_feature('+internal-blobstore');
+		if $self->wants_feature('+internal-blobstore');
 
   my $common_vm_type_def = {
     cloud_properties_for_iaas => {
