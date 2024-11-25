@@ -85,7 +85,7 @@ instance_groups:
   path: /instance_groups/name=database/vm_type
   value: (( grab params.database_vm_type ))
 - type: replace
-  path: /instance_groups/name=blobstore/vm_type
+  path: /instance_groups/name=singleton-blobstore/vm_type
   value: (( grab params.blobstore_vm_type ))
 
 #stemcells default
