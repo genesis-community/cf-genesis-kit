@@ -8,17 +8,18 @@ instance_groups:
 - name: diego-cell
   vm_extensions:
   - (( replace ))
-  - (( grab meta.ocfp.cf.diego_cell_vm_ext ))
+  - (( grab params.diego_cell_vmx ))
 
 - name: router
   vm_extensions:
   - (( replace ))
-  - (( grab meta.ocfp.cf.router_vm_ext ))
+  - (( grab params.cf_router_vmx ))
 
 - name: tcp-router
   vm_extensions:
   - (( replace ))
-  - (( grab meta.ocfp.cf.tcp_router_vm_ext ))
+  - (( grab params.cf_tcp_router_vmx ))
+
 ---
 # OCFP Cloud Config accounts for larger ephemeral disks vvv
 - type: remove

@@ -40,11 +40,11 @@ instance_groups:
 
 - name: database
   vm_type: (( grab params.database_vm_type ))
-  persistent_disk_type: (( grab database_disk_type ))
+  persistent_disk_type: (( grab params.database_disk_type ))
 
 - name: singleton-blobstore
   vm_type: (( grab params.blobstore_vm_type ))
-  persistent_disk_type: (( grab blobstore_disk_type ))
+  persistent_disk_type: (( grab params.blobstore_disk_type ))
 
 - name: diego-api
   vm_type: (( grab params.diego_api_vm_type ))
