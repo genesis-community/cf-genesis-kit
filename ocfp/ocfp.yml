@@ -6,10 +6,26 @@ params:
 
   skip_ssl_validation: true # Using self-signed certs
 
-  cf_core_network:    (( concat genesis.env "-ocf" ))
-  cf_edge_network:    (( concat genesis.env "-ocf" ))
-  cf_runtime_network: (( concat genesis.env "-ocf" ))
-  cf_db_network:      (( concat genesis.env "-ocf" ))
+  cf_core_network:    (( concat genesis.env ".cf.net-ocf" ))
+  cf_edge_network:    (( concat genesis.env ".cf.net-ocf" ))
+  cf_runtime_network: (( concat genesis.env ".cf.net-ocf" ))
+  cf_db_network:      (( concat genesis.env ".cf.net-ocf" ))
+
+  api_vm_type:        (( concat genesis.env ".cf.vm-api" ))
+  cc_worker_vm_type:  (( concat genesis.env ".cf.vm-cc-worker" ))
+  credhub_vm_type:    (( concat genesis.env ".cf.vm-credhub" ))
+  diego_api_vm_type:  (( concat genesis.env ".cf.vm-diego-api" ))
+  diego_cell_vm_type: (( concat genesis.env ".cf.vm-diego-cell" ))
+  doppler_vm_type:    (( concat genesis.env ".cf.vm-doppler" ))
+  errand_vm_type:     (( concat genesis.env ".cf.vm-default" ))
+  log_api_vm_type:    (( concat genesis.env ".cf.vm-log-api" ))
+  log_cache_vm_type:  (( concat genesis.env ".cf.vm-log-cache" ))
+  nats_vm_type:       (( concat genesis.env ".cf.vm-nats" ))
+  router_vm_type:     (( concat genesis.env ".cf.vm-router" ))
+  scheduler_vm_type:  (( concat genesis.env ".cf.vm-scheduler" ))
+  tcp_router_vm_type: (( concat genesis.env ".cf.vm-tcp-router" ))
+  uaa_vm_type:        (( concat genesis.env ".cf.vm-uaa" ))
+  windows_diego_cell_vm_type: (( concat genesis.env ".cf.vm-windows-cell" )) # Not in use
 
 instance_groups:
 - name: router
@@ -30,6 +46,55 @@ instance_groups:
 - name: diego-cell
   update:
     max_in_flight: 3
+
+
+---
+# VM Types
+- type: replace
+  path: /instance_groups/name=diego-cell/vm_type
+  value: (( grab params.diego_cell_vm_type ))
+- type: replace
+  path: /instance_groups/name=diego-api/vm_type
+  value: (( grab params.diego_api_vm_type ))
+- type: replace
+  path: /instance_groups/name=nats/vm_type
+  value: (( grab params.nats_vm_type ))
+- type: replace
+  path: /instance_groups/name=uaa/vm_type
+  value: (( grab params.uaa_vm_type ))
+- type: replace
+  path: /instance_groups/name=api/vm_type
+  value: (( grab params.api_vm_type ))
+- type: replace
+  path: /instance_groups/name=cc-worker/vm_type
+  value: (( grab params.cc_worker_vm_type ))
+- type: replace
+  path: /instance_groups/name=scheduler/vm_type
+  value: (( grab params.scheduler_vm_type ))
+- type: replace
+  path: /instance_groups/name=router/vm_type
+  value: (( grab params.router_vm_type ))
+- type: replace
+  path: /instance_groups/name=tcp-router/vm_type
+  value: (( grab params.tcp_router_vm_type ))
+- type: replace
+  path: /instance_groups/name=doppler/vm_type
+  value: (( grab params.doppler_vm_type ))
+- type: replace
+  path: /instance_groups/name=log-api/vm_type
+  value: (( grab params.log_api_vm_type ))
+- type: replace
+  path: /instance_groups/name=log-cache/vm_type
+  value: (( grab params.log_cache_vm_type ))
+- type: replace
+  path: /instance_groups/name=credhub/vm_type
+  value: (( grab params.credhub_vm_type ))
+- type: replace
+  path: /instance_groups/name=rotate-cc-database-key?/vm_type
+  value: (( grab params.errand_vm_type ))
+- type: replace
+  path: /instance_groups/name=smoke-tests/vm_type
+  value: (( grab params.errand_vm_type ))
 
 #stemcells default
 #      NOTE: See codex2 for 

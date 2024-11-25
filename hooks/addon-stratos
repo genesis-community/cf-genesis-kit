@@ -27,35 +27,35 @@ secrets_mount=$(lookup genesis.secrets_mount)
 vault_env=$(lookup genesis.env)
 
 case "${GENESIS_REQUESTED_FEATURES}" in
-  (*ocfp*)
-    echo "Looking up OCFP information from the manifest, this will take a few moments..."
-    tf_path=$(lookup --partial meta.ocfp.vault.tf)
-    secrets_mount=$(lookup --partial genesis.secrets_mount)
-    vault_env=$(lookup --partial genesis.vault_env)
-    env_path="${secrets_mount}${vault_env}"
+*ocfp*)
+  echo "Looking up OCFP information from the manifest, this will take a few moments..."
+  config_path=$(lookup --partial meta.ocfp.vault.config)
+  secrets_mount=$(lookup --partial genesis.secrets_mount)
+  vault_env=$(lookup --partial genesis.vault_env)
+  env_path="${secrets_mount}${vault_env}"
 
-    stratos_domain=$(safe get "${tf_path}/ocf/fqdns:stratos") 
+  stratos_domain=$(safe get "${config_path}/ocf/fqdns:stratos")
 
-    echo "Looking up database credentials from vault at ${env_path}/stratos/db/stratos ..."
-    stratos_db_scheme=$(  safe get "${env_path}/stratos/db/stratos:scheme")
-    stratos_db_hostname=$(safe get "${env_path}/stratos/db/stratos:hostname")
-    stratos_db_username=$(safe get "${env_path}/stratos/db/stratos:username")
-    stratos_db_password=$(safe get "${env_path}/stratos/db/stratos:password")
-    stratos_db_port=$(    safe get "${env_path}/stratos/db/stratos:port")
-    stratos_db_database=$(safe get "${env_path}/stratos/db/stratos:database")
-    stratos_db_sslmode="verify-ca"
-    ;;
-  (*)
-    stratos_domain="console.$(exodus apps_domain)"
+  echo "Looking up database credentials from vault at ${env_path}/stratos/db/stratos ..."
+  stratos_db_scheme=$(safe get "${env_path}/stratos/db/stratos:scheme")
+  stratos_db_hostname=$(safe get "${env_path}/stratos/db/stratos:hostname")
+  stratos_db_username=$(safe get "${env_path}/stratos/db/stratos:username")
+  stratos_db_password=$(safe get "${env_path}/stratos/db/stratos:password")
+  stratos_db_port=$(safe get "${env_path}/stratos/db/stratos:port")
+  stratos_db_database=$(safe get "${env_path}/stratos/db/stratos:database")
+  stratos_db_sslmode="verify-ca"
+  ;;
+*)
+  stratos_domain="console.$(exodus apps_domain)"
 
-    stratos_db_scheme="postgres"
-    stratos_db_hostname=$(lookup params.db_hostname)
-    stratos_db_username=$(lookup params.db_username "stratos")
-    stratos_db_password=$(lookup params.db_password "stratos")
-    stratos_db_port=$(    lookup params.db_port     5432)
-    stratos_db_database=$(lookup params.db_database "stratos")
-    stratos_db_sslmode=$( lookup params.db_sslmode  "disabled") # verify-ca
-    ;;
+  stratos_db_scheme="postgres"
+  stratos_db_hostname=$(lookup params.db_hostname)
+  stratos_db_username=$(lookup params.db_username "stratos")
+  stratos_db_password=$(lookup params.db_password "stratos")
+  stratos_db_port=$(lookup params.db_port 5432)
+  stratos_db_database=$(lookup params.db_database "stratos")
+  stratos_db_sslmode=$(lookup params.db_sslmode "disabled") # verify-ca
+  ;;
 esac
 
 stratos_session_store_sekret=$(echo "${RANDOM}" | sha256sum | awk '{print $1}')
@@ -63,47 +63,47 @@ stratos_client=$(safe get "${exodus_path}:stratos_client")
 stratos_client_secret=$(safe get "${exodus_path}:stratos_secret")
 
 shift # shift off the "run" argument that genesis passes to hooks
-while [[ $# -gt 0 ]]
-do
-  arg="$1" ; shift
+while [[ $# -gt 0 ]]; do
+  arg="$1"
+  shift
   case $arg in
-    (file)
-      file="${1}"
-      shift || fail "Usage: ... file <path/name> # default: will download stratos-ui-packaged.zip from github"
-      ;;
-    (buildpack)
-      buildpack="${1}"
-      shift || fail "Usage: ... buildpack <name> # default: binary_buildpack"
-      ;;
-    (stack)
-      stack="${1}"
-      shift || fail "Usage: stack <name> # default: cflinuxfs4" 
-      ;;
-    (memory)
-      memory="${1}"
-      shift || fail "Usage: memory <XXXXM> # default: 1512M" 
-      ;;
-    (disk)
-      disk="${1}"
-      shift || fail "Usage: disk <XXXXM> # default: 1024M" 
-      ;;
-    (timeout)
-      timeout="${1}"
-      shift || fail "Usage: timeout <seconds> # default: 180"
-      ;;
-    (sgs)
-      create_sgs=true
-      ;;
+  file)
+    file="${1}"
+    shift || fail "Usage: ... file <path/name> # default: will download stratos-ui-packaged.zip from github"
+    ;;
+  buildpack)
+    buildpack="${1}"
+    shift || fail "Usage: ... buildpack <name> # default: binary_buildpack"
+    ;;
+  stack)
+    stack="${1}"
+    shift || fail "Usage: stack <name> # default: cflinuxfs4"
+    ;;
+  memory)
+    memory="${1}"
+    shift || fail "Usage: memory <XXXXM> # default: 1512M"
+    ;;
+  disk)
+    disk="${1}"
+    shift || fail "Usage: disk <XXXXM> # default: 1024M"
+    ;;
+  timeout)
+    timeout="${1}"
+    shift || fail "Usage: timeout <seconds> # default: 180"
+    ;;
+  sgs)
+    create_sgs=true
+    ;;
   esac
 done
 
-if [[ -s "${file:-}" ]] ; then
+if [[ -s "${file:-}" ]]; then
   unzip -o "${file}"
 else
   echo "Downloading Stratos ${stratos_version}..."
   wget "${stratos_releases_url}" &&
     unzip -o stratos-ui-packaged.zip &&
-      rm stratos-ui-packaged.zip
+    rm stratos-ui-packaged.zip
 fi
 
 cf create-space -o system stratos
@@ -117,28 +117,29 @@ org=system
 space=stratos
 org_guid="$(cf org ${org} --guid)"
 space_guid="$(cf space ${space} --guid)"
-svc="$(cf curl "/v3/service_instances?organization_guids=${org_guid}&space_guids=${space_guid}" |
+svc="$(
+  cf curl "/v3/service_instances?organization_guids=${org_guid}&space_guids=${space_guid}" |
     jq -r '.resources[]|select(.name|test("'${svc_name}'"))|.name'
 )"
 
-if [[ ${svc} = "${svc_name}" ]]
-then
+if [[ ${svc} = "${svc_name}" ]]; then
   echo "Service ${svc_name} was found, update existing cups service definition."
-  cf uups console_db_tls_verify_ca  -p "$( cat <<-EOF
+  cf uups console_db_tls_verify_ca -p "$(
+    cat <<-EOF
 { "uri": "${stratos_db_scheme}://", "username":"${stratos_db_username}", "password":"${stratos_db_password}", "hostname":"${stratos_db_hostname}", "port":"${stratos_db_port}", "dbname":"${stratos_db_database}", "sslmode":"${stratos_db_sslmode}" }'
 EOF
-)"
+  )"
 else
   echo "Service ${svc_name} was not found, creating cups service definition."
-  cf cups console_db_tls_verify_ca  -p "$( cat <<-EOF
+  cf cups console_db_tls_verify_ca -p "$(
+    cat <<-EOF
 { "uri": "${stratos_db_scheme}://", "username":"${stratos_db_username}", "password":"${stratos_db_password}", "hostname":"${stratos_db_hostname}", "port":"${stratos_db_port}", "dbname":"${stratos_db_database}", "sslmode":"${stratos_db_sslmode}" }'
 EOF
-)"
+  )"
 fi
 
-if [[ -n ${create_sgs} ]]
-then # Security group that allows to talk to VPC IP Range
-  cat > vpc-sg.json <<EOF
+if [[ -n ${create_sgs} ]]; then # Security group that allows to talk to VPC IP Range
+  cat >vpc-sg.json <<EOF
 [
   {
     "protocol": "all",
@@ -155,7 +156,7 @@ fi
 # To the Stratosphere!
 ################################################################################
 
-cat > manifest.yml <<-APPMANIFEST
+cat >manifest.yml <<-APPMANIFEST
 ---
 applications:
   - name: apps
@@ -180,4 +181,3 @@ applications:
 APPMANIFEST
 
 cf push -f manifest.yml
-
