@@ -30,7 +30,7 @@ sub perform {
   /;
 
 	push @vm_type_names, 'database'
-		if $self->wants_feature('+internal-database');
+		if $self->wants_feature('+internal-db');
 
 	push @vm_type_names, 'blobstore'
 		if $self->wants_feature('+internal-blobstore');
