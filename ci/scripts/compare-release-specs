@@ -105,18 +105,24 @@ if [[ "${#changed[@]}" -gt 0 && -n "${changed[0]}" ]] ; then
   echo
 
   echo "Fetching spec diffs..."
-  if [ -f "${ci_dir}/ci/upstreamrepo.yml" ]; then
-    upstreamrepo=$(spruce json "${ci_dir}/ci/upstreamrepo.yml")
-  else
-    upstreamrepo='{"repos": []}'
-  fi
+  upstream="$(
+    spruce merge --skip-eval "${ci_dir}/ci/pipeline/base.yml" "${ci_dir}/ci/settings.yml" |
+    spruce json |
+    jq -r '.meta.upstream.bosh_releases[] |
+           if .spec_url then {name, "repo":.spec_url}
+           elif .owner then {name, "repo":"https://github.com/\(.owner)/\(.repository)"}
+           else {name, "repo":"https://github.com/\(.repository)"}
+           end' |
+    jq -s
+  )"
+
   # TODO: do this in two phases -- first phase pull out all the non-compiled
   #       versions, then run through with the compiled versions, picking up the
   #       non-compiled version's git repo.  Also indicate if they are compiled
   #       or not, and if so, what os is the target. (because that may change)
   repos="$(
     echo "$curr_releases" \
-    | jq --argjson gitrepos "$upstreamrepo" -r 'reduce .releases[] as {$name, $url, $sha1, $version} ({repos: []};
+    | jq --argjson gitrepos "$upstream" -r 'reduce .releases[] as {$name, $url, $sha1, $version} ({repos: []};
         ($url
         | if ($url | test("https?://s3(-.*)?.amazonaws.com")) then
             ($gitrepos.repos | map(select(.name == $name))[0].repo)
@@ -160,7 +166,7 @@ if [[ "${#changed[@]}" -gt 0 && -n "${changed[0]}" ]] ; then
       branch="master"
     fi
 
-    git -C "$rel_dir" pull --depth 1 origin ${branch} > /dev/null 2>&1
+    git -C "$rel_dir" pull --depth 1 origin "${branch}" > /dev/null 2>&1
 
 
     mkdir -p "$workdir/compare-specs"

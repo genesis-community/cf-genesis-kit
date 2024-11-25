@@ -14,6 +14,14 @@ meta:
       package:  cf-deployment
       branch:   main
 
+    categories:
+    - name:  core
+      label: Cloud Foundry Components
+      default: true
+    - name:  buildpacks
+      label: Buildpacks
+      pattern: '.*-buildpack'
+
   vault:
     url:       ((vault.url))
     token:     ((vault.token))

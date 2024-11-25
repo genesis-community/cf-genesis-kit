@@ -7,10 +7,11 @@ _lookup() {
  echo "${1}" | base64 --decode | jq -re "${2}"
 }
 
-# Read upstream.yml
+# Get upstream details from settings.yml
 update_group=()
-upstream_details="$(spruce json "${base_dir}/settings.yml" | jq -r '.meta.upstream.bosh_releases//[] | .[] | @base64')"
-upstream_manifest="$(spruce merge "$base_dir/pipeline/base.yml" "$base_dir/settings.yml" | spruce json | jq -r '.meta.upstream.manifest//{} | @base64')"
+upstream_details="$(spruce merge "$base_dir/pipeline/base.yml" "$base_dir/settings.yml" | spruce json | jq -r '.meta.upstream//{}')"
+upstream_releases="$(jq -r '.bosh_releases//[] | .[] | @base64' <<< "$upstream_details")"
+upstream_manifest="$(jq -r '.manifest//{} | @base64' <<< "$upstream_details")"
 
 # Support upstream manifests
 package="$(_lookup "$upstream_manifest" '.package')" || true
@@ -60,11 +61,17 @@ EOF
 	cp "$base_dir/pipeline/optional-resources/upstream-manifest.yml" "$base_dir/pipeline/upstream/upstream-manifest-resource.yml"
 fi
 
-# For each release in upstream.yml,
-for release in $upstream_details ; do
-  name="$(_lookup "$release" .name)"
+# For each upstream release, create a job to update the release
+for release in $upstream_releases ; do
+  name="$(_lookup "$release" '.name')"
+  watch="$(_lookup "$release" '.watch')" || true
+  [[ "$watch" == "false" ]] && continue
   type="$(_lookup "$release" '.type//"bosh-io-release"')"
-  path="$(_lookup "$release" '.path//"manifests/releases/'"$name"'.yml"')"
+  path="$(_lookup "$release" '.path//""')"
+  if [[ -z "$path" ]] ; then
+    default_path="$(jq -r '.default_releases_path//"manifests/releases"' <<<"$upstream_details")"
+    path="$default_path/$name.yml"
+  fi
   repo="$(_lookup "$release" '.repository')"
   if [[ $type == 'bosh-io-release' ]] ; then
     source=$'\n'"      repository: $repo";

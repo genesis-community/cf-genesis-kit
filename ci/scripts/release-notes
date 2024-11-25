@@ -55,6 +55,14 @@ sub get_new_commits {
 	return @commits;
 }
 
+sub get_upstream_settings {
+	my ($path) = @_;
+	$path //= $FindBin::Bin."/../";
+	my $json = qx(spruce merge --skip-eval $path/pipeline/base.yml $path/settings.yml | spruce json);
+	my $settings = decode_json($json);
+	return $settings->{meta}{upstream} || {};
+}
+
 sub get_latest_commit_ref {
 	my ($path) = @_;
 	chomp(my $ref = qx(git -C $path rev-parse HEAD));
@@ -131,6 +139,7 @@ sub parse_commits {
 }
 
 sub get_releases {
+	# FIXME: This should also check manifest/releases/*.yml or potentially other locations
 	my ($path) = @_;
 	my $filter = "$path/spec/results/*.yml";
 	my @entries = qx(for x in $filter ; do spruce json \$x | jq -r '.releases[] | "\\(.name) \\(.version) \\(.url)"' 2>/dev/null ; done | sort | uniq);
@@ -144,7 +153,7 @@ sub get_releases {
 
 my @months = qw(ignored January February March April May June July August September October November December);
 sub github {
-	my ($org, $repo, $versions, $type, $orig_url) = @_;
+	my ($org, $repo, $versions, $orig_url) = @_;
 	my ($url, $day, $mon, $year, $out, $tag);
 
 	unless ($org && $repo) {
@@ -208,10 +217,17 @@ sub calculate_software_updates {
 	printf STDERR "  - retrieving previous releases found by spec tests...\n";
 	my $last_release_releases = get_releases($last_path);
 
-	printf STDERR "  - checking ci/upstream.yml for more details...\n";
-	my $upstream = LoadFile($FindBin::Bin."/../upstream.yml");
-	my $sections = $upstream->{sections} || [];
+	printf STDERR "  - checking ci/settings.yml for more details...\n";
+	my $upstream = get_upstream_settings();
+	my $sections = $upstream->{categories} || [
+		{
+			'default' => bless( do{\(my $o = 1)}, 'JSON::PP::Boolean' ), # TODO: maybe support a regular expression match (ie .*-cpi)
+			'label' => 'Releases',
+			'name' => 'releases'
+		}
+	];
 	my $default_section = (map {$_->{name}} grep {$_->{default}} @$sections)[0] || '-';
+	my $section_matches = {map {qr/$_->{pattern}/ => $_->{name}} grep {$_->{pattern}} @$sections};
 	delete $upstream->{sections};
 
 	my %found;
@@ -234,7 +250,10 @@ sub calculate_software_updates {
 		next unless scalar(@new_versions);
 		for my $version (@new_versions) {
 
-			my $section = (grep {defined($upstream->{$_}{$name})} keys(%$upstream))[0] || $default_section;
+			my $release_definition = (grep {$_->{name} eq $name} @{$upstream->{bosh_releases}||[]})[0];
+			my $section = $release_definition->{category}
+			   || (map {$section_matches->{$_}} grep {$name =~ $_} keys %$section_matches)[0]
+			   || $default_section;
 			for my $url (@{$release_candidate_releases->{$name}{$version} || []}) {
 				my ($type,$target);
 				if ($url =~ /$name-$version-([^-]*(?:-[^0-9][^-]*)*)-(\d*(?:\.\d*)*)-/) {
@@ -243,16 +262,17 @@ sub calculate_software_updates {
 				} else {
 					$type = 'source';
 				}
-				my @prefixes = defined($upstream->{$section}{$name}{tag_prefix}) ? ($upstream->{$section}{$name}{tag_prefix}) : ('v','');
+				my @prefixes = defined($release_definition->{tag_prefix}) ? ($release_definition->{tag_prefix}) : ('v','');
 				my @suffixes = ($version =~ /^\d+$/) ? ('','.0','.0.0') : ('');
 
 				$found{$section} ||= {};
+				my ($org,$repo) = ($release_definition->{owner},$release_definition->{repository});
+				($org,$repo) = ($repo =~ m|([^\\]*)/([^\\]*)|) if $repo && $repo =~ /\// && ! defined($org);
 				unless (defined($found{$section}{"$name/$version"})) {
 					my ($date,$release_url) = github(
-						$upstream->{$section}{$name}{org},
-						$upstream->{$section}{$name}{repo},
+						$org,
+						$repo,
 						[map {my $p = $_; map {$p.$version.$_} @suffixes} @prefixes],
-						$upstream->{$section}{$name}{type},
 						$url
 					);
 					$found{$section}{"$name/$version"} = {
@@ -261,7 +281,7 @@ sub calculate_software_updates {
 						url => $release_url,
 						date => $date,
 						form => [],
-						label => $upstream->{$section}{$name}{label},
+						label => $release_definition->{label},
 						changed => (! scalar(@old_versions)) ? "NEW" :
 						           scalar(grep {$version eq $_} @old_versions) ? '' :
 						           sprintf('[X](## "was %s")', join(', ',@old_versions))
