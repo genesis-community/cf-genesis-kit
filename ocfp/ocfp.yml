@@ -12,8 +12,10 @@ params:
   cf_db_network:      (( concat meta.ocfp.env.cloud "net-ocf" ))
 
   api_vm_type:        (( concat meta.ocfp.env.cloud "vm-api" ))
+  blobstore_vm_type:  (( concat meta.ocfp.env.cloud "vm-blobstore" ))
   cc_worker_vm_type:  (( concat meta.ocfp.env.cloud "vm-cc-worker" ))
   credhub_vm_type:    (( concat meta.ocfp.env.cloud "vm-credhub" ))
+  database_vm_type:   (( concat meta.ocfp.env.cloud "vm-database" ))
   diego_api_vm_type:  (( concat meta.ocfp.env.cloud "vm-diego-api" ))
   diego_cell_vm_type: (( concat meta.ocfp.env.cloud "vm-diego-cell" ))
   doppler_vm_type:    (( concat meta.ocfp.env.cloud "vm-doppler" ))
@@ -28,25 +30,9 @@ params:
   windows_diego_cell_vm_type: (( concat meta.ocfp.env.cloud "vm-windows-cell" )) # Not in use
 
 instance_groups:
-- name: router
-  vm_extensions:
-  - ((replace))
-  - cf-system-apps-lb
-
-- name: scheduler
-  vm_extensions:
-  - ((replace))
-  - cf-ssh-lb
-
-- name: tcp-router
-  vm_extensions:
-  - ((replace))
-  - (( grab params.tcp_lb_vm_ext || "cf-tcp-lb" ))
-
 - name: diego-cell
   update:
     max_in_flight: 3
-
 
 ---
 # VM Types
@@ -95,6 +81,12 @@ instance_groups:
 - type: replace
   path: /instance_groups/name=smoke-tests/vm_type
   value: (( grab params.errand_vm_type ))
+- type: replace
+  path: /instance_groups/name=database/vm_type
+  value: (( grab params.database_vm_type ))
+- type: replace
+  path: /instance_groups/name=blobstore/vm_type
+  value: (( grab params.blobstore_vm_type ))
 
 #stemcells default
 #      NOTE: See codex2 for

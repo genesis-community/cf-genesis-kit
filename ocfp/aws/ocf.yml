@@ -1,4 +1,21 @@
 ---
+instance_groups:
+- name: router
+  vm_extensions:
+  - ((replace))
+  - cf-system-apps-lb
+
+- name: scheduler
+  vm_extensions:
+  - ((replace))
+  - cf-ssh-lb
+
+- name: tcp-router
+  vm_extensions:
+  - ((replace))
+  - (( grab params.tcp_lb_vm_ext || "cf-tcp-lb" ))
+
+---
 # OCFP Cloud Config accounts for larger ephemeral disks vvv
 - type: remove
   path: /instance_groups/name=diego-cell/vm_extensions

@@ -29,6 +29,12 @@ sub perform {
     nats router scheduler tcp-router uaa
   /;
 
+	push @vm_type_names, 'database'
+		if $self->env->want_feature('+internal-database');
+
+	push @vm_type_names, 'blobstore'
+		if $self->env->want_feature('+internal-blobstore');
+
   my $common_vm_type_def = {
     cloud_properties_for_iaas => {
       openstack => {
