@@ -5,7 +5,8 @@ meta:
       scale: (( grab params.ocfp_env_scale || "dev" ))
 
     vault:
-      tf: (( concat genesis.secrets_mount "tf/" genesis.vault_env ))
+      config_prefix: (( grab params.ocfp_vault_config_prefix || "config/" ))
+      config:        (( concat genesis.ocfp_config_mount genesis.ocfp_env ))
 
     certs:
       trusted:
@@ -16,8 +17,8 @@ meta:
 
     cf:
       fqdns:
-        base:   (( vault meta.ocfp.vault.tf "/ocf/fqdns:base" ))
-        system: (( vault meta.ocfp.vault.tf "/ocf/fqdns:system" ))
+        base:   (( vault meta.ocfp.vault.config "/fqdns:base" ))
+        system: (( vault meta.ocfp.vault.config "/fqdns:system" ))
         apps:
-        - (( vault meta.ocfp.vault.tf "/ocf/fqdns:apps" ))
+        - (( vault meta.ocfp.vault.config "/fqdns:apps" ))
 
