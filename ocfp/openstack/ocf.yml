@@ -5,7 +5,7 @@ params:
   diego_cell_vmx:      (( concat meta.ocfp.env.cloud "vmx-diego-ssh-proxy-network-properties" ))
 
 instance_groups:
-- name: diego-cell
+- name: scheduler
   vm_extensions:
   - (( replace ))
   - (( grab params.diego_cell_vmx ))
