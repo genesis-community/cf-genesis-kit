@@ -1,23 +1,26 @@
 #!/bin/bash
-for feature in $GENESIS_REQUESTED_FEATURES ; do
+for feature in $GENESIS_REQUESTED_FEATURES; do
   case $feature in
-    (cf-deployment/operations/enable-nfs-volume-services) echo "nfs-volume-services" ;;
-    (cf-deployment/operations/enable-nfs-lambda)          echo "nfs-lambda" ;;
-    (cf-deployment/operations/enable-smb-volume-services) echo "smb-volume-services" ;;
-    (*) echo "$feature" ;;
+  cf-deployment/operations/enable-nfs-volume-services) echo "nfs-volume-services" ;;
+  cf-deployment/operations/enable-nfs-lambda) echo "nfs-lambda" ;;
+  cf-deployment/operations/enable-smb-volume-services) echo "smb-volume-services" ;;
+  internal-db) echo "+internal-db" ;;
+  internal-blobstore) echo "+internal-blobstore" ;;
+  *) echo "$feature" ;;
   esac
 done
+
 db_overrides="$(lookup params 2>/dev/null | jq -r '. | keys| .[] | select(. | test("^(cc|uaa|diego|policyserver|silk|locket|routingapi|credhub)db_(name|user)$"))')"
 [[ -z "$db_overrides" ]] || echo "+override-db-names"
 
 migrated_v1_env="$(exodus migrated_v1_env)"
-if [[ $migrated_v1_env != "1" ]] ; then
+if [[ $migrated_v1_env != "1" ]]; then
   version="$(exodus kit_version)"
-  if [[ -n "${version:-}" ]] && ! new_enough "${version}" "2.0.0-rc0" ; then
+  if [[ -n "${version:-}" ]] && ! new_enough "${version}" "2.0.0-rc0"; then
     migrated_v1_env=1
   fi
 fi
-if [[ -n "${migrated_v1_env:-}" ]] ; then
+if [[ -n "${migrated_v1_env:-}" ]]; then
   echo "+migrated-v1-env"
   want_feature no-v1-vm-types || echo "v1-vm-types"
 fi
