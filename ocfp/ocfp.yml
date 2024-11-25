@@ -6,26 +6,26 @@ params:
 
   skip_ssl_validation: true # Using self-signed certs
 
-  cf_core_network:    (( concat genesis.env ".cf.net-ocf" ))
-  cf_edge_network:    (( concat genesis.env ".cf.net-ocf" ))
-  cf_runtime_network: (( concat genesis.env ".cf.net-ocf" ))
-  cf_db_network:      (( concat genesis.env ".cf.net-ocf" ))
+  cf_core_network:    (( concat meta.ocfp.env.cloud "net-ocf" ))
+  cf_edge_network:    (( concat meta.ocfp.env.cloud "net-ocf" ))
+  cf_runtime_network: (( concat meta.ocfp.env.cloud "net-ocf" ))
+  cf_db_network:      (( concat meta.ocfp.env.cloud "net-ocf" ))
 
-  api_vm_type:        (( concat genesis.env ".cf.vm-api" ))
-  cc_worker_vm_type:  (( concat genesis.env ".cf.vm-cc-worker" ))
-  credhub_vm_type:    (( concat genesis.env ".cf.vm-credhub" ))
-  diego_api_vm_type:  (( concat genesis.env ".cf.vm-diego-api" ))
-  diego_cell_vm_type: (( concat genesis.env ".cf.vm-diego-cell" ))
-  doppler_vm_type:    (( concat genesis.env ".cf.vm-doppler" ))
-  errand_vm_type:     (( concat genesis.env ".cf.vm-default" ))
-  log_api_vm_type:    (( concat genesis.env ".cf.vm-log-api" ))
-  log_cache_vm_type:  (( concat genesis.env ".cf.vm-log-cache" ))
-  nats_vm_type:       (( concat genesis.env ".cf.vm-nats" ))
-  router_vm_type:     (( concat genesis.env ".cf.vm-router" ))
-  scheduler_vm_type:  (( concat genesis.env ".cf.vm-scheduler" ))
-  tcp_router_vm_type: (( concat genesis.env ".cf.vm-tcp-router" ))
-  uaa_vm_type:        (( concat genesis.env ".cf.vm-uaa" ))
-  windows_diego_cell_vm_type: (( concat genesis.env ".cf.vm-windows-cell" )) # Not in use
+  api_vm_type:        (( concat meta.ocfp.env.cloud "vm-api" ))
+  cc_worker_vm_type:  (( concat meta.ocfp.env.cloud "vm-cc-worker" ))
+  credhub_vm_type:    (( concat meta.ocfp.env.cloud "vm-credhub" ))
+  diego_api_vm_type:  (( concat meta.ocfp.env.cloud "vm-diego-api" ))
+  diego_cell_vm_type: (( concat meta.ocfp.env.cloud "vm-diego-cell" ))
+  doppler_vm_type:    (( concat meta.ocfp.env.cloud "vm-doppler" ))
+  errand_vm_type:     (( concat meta.ocfp.env.cloud "vm-default" ))
+  log_api_vm_type:    (( concat meta.ocfp.env.cloud "vm-log-api" ))
+  log_cache_vm_type:  (( concat meta.ocfp.env.cloud "vm-log-cache" ))
+  nats_vm_type:       (( concat meta.ocfp.env.cloud "vm-nats" ))
+  router_vm_type:     (( concat meta.ocfp.env.cloud "vm-router" ))
+  scheduler_vm_type:  (( concat meta.ocfp.env.cloud "vm-scheduler" ))
+  tcp_router_vm_type: (( concat meta.ocfp.env.cloud "vm-tcp-router" ))
+  uaa_vm_type:        (( concat meta.ocfp.env.cloud "vm-uaa" ))
+  windows_diego_cell_vm_type: (( concat meta.ocfp.env.cloud "vm-windows-cell" )) # Not in use
 
 instance_groups:
 - name: router
@@ -97,8 +97,7 @@ instance_groups:
   value: (( grab params.errand_vm_type ))
 
 #stemcells default
-#      NOTE: See codex2 for 
-#NOTE: Okta feature - LATER 
+#      NOTE: See codex2 for
+#NOTE: Okta feature - LATER
 #
 #NOTE: update `check` to check for feature required vault things
-
