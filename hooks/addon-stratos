@@ -11,13 +11,13 @@ declare file buildpack stack create_sgs exodus_path system_api_domain \
   create_sgs
 
 # NOTE: TODO: all of these values come from cli, then vault, then default.
-stratos_version="4.4.1"
-stratos_releases_url="https://github.com/cloudfoundry-community/stratos/releases/download/${stratos_version}/stratos-ui-packaged.zip"
+stratos_version="4.8.1"
+stratos_releases_url="https://github.com/cloudfoundry/stratos/releases/download/v${stratos_version}/stratos-ui-4.8.1.zip"
 stratos_sso_options="nosplash, logout" # Question: Should this come from vault?
 buildpack="binary_buildpack"
 stack="cflinuxfs4"
 memory="1512M"
-disk="1024M"
+disk="2000M"
 timeout="180"
 create_sgs=false
 
@@ -34,7 +34,7 @@ case "${GENESIS_REQUESTED_FEATURES}" in
   vault_env=$(lookup --partial genesis.vault_env)
   env_path="${secrets_mount}${vault_env}"
 
-  stratos_domain=$(safe get "${config_path}/ocf/fqdns:stratos")
+  stratos_domain=$(safe get "${config_path}/fqdns:stratos")
 
   echo "Looking up database credentials from vault at ${env_path}/stratos/db/stratos ..."
   stratos_db_scheme=$(safe get "${env_path}/stratos/db/stratos:scheme")
@@ -43,7 +43,7 @@ case "${GENESIS_REQUESTED_FEATURES}" in
   stratos_db_password=$(safe get "${env_path}/stratos/db/stratos:password")
   stratos_db_port=$(safe get "${env_path}/stratos/db/stratos:port")
   stratos_db_database=$(safe get "${env_path}/stratos/db/stratos:database")
-  stratos_db_sslmode="verify-ca"
+  stratos_db_sslmode="disable" # or "verify-ca"
   ;;
 *)
   stratos_domain="console.$(exodus apps_domain)"
@@ -59,6 +59,7 @@ case "${GENESIS_REQUESTED_FEATURES}" in
 esac
 
 stratos_session_store_sekret=$(echo "${RANDOM}" | sha256sum | awk '{print $1}')
+echo "The Exodus path for Stratos UAA secrets is ${exodus_path}"
 stratos_client=$(safe get "${exodus_path}:stratos_client")
 stratos_client_secret=$(safe get "${exodus_path}:stratos_secret")
 
@@ -102,8 +103,8 @@ if [[ -s "${file:-}" ]]; then
 else
   echo "Downloading Stratos ${stratos_version}..."
   wget "${stratos_releases_url}" &&
-    unzip -o stratos-ui-packaged.zip &&
-    rm stratos-ui-packaged.zip
+    unzip -o stratos-ui-${stratos_version}.zip &&
+    rm stratos-ui-${stratos_version}.zip
 fi
 
 cf create-space -o system stratos
@@ -143,7 +144,7 @@ if [[ -n ${create_sgs} ]]; then # Security group that allows to talk to VPC IP R
 [
   {
     "protocol": "all",
-    "destination": "10.0.0.0-10.255.255.255"
+    "destination": "192.168.0.1-192.168.16.255"
   }
 ]
 EOF
@@ -159,13 +160,13 @@ fi
 cat >manifest.yml <<-APPMANIFEST
 ---
 applications:
-  - name: apps
-    host: console
+  - name: console
     health-check-type: port
     memory: ${memory}
     disk_quota: ${disk}
     timeout: ${timeout}
-    buildpack: ${buildpack}
+    buildpacks:
+     - ${buildpack}
     stack: ${stack}
     env:
       CF_API_URL: https://${system_api_domain}
