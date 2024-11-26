@@ -1,4 +1,4 @@
 ---
 meta:
-  stratos_domain: (( vault meta.ocfp.vault.config "/ocf/fqdns:stratos" ))
+  stratos_domain: (( vault meta.ocfp.vault.config "/fqdns:stratos" ))
 
