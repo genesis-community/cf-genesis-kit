@@ -22,7 +22,7 @@ params:
   diego_api_vm_type:   (( concat meta.ocfp.env.cloud "vm-diego-api" ))
   diego_cell_vm_type:  (( concat meta.ocfp.env.cloud "vm-diego-cell" ))
   doppler_vm_type:     (( concat meta.ocfp.env.cloud "vm-doppler" ))
-  errand_vm_type:      (( concat meta.ocfp.env.cloud "vm-default" ))
+  errand_vm_type:      (( concat meta.ocfp.env.cloud "vm-errand" ))
   log_api_vm_type:     (( concat meta.ocfp.env.cloud "vm-log-api" ))
   log_cache_vm_type:   (( concat meta.ocfp.env.cloud "vm-log-cache" ))
   nats_vm_type:        (( concat meta.ocfp.env.cloud "vm-nats" ))

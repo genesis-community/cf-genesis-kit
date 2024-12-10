@@ -24,38 +24,40 @@ sub perform {
 	my ($self) = @_;
 	return 1 if $self->completed;
 
-	my @vm_type_names = qw/
-	api cc-worker credhub diego-api diego-cell doppler default log-api log-cache
-	nats router scheduler tcp-router uaa
-	/;
+	# FIXME: Add support for other iaas types
+	# TODO: Add support for env-provided matrices
+	my $vm_matrix = {map {($_->[0], {type_dev => $_->[1], type_prod => $_->[2], disk_size => $_->[3]})} (
+		#     Name        dev_type  prod_type  root_disk_size
+		[qw[  api            c2i.4     c1a.4d              15  ]], #  c1a.4d
+		[qw[  cc-worker      c2i.1     c1a.1d              15  ]], #  a1cpu_2ram_d     =  c1a.1d
+		[qw[  credhub        c2i.1     c1a.1d              30  ]], #  a1cpu_2ram_d
+		[qw[  diego-api      c2i.1     c1a.1d              15  ]], #  a1cpu_2ram_d
+		[qw[  diego-cell      g1.4    m1a.16d             256  ]], #  a16cpu_128ram_d  =  m1a.16d
+		[qw[  doppler        c2i.2     c1a.2d              15  ]], #  a2cpu_4ram_d
+		[qw[  errand          c1.1       c1.1              15  ]], #
+		[qw[  log-api        c2i.1     c1a.1d              15  ]], #  a1cpu_2ram_d
+		[qw[  log-cache      c2i.2     c1a.2d              15  ]], #  a2cpu_4ram_d     =  c1a.2d
+		[qw[  nats           c2i.1     c1a.1d              15  ]], #  a1cpu_2ram_d
+		[qw[  router         c2i.4     c1a.4d              15  ]], #  c1a.4d
+		[qw[  scheduler      c2i.1     c1a.1d              15  ]], #  a1cpu_2ram_d
+		[qw[  tcp-router      c1.1       c1.1              10  ]], #  c1.1
+		[qw[  uaa            c2i.2     c1a.2d              30  ]], #  a2cpu_4ram_d
+		[qw[  database       c2i.4     g1a.8d              60  ]], #  database
+		[qw[  blobstore      c2i.1     c1a.1d              60  ]], #  a1cpu_2ram_d
+	)};
 
-	push @vm_type_names, 'database'
-	if $self->wants_feature('+internal-db');
+	delete($vm_matrix->{database})
+	  unless $self->wants_feature('+internal-db');
 
-	push @vm_type_names, 'blobstore'
-	if $self->wants_feature('+internal-blobstore');
-
-	my $common_vm_type_def = {
-		cloud_properties_for_iaas => {
-			openstack => {
-				'instance_type' => $self->for_scale({
-						dev => 'm1.2',
-						prod => 'm1.3'
-					}, 'm1.2'),
-				'boot_from_volume' => $self->TRUE,
-				'root_disk' => {
-					'size' => 32 # in gigabytes
-				},
-			},
-		},
-	};
+	delete($vm_matrix->{blobstore})
+	  unless $self->wants_feature('+internal-blobstore');
 
 	my $config = $self->build_cloud_config({
 		'networks' => [
 			$self->network_definition('ocf', strategy => 'ocfp',
 				dynamic_subnets => {
 					allocation => {
-						size => 32,
+						size => 64,
 						statics => 8,
 					},
 					cloud_properties_for_iaas => {
@@ -67,9 +69,19 @@ sub perform {
 				},
 			)
 		],
-		'vm_types' => [ map {
-				$self->vm_type_definition($_, %$common_vm_type_def)
-			} (@vm_type_names)
+		'vm_types' => [ (map {
+			$self->vm_type_definition($_, cloud_properties_for_iaas => {
+				openstack => {
+					'instance_type' => $self->for_scale({
+							dev  => $vm_matrix->{$_}{type_dev},
+							prod => $vm_matrix->{$_}{type_prod}
+						}),
+					'ephemeral_disk' => {encrypted => $self->TRUE},
+					'boot_from_volume' => $self->TRUE,
+					'root_disk' => {size => $vm_matrix->{$_}{disk_size}+0}, # Force conversion to integer
+				},
+			}),
+			} (sort keys %$vm_matrix)),
 		],
 		'vm_extensions' => [
 			$self->vm_extension_definition('diego-ssh-proxy-network-properties', common => {}),
@@ -89,7 +101,10 @@ sub perform {
 			),
 			$self->disk_type_definition('blobstore',
 				common => {
-					disk_size => gigabytes(100),
+					disk_size => $self->for_scale({
+              dev => gigabytes(100),
+              prod => gigabytes(200),
+            }, gigabytes(100))
 				},
 				cloud_properties_for_iaas => {
 					openstack => {
