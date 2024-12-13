@@ -89,6 +89,16 @@ Blobstore related:
   - `gcp-blobstore` - Use GCS as external blobstore.
   - `gcp-use-access-key` - Use use google storage access key/secret to access the external GCS blobstore (instead of service account credentials which is the default).
 
+## OCFP Deployments
+
+As an alternative to customizable general CF deployments, this kit provides an `ocfp` (Opensource Cloud Foundry Platform) feature, which is a _very opinionated_ specific deployment.  However, it does support a few parameters and complementary features.
+
+### Features supported in OCFP deployments
+
+- internal-blobstore - instead of using an external blobstore (default), make an internal blobstore instance.
+- internal-db - instead of using an external Postgres database, which makes an internal database instance.
+
+
 ## Features Provided by `cf-deployment`
 
 In addition to the bundled features that this kit exposes you can also include any ops files contained in the upstream [cf-deployment](https://https://github.com/cloudfoundry/cf-deployment) by referencing them via:
@@ -348,6 +358,12 @@ These params need to be set when activating features:
     partitioned-network feature.  If that parameter is not specified, it
     defaults to `cf-runtime`.
 
+  - ocfp:
+
+    | param           | description                                                       | default |
+    | --------------- | ----------------------------------------------------------------- | ------- |
+    | router-ssl-path | Path to the user provided certificate and key. | will use a generated self-signed certificate. |
+    | --------------- | ----------------------------------------------------------------- | ------- |
 
 # Retired Parameters (from v1.x)
 
