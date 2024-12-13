@@ -2,36 +2,24 @@
 # Network names (split out by exposure)
 
 - type:  replace
-  path:  /params?/cf_core_network?
-  value: cf-core
-
-- type:  replace
-  path:  /params/cf_edge_network?
-  value: cf-edge
-
-- type:  replace
-  path:  /params/cf_runtime_network?
-  value: cf-runtime
-
-- type:  replace
-  path:  /params/cf_db_network?
-  value: (( grab params.cf_core_network ))
-
-- type:  replace
   path:  /bosh-variables?/cf_core_network?
-  value: (( grab params.cf_core_network ))
+  value: (( grab params.cf_core_network || params.network || "cf-core" ))
 
 - type:  replace
   path:  /bosh-variables/cf_edge_network?
-  value: (( grab params.cf_edge_network ))
+  value: (( grab params.cf_edge_network || params.network || "cf-edge" ))
+
+- type:  replace
+  path:  /bosh-variables/cf_tcp_edge_network?
+  value: (( grab params.cf_tcp_edge_network || params.cf_edge_network || params.network || "cf-edge"))
 
 - type:  replace
   path:  /bosh-variables/cf_runtime_network?
-  value: (( grab params.cf_runtime_network ))
+  value: (( grab params.cf_runtime_network || params.network || "cf-runtime" ))
 
 - type:  replace
   path:  /bosh-variables/cf_db_network?
-  value: (( grab params.cf_db_network ))
+  value: (( grab params.cf_db_network || params.network || "cf-db" ))
 
 - type: remove
   path: /bosh-variables/network_name
@@ -96,7 +84,7 @@
 
 - type: replace
   path: /instance_groups/name=tcp-router/networks/name=default/name
-  value: ((cf_edge_network))
+  value: ((cf_tcp_edge_network))
 
 - type: replace
   path: /instance_groups/name=credhub/networks/name=default/name
@@ -207,6 +195,7 @@
       deployment: ((deployment_name))
       network: ((cf_edge_network))
       domain: bosh
+  # FIXME: do we need instance_group: tcp-router ?
   - domain: locket.service.cf.internal
     targets:
     - query: '*'

@@ -54,7 +54,8 @@ meta:
   value: (( grab meta.ocfp.azs ))
 - type: replace
   path: /instance_groups/name=database/azs
-  value: (( grab meta.ocfp.azs ))
+  value:
+    - (( grab meta.ocfp.azs[0] ))
 - type: replace
   path: /instance_groups/name=singleton-blobstore/azs
   value: (( grab meta.ocfp.azs ))

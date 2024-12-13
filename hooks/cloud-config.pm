@@ -52,23 +52,61 @@ sub perform {
 	delete($vm_matrix->{blobstore})
 	  unless $self->wants_feature('+internal-blobstore');
 
-	my $config = $self->build_cloud_config({
-		'networks' => [
-			$self->network_definition('ocf', strategy => 'ocfp',
+  my @networks = ();
+  my $network_cloud_properties = {
+    openstack => {
+      'net_id' => $self->network_reference('id'), # TODO: $self->subnet_reference('net_id'),
+      'security_groups' => ['default'] #$self->subnet_reference('sgs', 'get_security_groups'),
+    },
+  };
+
+  if ($self->want_feature('split-network')) {
+    $self->relinquish_networks('ocf');
+    @networks = (
+      $self->network_definition('ocf-core', strategy => 'ocfp',
+        dynamic_subnets => {
+          cloud_properties_for_iaas => $network_cloud_properties,
+          allocation => { size => 11, statics => 0 }
+        }
+      ),
+      $self->network_definition('ocf-edge', strategy => 'ocfp',
+        dynamic_subnets => {
+          cloud_properties_for_iaas => $network_cloud_properties,
+          allocation => { size => 1, statics => 0 }
+        }
+      ),
+      $self->network_definition('ocf-tcp', strategy => 'ocfp',
+        dynamic_subnets => {
+          cloud_properties_for_iaas => $network_cloud_properties,
+          allocation => { size => 1, statics => 0 }
+        }
+      ),
+      $self->network_definition('ocf-db', strategy => 'ocfp',
+        dynamic_subnets => {
+          subnets => ['ocfp-0'],
+          cloud_properties_for_iaas => $network_cloud_properties,
+          allocation => { size => 1, statics => 0 }
+        }
+      ),
+      $self->network_definition('ocf-runtime', strategy => 'ocfp',
+        dynamic_subnets => {
+          cloud_properties_for_iaas => $network_cloud_properties,
+          allocation => { size => 40, statics => 0 } # 120 diego cell vms max
+        }
+      )
+    );
+  } else {
+    $self->relinquish_networks(qw/ocf-core ocf-edge ocf-tcp ocf-runtime ocf-db/);
+    @networks = $self->network_definition('ocf', strategy => 'ocfp',
 				dynamic_subnets => {
-					allocation => {
-						size => 64,
-						statics => 8,
-					},
-					cloud_properties_for_iaas => {
-						openstack => {
-							'net_id' => $self->network_reference('id'), # TODO: $self->subnet_reference('net_id'),
-							'security_groups' => ['default'] #$self->subnet_reference('sgs', 'get_security_groups'),
-						},
-					},
-				},
+          cloud_properties_for_iaas => $network_cloud_properties,
+					allocation => { size => 64, statics => 8, }
+				}
 			)
-		],
+  }
+
+	my $config = $self->build_cloud_config({
+		'networks' => \@networks,
 		'vm_types' => [ (map {
 			$self->vm_type_definition($_, cloud_properties_for_iaas => {
 				openstack => {

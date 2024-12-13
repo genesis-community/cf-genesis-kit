@@ -363,7 +363,7 @@ features::validate() {
       warn "The #c{$want} feature has been renamed to #c{${want#blobstore-}-blobstore}"
       features+=("${want#blobstore-}-blobstore")
       ;;
-    +internal-blobstore | +internal-db)
+    +internal-blobstore | +internal-db | split-network)
       if want_feature 'ocfp'; then
         features+=($want)
       else
@@ -793,7 +793,7 @@ features::process() {
     cflinuxfs3)
       manifests+=("operations/use-cflinuxfs3.yml")
       ;;
-    isolation-segments)
+    isolation-segments | split-network)
       # process outside of base features so that base features can be called within iso segs
       true
       ;;
@@ -976,8 +976,13 @@ features::ocfp() {
       "ocfp/trusted-certs-windows.yml"
     )
   fi
+
   if [[ -n "$router_ssl_path" ]]; then
     manifests+=("ocfp/provided-router-ssl.yml")
+  fi
+
+  if want_feature 'split-network'; then
+    manifests+=("ocfp/split-network.yml")
   fi
 
   manifests+=("ocfp/scale/${env_scale}.yml") # FIXME:  Do we need actually need this? - Dennis
