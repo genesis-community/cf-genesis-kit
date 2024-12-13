@@ -1,0 +1,16 @@
+---
+instance_groups:
+- name: router
+  jobs:
+  - name: gorouter
+    properties:
+      router:
+        tls_pem:
+        - cert_chain: (( vault params.router-ssl-path ":cert_chain" ))
+          private_key: (( vault params.router-ssl-path ":private_key" ))
+
+---
+- type: remove
+  path: /variables/name=router_ssl
+- type: remove
+  path: /variables/name=router_ca

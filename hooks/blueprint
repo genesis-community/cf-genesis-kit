@@ -936,7 +936,8 @@ features::isos() {
 features::ocfp() {
   want_feature ocfp || return 0
 
-  env_scale=$(lookup "params.ocfp_env_scale" "dev")
+  router_ssl_path=$(lookup "params.router-ssl-path" "")
+  env_scale=$(lookup "kit.scale" "dev")
 
   manifests+=(
     "overlay/addons/autoscaler.yml"
@@ -974,6 +975,9 @@ features::ocfp() {
       "ocfp/${iaas}/windows.yml"
       "ocfp/trusted-certs-windows.yml"
     )
+  fi
+  if [[ -n "$router_ssl_path" ]]; then
+    manifests+=("ocfp/provided-router-ssl.yml")
   fi
 
   manifests+=("ocfp/scale/${env_scale}.yml") # FIXME:  Do we need actually need this? - Dennis
