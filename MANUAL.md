@@ -360,10 +360,11 @@ These params need to be set when activating features:
 
   - ocfp:
 
-    | param           | description                                                       | default |
-    | --------------- | ----------------------------------------------------------------- | ------- |
-    | router-ssl-path | Path to the user provided certificate and key. | will use a generated self-signed certificate. |
-    | --------------- | ----------------------------------------------------------------- | ------- |
+    | param            | description                                                       | default |
+    | ---------------- | ----------------------------------------------------------------- | ------- |
+    | router-ssl-path  | Path to the user provided certificate and key. | will use a generated self-signed certificate. |
+    | split-network    | Split network into core, edge, tcp-edge, runtime and db | All vms are in same network |
+    | ---------------- | ----------------------------------------------------------------- | ------- |
 
 # Retired Parameters (from v1.x)
 
