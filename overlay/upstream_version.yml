@@ -1,4 +1,4 @@
 exodus:
-  cf-deployment-version: 40.12.0
-  cf-deployment-date:    2024-Jul-08 16:15:51 UTC
-  cf-deployment-url:     https://github.com/cloudfoundry/cf-deployment/releases/tag/v40.12.0
+  cf-deployment-version: 44.4.0
+  cf-deployment-date:    2024-Nov-11 15:24:29 UTC
+  cf-deployment-url:     https://github.com/cloudfoundry/cf-deployment/releases/tag/v44.4.0
