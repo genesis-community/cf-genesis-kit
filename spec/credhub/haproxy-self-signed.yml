@@ -15,6 +15,10 @@ binding_cache_tls:
   certificate: <!{credhub}:binding_cache_tls.certificate!>
   private_key: <!{credhub}:binding_cache_tls.private_key!>
 blobstore_admin_users_password: <!{credhub}:blobstore_admin_users_password!>
+blobstore_public:
+  ca: <!{credhub}:blobstore_public.ca!>
+  certificate: <!{credhub}:blobstore_public.certificate!>
+  private_key: <!{credhub}:blobstore_public.private_key!>
 blobstore_secure_link_secret: <!{credhub}:blobstore_secure_link_secret!>
 blobstore_tls:
   ca: <!{credhub}:blobstore_tls.ca!>
@@ -130,6 +134,10 @@ gorouter_backend_tls:
   ca: <!{credhub}:gorouter_backend_tls.ca!>
   certificate: <!{credhub}:gorouter_backend_tls.certificate!>
   private_key: <!{credhub}:gorouter_backend_tls.private_key!>
+gorouter_lb_health_tls:
+  ca: <!{credhub}:gorouter_lb_health_tls.ca!>
+  certificate: <!{credhub}:gorouter_lb_health_tls.certificate!>
+  private_key: <!{credhub}:gorouter_lb_health_tls.private_key!>
 locket_database_password: <!{credhub}:locket_database_password!>
 log_cache:
   ca: <!{credhub}:log_cache.ca!>
@@ -231,14 +239,6 @@ metric_scraper_ca:
   ca: <!{credhub}:metric_scraper_ca.ca!>
   certificate: <!{credhub}:metric_scraper_ca.certificate!>
   private_key: <!{credhub}:metric_scraper_ca.private_key!>
-blobstore_public:
-  ca: <!{credhub}:blobstore_public.ca!>
-  certificate: <!{credhub}:blobstore_public.certificate!>
-  private_key: <!{credhub}:blobstore_public.private_key!>
-gorouter_lb_health_tls:
-  ca: <!{credhub}:gorouter_lb_health_tls.ca!>
-  certificate: <!{credhub}:gorouter_lb_health_tls.certificate!>
-  private_key: <!{credhub}:gorouter_lb_health_tls.private_key!>
 nats_ca:
   ca: <!{credhub}:nats_ca.ca!>
   certificate: <!{credhub}:nats_ca.certificate!>
@@ -317,10 +317,6 @@ routing_api_tls_client:
   ca: <!{credhub}:routing_api_tls_client.ca!>
   certificate: <!{credhub}:routing_api_tls_client.certificate!>
   private_key: <!{credhub}:routing_api_tls_client.private_key!>
-tcp_router_lb_health_tls:
-  ca: <!{credhub}:tcp_router_lb_health_tls.ca!>
-  certificate: <!{credhub}:tcp_router_lb_health_tls.certificate!>
-  private_key: <!{credhub}:tcp_router_lb_health_tls.private_key!>
 service_cf_internal_ca:
   ca: <!{credhub}:service_cf_internal_ca.ca!>
   certificate: <!{credhub}:service_cf_internal_ca.certificate!>
@@ -353,6 +349,14 @@ syslog_agent_metrics_tls:
   ca: <!{credhub}:syslog_agent_metrics_tls.ca!>
   certificate: <!{credhub}:syslog_agent_metrics_tls.certificate!>
   private_key: <!{credhub}:syslog_agent_metrics_tls.private_key!>
+tcp_router_backend_tls:
+  ca: <!{credhub}:tcp_router_backend_tls.ca!>
+  certificate: <!{credhub}:tcp_router_backend_tls.certificate!>
+  private_key: <!{credhub}:tcp_router_backend_tls.private_key!>
+tcp_router_lb_health_tls:
+  ca: <!{credhub}:tcp_router_lb_health_tls.ca!>
+  certificate: <!{credhub}:tcp_router_lb_health_tls.certificate!>
+  private_key: <!{credhub}:tcp_router_lb_health_tls.private_key!>
 uaa_admin_client_secret: <!{credhub}:uaa_admin_client_secret!>
 uaa_ca:
   ca: <!{credhub}:uaa_ca.ca!>
@@ -387,3 +391,4 @@ uaa_ssl:
   ca: <!{credhub}:uaa_ssl.ca!>
   certificate: <!{credhub}:uaa_ssl.certificate!>
   private_key: <!{credhub}:uaa_ssl.private_key!>
+
