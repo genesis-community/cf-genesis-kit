@@ -108,7 +108,7 @@ if [[ "${#changed[@]}" -gt 0 && -n "${changed[0]}" ]] ; then
   upstream="$(
     spruce merge --skip-eval "${ci_dir}/ci/pipeline/base.yml" "${ci_dir}/ci/settings.yml" |
     spruce json |
-    jq -r '.meta.upstream.bosh_releases[] |
+    jq -r '.meta.upstream.bosh_releases//[] | .[] |
            if .spec_url then {name, "repo":.spec_url}
            elif .owner then {name, "repo":"https://github.com/\(.owner)/\(.repository)"}
            else {name, "repo":"https://github.com/\(.repository)"}
@@ -125,9 +125,9 @@ if [[ "${#changed[@]}" -gt 0 && -n "${changed[0]}" ]] ; then
     | jq --argjson gitrepos "$upstream" -r 'reduce .releases[] as {$name, $url, $sha1, $version} ({repos: []};
         ($url
         | if ($url | test("https?://s3(-.*)?.amazonaws.com")) then
-            ($gitrepos.repos | map(select(.name == $name))[0].repo)
+            ($gitrepos | map(select(.name == $name))[0].repo)
           elif ($url | test("https?://storage.googleapis.com")) then
-            ($gitrepos.repos | map(select(.name == $name))[0].repo)
+            ($gitrepos | map(select(.name == $name))[0].repo)
           elif ($url | test("https?://bosh.io")) then
             ($url | sub("^.*/d/";"https://") | sub("\\?v=.*$";""))
           elif ($url | test("https?://github.com")) then
