@@ -458,6 +458,9 @@ features::validate() {
       (gcp-use-access-key)
         features+=( "$want" )
         ;;
+      (haproxy-acme)
+        features+=( "$want" )
+        ;;
       (enable-service-discovery|ssh-proxy-on-routers|no-tcp-routers)
         features+=( "$want" )
         ;;
@@ -834,6 +837,16 @@ features::process() {
 
       want_feature "small-footprint" &&
         manifests+=( "overlay/routing/haproxy-small-footprint.yml" )
+    
+      if want_feature "haproxy-acme"; then
+        manifests+=( "overlay/routing/haproxy-acme.yml" )
+          (
+            GENESIS_ADDON_SCRIPT=acme-client
+            SILENT_MODE=true
+            source hooks/addon
+          )
+      fi
+
     fi
   done
 
