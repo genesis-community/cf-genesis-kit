@@ -51,8 +51,12 @@ sub perform {
     return $self->do_setup_cli();
   } elsif ($script eq 'smoketest') {
     return $self->do_smoketest();
+  } elsif ($script eq 'stratos') {
+    # Stratos is implemented as an extended addon in hooks/addon-stratos.pm
+    # This delegates to the extended addon mechanism
+    return $self->run_extended_addon();
   } else {
-    # Handle extended addon
+    # Handle other extended addons
     return $self->run_extended_addon();
   }
 }
@@ -130,6 +134,17 @@ sub do_remigrate {
 sub do_setup_cli {
   my ($self) = @_;
 
+  # Check for unexpected arguments
+  if (scalar(@{$self->{args}}) > 0) {
+    foreach my $arg (@{$self->{args}}) {
+      if ($arg =~ /^-/ && $arg ne '-f') {
+        bail("#R{[ERROR]} Bad option $arg: expecting -f");
+      } elsif ($arg !~ /^-/) {
+        bail("#R{[ERROR]} setup-cli does not take any arguments");
+      }
+    }
+  }
+  
   # Parse -f option
   my %options = $self->parse_options(['f']);
   my $force = $options{f} ? 1 : 0;
@@ -171,6 +186,7 @@ sub run_extended_addon {
   my ($self) = @_;
 
   # This will run the addon script in the $GENESIS_ADDON_SCRIPT file, if it exists.
+  # Ex: hooks/addon-stratos for the stratos addon.
   # Pass all arguments to the extended addon handler
   run({interactive => 1}, 'run_extended_addon "$@"', @{$self->{args}});
 

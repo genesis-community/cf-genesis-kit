@@ -220,7 +220,6 @@ sub extract_vm_extensions {
   my ($self, $manifest_json) = @_;
 
   # This method extracts all VM extensions from the manifest
-
   my $manifest = decode_json($manifest_json);
   my %vm_extensions;
 
@@ -230,14 +229,52 @@ sub extract_vm_extensions {
       for my $ext (@{$ig->{vm_extensions}}) {
         $vm_extensions{$ext} = 1 if $ext;
       }
+    }
+  }
+
+  return sort keys %vm_extensions;
+}
+
+sub extract_disks {
+  my ($self, $manifest_json) = @_;
+
+  # This method extracts all disk types from the manifest
+  my $manifest = decode_json($manifest_json);
+  my %disks;
+
+  # Extract unique persistent_disk_type from instance groups
+  # Following the same pattern as the bash script using jq
+  for my $ig (@{$manifest->{instance_groups} || []}) {
+    if (defined $ig->{persistent_disk_type}) {
+      $disks{$ig->{persistent_disk_type}} = 1;
+    }
+  }
+
+  return sort keys %disks;
+}
+
+# Check if cloud config has required elements
+sub cloud_config_needs {
   my ($self, $type, $name) = @_;
 
   # Validate that the specified type and name exist in the cloud config
   # This implements the "cloud_config_needs" function from the bash script
   my $bosh = $self->env->bosh;
+  my $jq_query;
+
+  # Handle each resource type based on its structure in cloud config
+  if ($type eq 'vm_extension') {
+    # VM extensions have a different structure in cloud config
+    $jq_query = '.vm_extensions[] | select(.name == $n) | .name';
+  } else {
+    # Use standardized naming convention for other types (networks, vm_types, disk_types)
+    my $plural = $type . 's';
+    $jq_query = '.[$t] | .[] | select(.name == $n) | .name';
+  }
+
   my ($out, $rc, $err) = $bosh->execute(
     {stderr => 0, redact => 1},
-    'cloud-config | spruce json | jq -r --arg t "'.$type.'" --arg n "'.$name.'" \'.[$t+"s"][] | select(.name == $n) | .name\''
+    'cloud-config | spruce json | jq -r --arg t "'.$type.'s" --arg n "'.$name.'" \''.$jq_query.'\''
   );
 
   if ($rc || !$out) {
@@ -254,7 +291,8 @@ sub extract_vm_extensions {
 sub check_cloud_config {
   my ($self) = @_;
 
-  # TODO: perform any additional checks on the cloud config not covered by the type-specific checks above
+  # This would perform any additional checks on the cloud config
+  # that aren't covered by the type-specific checks above
   my $bosh = $self->env->bosh;
 
   # Execute any bosh command that might fail if the cloud config isn't valid

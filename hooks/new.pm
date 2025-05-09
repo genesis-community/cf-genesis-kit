@@ -13,6 +13,7 @@ use lib $lib;
 
 use parent qw(Genesis::Hook);
 
+# Import necessary Genesis functions
 use Genesis qw/bail trace new_enough info warning notice run bug pushd popd humanize_path/;
 use Genesis::UI qw/describe prompt_for/;
 use Genesis::Term qw/in_controlling_terminal csprintf/;
@@ -100,16 +101,26 @@ sub ask_for_loadbalancer {
   }
 }
 
+# Move a secret from Vault to Credhub
+# This function reads a secret from Vault, stores it in Credhub, and removes it from Vault
+# Matching the behavior of the original bash script
 sub move_secrets_to_credhub {
   my ($self, $vault_path, $credhub_key) = @_;
+
+  # First, read the secret from Vault
+  my ($secret_value, $rc_read) = run(qq{safe read "${ENV{GENESIS_SECRETS_BASE}}$vault_path"});
+  bail("Failed to read secret from vault: $secret_value") if $rc_read;
+
+  # Store it in Credhub
   my ($out, $rc) = run(qq{
-    credhub set -n "/${ENV{GENESIS_CREDHUB_ROOT}}/$credhub_key" -t value \\
-    -v "\$(safe read "${ENV{GENESIS_SECRETS_BASE}}$vault_path")"
+    credhub set -n "/${ENV{GENESIS_CREDHUB_ROOT}}/$credhub_key" -t value -v "$secret_value"
     });
 
   bail("Failed to move secret from vault to credhub: $out") if $rc;
 
-  run(qq{safe rm "${ENV{GENESIS_SECRETS_BASE}}$vault_path"});
+  # Remove it from Vault
+  my ($rm_out, $rm_rc) = run(qq{safe rm "${ENV{GENESIS_SECRETS_BASE}}$vault_path"});
+  warning("Failed to remove secret from vault after moving to credhub: $rm_out") if $rm_rc;
 }
 
 sub ask_for_database {
@@ -185,10 +196,16 @@ sub ask_for_database {
   push @{$self->{features}}, $self->{database};
 }
 
+# Get Cloud Foundry version from cf-deployment manifest
+# This extracts the manifest_version field from the cf-deployment.yml file
 sub get_cf_version {
   my ($self) = @_;
-  my ($out, $rc) = run('spruce json cf-deployment/cf-deployment.yml | jq -r \'.manifest_version\'');
-  bail("Failed to get CF version: $out") if $rc;
+
+  # Using the same command as the bash script for consistent behavior
+  my ($out) = run('spruce json cf-deployment/cf-deployment.yml | jq -r \'.manifest_version\'');
+
+  # Strip any trailing whitespace
+  chomp($out);
   return $out;
 }
 
@@ -229,8 +246,15 @@ sub perform {
       --default => $default_apps
     );
 
-    $self->{system_domain} = $default_system if $self->{system_domain} eq "";
-    $self->{apps_domain} = $default_apps if $self->{apps_domain} eq "";
+    # Fix for the logic error in the bash version where system_domain and apps_domain
+    # could remain empty - properly set defaults if empty strings are provided
+    if ($self->{system_domain} eq "") {
+      $self->{system_domain} = "system.$self->{base_domain}";
+    }
+
+    if ($self->{apps_domain} eq "") {
+      $self->{apps_domain} = "run.$self->{base_domain}";
+    }
 
     describe(
       "",
@@ -373,12 +397,15 @@ sub perform {
         );
 
         # Generate bucket prefix from environment name
-        my $env_name = $ENV{GENESIS_ENVIRONMENT};
-        $env_name =~ tr/[A-Z]/[a-z]/;
-        $env_name =~ tr/./_/;
+        # Following exact transformation from the bash script:
+        # 1. Convert to lowercase
+        # 2. Convert periods and underscores to hyphens
+        # 3. Remove characters that aren't alphanumeric, periods, or hyphens
+        my $env_name = lc($ENV{GENESIS_ENVIRONMENT});
+        $env_name =~ tr/./_/--; # Convert periods and underscores to hyphens
         $env_name =~ s/[^a-z0-9\.-]//g;
 
-        $self->{bucket_prefix} = ($env_name eq $ENV{GENESIS_ENVIRONMENT}) ? '' : $env_name;
+        $self->{bucket_prefix} = ($env_name eq lc($ENV{GENESIS_ENVIRONMENT})) ? '' : $env_name;
       }
     } elsif ($iaas eq 'google') {
       $self->ask_for_loadbalancer("Google Cloud Load Balancer");
@@ -455,12 +482,15 @@ sub perform {
       }
 
       # Generate bucket prefix from environment name
-      my $env_name = $ENV{GENESIS_ENVIRONMENT};
-      $env_name =~ tr/[A-Z]/[a-z]/;
-      $env_name =~ tr/./_/;
+      # Following exact transformation from the bash script:
+      # 1. Convert to lowercase
+      # 2. Convert periods and underscores to hyphens
+      # 3. Remove characters that aren't alphanumeric, periods, or hyphens
+      my $env_name = lc($ENV{GENESIS_ENVIRONMENT});
+      $env_name =~ tr/./_/--; # Convert periods and underscores to hyphens
       $env_name =~ s/[^a-z0-9\.-]//g;
 
-      $self->{bucket_prefix} = ($env_name eq $ENV{GENESIS_ENVIRONMENT}) ? '' : $env_name;
+      $self->{bucket_prefix} = ($env_name eq lc($ENV{GENESIS_ENVIRONMENT})) ? '' : $env_name;
     } else {
       $self->ask_for_loadbalancer();
       $self->ask_for_database();
@@ -529,17 +559,22 @@ sub perform {
   return 1;
 }
 
+# Generate the environment YAML file with all settings
+# This creates the environment configuration file with all the options selected during the hook execution
 sub generate_env_file {
   my ($self) = @_;
   my $env_file = "$ENV{GENESIS_ROOT}/$ENV{GENESIS_ENVIRONMENT}.yml";
 
+  # Open file for writing
   open my $fh, '>', $env_file or bail("Could not open $env_file for writing: $!");
 
+  # Write basic kit information
   print $fh "---\n";
   print $fh "kit:\n";
   print $fh "  name:    $ENV{GENESIS_KIT_NAME}\n";
   print $fh "  version: $ENV{GENESIS_KIT_VERSION}\n";
 
+  # Write selected features
   if (@{$self->{features}}) {
     print $fh "  features:\n";
     foreach my $feature (@{$self->{features}}) {
@@ -547,10 +582,11 @@ sub generate_env_file {
     }
   }
 
-  # Genesis config block
+  # Include Genesis config block (provided by Genesis)
   my ($out) = run('genesis_config_block');
   print $fh $out;
 
+  # Write domain configuration
   print $fh "params:\n";
   print $fh "  # Cloud Foundry base domain\n";
   print $fh "  base_domain: $self->{base_domain}\n";
@@ -558,6 +594,7 @@ sub generate_env_file {
   print $fh "  apps_domains:\n";
   print $fh "  - $self->{apps_domain}\n";
 
+  # Write database configuration if using external database
   if ($self->{database} eq 'mysql-db') {
     print $fh "\n";
     print $fh "  # External MySQL configuration\n";
@@ -568,6 +605,7 @@ sub generate_env_file {
     print $fh "  external_db_host: $self->{db_host}\n";
   }
 
+  # Write blobstore configuration
   if ($self->{aws_blobstore_region}) {
     print $fh "  blobstore_s3_region: $self->{aws_blobstore_region}\n";
   }
@@ -576,6 +614,7 @@ sub generate_env_file {
     print $fh "  blobstore_bucket_prefix: $self->{bucket_prefix}\n";
   }
 
+  # Set SSL validation settings
   if (!$self->{use_provided_cert}) {
     print $fh "  # Skip SSL validation since we use self-signed certs\n";
     print $fh "  skip_ssl_validation: true\n";
@@ -583,7 +622,7 @@ sub generate_env_file {
 
   close $fh;
 
-  # Offer environment editor
+  # Offer environment editor to the user
   run('offer_environment_editor');
 
   return 1;
