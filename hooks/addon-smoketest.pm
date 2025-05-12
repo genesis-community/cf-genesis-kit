@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 # vim: set ts=2 sw=2 sts=2 foldmethod=marker expandtab:
-package Genesis::Hook::Addon::CF v2.7.0;
+package Genesis::Hook::Addon::CF::Smoketest v2.7.0;
 
 use strict;
 use warnings;
@@ -14,7 +14,7 @@ use lib $lib;
 use parent qw(Genesis::Hook::Addon);
 
 use Genesis qw/bail info run/;
-use Genesis::UI qw/prompt_for_boolean describe/;
+use Genesis::UI qw/describe/;
 
 sub init {
   my $class = shift;
@@ -24,13 +24,20 @@ sub init {
 }
 
 sub cmd_details {
-  return "go away"
+  return
+  "Run the smoke tests errand on the first vm in the api instance group.";
 }
 
 sub perform {
   my ($self) = @_;
-  my $script = $self->{script};
-  bail("#R{[ERROR]} Don't use this script. Call addons from Genesis directly.");
+  
+  # This assumes $GENESIS_BOSH_COMMAND, $BOSH_ENVIRONMENT, and $BOSH_DEPLOYMENT
+  # are set in the environment
+  run({interactive => 1},
+    '$GENESIS_BOSH_COMMAND -e "$BOSH_ENVIRONMENT" -d "$BOSH_DEPLOYMENT" run-errand smoke_tests'
+  );
+
+  return 1;
 }
 
 1;
