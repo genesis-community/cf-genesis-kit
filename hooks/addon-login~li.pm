@@ -35,16 +35,16 @@ sub cmd_details {
 sub perform {
   my ($self) = @_;
   my $env = $self->env;
-  
+
   # Parse options
   my %options = $self->parse_options([
     'yes|y',           # Skip confirmation prompts
     'validate-ssl',    # Enforce SSL validation
   ]);
-  
+
   my $non_interactive = $options{'yes'} ? 1 : 0;
   my $validate_ssl = $options{'validate-ssl'} ? 1 : 0;
-  
+
   my $use_cf_targets = 1;
   my ($out, $rc) = run('cf plugins | grep -q \'^cf-targets\'');
   if ($rc != 0) {
@@ -79,12 +79,10 @@ sub perform {
   } else {
     run('cf api "$1" --skip-ssl-validation', $api_url);
   }
-  
+
   run('cf auth "$1" "$2"', $username, $password);
 
-  if ($use_cf_targets) {
-    run('cf save-target -f "$1"', $ENV{GENESIS_ENVIRONMENT});
-  }
+  run('cf save-target -f "$1"', $ENV{GENESIS_ENVIRONMENT}) if ($use_cf_targets);
 
   info("\n\n");
   run('cf target');
