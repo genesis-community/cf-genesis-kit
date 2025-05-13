@@ -31,6 +31,8 @@ sub init {
 sub perform {
   my ($self) = @_;
 
+  $self->create_cf_vpcs();
+
   # Base class has deploy_successful method to check if GENESIS_DEPLOY_RC == 0
   if ($self->deploy_successful) {
     # Display messages to the user about available commands
