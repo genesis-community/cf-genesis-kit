@@ -17,6 +17,23 @@ sub init {
 	my $class = shift;
 	my $obj = $class->SUPER::init(@_);
 	$obj->check_minimum_genesis_version('3.1.0-rc.20');
+
+	# Parse options first before getting info so we can check for version override
+	my %options = $obj->parse_options([
+		'json',           # Output in JSON format
+		'urls-only',      # Only display URLs
+		'force',          # Force redeployment
+		'skip-cf-check',  # Skip CF CLI availability check
+		'file=s',         # Path to Stratos zip file
+		'version=s',      # Stratos version to deploy
+		'buildpack=s',    # Buildpack to use
+		'stack=s',        # Stack to use
+		'memory=s',       # Memory allocation
+		'disk=s',         # Disk allocation
+		'timeout=i',      # Application startup timeout
+	]);
+
+	$obj->{options} = \%options;
 	$obj->{info} = $obj->_get_stratos_info();
 	return $obj;
 }
@@ -31,34 +48,21 @@ sub cmd_details {
 	"[[  #y{--json}              >>Output information in JSON format\n".
 	"[[  #y{--urls-only}         >>Only display URLs\n\n".
 	"Deploy Options:\n".
-	"[[  #y{--force}             >>Force redeployment even if already deployed\n".
-	"[[  #y{--skip-cf-check}     >>Skip CF CLI availability check\n".
-	"[[  #y{--file <path>}       >>Path to Stratos zip file (will download from GitHub if not specified)\n".
 	"[[  #y{--buildpack <name>}  >>Buildpack to use (default: binary_buildpack)\n".
-	"[[  #y{--stack <name>}      >>Stack to use (default: cflinuxfs4)\n".
-	"[[  #y{--memory <size>}     >>Memory allocation (default: 1512M)\n".
 	"[[  #y{--disk <size>}       >>Disk allocation (default: 1024M)\n".
+	"[[  #y{--file <path>}       >>Path to Stratos zip file (will download from GitHub if not specified)\n".
+	"[[  #y{--force}             >>Force redeployment even if already deployed\n".
+	"[[  #y{--memory <size>}     >>Memory allocation (default: 1512M)\n".
+	"[[  #y{--skip-cf-check}     >>Skip CF CLI availability check\n".
+	"[[  #y{--stack <name>}      >>Stack to use (default: cflinuxfs4)\n".
 	"[[  #y{--timeout <seconds>} >>Application startup timeout (default: 180)\n".
-	"[[  #y{--sgs}               >>Create security groups for VPC access\n";
+	"[[  #y{--version <ver>}     >>Stratos version to deploy (overrides configuration and defaults)\n".
 }
 
 sub perform {
 	my ($self) = @_;
 	my $env = $self->env;
-	my %options = $self->parse_options([
-		'json',           # Output in JSON format
-		'urls-only',      # Only display URLs
-		'force',          # Force redeployment
-		'skip-cf-check',  # Skip CF CLI availability check
-		'file=s',         # Path to Stratos zip file
-		'buildpack=s',    # Buildpack to use
-		'stack=s',        # Stack to use
-		'memory=s',       # Memory allocation
-		'disk=s',         # Disk allocation
-		'timeout=i',      # Application startup timeout
-		'sgs',            # Create security groups
-	],
-	);
+	my %options = %{$self->{options}}; # Use options already parsed in init
 
 	# Apply default values for deployment options
 	$options{buildpack} //= 'binary_buildpack';
@@ -107,7 +111,8 @@ sub _get_stratos_info {
 	my $cf_app_name = $env->lookup('stratos.cf_app_name', 'apps');
 
 	# Get Stratos specific configuration
-	my $stratos_version = $env->lookup('stratos.version', '4.4.1');
+	# Command line version takes precedence over environment config
+	my $stratos_version = $self->{options}->{version} // $env->lookup('stratos.version', '4.8.1');
 	my $stratos_admin = $env->lookup('stratos.admin_user', 'admin');
 
 	# Get database connection information
@@ -156,30 +161,24 @@ sub _get_stratos_info {
 	# Determine if Stratos is deployed as a CF app
 	my $is_cf_app_deployed = 0;
 	my $cf_app_status = "unknown";
-	eval {
-		my ($out, $rc) = run('cf app "$1" >/dev/null 2>&1', $cf_app_name);
-		$is_cf_app_deployed = ($rc == 0);
-		if ($is_cf_app_deployed) {
-			($out, $rc) = run('cf app "$1" | grep -E "^#?status:" | awk \'{print $2}\'', $cf_app_name);
-			$cf_app_status = $out if $rc == 0;
-			chomp($cf_app_status);
-		}
-	};
+  my ($out, $rc) = run('cf app "$1" >/dev/null 2>&1', $cf_app_name);
+  $is_cf_app_deployed = ($rc == 0);
+  if ($is_cf_app_deployed) {
+    ($out, $rc) = run('cf app "$1" | grep -E "^#?status:" | awk \'{print $2}\'', $cf_app_name);
+    $cf_app_status = $out if $rc == 0;
+    chomp($cf_app_status);
+  }
 
 	# Get credentials from vault
-	my $admin_password = "";
-	my $session_secret = "";
-	my $stratos_client = "";
-	my $stratos_client_secret = "";
-
   # FIXME: Should we bail or generate instead of "" if not set?
-  $admin_password = $env->vault->get($env->secrets_base . "stratos/admin_password") || "";
-  $session_secret = $env->vault->get($env->secrets_base . "stratos/session_secret") || "";
+  my $admin_password = $env->vault->get($env->secrets_base . "stratos/admin_password") || "";
+  my $session_secret = $env->vault->get($env->secrets_base . "stratos/session_secret") || "";
 
 	# Try to get client credentials from exodus
-	my $exodus_path = $env->lookup_genesis('exodus_base');
-  $stratos_client = $env->vault->get($env->exodus_base . ":stratos_client") || "";
-  $stratos_client_secret = $env->vault->get($env->expodus_base . ":stratos_secret || """);
+  my $data = $self->exodus_data;
+  # FIXME: Should we bail if not set?
+  my $stratos_client = $data->{stratos_client} || "";
+  my $stratos_client_secret = $data->{stratos_secret} || "");
 
 	# Build info structure
 	return {
@@ -223,6 +222,12 @@ sub _get_stratos_info {
 sub display_info {
 	my ($self, %options) = @_;
 	my $info = $self->{info};
+
+	# If version was specified on command line, update the info object
+	if ($options{version} && $options{version} ne $info->{version}) {
+		$info->{version} = $options{version};
+		info("Note: Using Stratos version %s from command line", $options{version});
+	}
 
 	# Handle URLs-only mode
 	if ($options{'urls-only'}) {
@@ -318,12 +323,14 @@ sub display_info {
 }
 
 sub deploy_stratos {
-  my ($self, $env, $info, %options) = @_;
+	my ($self, %options) = @_;
+	my $env = $self->env;
+	my $info = $self->{info};
 
-  $env->notify("deploying Stratos as a CF application...");
+	$env->notify("deploying Stratos as a CF application...");
 
-  # Check if already deployed
-  if ($info->{is_cf_app_deployed} && !$options{force}) {
+	# Check if already deployed
+	if ($info->{is_cf_app_deployed} && !$options{force}) {
 		info("Stratos is already deployed. Use --force to redeploy.");
 		return 1;
 	}
@@ -352,203 +359,179 @@ sub deploy_stratos {
 
 	# Create a temporary directory for the deployment
 	my $tmp_dir = $self->tempdir('stratos-deploy');
-	eval {
-		info("Preparing Stratos deployment...");
+  info("Preparing Stratos deployment...");
 
-    # Get environment config and exodus data
-    my $data = $self->exodus_data;
-    my $system_api_domain = $data->{cf}{api_url} || '';
-    $system_api_domain =~ s/^https?:\/\///; # Remove protocol
+  # Get environment config and exodus data
+  my $data = $self->exodus_data;
+  my $system_api_domain = $data->{cf}{api_url} || '';
+  $system_api_domain =~ s/^https?:\/\///; # Remove protocol
 
-    # Get database connection information
-    my $stratos_db_scheme = $data->{stratos}{db}{scheme} || 'postgres';
-    my $stratos_db_hostname = $data->{stratos}{db}{hostname} || '';
-    my $stratos_db_username = $data->{stratos}{db}{username} || 'stratos';
-    my $stratos_db_password = $data->{stratos}{db}{password} || 'stratos';
-    my $stratos_db_port = $data->{stratos}{db}{port} || 5432;
-    my $stratos_db_database = $data->{stratos}{db}{database} || 'stratos';
-    my $stratos_db_sslmode = $data->{stratos}{db}{sslmode} || 'disabled';
+  # Get database connection information
+  my $stratos_db_scheme = $data->{stratos}{db}{scheme} || 'postgres';
+  my $stratos_db_hostname = $data->{stratos}{db}{hostname} || '';
+  my $stratos_db_username = $data->{stratos}{db}{username} || 'stratos';
+  my $stratos_db_password = $data->{stratos}{db}{password} || 'stratos';
+  my $stratos_db_port = $data->{stratos}{db}{port} || 5432;
+  my $stratos_db_database = $data->{stratos}{db}{database} || 'stratos';
+  my $stratos_db_sslmode = $data->{stratos}{db}{sslmode} || 'disabled';
 
-		# Get or generate session store secret
-		my $stratos_session_store_sekret = "";
-		eval {
-			$stratos_session_store_sekret = $env->vault->get($env->secrets_base . "stratos/session_secret");
-		};
-		unless ($stratos_session_store_sekret) {
-			# Generate session secret
-			my $random = rand(10000);
-			$stratos_session_store_sekret = `echo $random | sha256sum | awk '{print \$1}'`;
-			chomp($stratos_session_store_sekret);
-			eval {
-				$env->vault->set($env->secrets_base . "stratos/session_secret", $stratos_session_store_sekret);
-			};
-		}
+  # Get or generate session store secret
+  my $stratos_session_store_sekret = $env->vault->get($env->secrets_base . "stratos/session_secret");
+  unless ($stratos_session_store_sekret) {
+    # Generate session secret
+    my $random = rand(10000);
+    $stratos_session_store_sekret = `echo $random | sha256sum | awk '{print \$1}'`;
+    chomp($stratos_session_store_sekret);
+    # FIXME: Should we bail if set fails?
+    $env->vault->set($env->secrets_base . "stratos/session_secret", $stratos_session_store_sekret);
+  }
 
-		# Get client credentials from vault/exodus
-		my $stratos_client = "";
-		my $stratos_client_secret = "";
-		eval {
-			$stratos_client = $env->vault->get($exodus_path . ":stratos_client");
-			$stratos_client_secret = $env->vault->get($exodus_path . ":stratos_secret");
-		};
-		unless ($stratos_client && $stratos_client_secret) {
-			warning("Stratos client credentials not found in vault. Using defaults.");
-			$stratos_client = "stratos_client";
-			$stratos_client_secret = "stratos_secret";
-		}
+  # Get client credentials from vault/exodus
+  my $data = $self->exodus_data;
+  # FIXME: Should we bail if not set?
+  my $stratos_client = $data->{"stratos_client"} || "";
+  my $stratos_client_secret = $data->{stratos_secret} || "";
 
-		# Get Stratos version
-		my $stratos_version = $env->lookup('stratos.version', '4.4.1');
-		my $stratos_releases_url = "https://github.com/cloudfoundry-community/stratos/releases/download/${stratos_version}/stratos-ui-packaged.zip";
-		my $stratos_sso_options = $env->lookup('stratos.sso_options', 'nosplash, logout');
+  unless ($stratos_client && $stratos_client_secret) {
+    warning("Stratos client credentials not found in vault. Using defaults.");
+    $stratos_client = "stratos_client";
+    $stratos_client_secret = "stratos_secret";
+  }
 
-		# Domain setup
-		my $apps_domain = $env->lookup('cf.apps_domain', '');
-		my $stratos_domain = "console.${apps_domain}";
+  # Get Stratos version - command line takes precedence over environment config
+  my $stratos_version = $options{version} // $info->{version};
+  info("Using Stratos version: %s%s", $stratos_version, $options{version} ? " (from command line)" : "");
+  my $stratos_releases_url = "https://github.com/cloudfoundry/stratos/releases/download/v${stratos_version}/stratos-ui-${stratos_version}.zip";
+  my $stratos_sso_options = $env->lookup('stratos.sso_options', 'nosplash, logout');
 
-		# Get file or download Stratos release
-		my $chdir = $tmp_dir;
-		chdir $chdir or bail("Could not change to temporary directory: $!");
+  # Domain setup
+  my $apps_domain = $env->lookup('cf.apps_domain', '');
+  my $stratos_domain = "console.${apps_domain}";
 
-		if ($options{file} && -f $options{file}) {
-			info("Using provided Stratos file: %s", $options{file});
-			run('unzip -o "$1"', $options{file});
-		} else {
-			info("Downloading Stratos %s...", $stratos_version);
-			run('wget "$1" && unzip -o stratos-ui-packaged.zip && rm stratos-ui-packaged.zip',
-				$stratos_releases_url);
-		}
+  # Get file or download Stratos release
+  my $chdir = $tmp_dir;
+  chdir $chdir or bail("Could not change to temporary directory: $!");
 
-		# Target the correct CF organization and space
-		info("Targeting CF organization 'system' and space 'stratos'...");
-		run('cf create-space -o system stratos');
-		run('cf target -o system -s stratos');
+  if ($options{file} && -f $options{file}) {
+    info("Using provided Stratos file: %s", $options{file});
+    run('unzip -o "$1"', $options{file});
+  } else {
+    info("Downloading Stratos %s...", $stratos_version);
+    run('wget "$1" && unzip -o stratos-ui-$2.zip && rm stratos-ui-$2.zip',
+      $stratos_releases_url, $stratos_version);
+  }
 
-		# Configure database via CUPS
-		info("Configuring Stratos Database Connection via CUPS Services");
-		my $svc_name = "console_db_tls_verify_ca";
+  # Target the correct CF organization and space
+  info("Targeting CF organization 'system' and space 'stratos'...");
+  run('cf create-space -o system stratos');
+  run('cf target -o system -s stratos');
 
-		# Check if service already exists
-		my $org_guid = `cf org system --guid`; chomp($org_guid);
-		my $space_guid = `cf space stratos --guid`; chomp($space_guid);
-		my $svc_exists = `cf curl "/v3/service_instances?organization_guids=${org_guid}&space_guids=${space_guid}" | jq -r '.resources[]|select(.name|test("${svc_name}"))|.name'`; chomp($svc_exists);
+  # Configure database via CUPS
+  info("Configuring Stratos Database Connection via CUPS Services");
+  my $svc_name = "console_db_tls_verify_ca";
 
-    # Prepare database connection JSON
-    my $db_data = {
-      uri => "$stratos_db_scheme://",
-      username => $stratos_db_username,
-      password => $stratos_db_password,
-      hostname => $stratos_db_hostname,
-      port => $stratos_db_port,
-      dbname => $stratos_db_database,
-      sslmode => $stratos_db_sslmode
-    };
+  # Check if service already exists
+  my $org_guid = `cf org system --guid`; chomp($org_guid);
+  my $space_guid = `cf space stratos --guid`; chomp($space_guid);
+  my $svc_exists = `cf curl "/v3/service_instances?organization_guids=${org_guid}&space_guids=${space_guid}" | jq -r '.resources[]|select(.name|test("${svc_name}"))|.name'`; chomp($svc_exists);
 
-    my $db_json = JSON::PP->new->encode($db_data);
+  # Prepare database connection JSON
+  my $db_data = {
+    uri => "$stratos_db_scheme://",
+    username => $stratos_db_username,
+    password => $stratos_db_password,
+    hostname => $stratos_db_hostname,
+    port => $stratos_db_port,
+    dbname => $stratos_db_database,
+    sslmode => $stratos_db_sslmode
+  };
 
-		# Create or update the service
-		if ($svc_exists eq $svc_name) {
-			info("Service %s was found, updating existing cups service definition.", $svc_name);
-			run('cf uups "$1" -p \'$2\'', $svc_name, $db_json);
-		} else {
-			info("Service %s was not found, creating cups service definition.", $svc_name);
-			run('cf cups "$1" -p \'$2\'', $svc_name, $db_json);
-		}
+  my $db_json = JSON::PP->new->encode($db_data);
 
-		# Create security groups if requested
-		if ($options{sgs}) {
-			info("Creating security groups for VPC access...");
-			open my $sg_file, '>', "$tmp_dir/vpc-sg.json" or bail("Could not create security group file: $!");
-			print $sg_file qq|[
-			{
-			"protocol": "all",
-			"destination": "10.0.0.0-10.255.255.255"
-			}
-			]|;
-			close $sg_file;
+  # Create or update the service
+  if ($svc_exists eq $svc_name) {
+    info("Service %s was found, updating existing cups service definition.", $svc_name);
+    run('cf uups "$1" -p \'$2\'', $svc_name, $db_json);
+  } else {
+    info("Service %s was not found, creating cups service definition.", $svc_name);
+    run('cf cups "$1" -p \'$2\'', $svc_name, $db_json);
+  }
 
-			run('cf create-security-group vpc "$1" || true', "$tmp_dir/vpc-sg.json");
-			run('cf bind-staging-security-group vpc || true');
-			run('cf bind-running-security-group vpc || true');
-		}
+  # Create application manifest
+  info("Creating application manifest...");
+  open my $manifest, '>', "$tmp_dir/manifest.yml" or bail("Could not create manifest file: $!");
+  my $manifest_data = {
+    applications => [
+      {
+        name => 'apps',
+        host => 'console',
+        'health-check-type' => 'port',
+        memory => $options{memory},
+        disk_quota => $options{disk},
+        timeout => $options{timeout},
+        buildpacks => [
+          $options{buildpack}
+        ],
+        stack => $options{stack},
+        env => {
+          CF_API_URL => "https://$system_api_domain",
+          CF_CLIENT => $stratos_client,
+          CF_CLIENT_SECRET => $stratos_client_secret,
+          SESSION_STORE_SECRET => $stratos_session_store_sekret,
+          SSO_OPTIONS => $stratos_sso_options,
+          SSO_WHITELIST => "https://$stratos_domain/*",
+          SSO_LOGIN => "true",
+          DB_SSL_MODE => $stratos_db_sslmode
+        },
+        services => [
+          'console_db_tls_verify_ca'
+        ]
+      }
+    ]
+  };
+  my $ypp = YAML::PP->new(indent => 2, header => 1);
+  # YAML::PP uses spaces by default, so replace with tabs after generating
+  my $yaml_content = $ypp->dump_string($manifest_data);
+  $yaml_content =~ s/  /\t/g;  # Replace 2 spaces with a tab
 
-		# Create application manifest
-		info("Creating application manifest...");
-		open my $manifest, '>', "$tmp_dir/manifest.yml" or bail("Could not create manifest file: $!");
-    my $manifest_data = {
-      applications => [
-        {
-          name => 'apps',
-          host => 'console',
-          'health-check-type' => 'port',
-          memory => $options{memory},
-          disk_quota => $options{disk},
-          timeout => $options{timeout},
-          buildpacks => [
-            $options{buildpack}
-          ],
-          stack => $options{stack},
-          env => {
-            CF_API_URL => "https://$system_api_domain",
-            CF_CLIENT => $stratos_client,
-            CF_CLIENT_SECRET => $stratos_client_secret,
-            SESSION_STORE_SECRET => $stratos_session_store_sekret,
-            SSO_OPTIONS => $stratos_sso_options,
-            SSO_WHITELIST => "https://$stratos_domain/*",
-            SSO_LOGIN => "true",
-            DB_SSL_MODE => $stratos_db_sslmode
-          },
-          services => [
-            'console_db_tls_verify_ca'
-          ]
-        }
-      ]
-    };
+  print $manifest $yaml_content;
+  close $manifest;
 
-    my $ypp = YAML::PP->new(indent => 2, header => 1);
-    # YAML::PP uses spaces by default, so replace with tabs after generating
-    my $yaml_content = $ypp->dump_string($manifest_data);
-    $yaml_content =~ s/  /\t/g;  # Replace 2 spaces with a tab
+  # Deploy the application
+  info("Deploying Stratos application...");
+  my ($out,$rc,$err) = run('cf push -f "$1"', "$tmp_dir/manifest.yml");
+  bail(
+    "Failed to deploy Stratos: %s", $err
+  ) unless $rc == 0;
 
-    print $manifest $yaml_content;
-    close $manifest;
+  # Update the status in the info object
+  $info->{is_cf_app_deployed} = 1;
+  $info->{status} = "Deployed as CF app (running)";
+  $info->{url} = "https://$stratos_domain";
 
-		# Deploy the application
-		info("Deploying Stratos application...");
-		run('cf push -f "$1"', "$tmp_dir/manifest.yml");
+  info("\nStratos deployment completed successfully!");
 
-		# Update the status in the info object
-		$info->{is_cf_app_deployed} = 1;
-		$info->{status} = "Deployed as CF app (running)";
-		$info->{url} = "https://$stratos_domain";
+  chdir('/');  # Go back to root directory
 
-		info("\nStratos deployment completed successfully!");
-	};
+  $self->display_info($info, %options);
 
-	if ($@) {
-		bail("Failed to deploy Stratos: $@");
-	}
-
-	chdir('/');  # Go back to root directory
-
-	$self->display_info($info, %options);
-
-	return 1;
+  return 1;
 }
 
 sub _generate_password {
-	my ($self, $length) = @_;
-	$length ||= 16;
+  my ($self, $length) = @_;
+  $length ||= 16;
 
-	my @chars = ('a'..'z', 'A'..'Z', '0'..'9', '_', '-', '!', '@', '#', '$', '%', '^', '&', '*');
-	my $password = '';
-	$password .= $chars[int(rand(scalar @chars))] for (1..$length);
+  my @chars = ('a'..'z', 'A'..'Z', '0'..'9', '_', '-', '!', '@', '#', '$', '%', '^', '&', '*');
+  my $password = '';
+  $password .= $chars[int(rand(scalar @chars))] for (1..$length);
 
-	return $password;
+  return $password;
 }
 
 sub open_in_browser {
-	my ($self, $env, $info) = @_;
+  my ($self) = @_;
+  my $info = $self->{info};
 
   bail(
     "Cannot open Stratos UI: No URL configured"
@@ -561,7 +544,7 @@ sub open_in_browser {
   );
   system("$cmd '$info->{url}' >/dev/null 2>&1 &");
 
-	return 1;
+  return 1;
 }
 
 1;

@@ -65,6 +65,27 @@ sub perform {
   return $self->done(1);
 }
 
+# TODO: In the future we can refactor this to be a specific override restricted configurable CIDR range(s) instead of the privbate ip address space.
+sub create_cf_vpcs {
+  info("Creating security groups for CF private networks VPC access.");
+
+  open my $sg_file, '>', "$tmp_dir/vpc-sg.json" or bail("Could not create security group file: $!");
+  # Create a Perl data structure for the security groups
+  my $security_groups = [
+    { "protocol" => "all", "destination" => "10.0.0.0-10.255.255.255" },
+    { "protocol" => "all", "destination" => "172.16.0.0-172.31.255.255" },
+    { "protocol" => "all", "destination" => "192.168.0.0-192.168.255.255" }
+  ];
+  # Use JSON::PP to encode the data structure with tab indentation
+  my $json = JSON::PP->new->indent(1)->tab(1)->pretty->encode($security_groups);
+  print $sg_file $json; # Write the JSON to the file
+  close $sg_file;
+
+  run('cf create-security-group vpc "$1" || true', "$tmp_dir/vpc-sg.json");
+  run('cf bind-staging-security-group vpc || true');
+  run('cf bind-running-security-group vpc || true');
+}
+
 1; # End of module
 
 =head1 NAME
