@@ -116,28 +116,24 @@ sub _get_stratos_info {
 	my $stratos_admin = $env->lookup('stratos.admin_user', 'admin');
 
 	# Get database connection information
-	my $stratos_db_scheme = '';
-	my $stratos_db_hostname = '';
-	my $stratos_db_username = '';
-	my $stratos_db_password = '';
-	my $stratos_db_port = '';
-	my $stratos_db_database = '';
-	my $stratos_db_sslmode = '';
+
+  # Default configuration
+  my $stratos_domain = "console.${apps_domain}";
+  my $stratos_url = "https://${stratos_domain}";
+  my $stratos_db_scheme = $env->params->{db_scheme} || 'postgres';
+  my $stratos_db_hostname = $env->params->{db_hostname} || '';
+  my $stratos_db_username = $env->params->{db_username} || 'stratos';
+  my $stratos_db_password = $env->params->{db_password} || 'stratos';
+  my $stratos_db_port = $env->params->{db_port} || 5432;
+  my $stratos_db_database = $env->params->{db_database} || 'stratos';
+  my $stratos_db_sslmode = $env->params->{db_sslmode} || 'disabled'; # verify-ca
 
 	# Check for OCFP requested feature
   if ($self->env->has_feature('ocfp')) {
-		# OCFP specific configuration
-		my $config_path = $env->lookup('meta.ocfp.vault.config', '');
-		my $secrets_mount = $env->lookup('genesis.secrets_mount', '');
-		my $vault_env = $env->lookup('genesis.vault_env', '');
-		my $env_path = "${secrets_mount}${vault_env}";
-
-		# Get Stratos domain from vault
+		# Get Stratos configuration from vault.
     # FIXME: Should we bail if not set?
-    $stratos_domain = $env->vault->get("${config_path}/fqdns:stratos") || '';
+    $stratos_domain = $env->vault->get($env->secrets_base . "fqdns:stratos") || '';
 		$stratos_url = "https://${stratos_domain}";
-
-		# Get database credentials from vault
     $stratos_db_scheme = $env->vault->get($env->secrets_base . "stratos/db/stratos:scheme") || 'postgres';
     $stratos_db_hostname = $env->vault->get($env->secrets_base . "stratos/db/stratos:hostname") || '';
     $stratos_db_username = $env->vault->get($env->secrets_base . "stratos/db/stratos:username") || 'stratos';
@@ -145,17 +141,6 @@ sub _get_stratos_info {
     $stratos_db_port = $env->vault->get($env->secrets_base . "stratos/db/stratos:port") || 5432;
     $stratos_db_database = $env->vault->get($env->secrets_base . "stratos/db/stratos:database")|| 'stratos';
     $stratos_db_sslmode = "disable"; # or "verify-ca"
-	} else {
-		# Default configuration
-		$stratos_domain = "console.${apps_domain}";
-		$stratos_url = "https://${stratos_domain}";
-    $stratos_db_scheme = $env->params->{db_scheme} || 'postgres';
-    $stratos_db_hostname = $env->params->{db_hostname} || '';
-    $stratos_db_username = $env->params->{db_username} || 'stratos';
-    $stratos_db_password = $env->params->{db_password} || 'stratos';
-    $stratos_db_port = $env->params->{db_port} || 5432;
-    $stratos_db_database = $env->params->{db_database} || 'stratos';
-    $stratos_db_sslmode = $env->params->{db_sslmode} || 'disabled'; # verify-ca
 	}
 
 	# Determine if Stratos is deployed as a CF app
@@ -168,13 +153,9 @@ sub _get_stratos_info {
     $cf_app_status = $out if $rc == 0;
     chomp($cf_app_status);
   }
-
-	# Get credentials from vault
   # FIXME: Should we bail or generate instead of "" if not set?
   my $admin_password = $env->vault->get($env->secrets_base . "stratos/admin_password") || "";
   my $session_secret = $env->vault->get($env->secrets_base . "stratos/session_secret") || "";
-
-	# Try to get client credentials from exodus
   my $data = $self->exodus_data;
   # FIXME: Should we bail if not set?
   my $stratos_client = $data->{stratos_client} || "";
@@ -246,6 +227,7 @@ sub display_info {
     return 1
 	}
   # Otherwise, display in a human-readable format
+  # TODO: Discuss if we want to simply dump as YAML?
   info(
     "\n" . "=" x terminal_width() .
     "\nStratos UI Deployment: %s" .
