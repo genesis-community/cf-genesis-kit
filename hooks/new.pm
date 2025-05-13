@@ -1,21 +1,14 @@
 #!/usr/bin/env perl
-# vim: set ts=2 sw=2 sts=2 foldmethod=marker expandtab:
+# vim: set ts=2 sw=2 sts=2 foldmethod=marker
 package Genesis::Hook::New v2.7.0;
 
 use strict;
 use warnings;
 use v5.20; # Genesis min perl version is 5.20
-
-# Only needed for development
-my $lib;
-BEGIN {$lib = $ENV{GENESIS_LIB} ? $ENV{GENESIS_LIB} : $ENV{HOME}.'/.genesis/lib'}
-use lib $lib;
-
-use parent qw(Genesis::Hook);
-
-# Import necessary Genesis functions
-use Genesis qw/bail info info warning run/;
+use Genesis qw/bail info warning run/;
 use Genesis::UI qw/prompt_for/;
+use parent qw(Genesis::Hook);
+use lib $ENV{GENESIS_LIB} // "$ENV{HOME}/.genesis/lib";
 use JSON::PP;
 
 sub init {

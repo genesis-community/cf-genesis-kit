@@ -1,20 +1,14 @@
 #!/usr/bin/env perl
-# vim: set ts=2 sw=2 sts=2 foldmethod=marker expandtab:
+# vim: set ts=2 sw=2 sts=2 foldmethod=marker
 package Genesis::Hook::Addon::CF::Login v2.7.0;
 
 use strict;
 use warnings;
 use v5.20; # Genesis min perl version is 5.20
-
-# Only needed for development
-my $lib;
-BEGIN {$lib = $ENV{GENESIS_LIB} ? $ENV{GENESIS_LIB} : $ENV{HOME}.'/.genesis/lib'}
-use lib $lib;
-
-use parent qw(Genesis::Hook::Addon);
-
 use Genesis qw/bail info run exodus_data/;
 use Genesis::UI qw/prompt_for_boolean/;
+use parent qw(Genesis::Hook::Addon);
+use lib $ENV{GENESIS_LIB} // "$ENV{HOME}/.genesis/lib";
 
 sub init {
   my $class = shift;

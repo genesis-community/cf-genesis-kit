@@ -1,10 +1,14 @@
 #!/usr/bin/env perl
-# vim: set ts=2 sw=2 sts=2 foldmethod=marker expandtab:
+# vim: set ts=2 sw=2 sts=2 foldmethod=marker
 package Genesis::Hook::CF::PostDeploy v2.7.0;
 
 use strict;
 use warnings;
 use v5.20; # Genesis min perl version is 5.20
+use Genesis qw/info/;
+use parent qw(Genesis::Hook);
+use lib $ENV{GENESIS_LIB} // "$ENV{HOME}/.genesis/lib";
+use JSON::PP;
 
 # Only needed for development
 my $lib;
@@ -13,7 +17,6 @@ use lib $lib;
 
 use parent qw(Genesis::Hook::PostDeploy);
 
-use Genesis qw/bail info/;
 
 # Initialize the hook
 sub init {

@@ -1,15 +1,15 @@
 #!/usr/bin/env perl
-# vim: set ts=2 sw=2 sts=2 foldmethod=marker expandtab:
+# vim: set ts=2 sw=2 sts=2 foldmethod=marker
 package Genesis::Hook::CF::Blueprint v2.7.0;
 
 use strict;
 use warnings;
 use v5.20; # Genesis min perl version is 5.20
-
-use parent qw(Genesis::Hook::Blueprint);
-
 use Genesis qw/info warning error bail new_enough want_feature lookup bosh_cpi/;
-use JSON::PP;
+use Genesis::Term qw/terminal_width/;
+use Genesis::UI qw/prompt_for_boolean/;
+use parent qw(Genesis::Hook);
+use lib $ENV{GENESIS_LIB} // "$ENV{HOME}/.genesis/lib";
 
 sub init {
   my $class = shift;
