@@ -12,92 +12,92 @@ use parent qw(Genesis::Hook::Addon);
 use Genesis qw/bail info warning run/;
 use Genesis::Term qw/terminal_width/;
 
-use File::Temp qw/tempdir/;
 use File::Path qw/mkpath rmtree/;
 use YAML::PP;
 use JSON::PP;
 
 sub init {
-    my $class = shift;
-    my $obj = $class->SUPER::init(@_);
-    $obj->check_minimum_genesis_version('3.0.0');
-    return $obj;
+  my $class = shift;
+  my $obj = $class->SUPER::init(@_);
+  $obj->check_minimum_genesis_version('3.1.0-rc.20');
+  return $obj;
 }
 
 sub cmd_details {
-    return
-        "Manage and display information about Stratos UI deployments. Supports the following commands:\n".
-        "[[  #y{info}          >>Display information about the Stratos deployment\n".
-        "[[  #y{deploy}        >>Deploy Stratos as a CF app\n\n".
-        "Options:\n".
-        "[[  #y{--json}         >>Output information in JSON format\n".
-        "[[  #y{--urls-only}    >>Only display URLs\n".
-        "[[  #y{--open}         >>Open the Stratos UI in your browser (if available)\n".
-        "[[  #y{--force}        >>Force redeployment even if already deployed\n".
-        "[[  #y{--skip-cf-check} >>Skip CF CLI availability check\n";
+  return
+  "Manage and display information about Stratos UI deployments. Supports the following commands:\n".
+  "[[  #y{info}          >>Display information about the Stratos deployment\n".
+  "[[  #y{deploy}        >>Deploy Stratos as a CF app\n".
+  "[[  #y{open}          >>Open the Stratos UI in your browser\n\n".
+  "Display Options:\n".
+  "[[  #y{--json}         >>Output information in JSON format\n".
+  "[[  #y{--urls-only}    >>Only display URLs\n".
+  "Deploy Options:\n".
+  "[[  #y{--force}        >>Force redeployment even if already deployed\n".
+  "[[  #y{--skip-cf-check} >>Skip CF CLI availability check\n";
 }
 
 sub perform {
-    my ($self) = @_;
-    my $env = $self->env;
+  my ($self) = @_;
+  my $env = $self->env;
 
-    # Parse options
-    my %options = $self->parse_options([
-            'json',
-            'urls-only',
-            'open',
-            'force',
-            'skip-cf-check',
-        ],
-    );
+  # Parse options
+  my %options = $self->parse_options([
+      'json',
+      'urls-only',
+      'force',
+      'skip-cf-check',
+    ],
+  );
 
-    # Get command (default to 'info')
-    my $command = $self->{args}->[0] || 'info';
+  # Get command (default to 'info')
+  my $command = $self->{args}->[0] || 'info';
 
-    # Check for valid command
-    if ($command ne 'info' && $command ne 'deploy') {
-        bail("Unknown command: $command. Valid commands are 'info' and 'deploy'");
-    }
+  # Check for valid command
+  if ($command !~ /^(info|deploy|open)$/) {
+    bail("Unknown command: $command. Valid commands are 'info', 'deploy', and 'open'");
+  }
 
-    # Determine the Stratos deployment info
-    my $info = $self->_get_stratos_info($env);
+  # Determine the Stratos deployment info
+  my $info = $self->_get_stratos_info($env);
 
-    # Handle commands
-    if ($command eq 'info') {
-        return $self->display_info($env, $info, %options);
-    }
-    elsif ($command eq 'deploy') {
-        $self->deploy_stratos($env, $info, %options);
-        # Display info after deployment
-        return $self->display_info($env, $info, %options);
-    }
+  # Handle commands
+  if ($command eq 'info') {
+    return $self->display_info($info, %options);
+  }
+  elsif ($command eq 'deploy') {
+    $self->deploy_stratos($env, $info, %options);
+    # Display info after deployment
+    return $self->display_info($info, %options);
+  }
+  elsif ($command eq 'open') {
+    return $self->open_in_browser($env, $info);
+  }
 
-    return 1;
+  return 1;
 }
 
 sub _get_stratos_info {
-    my ($self, $env) = @_;
+  my ($self, $env) = @_;
 
-    # Get BOSH target if possible
-    my $bosh;
-    my $deployment_exists = 0;
-    eval {
-        $bosh = $env->get_target_bosh({self => 0});
+  # Get BOSH target if possible
+  my $deployment_exists = 0;
+  eval {
+    # Get deployment name from environment or configuration
+    #TODO: Should we: my $exodus = $self->exodus_data()
+    my $deployment_name = $env->lookup('stratos.deployment_name', $self->env->name . "-stratos");
 
-        # Get deployment name from environment or configuration
-        my $deployment_name = $env->lookup('stratos.deployment_name', $env->name . "-stratos");
+    # Check if deployment exists
+    my @deployments = $self->bosh->deployments();
+    $deployment_exists = grep { $_ eq $deployment_name } @deployments;
+  };
 
-        # Check if deployment exists
-        my @deployments = $bosh->deployments();
-        $deployment_exists = grep { $_ eq $deployment_name } @deployments;
-    };
-
-    # Get Stratos information from environment
-    my $stratos_url = $env->lookup('stratos.url', '');
-    if (!$stratos_url) {
-        my $system_domain = $env->lookup('cf.system_domain', '');
-        $stratos_url = $system_domain ? "https://stratos.$system_domain" : '';
-    }
+  # Get Stratos information from environment
+  my $stratos_url = $env->lookup('stratos.url', '');
+  if (!$stratos_url) {
+    my $system_domain = $env->lookup('cf.system_domain', '');
+    $stratos_url = $system_domain ? "https://stratos.$system_domain" : '';
+  }
 
     # Get CF configuration
     my $cf_api = $env->lookup('cf.api_url', '');
@@ -145,7 +145,7 @@ sub _get_stratos_info {
 }
 
 sub display_info {
-    my ($self, $env, $info, %options) = @_;
+    my ($self, $info, %options) = @_;
 
     # Handle URLs-only mode
     if ($options{'urls-only'}) {
@@ -153,20 +153,6 @@ sub display_info {
             info($info->{url});
         } else {
             info("No Stratos URL configured");
-        }
-        return 1;
-    }
-
-    # Handle open mode
-    if ($options{open}) {
-        if ($info->{url}) {
-            my $cmd = $^O eq 'darwin' ? 'open' :
-                     ($^O eq 'MSWin32' ? 'start' : 'xdg-open');
-
-            info("Opening Stratos UI in browser: %s", $info->{url});
-            system("$cmd '$info->{url}' >/dev/null 2>&1 &");
-        } else {
-            bail("Cannot open Stratos UI: No URL configured");
         }
         return 1;
     }
@@ -212,7 +198,7 @@ sub display_info {
 
         # Show helpful commands
         info("\nHelpful Commands:");
-        info("  Open in browser: %s %s stratos --open",
+        info("  Open in browser: %s %s stratos open",
             $env->get_call_path(), $env->name);
         info("  Deploy Stratos: %s %s stratos deploy",
             $env->get_call_path(), $env->name);
@@ -255,7 +241,7 @@ sub deploy_stratos {
     }
 
     # Create a temporary directory for the deployment
-    my $tmp_dir = tempdir(CLEANUP => 1);
+    my $tmp_dir = $self->tempdir('stratos-deploy')
     eval {
         info("Preparing Stratos deployment...");
 
@@ -364,6 +350,22 @@ sub _generate_password {
     $password .= $chars[int(rand(scalar @chars))] for (1..$length);
 
     return $password;
+}
+
+sub open_in_browser {
+    my ($self, $env, $info) = @_;
+
+    if ($info->{url}) {
+        my $cmd = $^O eq 'darwin' ? 'open' :
+                 ($^O eq 'MSWin32' ? 'start' : 'xdg-open');
+
+        info("Opening Stratos UI in browser: %s", $info->{url});
+        system("$cmd '$info->{url}' >/dev/null 2>&1 &");
+    } else {
+        bail("Cannot open Stratos UI: No URL configured");
+    }
+
+    return 1;
 }
 
 1;

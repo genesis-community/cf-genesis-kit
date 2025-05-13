@@ -14,7 +14,7 @@ use lib $lib;
 use parent qw(Genesis::Hook);
 
 # Import necessary Genesis functions
-use Genesis qw/bail info trace new_enough info warning notice run bug pushd popd humanize_path/;
+use Genesis qw/bail info info warning run/;
 use Genesis::UI qw/prompt_for/;
 use JSON::PP;
 
