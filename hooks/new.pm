@@ -14,9 +14,8 @@ use lib $lib;
 use parent qw(Genesis::Hook);
 
 # Import necessary Genesis functions
-use Genesis qw/bail trace new_enough info warning notice run bug pushd popd humanize_path/;
-use Genesis::UI qw/describe prompt_for/;
-use Genesis::Term qw/in_controlling_terminal csprintf/;
+use Genesis qw/bail info trace new_enough info warning notice run bug pushd popd humanize_path/;
+use Genesis::UI qw/prompt_for/;
 use JSON::PP;
 
 sub init {
@@ -213,7 +212,7 @@ sub perform {
   my ($self) = @_;
   my $cfversion = $self->get_cf_version();
 
-  describe(
+  info(
     "",
     "#Gku{Cloud Foundry Genesis Kit $ENV{GENESIS_KIT_VERSION}}",
     "",
@@ -224,7 +223,7 @@ sub perform {
   # Get domain info
   my $ok = 'false';
   while ($ok ne 'true') {
-    describe(
+    info(
       "",
       "Your Cloud Foundry instance needs a base domain, from which all the",
       "other endpoint URLs and domains will be fashioned."
@@ -256,14 +255,14 @@ sub perform {
       $self->{apps_domain} = "run.$self->{base_domain}";
     }
 
-    describe(
+    info(
       "",
       "Using the base domain of #C{$self->{base_domain}},",
       "you will get the following domains and endpoints:",
       "",
       "    apps: https://#yi{<APP-NAME>}.#C{$self->{apps_domain}}",
       "  cf api: https://#M{api}.#C{$self->{system_domain}}",
-      "     uaa: https://#M{uaa}.#C{$self->{system_domain}}",
+     info"     uaa: https://#M{uaa}.#C{$self->{system_domain}}",
       "          https://#M{login}.#C{$self->{system_domain}}",
     );
 
@@ -271,7 +270,7 @@ sub perform {
   }
 
   # Feature selection
-  describe(
+  info(
     "",
     "This new environment can be configured as a bare cf-deployment deployment with",
     "just enough modifications to allow it to work with Genesis, or it can be",
@@ -312,7 +311,7 @@ sub perform {
     }
   } else {
     # IaaS selection
-    describe("", "#gu{Iaas Selection}");
+    info("", "#gu{Iaas Selection}");
     my $iaas = prompt_for(
       "select",
       'What IaaS are you deploying to?',
@@ -326,7 +325,7 @@ sub perform {
       $self->ask_for_loadbalancer("Azure Load Balancer");
       $self->ask_for_database();
 
-      describe("#gu{Blobstore}");
+      info("#gu{Blobstore}");
       my $use_azure_storage = prompt_for(
         "boolean",
         'Would you like to use Azure Storage to store droplets and application bits?'
@@ -497,7 +496,7 @@ sub perform {
     }
 
     # Extra features
-    describe("", "#gu{Extra Features}");
+    info("", "#gu{Extra Features}");
 
     my $compiled_releases = prompt_for(
       "boolean",
@@ -546,7 +545,7 @@ sub perform {
     push @{$self->{features}}, 'prometheus-integration' if $use_prometheus eq 'true';
   }
 
-  describe(
+  info(
     "",
     "Further cf-deployment operations can be added as features manually. Just",
     "specify them as #m{cf-deployment/operations/<subpath-to-ops-file-without-.yml>}",

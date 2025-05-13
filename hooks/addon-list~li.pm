@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 # vim: set ts=2 sw=2 sts=2 foldmethod=marker expandtab:
-package Genesis::Hook::Addon::CF::List v2.7.0;
+package Genesis::Hook::Addon::CF v2.7.0;
 
 use strict;
 use warnings;
@@ -14,12 +14,11 @@ use lib $lib;
 use parent qw(Genesis::Hook::Addon);
 
 use Genesis qw/bail info run/;
-use Genesis::UI qw/describe/;
 
 sub init {
   my $class = shift;
   my $obj = $class->SUPER::init(@_);
-  $obj->check_minimum_genesis_version('3.1.0');
+  $obj->check_minimum_genesis_version('3.1.0-rc.20');
   return $obj;
 }
 
@@ -35,6 +34,7 @@ sub perform {
     "  login             Log into the Cloud Foundry instance as the".
     "                    admin user account.  This will overwrite local".
     "                    cf CLI configuration!\n".
+    "  logout            Log out of the Cloud Foundry instance.\n".
     "  setup-cli         Installs cf CLI plugins like 'Targets', which".
     "                    helps to manage multiple Cloud Foundries from a".
     "                    single jumpbox.\n".
@@ -44,7 +44,7 @@ sub perform {
     "  scs               Deploy and register Spring Cloud Services broker to CF.\n"
   );
 
-  return 1;
+  return $self->done();
 }
 
 1;

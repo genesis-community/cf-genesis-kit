@@ -8,8 +8,7 @@ use v5.20; # Genesis min perl version is 5.20
 
 use parent qw(Genesis::Hook::Blueprint);
 
-use Genesis qw/bail bug trace new_enough semver run want_feature lookup lines count_nouns
-deep_merge compare_arrays is_valid_uri bosh_cpi in_callback/;
+use Genesis qw/info warning error bail new_enough want_feature lookup bosh_cpi/;
 use JSON::PP;
 
 sub init {
@@ -45,21 +44,21 @@ sub init {
 sub warn_message {
   my ($self, $message) = @_;
   $self->{warn} = 1;
-  Genesis::warning({stderr => 1}, "#Y{[WARNING]} %s", $message);
+  warning({stderr => 1}, "#Y{[WARNING]} %s", $message);
   return;
 }
 
 sub abort_message {
   my ($self, $message) = @_;
   $self->{abort} = 1;
-  Genesis::error({stderr => 1}, "#R{[ERROR]} %s", $message);
+  error({stderr => 1}, "#R{[ERROR]} %s", $message);
   return;
 }
 
 sub switch_cf_version {
   my ($self, $version) = @_;
 
-  Genesis::describe({stderr => 1}, "",
+  info({stderr => 1}, "",
     "- #y{Experimental Feature Enabled:} Custom cf-deployment version: $version");
 
   my $genesis_root = $self->env->path;
@@ -67,7 +66,7 @@ sub switch_cf_version {
   my $cfd_url = "https://github.com/cloudfoundry/cf-deployment/archive/v${version}.tar.gz";
 
   if (! -s $cfd_file) {
-    Genesis::describe({stderr => 1},
+    info({stderr => 1},
       "  #i{Fetching cf-deployment-${version} release from cloudfoundry/cf-deployment}",
       "  #i{on github.com}");
 
@@ -91,7 +90,7 @@ sub switch_cf_version {
       bail("Downloaded cf-deployment v${version} doesn't look like a valid release -- cannot continue");
     }
   } else {
-    Genesis::describe({stderr => 1}, "  #i{Using cached copy of cf-deployment-${version} release}");
+    info({stderr => 1}, "  #i{Using cached copy of cf-deployment-${version} release}");
   }
 
   # Extract the tar file

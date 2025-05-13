@@ -14,12 +14,11 @@ use lib $lib;
 use parent qw(Genesis::Hook::Addon);
 
 use Genesis qw/bail info run/;
-use Genesis::UI qw/describe/;
 
 sub init {
   my $class = shift;
   my $obj = $class->SUPER::init(@_);
-  $obj->check_minimum_genesis_version('3.1.0');
+  $obj->check_minimum_genesis_version('3.1.0-rc.20');
   return $obj;
 }
 
@@ -30,14 +29,14 @@ sub cmd_details {
 
 sub perform {
   my ($self) = @_;
-  
-  # This assumes $GENESIS_BOSH_COMMAND, $BOSH_ENVIRONMENT, and $BOSH_DEPLOYMENT
-  # are set in the environment
-  run({interactive => 1},
-    '$GENESIS_BOSH_COMMAND -e "$BOSH_ENVIRONMENT" -d "$BOSH_DEPLOYMENT" run-errand smoke_tests'
-  );
 
-  return 1;
+  $self->bosh->execute(
+    'run-errand',
+    'smoke_tests',
+    {interactive => 1}, # Run in interactive mode means seeing output as it happens
+  )
+
+  return $self->done();
 }
 
 1;

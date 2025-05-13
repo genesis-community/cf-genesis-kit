@@ -14,8 +14,7 @@ use lib $lib;
 use parent qw(Genesis::Hook::Addon);
 
 use Genesis qw/bail info count_nouns/;
-use Genesis::UI qw/prompt_for_boolean/;
-use Genesis::Term qw/csprintf terminal_width/;
+use Genesis::Term qw/terminal_width/;
 use JSON::PP;
 
 sub init {
@@ -157,7 +156,7 @@ sub perform {
     }
   }
 
-  return 1;
+  return $self->done();
 }
 
 1;
