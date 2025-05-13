@@ -1,6 +1,10 @@
+#!/usr/bin/env perl
+# vim: set ts=2 sw=2 sts=2 foldmethod=marker expandtab:
 package Genesis::Hook::Addon::Stratos v1.0.0;
+
 use strict;
 use warnings;
+use v5.20; # Genesis min perl version is 5.20
 
 # Only needed for development
 my $lib;
@@ -12,7 +16,6 @@ use parent qw(Genesis::Hook::Addon);
 use Genesis qw/bail info warning run/;
 use Genesis::Term qw/terminal_width/;
 
-use File::Path qw/mkpath rmtree/;
 use YAML::PP;
 use JSON::PP;
 
@@ -31,7 +34,7 @@ sub cmd_details {
   "[[  #y{open}          >>Open the Stratos UI in your browser\n\n".
   "Display Options:\n".
   "[[  #y{--json}         >>Output information in JSON format\n".
-  "[[  #y{--urls-only}    >>Only display URLs\n".
+  "[[  #y{--urls-only}    >>Only display URLs\n\n".
   "Deploy Options:\n".
   "[[  #y{--force}        >>Force redeployment even if already deployed\n".
   "[[  #y{--skip-cf-check} >>Skip CF CLI availability check\n";
@@ -342,10 +345,7 @@ sub _generate_password {
     my ($self, $length) = @_;
     $length ||= 16;
 
-    my @chars = ('a'..'z', 'A'..'Z', '0'..'9', '_', '-', '!', '@', '#', '
-
-1;
-, '%', '^', '&', '*');
+    my @chars = ('a'..'z', 'A'..'Z', '0'..'9', '_', '-', '!', '@', '#', '$', '%', '^', '&', '*');
     my $password = '';
     $password .= $chars[int(rand(scalar @chars))] for (1..$length);
 
