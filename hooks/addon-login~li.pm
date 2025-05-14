@@ -5,7 +5,15 @@ package Genesis::Hook::Addon::CF::Login v2.7.0;
 use strict;
 use warnings;
 use v5.20; # Genesis min perl version is 5.20
-use Genesis qw/bail info run exodus_data/;
+
+# Only needed for development
+my $lib;
+BEGIN {$lib = $ENV{GENESIS_LIB} ? $ENV{GENESIS_LIB} : $ENV{HOME}.'/.genesis/lib'}
+use lib $lib;
+
+use parent qw(Genesis::Hook::Addon);
+
+use Genesis qw/bail info run/;
 use Genesis::UI qw/prompt_for_boolean/;
 use parent qw(Genesis::Hook::Addon);
 use lib $ENV{GENESIS_LIB} // "$ENV{HOME}/.genesis/lib";
@@ -47,7 +55,7 @@ sub perform {
       "#Y{The cf-targets plugin does not seem to be installed}\n".
       "It is recommended you install it first, via #G{%s do setup-cli}'\n\n".
       "[[NOTE: >>It is not compatible with Apple M1 (arm) architecture",
-      $env->get_call_path_with_environment()
+      $env->get_call_path_with_env
     );
 
     # Skip confirmation if in non-interactive mode
@@ -60,11 +68,10 @@ sub perform {
   }
 
   # Get CF credentials from exodus data
-  my $exodus = exodus_data($env->path);
-  my $api_domain = $exodus->{api_domain};
+  my $exodus = $self->exodus_data();
+	my ($api_domain, $username, $password) =
+		$exodus->@{qw/api_domain admin_username admin_password/};
   my $api_url = "https://${api_domain}";
-  my $username = $exodus->{admin_username};
-  my $password = $exodus->{admin_password};
 
   # Handle SSL validation based on option
   if ($validate_ssl) {

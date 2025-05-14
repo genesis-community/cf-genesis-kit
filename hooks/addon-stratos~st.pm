@@ -289,12 +289,12 @@ sub display_info {
     );
   }
 
-  # Show helpful commands
-  info("\nHelpful Commands:");
-  info("  Open in browser: %s stratos open",
-    $self->env->get_call_path_with_environment());
-  info("  Deploy Stratos: %s stratos deploy",
-    $self->env->get_call_path_with_environment());
+		# Show helpful commands
+		info("\nHelpful Commands:");
+		info("  Open in browser: %s stratos open",
+			$self->env->get_call_path_with_env());
+		info("  Deploy Stratos: %s stratos deploy",
+			$self->env->get_call_path_with_env());
 
   if ($info->{is_cf_app_deployed}) {
     info("  View CF app logs: cf logs %s --recent", $info->{cf_app_name});
