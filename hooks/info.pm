@@ -5,7 +5,7 @@ package Genesis::Hook::CF::Info v2.7.0;
 use strict;
 use warnings;
 use v5.20; # Genesis min perl version is 5.20
-use Genesis qw/info/;
+use Genesis qw/info error/;
 use parent qw(Genesis::Hook);
 use lib $ENV{GENESIS_LIB} // "$ENV{HOME}/.genesis/lib";
 use JSON::PP;
@@ -53,24 +53,32 @@ sub perform {
     "Access to Cloud Foundry API:\n".
     "       url: #C{%s}\n".
     "  username: #M{%s}\n".
-    "  password: #G{%s}",
-    $upstream_version, $hotfixes, $upstream_url,
-    $api_url, $admin, $password
+    "  password: #G{%s}\n",
+    $upstream_version, $hotfixes, $upstream_url, $api_url, $admin, $password
   );
 
-  # Make API request using curl (similar to the bash script)
-  print "\n";
-  my ($curl_output, $curl_rc, $curl_err) = run(
-    'curl -m5 -Lsk "$1/v2/info" | jq -Cr . | sed -e \'s/^/  /\'',
-    $api_url
-  );
+  my $cf_curl_output = qx(cf curl /info 2>&1);
+  my $curl_rc = $? >> 8; # Get the exit code
 
-  if ($curl_rc == 0) {
-    print $curl_output;
+  bail(
+    "  Error executing 'cf curl /info': $cf_curl_output\n"
+  ) unless $curl_rc == 0;
+
+  # Parse and format JSON for better display
+  my $data = eval { JSON::PP::decode_json($cf_curl_output) };
+  if ($@) {
+    # JSON parsing error
+    error "  Error parsing output: $@\n";
+    error "  Raw output: $cf_curl_output\n";
+  } else {
+    # Pretty-print the JSON with 2-space indentation
+    my $formatted = JSON::PP->new->pretty->canonical->encode($data);
+    # Add two spaces prefix to each line
+    my $curl_output = join("\n", map { "  $_" } split(/\n/, $formatted));
+    info $curl_output;
   }
 
-  $self->done(1);
-  return 1;
+  return $self->done(1);
 }
 
 sub results {
