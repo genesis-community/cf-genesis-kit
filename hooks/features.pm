@@ -5,9 +5,10 @@ package Genesis::Hook::CF::Features v2.7.0;
 use strict;
 use warnings;
 use v5.20; # Genesis min perl version is 5.20
-use Genesis qw/new_enough/;
-use parent qw(Genesis::Hook);
-use lib $ENV{GENESIS_LIB} // "$ENV{HOME}/.genesis/lib";
+
+# Only needed for development
+BEGIN {push @INC, $ENV{GENESIS_LIB} ? $ENV{GENESIS_LIB} : $ENV{HOME}.'/.genesis/lib'}
+use parent qw(Genesis::Hook::Features);
 
 sub init {
   my $class = shift;
@@ -34,18 +35,15 @@ sub perform {
 
   # Check for database overrides
   my $params = $self->env->lookup('params', {});
-  my $has_db_overrides = 0;
 
   if ($params && ref($params) eq 'HASH') {
     foreach my $key (keys %$params) {
       if ($key =~ /^(cc|uaa|diego|policyserver|silk|locket|routingapi|credhub)db_(name|user)$/) {
-        $has_db_overrides = 1;
+				$self->add_feature('+override-db-names');
         last;
       }
     }
   }
-
-  $self->add_feature('+override-db-names') if $has_db_overrides;
 
   # Check if migrated from v1
   my $migrated_v1_env = $self->env->exodus_lookup('migrated_v1_env', '');
@@ -65,10 +63,7 @@ sub perform {
       $self->add_feature('v1-vm-types');
     }
   }
-
-  # Build the features list and return it
-  my @results = $self->build_features_list();
-  return \@results;
+	return $self->done();
 }
 
 1;
