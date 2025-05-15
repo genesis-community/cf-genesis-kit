@@ -14,13 +14,14 @@ use Genesis qw/info warning error bail new_enough/;
 use JSON::PP;
 use File::Path qw(remove_tree make_path);
 use File::Copy qw(copy);
-use LWP::Simple;
+use IO::Socket::INET;
+use Socket qw(AF_INET SOCK_STREAM pack_sockaddr_in inet_aton);
 use Archive::Tar;
-
 
 sub init {
 	my $class = shift;
 	my $obj = $class->SUPER::init(@_);
+  $obj->check_minimum_genesis_version('3.1.0-rc.20');
 
 	# Initialize all state variables needed by the hook
 	# $obj->{files} is initialized by parent. We'll use add_files directly.
@@ -32,20 +33,13 @@ sub init {
 	$obj->{abort_flag} = 0;
 	$obj->{warn_flag} = 0;
 	$obj->{db_specified_flag} = 0;
-	$obj->{parsed_params} = $obj->env->lookup_hash("params", {}); # Parse params once
-
-	# Set up IaaS related variables
-	$obj->{cpi_name} = bosh_cpi() || "";
-	$obj->{iaas_name} = $obj->{cpi_name};
+	$obj->{parsed_params} = $obj->env->{params};
+	$obj->{iaas_name} = $obj->env->iaas; # aws, gcp, azure, vsphere, openstack, stackit
 	$obj->{iaas_name} = "gcp" if $obj->{iaas_name} eq "google";
-
-	# Set up operations directory path
 	$obj->{custom_ops_dir} = "ops";
 	if ($ENV{PREVIOUS_ENV}) {
 		$obj->{custom_ops_dir} = ".genesis/cached/$ENV{PREVIOUS_ENV}/ops";
 	}
-
-  $obj->check_minimum_genesis_version('3.1.0-rc.20');
 
 	return $obj;
 }
@@ -77,9 +71,36 @@ sub _switch_cf_version {
 			"  #i{on github.com}");
 
     make_path("$genesis_root/.genesis/kits/addons/");
-    my $response = getstore($cfd_url, $cfd_file);
-    bail("Failed to download cf-deployment v${version} -- cannot continue") unless $response == 200;
-		system($curl_cmd);
+
+    # Download the file using only core Perl modules
+    my $response_code = 0;
+    eval {
+      # Parse the URL - GitHub URLs are HTTPS
+      $cfd_url =~ m{^https://([^/:]+)(?::(\d+))?(.*)$} or die "Invalid URL format";
+      my $host = $1;
+      my $port = $2 || 443; # Default HTTPS port
+      my $path = $3;
+
+      # Create a temporary file for the download content
+      my $tmp_file = "$cfd_file.tmp";
+
+      # Use the system curl command which should be available on most systems
+      my $exit_code = system("curl -s -o '$tmp_file' -L '$cfd_url'");
+      if ($exit_code == 0 && -s $tmp_file) {
+        # If successful, move the temp file to the final location
+        rename($tmp_file, $cfd_file) or die "Cannot rename file: $!";
+        $response_code = 200; # Indicate success
+      } else {
+        die "Failed to download file using curl";
+      }
+    };
+
+    if ($@) {
+      warning("Error downloading file: $@");
+      $response_code = 500;
+    }
+
+    bail("Failed to download cf-deployment v${version} -- cannot continue") unless $response_code == 200;
 
     bail("Failed to download cf-deployment v${version} -- cannot continue") unless -s $cfd_file;
 
@@ -94,14 +115,14 @@ sub _switch_cf_version {
 	}
 
   # Remove the existing cf-deployment directory
-  remove_tree("./cf-deployment", {error => \my $err});
-  bail("Failed to remove ./cf-deployment: " . join(", ", map { $_->{message} } @$err))
-    if @$err;
+  remove_tree("./cf-deployment", {error => \my $remove_err});
+  bail("Failed to remove ./cf-deployment: " . join(", ", map { $_->{message} } @$remove_err))
+    if @$remove_err;
 
   # Create a new cf-deployment directory
-  make_path("./cf-deployment", {error => \my $err});
-  bail("Failed to create ./cf-deployment: " . join(", ", map { $_->{message} } @$err))
-    if @$err;
+  make_path("./cf-deployment", {error => \my $create_err});
+  bail("Failed to create ./cf-deployment: " . join(", ", map { $_->{message} } @$create_err))
+    if @$create_err;
 
   # Extract the tar.gz file into the cf-deployment directory
   my $tar = Archive::Tar->new;
@@ -126,7 +147,7 @@ sub _dynamic_isolation_template_render {
   open my $dst_fh, '>', $dst or bail("Cannot open destination file $dst: $!");
 
   while (my $line = <$src_fh>) {
-    $line =~ s/{{segment-name}}/$name/g;
+    $line =~ s/\{\{segment-name\}\}/$name/g;
     print $dst_fh $line;
   }
 
@@ -381,6 +402,8 @@ sub _perform_feature_pre_validation {
 			warning("The #c{$want} feature has been deprecated, in favor of BOSH add-ons");
 		} elsif ($want =~ /^(omit-haproxy|local-blobstore|blobstore-webdav|container-routing-integrity|routing-api|loggregator-forwarder-agent)$/) {
 			warning("The #c{$want} feature is now the default behaviour and doesn't need\n\tto be specified in the environment file");
+    } elsif ($want =~ /^internal-blobstore$/) {
+      push @curated_features, "internal-blobstore";
 		} elsif ($want =~ /^blobstore-(aws|azure|gcp)$/) {
 			my $iaas = $1;
 			warning("The #c{$want} feature has been renamed to #c{$iaas-blobstore}");
@@ -389,7 +412,7 @@ sub _perform_feature_pre_validation {
 			my $db_type = $1;
 			warning("The #c{$want} flag has been renamed to #c{$db_type-db}");
 			push @curated_features, "$db_type-db";
-		} elsif ($want =~ /^(db-internal-postgres|local-db)$/) {
+		} elsif ($want =~ /^(internal-db|db-internal-postgres|local-db)$/) {
 			warning("The #c{$want} flag has been renamed to #c{local-postgres-db}");
 			push @curated_features, "local-postgres-db";
 			$self->{db_specified_flag} = 1;
@@ -498,6 +521,8 @@ sub _perform_feature_pre_validation {
 			$blobstore_feature_for_ocfp = "${iaas}-blobstore";
 		} elsif ($iaas eq "vsphere") {
 			$blobstore_feature_for_ocfp = "minio-blobstore";
+		} elsif ($iaas eq "openstack") {
+			$blobstore_feature_for_ocfp = "internal-blobstore";
 		} else {
 			bail("Blobstores are not supported on #c{${iaas}} yet for OCFP.");
 		}
@@ -606,7 +631,7 @@ sub perform {
 
 		# AZ handling (formerly features_setup part 3)
 		# Note: small-footprint feature also adds scale-to-one-az.yml later
-		if ($self->{cpi_name} eq 'azure' || $self->want_feature("small-footprint") ||
+		if ($self->{iaas_name} eq 'azure' || $self->want_feature("small-footprint") ||
 			$self->want_feature("cf-deployment/operations/scale-to-one-az")) {
 			# Ensure scale-to-one-az from cf-deployment is added if small-footprint is active
 			# The actual small-footprint feature handling will add its specific ops files.
@@ -659,7 +684,7 @@ sub perform {
 			} else {
 				$self->add_files("overlay/blobstore/external.yml", "cf-deployment/operations/use-external-blobstore.yml", "cf-deployment/operations/use-gcs-blobstore-service-account.yml");
 			}
-		}
+    }
 		# Databases
 		elsif ($feature =~ /^(mysql-db|postgres-db)$/) {
 			push @{$self->{database_selections}}, $feature;
@@ -670,7 +695,7 @@ sub perform {
 				"overlay/db/external.yml",
 				"overlay/db/external-${db_type}.yml"
 			);
-		} elsif ($feature eq "local-postgres-db") {
+		} elsif ($feature =~ /^(internal-db|local-postgres-db)$/) {
 			push @{$self->{database_selections}}, $feature;
 			$self->add_files("cf-deployment/operations/use-postgres.yml");
 			if ($self->want_feature('+override-db-names')) {
@@ -810,19 +835,37 @@ sub perform {
 		$self->add_files( # These are common additions for OCFP
 			"overlay/addons/autoscaler.yml", "overlay/addons/app-scheduler.yml",
 			"overlay/addons/scs.yml", "overlay/addons/prometheus.yml",
-			"overlay/blobstore/meta.yml" # For OCFP controlled blobstore
 		);
+
+    # TODO: Do we need to adjust this for internal (builtin) blobstore?
+    #unless ($self->want_feature("internal-blobstore")) {
+    $self->add_files("overlay/blobstore/meta.yml"); # For OCFP controlled blobstore
+    #}
+
+    $self->add_files( "ocfp/meta.yml", "ocfp/ocfp.yml", "ocfp/trusted-certs.yml" );
+
+    unless ($self->want_feature("local-postgres-db|internal-db")) {
+      if ($self->{iaas_name} =~ /^(aws|azure|gcp)$/) {
+        $self->add_files( "ocfp/external-db-prep.yml", "ocfp/external-db.yml" );
+      #} elsif ($self->{iaas_name} =~ /^(openstack|stackit)$/) {
+      }
+    }
+
+    unless ($self->want_feature("internal-blobstore")) {
+      if ($self->{iaas_name} =~ /^(aws|azure|gcp)$/) {
+        $self->add_files( "ocfp/external-blobstore.yml" );
+      } elsif ($self->{iaas_name} =~ /^(openstack|stackit)$/) {
+        $self->add_files("ocfp/external-blobstore.yml");
+      }
+    }
+
 		$self->add_files(
-			"ocfp/meta.yml", "ocfp/ocfp.yml", "ocfp/external-db-prep.yml",
-			"ocfp/external-db.yml", "ocfp/external-blobstore.yml", "ocfp/trusted-certs.yml"
-		);
-		my $ocfp_iaas_path_part = $self->{iaas_name}; # e.g. aws, gcp, azure, vsphere
-		$self->add_files(
-			"ocfp/$ocfp_iaas_path_part/ocf.yml", "ocfp/$ocfp_iaas_path_part/azs.yml",
-			"ocfp/$ocfp_iaas_path_part/blobstore.yml"
+			"ocfp/$self->{iaas_name}/ocf.yml",
+      "ocfp/$self->{iaas_name}/azs.yml",
+			"ocfp/$self->{iaas_name}/blobstore.yml"
 		);
 		if ($self->want_feature("windows-diego-cells")) {
-			$self->add_files("ocfp/$ocfp_iaas_path_part/windows.yml", "ocfp/trusted-certs-windows.yml");
+			$self->add_files("ocfp/$self->{iaas_name}/windows.yml", "ocfp/trusted-certs-windows.yml");
 		}
 		$self->add_files("ocfp/scale/${env_scale}.yml");
 
@@ -870,12 +913,12 @@ sub perform {
 		}
 
 		# IaaS peculiarities
-		if ($self->{cpi_name} eq 'azure') {
+		if ($self->{iaas_name} eq 'azure') {
 			if (($has_availability_zones || $randomize_az_placement eq 'true')) { # Stricter check for azure
 				bail("#M{params.availability_zones} and #M{params.randomize_az_placement} are\n\tnot compatible with deployments to Azure infrastructure.");
 			}
 			$self->add_files("cf-deployment/operations/azure.yml", "overlay/azure_availability_sets.yml");
-		} elsif ($self->{cpi_name} eq 'warden') {
+		} elsif ($self->{iaas_name} eq 'warden') {
 			$self->add_files("cf-deployment/operations/bosh-lite.yml");
 		}
 

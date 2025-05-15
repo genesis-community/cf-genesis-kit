@@ -52,34 +52,35 @@ sub perform {
   }
 
   # Extract networks, VM types, VM extensions, and disks
-  my @networks = $self->extract_networks($manifest_json);
-  my @vm_types = $self->extract_vm_types($manifest_json);
-  my @vm_extensions = $self->extract_vm_extensions($manifest_json);
-  my @disks = $self->extract_disks($manifest_json);
+  #  my @networks = $self->extract_networks($manifest_json);
+  #  my @vm_types = $self->extract_vm_types($manifest_json);
+  #  my @vm_extensions = $self->extract_vm_extensions($manifest_json);
+  #  my @disks = $self->extract_disks($manifest_json);
+  #
+  #  $self->env->notify("  Checking cloud config resources for manifest requirements...");
 
-  $self->env->notify("  Checking cloud config resources for manifest requirements...");
-
+  # Genesis 3.1 now provides cloud config differently.
   # Check if cloud config has all the required elements
-  for my $t (@networks) {
-    $self->cloud_config_needs('network', $t);
-  }
+  # for my $t (@networks) {
+  #   $self->cloud_config_needs('network', $t);
+  # }
 
-  for my $t (@vm_types) {
-    $self->cloud_config_needs('vm_type', $t);
-  }
+  # for my $t (@vm_types) {
+  #   $self->cloud_config_needs('vm_type', $t);
+  # }
 
-  for my $t (@vm_extensions) {
-    $self->cloud_config_needs('vm_extension', $t);
-  }
+  # for my $t (@vm_extensions) {
+  #   $self->cloud_config_needs('vm_extension', $t);
+  # }
 
-  for my $t (@disks) {
-    $self->cloud_config_needs('disk_type', $t);
-  }
+  # for my $t (@disks) {
+  #   $self->cloud_config_needs('disk_type', $t);
+  # }
 
   # Additional cloud config validation
-  if (!$self->check_cloud_config()) {
-    $self->{cc_ok} = 'no';
-  }
+  #if (!$self->check_cloud_config()) {
+  #  $self->{cc_ok} = 'no';
+  #}
 
   # Check if there were any errors
   if ($self->{cc_ok} eq 'yes') {
