@@ -403,7 +403,7 @@ sub _perform_feature_pre_validation {
 		} elsif ($want =~ /^(omit-haproxy|local-blobstore|blobstore-webdav|container-routing-integrity|routing-api|loggregator-forwarder-agent)$/) {
 			warning("The #c{$want} feature is now the default behaviour and doesn't need\n\tto be specified in the environment file");
     } elsif ($want =~ /^internal-blobstore$/) {
-      push @curated_features, "internal-blobstore";
+      push @curated_features, "+internal-blobstore" unless $self->want_feature_in_list("+internal-blobstore", \@curated_features);
 		} elsif ($want =~ /^blobstore-(aws|azure|gcp)$/) {
 			my $iaas = $1;
 			warning("The #c{$want} feature has been renamed to #c{$iaas-blobstore}");
@@ -413,6 +413,7 @@ sub _perform_feature_pre_validation {
 			warning("The #c{$want} flag has been renamed to #c{$db_type-db}");
 			push @curated_features, "$db_type-db";
 		} elsif ($want =~ /^(internal-db|db-internal-postgres|local-db)$/) {
+      push @curated_features, "+internal-db" unless $self->want_feature_in_list("+internal-db", \@curated_features);
 			warning("The #c{$want} flag has been renamed to #c{local-postgres-db}");
 			push @curated_features, "local-postgres-db";
 			$self->{db_specified_flag} = 1;
@@ -843,6 +844,8 @@ sub perform {
     #}
 
     $self->add_files( "ocfp/meta.yml", "ocfp/ocfp.yml", "ocfp/trusted-certs.yml" );
+    $self->add_files( "ocfp/trusted-certs-cflinuxfs3.yml" ) if $($self->want_feature('cflinuxfs3'));
+    $self->add_files( "ocfp/trusted-certs-cflinuxfs4.yml" ) if $($self->want_feature('cflinuxfs4'));
 
     unless ($self->want_feature("local-postgres-db|internal-db")) {
       if ($self->{iaas_name} =~ /^(aws|azure|gcp)$/) {

@@ -31,10 +31,11 @@ sub init {
 sub perform {
   my ($self) = @_;
 
-  $self->create_cf_vpcs();
-
   # Base class has deploy_successful method to check if GENESIS_DEPLOY_RC == 0
   if ($self->deploy_successful) {
+
+    $self->create_cf_vpcs();
+
     # Display messages to the user about available commands
     # This emulates the 'describe' function in the bash script
     info(
@@ -71,6 +72,7 @@ sub perform {
 sub create_cf_vpcs {
   info("Creating security groups for CF private networks VPC access.");
 
+  my $tmp_dir = $ENV{GENESIS_TMP_DIR} // '/tmp';
   open my $sg_file, '>', "$tmp_dir/vpc-sg.json" or bail("Could not create security group file: $!");
   # Create a Perl data structure for the security groups
   my $security_groups = [
@@ -79,13 +81,13 @@ sub create_cf_vpcs {
     { "protocol" => "all", "destination" => "192.168.0.0-192.168.255.255" }
   ];
   # Use JSON::PP to encode the data structure with tab indentation
-  my $json = JSON::PP->new->indent(1)->tab(1)->pretty->encode($security_groups);
+  my $json = JSON::PP->new->indent(-1)->pretty->encode($security_groups);
   print $sg_file $json; # Write the JSON to the file
   close $sg_file;
 
-  run('cf create-security-group vpc "$1" || true', "$tmp_dir/vpc-sg.json");
-  run('cf bind-staging-security-group vpc || true');
-  run('cf bind-running-security-group vpc || true');
+  system("cf create-security-group vpc \"$tmp_dir/vpc-sg.json\" || true");
+  system("cf bind-staging-security-group vpc || true");
+  system("cf bind-running-security-group vpc || true");
 }
 
 1; # End of module

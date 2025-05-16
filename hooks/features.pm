@@ -20,6 +20,8 @@ sub init {
 sub perform {
   my ($self) = @_;
 
+  $self->add_feature("cflinuxfs4"); # Default runtime.
+
   # Process requested features
   foreach my $feature (@{$self->{features}}) {
     if ($feature eq 'cf-deployment/operations/enable-nfs-volume-services') {
