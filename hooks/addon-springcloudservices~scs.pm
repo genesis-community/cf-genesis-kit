@@ -128,12 +128,12 @@ sub perform {
   }
 
   # Get data from exodus
-  my $exodus_path = $env->lookup("genesis.exodus_base");
-  my $system_api_domain = $env->exodus_lookup("api_domain");
-  my $system_domain = $env->exodus_lookup("system_domain");
-  my $cf_admin_username = $env->exodus_lookup("admin_username");
-  my $cf_admin_password = $env->exodus_lookup("admin_password");
-  my $apps_domain = $env->exodus_lookup("apps_domain");
+  my $exodus_path = $self->env->exodus_base();
+  my $system_api_domain = $self->env->exodus_lookup("api_domain");
+  my $system_domain = $self->env->exodus_lookup("system_domain");
+  my $cf_admin_username = $self->env->exodus_lookup("admin_username");
+  my $cf_admin_password = $self->env->exodus_lookup("admin_password");
+  my $apps_domain = $self->env->exodus_lookup("apps_domain");
 
   # Get SCS client data from vault
   my $scs_client = $self->vault->get("$exodus_path:scs_client");
