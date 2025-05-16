@@ -47,10 +47,10 @@ sub perform {
 	)};
 
 	delete($vm_matrix->{database})
-	  unless $self->wants_feature('+internal-db');
+	  unless $self->wants_feature('+internal-db') or $self->wants_feature('internal-db');
 
 	delete($vm_matrix->{blobstore})
-	  unless $self->wants_feature('+internal-blobstore');
+	  unless $self->wants_feature('+internal-blobstore') or $self->wants_feature('internal-blobstore');
 
   my @networks = ();
   my $network_cloud_properties = {

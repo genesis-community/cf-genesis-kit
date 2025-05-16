@@ -5,7 +5,7 @@ package Genesis::Hook::CF::Check v2.7.0;
 use strict;
 use warnings;
 use v5.20; # Genesis min perl version is 5.20
-use Genesis qw/info bail new_enough/;
+use Genesis qw/info error bail new_enough/;
 use parent qw(Genesis::Hook);
 use lib $ENV{GENESIS_LIB} // "$ENV{HOME}/.genesis/lib";
 
@@ -93,7 +93,7 @@ sub check_runtime_config {
 
 	my @errors = ();
 	if (@more_bosh_dns_jobs) {
-		push @errors, 
+		push @errors,
 			"There are multiple BOSH DNS jobs in the runtime-config, which is not ".
 			"allowed.  Please remove all but one of them.";
 		$runtime_ok = 'no';
@@ -108,44 +108,42 @@ sub check_runtime_config {
 	if ($runtime_ok eq 'yes') {
 		info("  runtime config [#G{OK}]");
 	} else {
+		info("  runtime config [#R{FAILED}]");
 		error(
 			"\n  Errors were found in the runtime config(s):%s\n\n",
-			join("\n[[    - >>", ''.@errors)
+			join("\n[[    - >>", @errors)
 		);
-		info("  runtime config [#R{FAILED}]");
 	}
-
-	$self->{checks}{runtime_config} = $runtime_ok;
+  $self->{checks}{runtime_config} = $runtime_ok;
 }
 
+# TODO: How to handle not yet deployed?
 sub check_environment {
 	my ($self) = @_;
 	my $env_ok = 'yes';
+  my $exodus_base = $self->env->exodus_base();
+  my $kit_id = $ENV{GENESIS_KIT_ID};
+  my ($version) = $kit_id =~ m{ / (\d+\.\d+\.\d+) }x;
+  if ($version) {
+    if (!new_enough($version, "2.0.0-rc0")) {
+      info("\n  #C{[Checking Upgrade from %s]}", $version);
 
-	# Check kit version for upgrades
-	my $version = '';
-	eval { $version = $self->env->exodus_lookup('kit_version'); };
+      if (!new_enough($version, "1.10.1")) {
+        info("    #R{[ERROR]} Please upgrade to at least cf kit 1.10.1 before upgrading to v2.x.x");
+        $env_ok = 'no';
+      } else {
+        # TODO: Check if safe secrets are present to be imported by migration hook
+      }
+    }
+  }
 
-	if ($version) {
-		if (!new_enough($version, "2.0.0-rc0")) {
-			info("\n  #C{[Checking Upgrade from %s]}", $version);
-
-			if (!new_enough($version, "1.10.1")) {
-				info("    #R{[ERROR]} Please upgrade to at least cf kit 1.10.1 before upgrading to v2.x.x");
-				$env_ok = 'no';
-			} else {
-				# TODO: Check if safe secrets are present to be imported by migration hook
-			}
-		}
-	}
-
-	# Check for retired parameters
-	my @retired_params_found = ();
-	foreach my $param (@{$self->{retired_params}}) {
-		if ($self->env->defines("params.$param")) {
-			push @retired_params_found, "  - #R{params.$param}";
-			unless ($ENV{GENESIS_IGNORE_RETIRED_PARAMS} =~ /^(y|yes|1|true)$/i) {
-				$env_ok = 'no';
+  # Check for retired parameters
+  my @retired_params_found = ();
+  foreach my $param (@{$self->{retired_params}}) {
+    if ($self->env->defines("params.$param")) {
+      push @retired_params_found, "  - #R{params.$param}";
+      unless ($ENV{GENESIS_IGNORE_RETIRED_PARAMS} =~ /^(y|yes|1|true)$/i) {
+        $env_ok = 'no';
 			}
 		}
 	}

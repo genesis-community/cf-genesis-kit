@@ -435,6 +435,8 @@ sub _perform_feature_pre_validation {
 			bail("The #c{cflinuxfs2} feature is no longer able to be supported.");
 		} elsif ($want eq "cflinuxfs3") {
 			push @curated_features, $want;
+		} elsif ($want eq "cflinuxfs4") {
+			push @curated_features, $want;
 		} elsif ($want eq "no-nats-tls") {
 			bail("The #c{no-nats-tls} feature is no longer able to be supported.");
 		} elsif ($want eq "local-ha-db") {
@@ -844,8 +846,8 @@ sub perform {
     #}
 
     $self->add_files( "ocfp/meta.yml", "ocfp/ocfp.yml", "ocfp/trusted-certs.yml" );
-    $self->add_files( "ocfp/trusted-certs-cflinuxfs3.yml" ) if $($self->want_feature('cflinuxfs3'));
-    $self->add_files( "ocfp/trusted-certs-cflinuxfs4.yml" ) if $($self->want_feature('cflinuxfs4'));
+    $self->add_files( "ocfp/trusted-certs-cflinuxfs3.yml" ) if ($self->want_feature('cflinuxfs3'));
+    $self->add_files( "ocfp/trusted-certs-cflinuxfs4.yml" ) if ($self->want_feature('cflinuxfs4'));
 
     unless ($self->want_feature("local-postgres-db|internal-db")) {
       if ($self->{iaas_name} =~ /^(aws|azure|gcp)$/) {
