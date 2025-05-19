@@ -58,6 +58,10 @@ sub perform {
       'net_id' => $self->network_reference('id'), # TODO: $self->subnet_reference('net_id'),
       'security_groups' => ['default'] #$self->subnet_reference('sgs', 'get_security_groups'),
     },
+    stackit => {
+      'net_id' => $self->subnet_reference('id'),
+      'security_groups' => ['default']
+    },
   };
 
   if ($self->want_feature('split-network')) {
@@ -118,6 +122,15 @@ sub perform {
 					'boot_from_volume' => $self->TRUE,
 					'root_disk' => {size => $vm_matrix->{$_}{disk_size}+0}, # Force conversion to integer
 				},
+				stackit => {
+					'instance_type' => $self->for_scale({
+							dev  => $vm_matrix->{$_}{type_dev},
+							prod => $vm_matrix->{$_}{type_prod}
+						}),
+					'ephemeral_disk' => {encrypted => $self->TRUE},
+					'boot_from_volume' => $self->TRUE,
+					'root_disk' => {size => $vm_matrix->{$_}{disk_size}+0}, 
+				},
 			}),
 			} (sort keys %$vm_matrix)),
 		],
@@ -135,6 +148,9 @@ sub perform {
 					openstack => {
 						'type' => 'storage_premium_perf6',
 					},
+					stackit => {
+						'type' => 'storage_premium_perf6',
+					},
 				},
 			),
 			$self->disk_type_definition('blobstore',
@@ -146,6 +162,9 @@ sub perform {
 				},
 				cloud_properties_for_iaas => {
 					openstack => {
+						'type' => 'storage_premium_perf6',
+					},
+					stackit => {
 						'type' => 'storage_premium_perf6',
 					},
 				},

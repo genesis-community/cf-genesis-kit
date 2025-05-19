@@ -311,6 +311,7 @@ sub perform {
       -o => '[aws]       Amazon Web Services',
       -o => '[azure]     Microsoft Azure',
       -o => '[google]    Google Cloud Platform',
+      -o => '[stackit]   STACKIT Cloud Platform',
       -o => '[other]     Other (OpenStack, vSphere, etc.)'
     );
 
@@ -472,6 +473,12 @@ sub perform {
           "blobstore_secret_access_key"
         );
       }
+    } elsif ($iaas eq 'stackit') {
+      $self->ask_for_loadbalancer("Stackit Load Balancer");
+      $self->ask_for_database();
+
+      # Use internal blobstore by default for Stackit
+      push @{$self->{features}}, 'internal-blobstore';
 
       # Generate bucket prefix from environment name
       # Following exact transformation from the bash script:
