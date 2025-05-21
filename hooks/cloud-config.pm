@@ -62,6 +62,9 @@ sub perform {
       'net_id' => $self->subnet_reference('id'),
       'security_groups' => ['default']
     },
+    aws => {
+      'subnet' => $self->subnet_reference('id')
+    },
   };
 
   if ($self->want_feature('split-network')) {
@@ -129,15 +132,54 @@ sub perform {
 						}),
 					'ephemeral_disk' => {encrypted => $self->TRUE},
 					'boot_from_volume' => $self->TRUE,
-					'root_disk' => {size => $vm_matrix->{$_}{disk_size}+0}, 
+					'root_disk' => {size => $vm_matrix->{$_}{disk_size}+0},
+				},
+				aws => {
+					'instance_type' => $self->for_scale({
+							dev  => $_ =~ /diego-cell/ ? 't3.large' : 't3.medium',
+							prod => $_ =~ /diego-cell/ ? 'r6i.4xlarge' : ($_ =~ /api|router/ ? 'm6i.xlarge' : 'm6i.large')
+						}),
+					'ephemeral_disk' => {
+						encrypted => $self->TRUE,
+						size => $self->for_scale({
+							dev => $_ =~ /diego-cell/ ? 65536 : 4096,
+							prod => $_ =~ /diego-cell/ ? 393216 : ($_ =~ /api|router/ ? 16384 : 8192),
+						}),
+						type => 'gp3'
+					},
+					'metadata_options' => {
+						'http_tokens' => 'required'
+					}, 
 				},
 			}),
 			} (sort keys %$vm_matrix)),
 		],
 		'vm_extensions' => [
-			$self->vm_extension_definition('diego-ssh-proxy-network-properties', common => {}),
-			$self->vm_extension_definition('cf-router-network-properties', common => {}),
-			$self->vm_extension_definition('cf-tcp-router-network-properties', common => {}),
+			$self->vm_extension_definition('diego-ssh-proxy-network-properties', 
+				common => {},
+				cloud_properties_for_iaas => {
+					aws => {
+						'lb_target_groups' => ['ocfp-ocf-cf-ssh-lb-tg'],
+					},
+				},
+			),
+			$self->vm_extension_definition('cf-router-network-properties', 
+				common => {},
+				cloud_properties_for_iaas => {
+					aws => {
+						'lb_target_groups' => ['ocfp-ocf-cf-system-apps-lb-tg'],
+					},
+				},
+			),
+			$self->vm_extension_definition('cf-tcp-router-network-properties', 
+				common => {},
+				cloud_properties_for_iaas => {
+					aws => {
+						'lb_target_groups' => ['ocfp-ocf-cf-tcp-lb-tg'],
+						'elbs' => ['ocfp-ocf-cf-tcp-lb'],
+					},
+				},
+			),
 		],
 		'disk_types' => [
 			$self->disk_type_definition('database',
@@ -150,6 +192,10 @@ sub perform {
 					},
 					stackit => {
 						'type' => 'storage_premium_perf6',
+					},
+					aws => {
+						'type' => 'gp3',
+						'encrypted' => $self->TRUE
 					},
 				},
 			),
@@ -166,6 +212,10 @@ sub perform {
 					},
 					stackit => {
 						'type' => 'storage_premium_perf6',
+					},
+					aws => {
+						'type' => 'gp3',
+						'encrypted' => $self->TRUE
 					},
 				},
 			),
