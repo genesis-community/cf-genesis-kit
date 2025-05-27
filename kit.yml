@@ -18,3 +18,12 @@ required_configs:
 
 genesis_version_min: 3.1.0-rc.9
 secrets_store: credhub
+
+supports:
+- aws
+- azure
+- gcp
+- openstack
+- vsphere
+- stackit
+
