@@ -78,7 +78,7 @@ sub perform {
     info $curl_output;
   }
 
-  return $self->done(1);
+  return $self->done();
 }
 
 sub results {

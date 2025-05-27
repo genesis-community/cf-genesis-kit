@@ -301,7 +301,7 @@ sub display_info {
     info("  Restart CF app: cf restart %s", $info->{cf_app_name});
   }
 
-  return 1;
+  return $self->done();
 }
 
 sub deploy_stratos {
@@ -497,7 +497,7 @@ sub deploy_stratos {
 
   $self->display_info($info, %options);
 
-  return 1;
+  return $self->done();
 }
 
 sub _generate_password {
@@ -526,7 +526,7 @@ sub open_in_browser {
   );
   system("$cmd '$info->{url}' >/dev/null 2>&1 &");
 
-  return 1;
+  return $self->done();
 }
 
 1;

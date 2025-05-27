@@ -57,7 +57,7 @@ sub perform {
 
   run('cf plugins');
 
-  return $self->done(1);
+  return $self->done();
 }
 
 1;

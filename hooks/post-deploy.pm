@@ -40,25 +40,18 @@ sub perform {
     # This emulates the 'describe' function in the bash script
     info(
       "\n".
-      "#M{$ENV{GENESIS_ENVIRONMENT}} Cloud Foundry deployed!\n".
-      "\n".
-      "For details about the deployment, run\n".
-      "\n".
-      "  #G{$ENV{GENESIS_CALL_ENV} info}\n".
-      "\n".
-      "To see a list of available addons, run\n".
-      "\n".
-      "  #G{$ENV{GENESIS_CALL_ENV} do -- list}\n".
-      "\n".
-      "To set up your local cf CLI installation with useful plugins:\n".
-      "\n".
-      "  #G{$ENV{GENESIS_CALL_ENV} do -- setup-cli}\n".
-      "\n".
-      "To log into Cloud Foundry, run\n".
-      "\n".
-      "  #G{$ENV{GENESIS_CALL_ENV} do -- login}\n".
+      "\n#M{$ENV{GENESIS_ENVIRONMENT}} Cloud Foundry deployed!\n".
+      "\nFor details about the deployment, run\n".
+      "\t#G{$ENV{GENESIS_CALL_ENV} info}\n".
+      "\nTo see a list of available addons, run\n".
+      "\t#G{$ENV{GENESIS_CALL_ENV} do -- list}\n".
+      "\nTo set up your local cf CLI installation with useful plugins:\n".
+      "\t#G{$ENV{GENESIS_CALL_ENV} do -- setup-cli}\n".
+      "\nTo log into Cloud Foundry, run\n".
+      "\t#G{$ENV{GENESIS_CALL_ENV} do -- login}\n".
       "\n"
     );
+    return $self->done();
   }
 
   # Call parent class methods if needed

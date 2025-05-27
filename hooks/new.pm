@@ -555,7 +555,7 @@ sub perform {
   # Generate the environment YAML
   $self->generate_env_file();
 
-  return 1;
+  return $self->done();
 }
 
 # Generate the environment YAML file with all settings

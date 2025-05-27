@@ -51,7 +51,7 @@ sub perform {
 		$self->{checks}{runtime_config} eq 'no' ||
 		$self->{checks}{environment} eq 'no');
 
-	return $self->done($success);
+	return $self->done();
 }
 
 sub check_cloud_config {

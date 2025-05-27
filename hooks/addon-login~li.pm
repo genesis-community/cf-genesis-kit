@@ -88,7 +88,7 @@ sub perform {
   info("\n\n");
   run('cf target');
 
-  return $self->done(1);
+  return $self->done();
 }
 
 1;

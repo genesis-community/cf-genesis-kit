@@ -280,7 +280,7 @@ MANIFEST
     run("cf $action-service-broker \"$config{broker_name}\" \"$config{broker_auth_username}\" \"$config{broker_auth_password}\" \"https://scs-broker.$apps_domain\"");
   }
 
-  return 1;
+  return $self->done();
 }
 
 # Helper methods
