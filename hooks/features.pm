@@ -10,6 +10,8 @@ use v5.20; # Genesis min perl version is 5.20
 BEGIN {push @INC, $ENV{GENESIS_LIB} ? $ENV{GENESIS_LIB} : $ENV{HOME}.'/.genesis/lib'}
 use parent qw(Genesis::Hook::Features);
 
+use Genesis qw(new_enough);
+
 sub init {
   my $class = shift;
   my $obj = $class->SUPER::init(@_);
