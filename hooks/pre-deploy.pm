@@ -90,7 +90,7 @@ sub perform {
     return $self->done(0);
   }
 
-  return $self->done();
+  return $self->done(1);
 }
 
 # Stub implementations for migration functions
