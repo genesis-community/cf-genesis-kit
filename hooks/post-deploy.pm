@@ -22,6 +22,7 @@ use parent qw(Genesis::Hook::PostDeploy);
 sub init {
   my ($class, %ops) = @_;
   my $self = $class->SUPER::init(%ops);
+  # TODO: minimum genesis version check
 
   # Nothing additional needed for initialization
   return $self;
@@ -51,18 +52,15 @@ sub perform {
       "\t#G{$ENV{GENESIS_CALL_ENV} do -- login}\n".
       "\n"
     );
-    return $self->done();
   }
 
-  # Call parent class methods if needed
-  $self->SUPER::perform() if $self->can('SUPER::perform');
-
   # Mark the hook as completed successfully
-  return $self->done(1);
+  return $self->done();
 }
 
 # TODO: In the future we can refactor this to be a specific override restricted configurable CIDR range(s) instead of the privbate ip address space.
 sub create_cf_vpcs {
+	return 1; # Deferring. Should run only after CF login is working and if no other VPC config provided
   info("Creating security groups for CF private networks VPC access.");
 
   my $tmp_dir = $ENV{GENESIS_TMP_DIR} // '/tmp';

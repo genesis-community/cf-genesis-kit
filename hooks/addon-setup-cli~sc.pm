@@ -5,10 +5,12 @@ package Genesis::Hook::Addon::CF::SetupCLI v2.7.0;
 use strict;
 use warnings;
 use v5.20; # Genesis min perl version is 5.20
-use Genesis qw/bail info run/;
-use Genesis::UI qw/prompt_for_boolean/;
+
 use parent qw(Genesis::Hook::Addon);
 use lib $ENV{GENESIS_LIB} // "$ENV{HOME}/.genesis/lib";
+
+use Genesis qw/bail info run/;
+use Genesis::UI qw/prompt_for_boolean/;
 use File::Basename qw/basename/;
 
 sub init {
@@ -51,13 +53,13 @@ sub perform {
   bail("#R{[ERROR]} cf plugins listing failed with rc=$rc") unless ( $rc == 0 );
 
   info('Installing the #C{cf-targets} plugin...');
-  cmd = 'cf install-plugin -r CF-Community Targets';
-  cmd += ' -f' if ($force);
-  run(cmd)
+  my $cmd = 'cf install-plugin -r CF-Community Targets';
+  $cmd += ' -f' if ($force);
+  run($cmd);
 
   run('cf plugins');
 
-  return $self->done();
+  return $self->done(1);
 }
 
 1;
