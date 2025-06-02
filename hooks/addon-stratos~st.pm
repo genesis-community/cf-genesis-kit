@@ -54,7 +54,7 @@ sub cmd_details {
 	"[[  #y{--skip-cf-check}     >>Skip CF CLI availability check\n".
 	"[[  #y{--stack <name>}      >>Stack to use (default: cflinuxfs4)\n".
 	"[[  #y{--timeout <seconds>} >>Application startup timeout (default: 180)\n".
-	"[[  #y{--version <ver>}     >>Stratos version to deploy (overrides configuration and defaults)\n".
+	"[[  #y{--version <ver>}     >>Stratos version to deploy (overrides configuration and defaults)\n";
 }
 
 sub perform {
@@ -116,8 +116,8 @@ sub _get_stratos_info {
 	# Get database connection information
 
   # Default configuration
-  my $stratos_domain = "console.${apps_domain}";
-  my $stratos_url = "https://${stratos_domain}";
+  $stratos_domain = "console.${apps_domain}";
+  $stratos_url = "https://${stratos_domain}";
   my $stratos_db_scheme = $env->params->{db_scheme} || 'postgres';
   my $stratos_db_hostname = $env->params->{db_hostname} || '';
   my $stratos_db_username = $env->params->{db_username} || 'stratos';
@@ -296,10 +296,10 @@ sub display_info {
 
 		# Show helpful commands
 		info("\nHelpful Commands:");
-		info("  Open in browser: %s stratos open",
-			$self->env->get_call_path_with_env());
-		info("  Deploy Stratos: %s stratos deploy",
-			$self->env->get_call_path_with_env());
+		info("  Open in browser: %s %s stratos open",
+			$self->env->get_call_path_with_env()); # returns two strings
+		info("  Deploy Stratos: %s %s stratos deploy",
+			$self->env->get_call_path_with_env()); # returns two strings
 
   if ($info->{is_cf_app_deployed}) {
     info("  View CF app logs: cf logs %s --recent", $info->{cf_app_name});
@@ -373,8 +373,6 @@ sub deploy_stratos {
     $env->vault->set($env->secrets_base . "stratos/session_secret", $stratos_session_store_sekret);
   }
 
-  # Get client credentials from vault/exodus
-  my $data = $self->exodus_data;
   # FIXME: Should we bail if not set?
   my $stratos_client = $data->{"stratos_client"} || "";
   my $stratos_client_secret = $data->{stratos_secret} || "";
