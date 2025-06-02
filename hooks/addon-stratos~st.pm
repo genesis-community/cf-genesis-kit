@@ -10,8 +10,6 @@ use Genesis::Term qw/terminal_width/;
 use Genesis::UI qw/prompt_for_boolean/;
 use parent qw(Genesis::Hook::Addon);
 use lib $ENV{GENESIS_LIB} // "$ENV{HOME}/.genesis/lib";
-use YAML::PP;
-use JSON::PP;
 
 sub init {
 	my $class = shift;
@@ -159,7 +157,7 @@ sub _get_stratos_info {
   my $data = $self->exodus_data;
   # FIXME: Should we bail if not set?
   my $stratos_client = $data->{stratos_client} || "";
-  my $stratos_client_secret = $data->{stratos_secret} || "");
+  my $stratos_client_secret = $data->{stratos_secret} || "";
 
 	# Build info structure
 	return {
@@ -222,9 +220,16 @@ sub display_info {
 
 	# Display information
 	if ($options{json}) {
-		# Output as JSON
-		info(JSON::PP->new->pretty->encode($info));
-    return 1
+		# Output as JSON using spruce
+		my $tmp = $self->tempdir('stratos-info-json');
+		open my $fh, '>', "$tmp/info.yml" or bail("Could not create temporary file: $!");
+		print $fh _to_yaml($info);
+		close $fh;
+		
+		my ($json_out, $rc) = run('spruce json "$1"', "$tmp/info.yml");
+		bail("Failed to convert to JSON: $!") if $rc != 0;
+		info($json_out);
+		return 1;
 	}
   # Otherwise, display in a human-readable format
   # TODO: Discuss if we want to simply dump as YAML?
@@ -245,7 +250,7 @@ sub display_info {
     $info->{status},
     $info->{url} ? $info->{url} : "Not configured",
     $info->{version},
-    $info->{admin_user}),
+    $info->{admin_user},
     $info->{has_admin_password} ? $info->{admin_password} : "Not found in vault",
     $info->{client}->{id},
     $info->{client}->{secret}
@@ -417,18 +422,22 @@ sub deploy_stratos {
   my $space_guid = `cf space stratos --guid`; chomp($space_guid);
   my $svc_exists = `cf curl "/v3/service_instances?organization_guids=${org_guid}&space_guids=${space_guid}" | jq -r '.resources[]|select(.name|test("${svc_name}"))|.name'`; chomp($svc_exists);
 
-  # Prepare database connection JSON
-  my $db_data = {
-    uri => "$stratos_db_scheme://",
-    username => $stratos_db_username,
-    password => $stratos_db_password,
-    hostname => $stratos_db_hostname,
-    port => $stratos_db_port,
-    dbname => $stratos_db_database,
-    sslmode => $stratos_db_sslmode
-  };
-
-  my $db_json = JSON::PP->new->encode($db_data);
+  # Prepare database connection JSON using spruce
+  open my $db_fh, '>', "$tmp_dir/db.yml" or bail("Could not create database config file: $!");
+  print $db_fh <<EOF;
+uri: "$stratos_db_scheme://"
+username: "$stratos_db_username"
+password: "$stratos_db_password"
+hostname: "$stratos_db_hostname"
+port: $stratos_db_port
+dbname: "$stratos_db_database"
+sslmode: "$stratos_db_sslmode"
+EOF
+  close $db_fh;
+  
+  my ($db_json, $rc_db) = run('spruce json "$1"', "$tmp_dir/db.yml");
+  bail("Failed to convert database config to JSON") if $rc_db != 0;
+  chomp($db_json);
 
   # Create or update the service
   if ($svc_exists eq $svc_name) {
@@ -442,41 +451,30 @@ sub deploy_stratos {
   # Create application manifest
   info("Creating application manifest...");
   open my $manifest, '>', "$tmp_dir/manifest.yml" or bail("Could not create manifest file: $!");
-  my $manifest_data = {
-    applications => [
-      {
-        name => 'apps',
-        host => 'console',
-        'health-check-type' => 'port',
-        memory => $options{memory},
-        disk_quota => $options{disk},
-        timeout => $options{timeout},
-        buildpacks => [
-          $options{buildpack}
-        ],
-        stack => $options{stack},
-        env => {
-          CF_API_URL => "https://$system_api_domain",
-          CF_CLIENT => $stratos_client,
-          CF_CLIENT_SECRET => $stratos_client_secret,
-          SESSION_STORE_SECRET => $stratos_session_store_sekret,
-          SSO_OPTIONS => $stratos_sso_options,
-          SSO_WHITELIST => "https://$stratos_domain/*",
-          SSO_LOGIN => "true",
-          DB_SSL_MODE => $stratos_db_sslmode
-        },
-        services => [
-          'console_db_tls_verify_ca'
-        ]
-      }
-    ]
-  };
-  my $ypp = YAML::PP->new(indent => 2, header => 1);
-  # YAML::PP uses spaces by default, so replace with tabs after generating
-  my $yaml_content = $ypp->dump_string($manifest_data);
-  $yaml_content =~ s/  /\t/g;  # Replace 2 spaces with a tab
-
-  print $manifest $yaml_content;
+  print $manifest <<EOF;
+---
+applications:
+- name: apps
+  host: console
+  health-check-type: port
+  memory: $options{memory}
+  disk_quota: $options{disk}
+  timeout: $options{timeout}
+  buildpacks:
+  - $options{buildpack}
+  stack: $options{stack}
+  env:
+    CF_API_URL: https://$system_api_domain
+    CF_CLIENT: $stratos_client
+    CF_CLIENT_SECRET: $stratos_client_secret
+    SESSION_STORE_SECRET: $stratos_session_store_sekret
+    SSO_OPTIONS: $stratos_sso_options
+    SSO_WHITELIST: https://$stratos_domain/*
+    SSO_LOGIN: "true"
+    DB_SSL_MODE: $stratos_db_sslmode
+  services:
+  - console_db_tls_verify_ca
+EOF
   close $manifest;
 
   # Deploy the application
@@ -495,7 +493,7 @@ sub deploy_stratos {
 
   chdir('/');  # Go back to root directory
 
-  $self->display_info($info, %options);
+  $self->display_info(%options);
 
   return $self->done();
 }
@@ -509,6 +507,43 @@ sub _generate_password {
   $password .= $chars[int(rand(scalar @chars))] for (1..$length);
 
   return $password;
+}
+
+sub _to_yaml {
+  my ($data, $indent) = @_;
+  $indent //= 0;
+  my $prefix = "  " x $indent;
+  my $result = "";
+  
+  if (ref($data) eq 'HASH') {
+    for my $key (sort keys %$data) {
+      $result .= "${prefix}$key: ";
+      my $value = $data->{$key};
+      if (ref($value)) {
+        $result .= "\n" . _to_yaml($value, $indent + 1);
+      } else {
+        $value //= '';
+        if ($value =~ /[\n:]/ || $value eq '') {
+          $value =~ s/"/\\"/g;
+          $result .= "\"$value\"\n";
+        } else {
+          $result .= "$value\n";
+        }
+      }
+    }
+  } elsif (ref($data) eq 'ARRAY') {
+    for my $item (@$data) {
+      $result .= "${prefix}- ";
+      if (ref($item)) {
+        $result .= "\n" . _to_yaml($item, $indent + 1);
+      } else {
+        $item //= '';
+        $result .= "$item\n";
+      }
+    }
+  }
+  
+  return $result;
 }
 
 sub open_in_browser {
