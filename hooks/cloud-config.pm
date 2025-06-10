@@ -59,7 +59,7 @@ sub perform {
       'security_groups' => ['default'] #$self->subnet_reference('sgs', 'get_security_groups'),
     },
     stackit => {
-      'net_id' => $self->subnet_reference('parent_network_id'),
+      'net_id' => $self->subnet_reference('network_id'),
       'security_groups' => $self->network_reference('sgs', 'get_sgs_by_names', 'ocfp', 'default'),
     },
     aws => {
