@@ -1,21 +1,25 @@
-#!/usr/bin/env perl
-# vim: set ts=2 sw=2 sts=2 foldmethod=marker
-package Genesis::Hook::CF::PreDeploy v2.7.0;
+# vim: set ts=2 sw=2 sts=2 noet fdm=marker foldlevel=1:
+package Genesis::Hook::PreDeploy::CF;
 
-use strict;
+use v5.20;
 use warnings;
-use v5.20; # Genesis min perl version is 5.20
-use Genesis;
-use parent qw(Genesis::Hook);
-use lib $ENV{GENESIS_LIB} // "$ENV{HOME}/.genesis/lib";
+
+# Only needed for development
+BEGIN {push @INC, $ENV{GENESIS_LIB} ? $ENV{GENESIS_LIB} : $ENV{HOME}.'/.genesis/lib'}
+
+use parent qw(Genesis::Hook::PreDeploy);
+
+use Genesis qw/new_enough bail info describe run load_json/;
 use JSON::PP;
 
+# init - Initialize the hook {{{
 sub init {
-  my $class = shift;
-  my $obj = $class->SUPER::init(@_);
-  $obj->{cc_ok} = 'yes';
+  my ($class, %ops) = @_;
+  my $obj = $class->SUPER::init(%ops);
+  $obj->check_minimum_genesis_version('3.1.0');
   return $obj;
 }
+# }}}
 
 sub perform {
   my ($self) = @_;

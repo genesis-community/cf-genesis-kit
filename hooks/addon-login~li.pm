@@ -1,23 +1,16 @@
-#!/usr/bin/env perl
-# vim: set ts=2 sw=2 sts=2 foldmethod=marker
-package Genesis::Hook::Addon::CF::Login v2.7.0;
+# vim: set ts=2 sw=2 sts=2 noet fdm=marker foldlevel=1:
+package Genesis::Hook::Addon::CF::Login;
 
-use strict;
+use v5.20;
 use warnings;
-use v5.20; # Genesis min perl version is 5.20
 
 # Only needed for development
-my $lib;
-BEGIN {$lib = $ENV{GENESIS_LIB} ? $ENV{GENESIS_LIB} : $ENV{HOME}.'/.genesis/lib'}
-use lib $lib;
+BEGIN {push @INC, $ENV{GENESIS_LIB} ? $ENV{GENESIS_LIB} : $ENV{HOME}.'/.genesis/lib'}
 
 use parent qw(Genesis::Hook::Addon);
 
 use Genesis qw/bail info run/;
 use Genesis::UI qw/prompt_for_boolean/;
-use parent qw(Genesis::Hook::Addon);
-use lib $ENV{GENESIS_LIB} // "$ENV{HOME}/.genesis/lib";
-
 sub init {
   my $class = shift;
   my $obj = $class->SUPER::init(@_);

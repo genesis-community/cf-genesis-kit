@@ -1,109 +1,56 @@
-#!/usr/bin/env perl
-# vim: set ts=2 sw=2 sts=2 foldmethod=marker
-package Genesis::Hook::CF::PostDeploy v2.7.0;
+# vim: set ts=2 sw=2 sts=2 noet fdm=marker foldlevel=1:
+package Genesis::Hook::PostDeploy::CF;
 
-use strict;
+use v5.20;
 use warnings;
-use v5.20; # Genesis min perl version is 5.20
-use Genesis qw/info/;
-use parent qw(Genesis::Hook);
-use lib $ENV{GENESIS_LIB} // "$ENV{HOME}/.genesis/lib";
-use JSON::PP;
 
 # Only needed for development
-my $lib;
-BEGIN {$lib = $ENV{GENESIS_LIB} ? $ENV{GENESIS_LIB} : $ENV{HOME}.'/.genesis/lib'}
-use lib $lib;
+BEGIN {push @INC, $ENV{GENESIS_LIB} ? $ENV{GENESIS_LIB} : $ENV{HOME}.'/.genesis/lib'}
 
 use parent qw(Genesis::Hook::PostDeploy);
 
+use Genesis qw/describe/;
 
-# Initialize the hook
+# init - Initialize the hook {{{
 sub init {
   my ($class, %ops) = @_;
-  my $self = $class->SUPER::init(%ops);
-  # TODO: minimum genesis version check
-
-  # Nothing additional needed for initialization
-  return $self;
+  my $obj = $class->SUPER::init(%ops);
+  $obj->check_minimum_genesis_version('3.1.0');
+  return $obj;
 }
+# }}}
 
-# Main hook execution
+# perform - Main hook execution {{{
 sub perform {
   my ($self) = @_;
-
-  # Base class has deploy_successful method to check if GENESIS_DEPLOY_RC == 0
-  if ($self->deploy_successful) {
-
-    $self->create_cf_vpcs();
-
-    # Display messages to the user about available commands
-    # This emulates the 'describe' function in the bash script
-    info(
-      "\n".
-      "\n#M{$ENV{GENESIS_ENVIRONMENT}} Cloud Foundry deployed!\n".
-      "\nFor details about the deployment, run\n".
-      "\t#G{$ENV{GENESIS_CALL_ENV} info}\n".
-      "\nTo see a list of available addons, run\n".
-      "\t#G{$ENV{GENESIS_CALL_ENV} do -- list}\n".
-      "\nTo set up your local cf CLI installation with useful plugins:\n".
-      "\t#G{$ENV{GENESIS_CALL_ENV} do -- setup-cli}\n".
-      "\nTo log into Cloud Foundry, run\n".
-      "\t#G{$ENV{GENESIS_CALL_ENV} do -- login}\n".
-      "\n"
+  
+  if ($ENV{GENESIS_DEPLOY_RC} == 0) {
+    describe(
+      "",
+      "#M{$ENV{GENESIS_ENVIRONMENT}} Cloud Foundry deployed!",
+      "",
+      "For details about the deployment, run",
+      "",
+      "  #G{$ENV{GENESIS_CALL_ENV} info}",
+      "",
+      "To see a list of available addons, run",
+      "",
+      "  #G{$ENV{GENESIS_CALL_ENV} do -- list}",
+      "",
+      "To set up your local cf CLI installation with useful plugins:",
+      "",
+      "  #G{$ENV{GENESIS_CALL_ENV} do -- setup-cli}",
+      "",
+      "To log into Cloud Foundry, run",
+      "",
+      "  #G{$ENV{GENESIS_CALL_ENV} do -- login}",
+      ""
     );
   }
-
-  # Mark the hook as completed successfully
+  
   return $self->done();
 }
+# }}}
 
-# TODO: In the future we can refactor this to be a specific override restricted configurable CIDR range(s) instead of the privbate ip address space.
-sub create_cf_vpcs {
-	return 1; # Deferring. Should run only after CF login is working and if no other VPC config provided
-  info("Creating security groups for CF private networks VPC access.");
-
-  my $tmp_dir = $ENV{GENESIS_TMP_DIR} // '/tmp';
-  open my $sg_file, '>', "$tmp_dir/vpc-sg.json" or bail("Could not create security group file: $!");
-  # Create a Perl data structure for the security groups
-  my $security_groups = [
-    { "protocol" => "all", "destination" => "10.0.0.0-10.255.255.255" },
-    { "protocol" => "all", "destination" => "172.16.0.0-172.31.255.255" },
-    { "protocol" => "all", "destination" => "192.168.0.0-192.168.255.255" }
-  ];
-  # Use JSON::PP to encode the data structure with tab indentation
-  my $json = JSON::PP->new->indent(-1)->pretty->encode($security_groups);
-  print $sg_file $json; # Write the JSON to the file
-  close $sg_file;
-
-  system("cf create-security-group vpc \"$tmp_dir/vpc-sg.json\" || true");
-  system("cf bind-staging-security-group vpc || true");
-  system("cf bind-running-security-group vpc || true");
-}
-
-1; # End of module
-
-=head1 NAME
-
-Genesis::Hook::PostDeploy::CloudFoundry - Post-deployment hook for Cloud Foundry Genesis Kit
-
-=head1 DESCRIPTION
-
-This module implements the post-deployment hook for the Cloud Foundry Genesis Kit.
-It displays helpful information to the user after a successful deployment.
-
-=head1 METHODS
-
-=head2 init(%options)
-
-Initializes the hook with the given options.
-
-=head2 perform()
-
-Executes the post-deploy hook, displaying helpful information if the deployment was successful.
-
-=head1 AUTHOR
-
-Genesis Framework
-
-=cut
+1;
+# vim: set ts=2 sw=2 sts=2 noet fdm=marker foldlevel=1:

@@ -1,16 +1,15 @@
-#!/usr/bin/env perl
-# vim: set ts=2 sw=2 sts=2 foldmethod=marker
-package Genesis::Hook::Addon::CF::Stratos v1.0.0;
+# vim: set ts=2 sw=2 sts=2 noet fdm=marker foldlevel=1:
+package Genesis::Hook::Addon::CF::Stratos;
 
-use strict;
-use warnings;
-use v5.20; # Genesis min perl version is 5.20
+use v5.20;
+use warnings; # Genesis min perl version is 5.20
 use Genesis qw/bail info warning run/;
 use Genesis::Term qw/terminal_width/;
 use Genesis::UI qw/prompt_for_boolean/;
-use parent qw(Genesis::Hook::Addon);
-use lib $ENV{GENESIS_LIB} // "$ENV{HOME}/.genesis/lib";
+# Only needed for development
+BEGIN {push @INC, $ENV{GENESIS_LIB} ? $ENV{GENESIS_LIB} : $ENV{HOME}.'./.genesis/lib'}
 
+use parent qw(Genesis::Hook::Addon);
 sub init {
 	my $class = shift;
 	my $obj = $class->SUPER::init(@_);
