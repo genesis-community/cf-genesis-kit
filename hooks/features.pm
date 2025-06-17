@@ -35,10 +35,10 @@ sub perform {
       push @features, 'nfs-lambda';
     } elsif ($feature eq 'cf-deployment/operations/enable-smb-volume-services') {
       push @features, 'smb-volume-services';
-    } elsif ($feature eq 'internal-db') {
-      push @features, '+internal-db';
-    } elsif ($feature eq 'internal-blobstore') {
-      push @features, '+internal-blobstore';
+#    } elsif ($feature eq 'internal-db') {
+#      push @features, '+internal-db';
+#    } elsif ($feature eq 'internal-blobstore') {
+#      push @features, '+internal-blobstore';
     } else {
       push @features, $feature;
     }

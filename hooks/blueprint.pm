@@ -410,7 +410,7 @@ sub _perform_feature_pre_validation {
 			my $db_type = $1;
 			warning("The #c{$want} flag has been renamed to #c{$db_type-db}");
 			push @curated_features, "$db_type-db";
-		} elsif ($want =~ /^(internal-db|db-internal-postgres|local-db)$/) {
+		} elsif ($want =~ /^(internal-db|db-internal-postgres|local-db|\+internal-db)$/) {
       push @curated_features, "+internal-db" unless $self->want_feature_in_list("+internal-db", \@curated_features);
 			warning("The #c{$want} flag has been renamed to #c{local-postgres-db}");
 			push @curated_features, "local-postgres-db";
@@ -846,7 +846,7 @@ sub perform {
     $self->add_files( "ocfp/trusted-certs-cflinuxfs3.yml" ) if ($self->want_feature('cflinuxfs3'));
     $self->add_files( "ocfp/trusted-certs-cflinuxfs4.yml" ) if ($self->want_feature('cflinuxfs4'));
 
-    unless ($self->want_feature("local-postgres-db|internal-db")) {
+    unless ($self->want_feature("local-postgres-db|internal-db|\+internal-db")) {
       if ($self->{iaas_name} =~ /^(aws|azure|gcp)$/) {
         $self->add_files( "ocfp/external-db-prep.yml", "ocfp/external-db.yml" );
       } elsif ($self->{iaas_name} =~ /^(openstack|stackit)$/) {
