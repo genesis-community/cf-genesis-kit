@@ -3,7 +3,7 @@ package Genesis::Hook::CF::Info;
 
 use v5.20;
 use warnings; # Genesis min perl version is 5.20
-use Genesis qw/info error/;
+use Genesis qw/info error bail/;
 # Only needed for development
 BEGIN {push @INC, $ENV{GENESIS_LIB} ? $ENV{GENESIS_LIB} : $ENV{HOME}.'./.genesis/lib'}
 
