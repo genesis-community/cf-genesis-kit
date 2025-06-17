@@ -7,7 +7,7 @@ use Genesis qw/info error/;
 # Only needed for development
 BEGIN {push @INC, $ENV{GENESIS_LIB} ? $ENV{GENESIS_LIB} : $ENV{HOME}.'./.genesis/lib'}
 
-use parent qw(Genesis::Hook::Info);
+use parent qw(Genesis::Hook);
 use JSON::PP;
 
 sub init {
@@ -33,9 +33,9 @@ sub perform {
   my $password = $exodus_data->{admin_password};
 
   # Get CF deployment information
-  my $upstream_version = $exodus_data->{'cf-deployment-version'};
+  my $upstream_version = $exodus_data->{'cf-deployment-version'} || 'unknown';
   my $upstream_hotfixes = $exodus_data->{'cf-deployment-hotfixes'} || 'false';
-  my $upstream_url = $exodus_data->{'cf-deployment-releases'};
+  my $upstream_url = $exodus_data->{'cf-deployment-releases'} || 'unknown';
 
   # Format hotfixes info
   my $hotfixes = "";
@@ -46,7 +46,7 @@ sub perform {
   # Display information
   # Note: The original used 'describe' which appears to be a helper function
   # that formats multi-line output with proper indentation and styling
-  $env->notify(
+  info(
     "Based on #M{cf-deployment %s}%s\n".
     "[url: #c{%s}]\n".
     "\n".
@@ -57,6 +57,8 @@ sub perform {
     $upstream_version, $hotfixes, $upstream_url, $api_url, $admin, $password
   );
 
+  # If the Load Balancer isn't availabe this will fail
+  # Also fails if "cf" command is missing
   my $cf_curl_output = qx(cf curl /info 2>&1);
   my $curl_rc = $? >> 8; # Get the exit code
 
