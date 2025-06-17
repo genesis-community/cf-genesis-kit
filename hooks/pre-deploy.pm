@@ -1,4 +1,3 @@
-# vim: set ts=2 sw=2 sts=2 noet fdm=marker foldlevel=1:
 package Genesis::Hook::PreDeploy::CF;
 
 use v5.20;
@@ -7,9 +6,9 @@ use warnings;
 # Only needed for development
 BEGIN {push @INC, $ENV{GENESIS_LIB} ? $ENV{GENESIS_LIB} : $ENV{HOME}.'/.genesis/lib'}
 
-use parent qw(Genesis::Hook::PreDeploy);
+use parent qw(Genesis::Hook);
 
-use Genesis qw/new_enough bail info describe run load_json/;
+use Genesis qw/new_enough bail info run load_json/;
 use JSON::PP;
 
 # init - Initialize the hook {{{
@@ -25,6 +24,7 @@ sub perform {
   my ($self) = @_;
   my $env = $self->env;
 
+  return $self->done(1) if $self->want_feature("ocfp");
   # 1. Upgrade check - migration from older versions
   my $version = $env->exodus_lookup('kit_version');
   if (defined($version) && !new_enough($version, "2.0.0-rc1")) {
@@ -315,3 +315,4 @@ sub check_cloud_config {
 }
 
 1;
+# vim: set ts=2 sw=2 sts=2 noet fdm=marker foldlevel=1:

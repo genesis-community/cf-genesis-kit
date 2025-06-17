@@ -9,7 +9,7 @@ BEGIN {push @INC, $ENV{GENESIS_LIB} ? $ENV{GENESIS_LIB} : $ENV{HOME}.'/.genesis/
 
 use parent qw(Genesis::Hook::PostDeploy);
 
-use Genesis qw/describe/;
+use Genesis qw/info/;
 
 # init - Initialize the hook {{{
 sub init {
@@ -25,26 +25,20 @@ sub perform {
   my ($self) = @_;
   
   if ($ENV{GENESIS_DEPLOY_RC} == 0) {
-    describe(
-      "",
-      "#M{$ENV{GENESIS_ENVIRONMENT}} Cloud Foundry deployed!",
-      "",
-      "For details about the deployment, run",
-      "",
-      "  #G{$ENV{GENESIS_CALL_ENV} info}",
-      "",
-      "To see a list of available addons, run",
-      "",
-      "  #G{$ENV{GENESIS_CALL_ENV} do -- list}",
-      "",
-      "To set up your local cf CLI installation with useful plugins:",
-      "",
-      "  #G{$ENV{GENESIS_CALL_ENV} do -- setup-cli}",
-      "",
-      "To log into Cloud Foundry, run",
-      "",
-      "  #G{$ENV{GENESIS_CALL_ENV} do -- login}",
-      ""
+    my $genesis_env = "$ENV{GENESIS_ENVIRONMENT}";
+    my $genesis_call_env = "$ENV{GENESIS_CALL_ENV}";
+    info(
+      "#M{%s} Cloud Foundry deployed!\n\n".
+      "For details about the deployment, run\n\n".
+      "  #G{%s} info\n\n".
+      "To see a list of available addons, run\n\n".
+      "  #G{%s} do -- list\n\n".
+      "To set up your local cf CLI installation with useful plugins:\n\n".
+      "  #G{%s} do -- setup-cli\n\n".
+      "To log into Cloud Foundry, run\n\n".
+      "  #G{%s} do -- login\n\n",
+      $genesis_env,
+      $genesis_call_env,$genesis_call_env,$genesis_call_env,$genesis_call_env
     );
   }
   
