@@ -7,3 +7,9 @@
 --no-opening-sub-brace-on-new-line
 --no-opening-brace-on-new-line
 
+# Modify files in-place without creating .bak files
+--backup-and-modify-in-place
+--backup-file-extension=/
+
+--nostandard-output
+--standard-error-output

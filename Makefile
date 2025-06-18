@@ -12,4 +12,4 @@ help:
 tidy:
 	@echo "Running perltidy on hooks/*.pm files..."
 	@perltidy -b hooks/*.pm
-	@echo "Tidying complete. Backup files created as *.bak"
+	@echo "Tidying complete."

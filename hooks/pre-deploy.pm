@@ -325,4 +325,5 @@ sub check_cloud_config {
 }
 
 1;
+
 # vim: set ts=2 sw=2 sts=2 noet fdm=marker foldlevel=1:
