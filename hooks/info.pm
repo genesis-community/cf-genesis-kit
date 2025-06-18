@@ -48,7 +48,7 @@ sub perform {
   # that formats multi-line output with proper indentation and styling
   info(
     "Based on #M{cf-deployment %s}%s\n".
-    "[url: #c{%s}]\n".
+    "[cf-deployment-releases url: #c{%s}]\n".
     "\n".
     "Access to Cloud Foundry API:\n".
     "       url: #C{%s}\n".
@@ -59,6 +59,7 @@ sub perform {
 
   # If the Load Balancer isn't availabe this will fail
   # Also fails if "cf" command is missing
+  my $cf_api_outout = qx(cf api $api_url --skip-ssl-validation 2>&1);
   my $cf_curl_output = qx(cf curl /info 2>&1);
   my $curl_rc = $? >> 8; # Get the exit code
 
