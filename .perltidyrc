@@ -13,3 +13,6 @@
 
 --nostandard-output
 --standard-error-output
+
+# Put string concatenation dots at end of line
+--want-break-after="."

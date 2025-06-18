@@ -19,11 +19,10 @@ sub init {
 }
 
 sub cmd_details {
-	return
-		"Log into the Cloud Foundry instance as the admin user account.\n"
-	  . "This will overwrite local cf CLI configuration!\n"
-	  . "Supports the following options:\n"
-	  . "[[  #y{--yes, -y}          >>Skip all confirmations, useful for non-interactive environments like pipelines\n"
+	return "Log into the Cloud Foundry instance as the admin user account.\n" .
+	  "This will overwrite local cf CLI configuration!\n" .
+	  "Supports the following options:\n" .
+"[[  #y{--yes, -y}          >>Skip all confirmations, useful for non-interactive environments like pipelines\n"
 	  . "[[  #y{--validate-ssl}     >>Enforce SSL validation when connecting to the CF API";
 }
 
@@ -47,9 +46,9 @@ sub perform {
 	if ( $rc != 0 ) {
 		$use_cf_targets = 0;
 		info(
-			"#Y{The cf-targets plugin does not seem to be installed}\n"
-			  . "It is recommended you install it first, via #G{%s do setup-cli}'\n\n"
-			  . "[[NOTE: >>It is not compatible with Apple M1 (arm) architecture",
+			"#Y{The cf-targets plugin does not seem to be installed}\n" .
+			  "It is recommended you install it first, via #G{%s do setup-cli}'\n\n" .
+			  "[[NOTE: >>It is not compatible with Apple M1 (arm) architecture",
 			$env->get_call_path_with_env
 		);
 

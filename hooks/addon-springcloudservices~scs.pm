@@ -21,14 +21,14 @@ sub init {
 
 sub cmd_details {
 	return
-		"Deploy and register Spring Cloud Services broker to CF. Supports the following options:\n"
-	  . "[[  #y{deploy}               >>Deploy the SCS broker to the targeted CF environment\n"
-	  . "[[  #y{register}             >>Register the SCS broker with CF\n"
-	  . "[[  #y{memory <size>}        >>Memory allocation for the broker app (default: 256M)\n"
-	  . "[[  #y{disk <size>}          >>Disk allocation for the broker app (default: 1048M)\n"
-	  . "[[  #y{stack <stack>}        >>Cloud Foundry stack to use (default: cflinuxfs4)\n"
-	  . "[[  #y{buildpack <name>}     >>Buildpack to use for the broker (default: go_buildpack)\n"
-	  . "[[  #y{registry_buildpack <name>}  >>Buildpack for registry service (default: java_buildpack)\n"
+	  "Deploy and register Spring Cloud Services broker to CF. Supports the following options:\n" .
+	  "[[  #y{deploy}               >>Deploy the SCS broker to the targeted CF environment\n" .
+	  "[[  #y{register}             >>Register the SCS broker with CF\n" .
+	  "[[  #y{memory <size>}        >>Memory allocation for the broker app (default: 256M)\n" .
+	  "[[  #y{disk <size>}          >>Disk allocation for the broker app (default: 1048M)\n" .
+	  "[[  #y{stack <stack>}        >>Cloud Foundry stack to use (default: cflinuxfs4)\n" .
+	  "[[  #y{buildpack <name>}     >>Buildpack to use for the broker (default: go_buildpack)\n" .
+"[[  #y{registry_buildpack <name>}  >>Buildpack for registry service (default: java_buildpack)\n"
 	  . "[[  #y{configserver_buildpack <name>} >>Buildpack for config server (default: java_buildpack)\n"
 	  . "[[  #y{release_tag <tag>}    >>Release tag to use (default: 2023.0.1)\n"
 	  . "[[  #y{broker_uri <uri>}     >>URI to download the broker from\n"

@@ -270,19 +270,19 @@ sub display_info {
 	# Otherwise, display in a human-readable format
 	# TODO: Discuss if we want to simply dump as YAML?
 	info(
-		"\n"
-		  . "=" x terminal_width()
-		  . "\nStratos UI Deployment: %s" . "\n"
-		  . "=" x terminal_width()
-		  . "\nStatus: %s"
-		  . "\nURL: %s"
-		  . "\nVersion: %s"
-		  . "\n\nAuthentication:"
-		  . "\n  Admin User: %s"
-		  . "\n  Admin Password: %s"
-		  . "\nUAA Client Details:"
-		  . "\n  Client ID: %s"
-		  . "\n  Client Secret: %s",
+		"\n" .
+		  "=" x terminal_width() .
+		  "\nStratos UI Deployment: %s" . "\n" .
+		  "=" x terminal_width() .
+		  "\nStatus: %s" .
+		  "\nURL: %s" .
+		  "\nVersion: %s" .
+		  "\n\nAuthentication:" .
+		  "\n  Admin User: %s" .
+		  "\n  Admin Password: %s" .
+		  "\nUAA Client Details:" .
+		  "\n  Client ID: %s" .
+		  "\n  Client Secret: %s",
 		$info->{name},
 		$info->{status},
 		$info->{url} ? $info->{url} : "Not configured",
@@ -297,16 +297,16 @@ sub display_info {
 
 	if ( $info->{cf_api} ) {
 		info(
-			"\n"
-			  . "=" x terminal_width()
-			  . "\nCloud Foundry Details:" . "\n"
-			  . "=" x terminal_width()
-			  . "\n  API: %s"
-			  . "\n  System Domain: %s"
-			  . "\n  Apps Domain: %s"
-			  . "\n  Organization: %s"
-			  . "\n  Space: %s"
-			  . "\n  App Name: %s",
+			"\n" .
+			  "=" x terminal_width() .
+			  "\nCloud Foundry Details:" . "\n" .
+			  "=" x terminal_width() .
+			  "\n  API: %s" .
+			  "\n  System Domain: %s" .
+			  "\n  Apps Domain: %s" .
+			  "\n  Organization: %s" .
+			  "\n  Space: %s" .
+			  "\n  App Name: %s",
 			$info->{cf_api}, $info->{system_domain}, $info->{apps_domain},
 			$info->{cf_org}, $info->{cf_space},      $info->{cf_app_name}
 		);
@@ -315,13 +315,13 @@ sub display_info {
 	# Database information if available
 	if ( $info->{db}->{hostname} ) {
 		info(
-			"\nDatabase Configuration:\n"
-			  . "  Scheme: %s\n"
-			  . "  Hostname: %s\n"
-			  . "  Port: %s\n"
-			  . "  Database: %s\n"
-			  . "  Username: %s\n"
-			  . "  SSL Mode: %s",
+			"\nDatabase Configuration:\n" .
+			  "  Scheme: %s\n" .
+			  "  Hostname: %s\n" .
+			  "  Port: %s\n" .
+			  "  Database: %s\n" .
+			  "  Username: %s\n" .
+			  "  SSL Mode: %s",
 			$info->{db}->{scheme},   $info->{db}->{hostname}, $info->{db}->{port},
 			$info->{db}->{database}, $info->{db}->{username}, $info->{db}->{sslmode}
 		);

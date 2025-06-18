@@ -459,13 +459,13 @@ sub _dynamic_instance_vm_types {
 			push @dups, $line if $seen{$line}++;
 		}
 		if (@dups) {
-			bail( "Instance vm types specified (or translated as) multiple times: "
-				  . join( ", ", @dups ) );
+			bail( "Instance vm types specified (or translated as) multiple times: " .
+				  join( ", ", @dups ) );
 		}
 		my $types_op_file_path = "operations/dynamic/instance_types.yml";
 		make_path( "operations/dynamic", { error => \my $err } );
-		bail( "Failed to create operations/dynamic directory: "
-			  . join( ", ", map { $_->{message} } @$err ) )
+		bail( "Failed to create operations/dynamic directory: " .
+			  join( ", ", map { $_->{message} } @$err ) )
 		  if @$err;
 		open my $fh, '>', $types_op_file_path
 		  or bail("Cannot write to $types_op_file_path: $!");
@@ -567,14 +567,14 @@ sub _dynamic_instance_counts {
 			push @dups, $line if $seen{$line}++;
 		}
 		if (@dups) {
-			bail( "Instance counts specified (or translated as) multiple times: "
-				  . join( ", ", @dups ) );
+			bail( "Instance counts specified (or translated as) multiple times: " .
+				  join( ", ", @dups ) );
 		}
 
 		my $counts_opsfile_path = "operations/dynamic/instance_counts.yml";
 		make_path( "operations/dynamic", { error => \my $err } );
-		bail( "Failed to create operations/dynamic directory: "
-			  . join( ", ", map { $_->{message} } @$err ) )
+		bail( "Failed to create operations/dynamic directory: " .
+			  join( ", ", map { $_->{message} } @$err ) )
 		  if @$err;
 		open my $fh, '>', $counts_opsfile_path
 		  or bail("Cannot write to $counts_opsfile_path: $!");
@@ -1119,8 +1119,8 @@ sub perform {
 						my $remove_ops_file =
 						  "operations/dynamic/remove-unused-nfs-ldap-ca-cert.yml";
 						make_path( "operations/dynamic", { error => \my $err } );
-						bail( "Failed to create operations/dynamic directory: "
-							  . join( ", ", map { $_->{message} } @$err ) )
+						bail( "Failed to create operations/dynamic directory: " .
+							  join( ", ", map { $_->{message} } @$err ) )
 						  if @$err;
 						open my $fh_rem, '>', $remove_ops_file
 						  or bail("Cannot write to $remove_ops_file: $!");
@@ -1316,12 +1316,12 @@ sub perform {
 
 	# --- Final Validations and non-bare specific additions ---
 	if ( scalar( @{ $self->{blobstore_selections} } ) > 1 ) {
-		bail( "Too many blobstores selected; pick only one of: "
-			  . join( ", ", @{ $self->{blobstore_selections} } ) );
+		bail( "Too many blobstores selected; pick only one of: " .
+			  join( ", ", @{ $self->{blobstore_selections} } ) );
 	}
 	if ( scalar( @{ $self->{database_selections} } ) > 1 ) {
-		bail( "Too many databases selected; pick only one of: "
-			  . join( ", ", @{ $self->{database_selections} } ) );
+		bail( "Too many databases selected; pick only one of: " .
+			  join( ", ", @{ $self->{database_selections} } ) );
 	}
 
 	my $has_availability_zones = exists( $params_ref->{availability_zones} );

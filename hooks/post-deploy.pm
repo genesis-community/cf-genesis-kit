@@ -28,15 +28,15 @@ sub perform {
 		my $genesis_env      = "$ENV{GENESIS_ENVIRONMENT}";
 		my $genesis_call_env = "$ENV{GENESIS_CALL_ENV}";
 		info(
-			"#M{%s} Cloud Foundry deployed!\n\n"
-			  . "For details about the deployment, run\n\n"
-			  . "  #G{%s} info\n\n"
-			  . "To see a list of available addons, run\n\n"
-			  . "  #G{%s} do -- list\n\n"
-			  . "To set up your local cf CLI installation with useful plugins:\n\n"
-			  . "  #G{%s} do -- setup-cli\n\n"
-			  . "To log into Cloud Foundry, run\n\n"
-			  . "  #G{%s} do -- login\n\n",
+			"#M{%s} Cloud Foundry deployed!\n\n" .
+			  "For details about the deployment, run\n\n" .
+			  "  #G{%s} info\n\n" .
+			  "To see a list of available addons, run\n\n" .
+			  "  #G{%s} do -- list\n\n" .
+			  "To set up your local cf CLI installation with useful plugins:\n\n" .
+			  "  #G{%s} do -- setup-cli\n\n" .
+			  "To log into Cloud Foundry, run\n\n" .
+			  "  #G{%s} do -- login\n\n",
 			$genesis_env,      $genesis_call_env, $genesis_call_env,
 			$genesis_call_env, $genesis_call_env
 		);

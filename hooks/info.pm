@@ -63,12 +63,12 @@ sub perform {
 	# Display information
 	# Note: The original used 'describe' which appears to be a helper function
 	# that formats multi-line output with proper indentation and styling
-	info( "Based on #M{cf-deployment %s}%s\n"
-		  . "[cf-deployment-releases url: #c{%s}]\n" . "\n"
-		  . "Access to Cloud Foundry API:\n"
-		  . "       url: #C{%s}\n"
-		  . "  username: #M{%s}\n"
-		  . "  password: #G{%s}\n",
+	info( "Based on #M{cf-deployment %s}%s\n" .
+		  "[cf-deployment-releases url: #c{%s}]\n" . "\n" .
+		  "Access to Cloud Foundry API:\n" .
+		  "       url: #C{%s}\n" .
+		  "  username: #M{%s}\n" .
+		  "  password: #G{%s}\n",
 		$upstream_version, $hotfixes, $upstream_url, $api_url, $admin, $password );
 
 	# Check DNS resolution and connectivity before attempting CF commands
@@ -80,14 +80,14 @@ sub perform {
 
 	if ( $nslookup_rc != 0 ) {
 		error(
-			"\n#R{DNS Resolution Failed:}\n"
-			  . "Unable to resolve API domain: #Y{%s}\n" . "\n"
-			  . "This typically means:\n"
-			  . "  • The DNS is not configured or propagated yet\n"
-			  . "  • There's a typo in the domain name\n"
-			  . "  • The load balancer hasn't been set up yet\n" . "\n"
-			  . "Please ensure the Cloud Foundry deployment has completed successfully\n"
-			  . "and that DNS records have been properly configured.\n",
+			"\n#R{DNS Resolution Failed:}\n" .
+			  "Unable to resolve API domain: #Y{%s}\n" . "\n" .
+			  "This typically means:\n" .
+			  "  • The DNS is not configured or propagated yet\n" .
+			  "  • There's a typo in the domain name\n" .
+			  "  • The load balancer hasn't been set up yet\n" . "\n" .
+			  "Please ensure the Cloud Foundry deployment has completed successfully\n" .
+			  "and that DNS records have been properly configured.\n",
 			$api_domain
 		);
 		return $self->done();
@@ -101,13 +101,13 @@ sub perform {
 		|| ( $curl_test !~ /^[23]\d\d$/ && $curl_test ne "000" ) )
 	{
 		error(
-			"\n#R{API Endpoint Unreachable:}\n"
-			  . "Unable to connect to API at: #Y{%s}\n" . "\n"
-			  . "This typically means:\n"
-			  . "  • The load balancer is not yet available\n"
-			  . "  • Firewall rules are blocking access\n"
-			  . "  • The CF deployment hasn't fully started\n" . "\n"
-			  . "HTTP Status: %s\n",
+			"\n#R{API Endpoint Unreachable:}\n" .
+			  "Unable to connect to API at: #Y{%s}\n" . "\n" .
+			  "This typically means:\n" .
+			  "  • The load balancer is not yet available\n" .
+			  "  • Firewall rules are blocking access\n" .
+			  "  • The CF deployment hasn't fully started\n" . "\n" .
+			  "HTTP Status: %s\n",
 			$api_url, $curl_test
 		);
 		return $self->done();
@@ -115,9 +115,9 @@ sub perform {
 
 	# Check if cf command is available
 	if ( !run( { passfail => 1 }, 'which', 'cf' ) ) {
-		error(  "\n#R{CF CLI Not Found:}\n"
-			  . "The 'cf' command line tool is not installed or not in PATH.\n"
-			  . "Please install the CF CLI to interact with Cloud Foundry.\n" );
+		error( "\n#R{CF CLI Not Found:}\n" .
+			  "The 'cf' command line tool is not installed or not in PATH.\n" .
+			  "Please install the CF CLI to interact with Cloud Foundry.\n" );
 		return $self->done();
 	}
 
@@ -128,9 +128,9 @@ sub perform {
 
 	if ( $cf_api_rc != 0 ) {
 		error(
-			"\n#R{CF API Connection Failed:}\n"
-			  . "Unable to set CF API endpoint.\n"
-			  . "Error: %s\n",
+			"\n#R{CF API Connection Failed:}\n" .
+			  "Unable to set CF API endpoint.\n" .
+			  "Error: %s\n",
 			$cf_api_output
 		);
 		return $self->done();

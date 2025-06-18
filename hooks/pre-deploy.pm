@@ -287,11 +287,11 @@ sub cloud_config_needs {
 
 	my ( $out, $rc, $err ) = $bosh->execute(
 		{ stderr => 0, redact => 1 },
-		'cloud-config | spruce json | jq -r --arg t "'
-		  . $type
-		  . 's" --arg n "'
-		  . $name . '" \''
-		  . $jq_query . '\''
+		'cloud-config | spruce json | jq -r --arg t "' .
+		  $type .
+		  's" --arg n "' .
+		  $name . '" \'' .
+		  $jq_query . '\''
 	);
 
 	if ( $rc || !$out ) {
