@@ -1,0 +1,9 @@
+# Use tabs instead of 4 spaces
+--entab-leading-whitespace=4
+
+--maximum-line-length=100
+
+# Keep opening braces on same line
+--no-opening-sub-brace-on-new-line
+--no-opening-brace-on-new-line
+

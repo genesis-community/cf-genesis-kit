@@ -1,87 +1,92 @@
-# vim: set ts=2 sw=2 sts=2 noet fdm=marker foldlevel=1:
 package Genesis::Hook::Addon::CF::Login;
 
 use v5.20;
 use warnings;
 
 # Only needed for development
-BEGIN {push @INC, $ENV{GENESIS_LIB} ? $ENV{GENESIS_LIB} : $ENV{HOME}.'/.genesis/lib'}
+BEGIN { push @INC, $ENV{GENESIS_LIB} ? $ENV{GENESIS_LIB} : $ENV{HOME} . '/.genesis/lib' }
 
 use parent qw(Genesis::Hook::Addon);
 
-use Genesis qw/bail info run/;
+use Genesis     qw/bail info run/;
 use Genesis::UI qw/prompt_for_boolean/;
+
 sub init {
-  my $class = shift;
-  my $obj = $class->SUPER::init(@_);
-  $obj->check_minimum_genesis_version('3.1.0-rc.20');
-  return $obj;
+	my $class = shift;
+	my $obj   = $class->SUPER::init(@_);
+	$obj->check_minimum_genesis_version('3.1.0-rc.20');
+	return $obj;
 }
 
 sub cmd_details {
-  return
-  "Log into the Cloud Foundry instance as the admin user account.\n".
-  "This will overwrite local cf CLI configuration!\n".
-  "Supports the following options:\n".
-  "[[  #y{--yes, -y}          >>Skip all confirmations, useful for non-interactive environments like pipelines\n".
-  "[[  #y{--validate-ssl}     >>Enforce SSL validation when connecting to the CF API";
+	return
+		"Log into the Cloud Foundry instance as the admin user account.\n"
+	  . "This will overwrite local cf CLI configuration!\n"
+	  . "Supports the following options:\n"
+	  . "[[  #y{--yes, -y}          >>Skip all confirmations, useful for non-interactive environments like pipelines\n"
+	  . "[[  #y{--validate-ssl}     >>Enforce SSL validation when connecting to the CF API";
 }
 
 sub perform {
-  my ($self) = @_;
-  my $env = $self->env;
+	my ($self) = @_;
+	my $env = $self->env;
 
-  # Parse options
-  my %options = $self->parse_options([
-    'yes|y',           # Skip confirmation prompts
-    'validate-ssl',    # Enforce SSL validation
-  ]);
+	# Parse options
+	my %options = $self->parse_options(
+		[
+			'yes|y',           # Skip confirmation prompts
+			'validate-ssl',    # Enforce SSL validation
+		]
+	);
 
-  my $non_interactive = $options{'yes'} ? 1 : 0;
-  my $validate_ssl = $options{'validate-ssl'} ? 1 : 0;
+	my $non_interactive = $options{'yes'}          ? 1 : 0;
+	my $validate_ssl    = $options{'validate-ssl'} ? 1 : 0;
 
-  my $use_cf_targets = 1;
-  my ($out, $rc) = run('cf plugins | grep -q \'^cf-targets\'');
-  if ($rc != 0) {
-    $use_cf_targets = 0;
-    info(
-      "#Y{The cf-targets plugin does not seem to be installed}\n".
-      "It is recommended you install it first, via #G{%s do setup-cli}'\n\n".
-      "[[NOTE: >>It is not compatible with Apple M1 (arm) architecture",
-      $env->get_call_path_with_env
-    );
+	my $use_cf_targets = 1;
+	my ( $out, $rc ) = run('cf plugins | grep -q \'^cf-targets\'');
+	if ( $rc != 0 ) {
+		$use_cf_targets = 0;
+		info(
+			"#Y{The cf-targets plugin does not seem to be installed}\n"
+			  . "It is recommended you install it first, via #G{%s do setup-cli}'\n\n"
+			  . "[[NOTE: >>It is not compatible with Apple M1 (arm) architecture",
+			$env->get_call_path_with_env
+		);
 
-    # Skip confirmation if in non-interactive mode
-    if (!$non_interactive) {
-      my $continue = prompt_for_boolean("Continue anyways?", 0);
-      return $self->done(0) unless $continue;
-    } else {
-      info("Running in non-interactive mode, continuing without cf-targets plugin...");
-    }
-  }
+		# Skip confirmation if in non-interactive mode
+		if ( !$non_interactive ) {
+			my $continue = prompt_for_boolean( "Continue anyways?", 0 );
+			return $self->done(0) unless $continue;
+		}
+		else {
+			info("Running in non-interactive mode, continuing without cf-targets plugin...");
+		}
+	}
 
-  # Get CF credentials from exodus data
-  my $exodus = $self->exodus_data();
-	my ($api_domain, $username, $password) =
-		$exodus->@{qw/api_domain admin_username admin_password/};
-  my $api_url = "https://${api_domain}";
+	# Get CF credentials from exodus data
+	my $exodus = $self->exodus_data();
+	my ( $api_domain, $username, $password ) =
+	  $exodus->@{qw/api_domain admin_username admin_password/};
+	my $api_url = "https://${api_domain}";
 
-  # Handle SSL validation based on option
-  if ($validate_ssl) {
-    info("Using SSL validation for CF API connection");
-    run('cf api "$1"', $api_url);
-  } else {
-    run('cf api "$1" --skip-ssl-validation', $api_url);
-  }
+	# Handle SSL validation based on option
+	if ($validate_ssl) {
+		info("Using SSL validation for CF API connection");
+		run( 'cf api "$1"', $api_url );
+	}
+	else {
+		run( 'cf api "$1" --skip-ssl-validation', $api_url );
+	}
 
-  run('cf auth "$1" "$2"', $username, $password);
+	run( 'cf auth "$1" "$2"', $username, $password );
 
-  run('cf save-target -f "$1"', $ENV{GENESIS_ENVIRONMENT}) if ($use_cf_targets);
+	run( 'cf save-target -f "$1"', $ENV{GENESIS_ENVIRONMENT} ) if ($use_cf_targets);
 
-  info("\n\n");
-  run('cf target');
+	info("\n\n");
+	run('cf target');
 
-  return $self->done();
+	return $self->done();
 }
 
 1;
+# vim: set ts=2 sw=2 sts=2 noet fdm=marker foldlevel=1:
