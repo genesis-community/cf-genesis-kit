@@ -306,7 +306,7 @@ sub fetch_uri {
 	my ( $self, $url ) = @_;
 	my $filename = basename($url);
 
-	$self->env->notify("Downloading $filename...");
+	info("Downloading $filename...");
 	my ( $out, $rc, $err ) =
 	  run("curl --fail --silent --show-error --location --remote-name --url \"$url\"");
 
@@ -317,7 +317,7 @@ sub fetch_uri {
 sub fetch_artifacts {
 	my ( $self, $configserver_jar_uri, $registry_jar_uri ) = @_;
 
-	$self->env->notify("Downloading service artifacts...");
+	info("Downloading service artifacts...");
 	run("mkdir -p artifacts");
 
 	pushd("artifacts");
@@ -331,7 +331,7 @@ sub fetch_artifacts {
 sub extract {
 	my ( $self, $archive ) = @_;
 
-	$self->env->notify("Extracting $archive...");
+	info("Extracting $archive...");
 
 	if ( $archive =~ /\.zip$/ ) {
 		run("unzip -o \"$archive\"");

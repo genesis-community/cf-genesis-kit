@@ -30,7 +30,7 @@ sub perform {
 	# 1. Upgrade check - migration from older versions
 	my $version = $env->exodus_lookup('kit_version');
 	if ( defined($version) && !new_enough( $version, "2.0.0-rc1" ) ) {
-		$env->notify("migrating v#C{${version}} kit secrets from Vault to Credhub...");
+		info("migrating v#C{${version}} kit secrets from Vault to Credhub...");
 
 		# Original script sources external migration functions
 		# We'd implement these methods in a real module
@@ -40,14 +40,14 @@ sub perform {
 	}
 
 	# 2. Cloud Config checks
-	$env->notify("checking BOSH Cloud Config meets requirements of generated manifest...");
+	info("checking BOSH Cloud Config meets requirements of generated manifest...");
 
 	my $manifest_json = $self->get_manifest_json();
 
 	# Check for missing required fields in instance groups
 	my @missing = $self->check_missing_fields($manifest_json);
 	if (@missing) {
-		$env->notify(
+		info(
 			"  Invalid Instance Groups (missing one or more required fields):",
 			join( "\n", @missing ),
 			"", "  Note: this could be because an instance group has been renamed", ""
@@ -61,7 +61,7 @@ sub perform {
 	#  my @vm_extensions = $self->extract_vm_extensions($manifest_json);
 	#  my @disks = $self->extract_disks($manifest_json);
 	#
-	#  $self->env->notify("  Checking cloud config resources for manifest requirements...");
+	#  info("  Checking cloud config resources for manifest requirements...");
 
 	# Genesis 3.1 now provides cloud config differently.
 	# Check if cloud config has all the required elements
@@ -88,10 +88,10 @@ sub perform {
 
 	# Check if there were any errors
 	if ( $self->{cc_ok} eq 'yes' ) {
-		$env->notify("  cloud config [#G{OK}]");
+		info("  cloud config [#G{OK}]");
 	}
 	else {
-		$env->notify("  cloud config [#R{FAILED}]");
+		info("  cloud config [#R{FAILED}]");
 		return $self->done(0);
 	}
 
@@ -104,7 +104,7 @@ sub validate_expected_vault_secrets {
 
 	# The original script just has a placeholder function that does nothing
 	# (defined as `: # TODO`)
-	$self->env->notify(
+	info(
 "  Validating expected vault secrets... #Ki{(placeholder - no validation actually performed)}"
 	);
 	return 1;
@@ -115,7 +115,7 @@ sub correct_x509_certs {
 
 	# The original script just has a placeholder function that does nothing
 	# (defined as `: # TODO`)
-	$self->env->notify(
+	info(
 		"  Correcting x509 certificates... #Ki{(placeholder - no correction actually performed)}");
 	return 1;
 }
@@ -126,7 +126,7 @@ sub migrate_credentials_to_credhub {
 	# This function has a real implementation in the migrate-to-2.0 script
 	# Let's execute it properly
 
-	$self->env->notify("  Migrating credentials from Vault to CredHub...");
+	info("  Migrating credentials from Vault to CredHub...");
 
 	my ( $out, $rc, $err ) = run(
 		{
@@ -144,11 +144,11 @@ sub migrate_credentials_to_credhub {
 	);
 
 	if ($rc) {
-		$self->env->notify("  #R{Failed to migrate credentials to CredHub: $err}");
+		info("  #R{Failed to migrate credentials to CredHub: $err}");
 		return 0;
 	}
 
-	$self->env->notify("  #G{Successfully migrated credentials to CredHub}");
+	info("  #G{Successfully migrated credentials to CredHub}");
 	return 1;
 }
 
@@ -295,12 +295,12 @@ sub cloud_config_needs {
 	);
 
 	if ( $rc || !$out ) {
-		$self->env->notify("  #R{missing} #m{$type}: #C{$name}");
+		info("  #R{missing} #m{$type}: #C{$name}");
 		$self->{cc_ok} = 'no';
 		return 0;
 	}
 
-	$self->env->notify("  #G{found} #m{$type}: #C{$name}") if $ENV{GENESIS_TRACE};
+	info("  #G{found} #m{$type}: #C{$name}") if $ENV{GENESIS_TRACE};
 	return 1;
 }
 
@@ -316,7 +316,7 @@ sub check_cloud_config {
 	my ( $out, $rc, $err ) = $bosh->execute( { stderr => 0 }, 'cloud-config > /dev/null 2>&1' );
 
 	if ($rc) {
-		$self->env->notify("  #R{Cloud config appears to be invalid or inaccessible}");
+		info("  #R{Cloud config appears to be invalid or inaccessible}");
 		$self->{cc_ok} = 'no';
 		return 0;
 	}
