@@ -18,7 +18,7 @@ use Archive::Tar;
 sub init {
 	my $class = shift;
 	my $obj   = $class->SUPER::init(@_);
-	$obj->check_minimum_genesis_version('3.1.0-rc.20');
+	$obj->check_minimum_genesis_version('3.1.0');
 
 	# Initialize all state variables needed by the hook
 	# $obj->{files} is initialized by parent. We'll use add_files directly.

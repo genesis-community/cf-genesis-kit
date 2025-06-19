@@ -15,29 +15,29 @@ use JSON::PP;
 sub init {
 	my $class = shift;
 	my $obj   = $class->SUPER::init(@_);
-	$obj->check_minimum_genesis_version('3.1.0-rc.20');
+	$obj->check_minimum_genesis_version('3.1.0');
 	return $obj;
 }
 
 sub cmd_details {
 	return
-	  "Deploy and register Spring Cloud Services broker to CF. Supports the following options:\n" .
-	  "[[  #y{deploy}               >>Deploy the SCS broker to the targeted CF environment\n" .
-	  "[[  #y{register}             >>Register the SCS broker with CF\n" .
-	  "[[  #y{memory <size>}        >>Memory allocation for the broker app (default: 256M)\n" .
-	  "[[  #y{disk <size>}          >>Disk allocation for the broker app (default: 1048M)\n" .
-	  "[[  #y{stack <stack>}        >>Cloud Foundry stack to use (default: cflinuxfs4)\n" .
-	  "[[  #y{buildpack <name>}     >>Buildpack to use for the broker (default: go_buildpack)\n" .
-"[[  #y{registry_buildpack <name>}  >>Buildpack for registry service (default: java_buildpack)\n"
-	  . "[[  #y{configserver_buildpack <name>} >>Buildpack for config server (default: java_buildpack)\n"
-	  . "[[  #y{release_tag <tag>}    >>Release tag to use (default: 2023.0.1)\n"
-	  . "[[  #y{broker_uri <uri>}     >>URI to download the broker from\n"
-	  . "[[  #y{broker_username <user>} >>Username for broker auth (default: admin)\n"
-	  . "[[  #y{broker_password <pwd>}  >>Password for broker auth (default: admin)\n"
-	  . "[[  #y{configserver_jar_uri <uri>} >>URI to download config server JAR\n"
-	  . "[[  #y{registry_jar_uri <uri>}     >>URI to download registry JAR\n"
-	  . "[[  #y{java_version <version>}     >>Java version to use (default: 17.+)\n"
-	  . "[[  #y{skip_ssl_validation <true|false>} >>Skip SSL validation (default: true)\n";
+	"Deploy and register Spring Cloud Services broker to CF. Supports the following options:\n" .
+	"[[  #y{deploy}               >>Deploy the SCS broker to the targeted CF environment\n" .
+	"[[  #y{register}             >>Register the SCS broker with CF\n" .
+	"[[  #y{memory <size>}        >>Memory allocation for the broker app (default: 256M)\n" .
+	"[[  #y{disk <size>}          >>Disk allocation for the broker app (default: 1048M)\n" .
+	"[[  #y{stack <stack>}        >>Cloud Foundry stack to use (default: cflinuxfs4)\n" .
+	"[[  #y{buildpack <name>}     >>Buildpack to use for the broker (default: go_buildpack)\n" .
+	"[[  #y{registry_buildpack <name>}  >>Buildpack for registry service (default: java_buildpack)\n".
+	"[[  #y{configserver_buildpack <name>} >>Buildpack for config server (default: java_buildpack)\n."
+	"[[  #y{release_tag <tag>}    >>Release tag to use (default: 2023.0.1)\n".
+	"[[  #y{broker_uri <uri>}     >>URI to download the broker from\n".
+	"[[  #y{broker_username <user>} >>Username for broker auth (default: admin)\n".
+	"[[  #y{broker_password <pwd>}  >>Password for broker auth (default: admin)\n".
+	"[[  #y{configserver_jar_uri <uri>} >>URI to download config server JAR\n".
+	"[[  #y{registry_jar_uri <uri>}     >>URI to download registry JAR\n".
+	"[[  #y{java_version <version>}     >>Java version to use (default: 17.+)\n".
+	"[[  #y{skip_ssl_validation <true|false>} >>Skip SSL validation (default: true)\n";
 }
 
 sub perform {
@@ -149,7 +149,7 @@ sub perform {
 	my $scs_client_secret = $self->vault->get("$exodus_path:scs_secret");
 
 	# Create CF space
-	$env->notify("Setting up CF organization and space...");
+	info("Setting up CF organization and space...");
 	run("cf create-space -o \"$config{org}\" \"$config{space}\"");
 	run("cf target -o \"$config{org}\" -s \"$config{space}\"");
 
@@ -158,7 +158,7 @@ sub perform {
 	chomp($scs_space_guid);
 
 	if ( $config{deploy} ) {
-		$env->notify("Deploying SCS Broker...");
+		info("Deploying SCS Broker...");
 
 		# Create temporary directory
 		my $tmp_dir = $env->workpath("scs-deploy");
@@ -258,13 +258,12 @@ MANIFEST
 		mkfile_or_fail( "manifest.yml", $manifest_content );
 
 		# Push the app to CF
-		$env->notify("Pushing SCS Broker to Cloud Foundry...");
-		run("cf push -f manifest.yml");
+		info("Pushing SCS Broker to Cloud Foundry...");
+		run({interactive => 0},"cf push -f manifest.yml");
 
-		$env->notify(
-			"SCS service broker is now running, you should now be able to create a service, e.g.:");
 		info(
-"  \$ cf create-service config-server default test-service -c \"{...whatever json configuration you wish to use for config-server - see config-server docs from Spring.io...}\""
+			"SCS service broker is now running, you should now be able to create a service, e.g.:\n".
+			"  \$ cf create-service config-server default test-service -c \"{...whatever json configuration you wish to use for config-server - see config-server docs from Spring.io...}\""
 		);
 
 		# Clean up
@@ -273,9 +272,10 @@ MANIFEST
 	}
 
 	if ( $config{register} ) {
-		$env->notify("Registering SCS Broker...");
+		info("Registering SCS Broker...");
 
-		# Check if broker is already registered
+		info("Checking if broker is already registered...")
+		# TODO: Switch to read_json_from($self->env->bosh->execute())
 		my ( $broker_json, $rc ) = run("cf curl \"/v2/service_brokers\"");
 		my $json_data = eval { decode_json($broker_json) };
 		bail("Failed to parse broker list JSON: $@") if $@;
@@ -291,7 +291,7 @@ MANIFEST
 		}
 
 		my $action = $broker_found ? "update" : "create";
-		$env->notify( ucfirst($action) . "ing the service broker..." );
+		info( ucfirst($action) . "ing the service broker..." );
 
 		run(
 "cf $action-service-broker \"$config{broker_name}\" \"$config{broker_auth_username}\" \"$config{broker_auth_password}\" \"https://scs-broker.$apps_domain\""

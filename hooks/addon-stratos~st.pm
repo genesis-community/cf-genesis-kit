@@ -40,23 +40,23 @@ sub init {
 
 sub cmd_details {
 	return
-"Manage and display information about Stratos UI deployments. Supports the following commands:\n"
-	  . "[[  #y{info}                >>Display information about the Stratos deployment\n"
-	  . "[[  #y{deploy}              >>Deploy Stratos as a CF app\n"
-	  . "[[  #y{open}                >>Open the Stratos UI in your browser\n\n"
-	  . "Display Options:\n"
-	  . "[[  #y{--json}              >>Output information in JSON format\n"
-	  . "[[  #y{--urls-only}         >>Only display URLs\n\n"
-	  . "Deploy Options:\n"
-	  . "[[  #y{--buildpack <name>}  >>Buildpack to use (default: binary_buildpack)\n"
-	  . "[[  #y{--disk <size>}       >>Disk allocation (default: 1024M)\n"
-	  . "[[  #y{--file <path>}       >>Path to Stratos zip file (will download from GitHub if not specified)\n"
-	  . "[[  #y{--force}             >>Force redeployment even if already deployed\n"
-	  . "[[  #y{--memory <size>}     >>Memory allocation (default: 1512M)\n"
-	  . "[[  #y{--skip-cf-check}     >>Skip CF CLI availability check\n"
-	  . "[[  #y{--stack <name>}      >>Stack to use (default: cflinuxfs4)\n"
-	  . "[[  #y{--timeout <seconds>} >>Application startup timeout (default: 180)\n"
-	  . "[[  #y{--version <ver>}     >>Stratos version to deploy (overrides configuration and defaults)\n";
+	"Manage and display information about Stratos UI deployments. Supports the following commands:\n".
+	"[[  #y{info}                >>Display information about the Stratos deployment\n".
+	"[[  #y{deploy}              >>Deploy Stratos as a CF app\n".
+	"[[  #y{open}                >>Open the Stratos UI in your br.owser\n\n".
+	"Display Options:\n".
+	"[[  #y{--json}              >>Output information in JSON format\n".
+	"[[  #y{--urls-only}         >>Only display URLs\n\n".
+	"Deploy Options:\n".
+	"[[  #y{--buildpack <name>}  >>Buildpack to use (default: binary_buildpack)\n".
+	"[[  #y{--disk <size>}       >>Disk allocation (default: 1024M)\n".
+	"[[  #y{--file <path>}       >>Path to Stratos zip file (will download from GitHub if not specified)\n".
+	"[[  #y{--force}             >>Force redeployment even if already deployed\n".
+	"[[  #y{--memory <size>}     >>Memory allocation (default: 1512M)\n".
+	"[[  #y{--skip-cf-check}     >>Skip CF CLI availability check\n".
+	"[[  #y{--stack <name>}      >>Stack to use (default: cflinuxfs4)\n".
+	"[[  #y{--timeout <seconds>} >>Application startup timeout (default: 180)\n".
+	"[[  #y{--version <ver>}     >>Stratos version to deploy (overrides configuration and defaults)\n";
 }
 
 sub perform {
@@ -158,15 +158,14 @@ sub _get_stratos_info {
 	my $cf_app_status      = "unknown";
 
 	# Check if CF app is deployed
-	if ( !run( { passfail => 1 }, 'cf', 'app', $cf_app_name ) ) {
+	if ( !run( {interactive => 0}, { passfail => 1 }, 'cf', 'app', $cf_app_name ) ) {
 		$is_cf_app_deployed = 0;
 	}
 	else {
 		$is_cf_app_deployed = 1;
 
 		# Get the app status
-		my ( $app_info, $app_rc ) =
-		  run( { stderr => 0 }, 'cf', 'app', $cf_app_name );
+		my ( $app_info, $app_rc ) = run( {interactive => 0}, { stderr => 0 }, 'cf', 'app', $cf_app_name );
 		if ( $app_rc == 0 ) {
 
 			# Parse the status from the output
@@ -261,7 +260,7 @@ sub display_info {
 		close $fh;
 
 		my ( $json_out, $rc ) =
-		  run( { stderr => 0 }, 'spruce', 'json', "$tmp/info.yml" );
+		  run( {interactive => 0}, { stderr => 0 }, 'spruce', 'json', "$tmp/info.yml" );
 		bail("Failed to convert to JSON") if $rc != 0;
 		info($json_out);
 		return 1;
@@ -347,7 +346,7 @@ sub deploy_stratos {
 	my $env  = $self->env;
 	my $info = $self->{info};
 
-	$env->notify("deploying Stratos as a CF application...");
+	info("deploying Stratos as a CF application...");
 
 	# Check if already deployed
 	if ( $info->{is_cf_app_deployed} && !$options{force} ) {
@@ -357,7 +356,8 @@ sub deploy_stratos {
 
 	# Check CF CLI is available
 	unless ( $options{'skip-cf-check'} ) {
-		if ( !run( { passfail => 1 }, 'cf', '--version' ) ) {
+		if ( !run( {interactive => 0}, { passfail => 1 }, 'cf', '--version' )
+		) {
 			bail(
 "CF CLI not found. Please install it or use --skip-cf-check if you're sure it's available."
 			);
@@ -369,7 +369,7 @@ sub deploy_stratos {
 	  unless $info->{cf_api};
 
 	# Check if we're logged in to CF
-	if ( !run( { passfail => 1 }, 'cf', 'target' ) ) {
+	if ( !run( {interactive => 0}, { passfail => 1 }, 'cf', 'target' ) ) {
 		warning("Not logged in to CF. Please log in first with 'cf login'");
 		bail("CF authentication required before deployment");
 	}
@@ -435,22 +435,37 @@ sub deploy_stratos {
 
 	if ( $options{file} && -f $options{file} ) {
 		info( "Using provided Stratos file: %s", $options{file} );
-		run( { onfailure => "Failed to unzip Stratos file" }, 'unzip', '-o', $options{file} );
+		run(
+			{interactive => 0},
+			{ onfailure => "Failed to unzip Stratos file" }, 'unzip', '-o', $options{file}
+		);
 	}
 	else {
 		info( "Downloading Stratos %s...", $stratos_version );
-		run( { onfailure => "Failed to download Stratos" }, 'wget', $stratos_releases_url );
-		run( { onfailure => "Failed to unzip Stratos" },
-			'unzip', '-o', "stratos-ui-${stratos_version}.zip" );
+		run(
+			{interactive => 0},
+			{ onfailure => "Failed to download Stratos" }, 'wget', $stratos_releases_url
+		);
+		run(
+			{interactive => 0},
+			{ onfailure => "Failed to unzip Stratos" },
+			'unzip', '-o', "stratos-ui-${stratos_version}.zip"
+		);
 		unlink("stratos-ui-${stratos_version}.zip");
 	}
 
 	# Target the correct CF organization and space
 	info("Targeting CF organization 'system' and space 'stratos'...");
-	run( { onfailure => "Failed to create space" },
-		'cf', 'create-space', '-o', 'system', 'stratos' );
-	run( { onfailure => "Failed to target space" },
-		'cf', 'target', '-o', 'system', '-s', 'stratos' );
+	run(
+		{interactive => 0},
+		{ onfailure => "Failed to create space" },
+		'cf', 'create-space', '-o', 'system', 'stratos'
+	);
+	run(
+		{interactive => 0},
+		{ onfailure => "Failed to target space" },
+		'cf', 'target', '-o', 'system', '-s', 'stratos'
+	);
 
 	# Configure database via CUPS
 	info("Configuring Stratos Database Connection via CUPS Services");
@@ -458,25 +473,37 @@ sub deploy_stratos {
 
 	# Check if service already exists
 	my ( $org_guid, $org_rc ) =
-	  run( { stderr => 0 }, 'cf', 'org', 'system', '--guid' );
+	  run(
+			{interactive => 0},
+			{ stderr => 0 }, 'cf', 'org', 'system', '--guid'
+		);
 	bail("Failed to get organization GUID") if $org_rc != 0;
 	chomp($org_guid);
 
 	my ( $space_guid, $space_rc ) =
-	  run( { stderr => 0 }, 'cf', 'space', 'stratos', '--guid' );
+	  run(
+			{interactive => 0},
+			{ stderr => 0 }, 'cf', 'space', 'stratos', '--guid'
+		);
 	bail("Failed to get space GUID") if $space_rc != 0;
 	chomp($space_guid);
 
 	# Check if service exists using CF API
-	my ( $svc_list, $svc_rc ) = run( { stderr => 0 },
+	my ( $svc_list, $svc_rc ) = run(
+		{interactive => 0},
+		{ stderr => 0 },
 		'cf', 'curl',
-		"/v3/service_instances?organization_guids=${org_guid}&space_guids=${space_guid}" );
+		"/v3/service_instances?organization_guids=${org_guid}&space_guids=${space_guid}"
+	);
 	bail("Failed to query service instances") if $svc_rc != 0;
 
 	# Parse the JSON to check if our service exists
 	my $svc_exists = '';
 	my ( $jq_out, $jq_rc ) =
-	  run( { stderr => 0 }, 'jq', '-r', ".resources[]|select(.name|test(\"${svc_name}\"))|.name" );
+	  run(
+			{interactive => 0},
+			{ stderr => 0 }, 'jq', '-r', ".resources[]|select(.name|test(\"${svc_name}\"))|.name"
+		);
 	if ( $jq_rc == 0 ) {
 
 		# Write the service list to a temp file for jq processing
@@ -487,6 +514,7 @@ sub deploy_stratos {
 		close $svc_fh;
 
 		( $svc_exists, $jq_rc ) = run(
+			{interactive => 0},
 			{ stderr => 0 },
 			'jq', '-r', ".resources[]|select(.name|test(\"${svc_name}\"))|.name",
 			$temp_svc_file
@@ -510,7 +538,10 @@ EOF
 	close $db_fh;
 
 	my ( $db_json, $rc_db ) =
-	  run( { stderr => 0 }, 'spruce', 'json', "$tmp_dir/db.yml" );
+	  run(
+			{interactive => 0},
+			{ stderr => 0 }, 'spruce', 'json', "$tmp_dir/db.yml"
+		);
 	bail("Failed to convert database config to JSON") if $rc_db != 0;
 	chomp($db_json);
 
@@ -524,13 +555,19 @@ EOF
 	# Create or update the service
 	if ( $svc_exists eq $svc_name ) {
 		info( "Service %s was found, updating existing cups service definition.", $svc_name );
-		run( { onfailure => "Failed to update service" },
-			'cf', 'uups', $svc_name, '-p', $db_json_file );
+		run(
+			{interactive => 0},
+			{ onfailure => "Failed to update service" },
+			'cf', 'uups', $svc_name, '-p', $db_json_file
+		);
 	}
 	else {
 		info( "Service %s was not found, creating cups service definition.", $svc_name );
-		run( { onfailure => "Failed to create service" },
-			'cf', 'cups', $svc_name, '-p', $db_json_file );
+		run(
+			{interactive => 0},
+			{ onfailure => "Failed to create service" },
+			'cf', 'cups', $svc_name, '-p', $db_json_file
+		);
 	}
 
 	unlink $db_json_file;

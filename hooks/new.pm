@@ -60,20 +60,20 @@ sub ask_for_loadbalancer {
 			prompt_for( "haproxy/ssl:key", "secret-block",
 				'Please provide the private key for that certificate' );
 
-			my ( $out, $rc ) = run('safe x509 validate "${GENESIS_SECRETS_BASE}haproxy/ssl"');
+			my ( $out, $rc ) = run({interactive => 0},'safe x509 validate "${GENESIS_SECRETS_BASE}haproxy/ssl"');
 			if ($rc) {
 				warning("Certificate validation failed: $out");
 				next;
 			}
 
-			($out) = run('safe x509 show "${GENESIS_SECRETS_BASE}haproxy/ssl"');
+			($out) = run({interactive => 0},'safe x509 show "${GENESIS_SECRETS_BASE}haproxy/ssl"');
 
 			$ok = prompt_for( "boolean", 'Is this the correct certificate?' );
 			last if $ok eq 'true';
 		}
 		print "\n";
 
-		my ( $out, $rc ) = run(
+		my ( $out, $rc ) = run({interactive => 0},
 			q{
       credhub "set" -n "${GENESIS_CREDHUB_ROOT}/haproxy_ssl" -t certificate -r /dev/null \
       -c <(safe read "${GENESIS_SECRETS_BASE}haproxy/ssl:certificate" | sed -e '/^$/d') \
@@ -83,7 +83,7 @@ sub ask_for_loadbalancer {
 
 		bail("#R{[ERROR]} Could not write to credhub: $out") if $rc;
 
-		run('safe rm "${GENESIS_SECRETS_BASE}haproxy/ssl"');
+		run({interactive => 0},'safe rm "${GENESIS_SECRETS_BASE}haproxy/ssl"');
 	}
 	else {
 		push @{ $self->{features} }, 'self-signed';
@@ -97,11 +97,11 @@ sub move_secrets_to_credhub {
 	my ( $self, $vault_path, $credhub_key ) = @_;
 
 	# First, read the secret from Vault
-	my ( $secret_value, $rc_read ) = run(qq{safe read "${ENV{GENESIS_SECRETS_BASE}}$vault_path"});
+	my ( $secret_value, $rc_read ) = run({interactive => 0},qq{safe read "${ENV{GENESIS_SECRETS_BASE}}$vault_path"});
 	bail("Failed to read secret from vault: $secret_value") if $rc_read;
 
 	# Store it in Credhub
-	my ( $out, $rc ) = run(
+	my ( $out, $rc ) = run{interactive => 0},(
 		qq{
     credhub set -n "/${ENV{GENESIS_CREDHUB_ROOT}}/$credhub_key" -t value -v "$secret_value"
     }
@@ -110,7 +110,7 @@ sub move_secrets_to_credhub {
 	bail("Failed to move secret from vault to credhub: $out") if $rc;
 
 	# Remove it from Vault
-	my ( $rm_out, $rm_rc ) = run(qq{safe rm "${ENV{GENESIS_SECRETS_BASE}}$vault_path"});
+	my ( $rm_out, $rm_rc ) = run({interactive => 0},qq{safe rm "${ENV{GENESIS_SECRETS_BASE}}$vault_path"});
 	warning("Failed to remove secret from vault after moving to credhub: $rm_out") if $rm_rc;
 }
 
@@ -175,7 +175,7 @@ sub ask_for_database {
 		my $db_host = prompt_for( "line", "What is the hostname or IP of your $inst?" );
 		my $db_user = prompt_for( "line", "What is your $inst database username?" );
 
-		run(qq{credhub set -n "/$ENV{GENESIS_CREDHUB_ROOT}/external_db_user" -t value -v "$db_user"}
+		run({interactive => 0},qq{credhub set -n "/$ENV{GENESIS_CREDHUB_ROOT}/external_db_user" -t value -v "$db_user"}
 		);
 
 		prompt_for( "external_db:password", "secret-line",
@@ -195,7 +195,7 @@ sub get_cf_version {
 	my ($self) = @_;
 
 	# Using the same command as the bash script for consistent behavior
-	my ($out) = run('spruce json cf-deployment/cf-deployment.yml | jq -r \'.manifest_version\'');
+	my ($out) = run({interactive => 0},'spruce json cf-deployment/cf-deployment.yml | jq -r \'.manifest_version\'');
 
 	# Strip any trailing whitespace
 	chomp($out);
@@ -540,7 +540,7 @@ sub generate_env_file {
 	}
 
 	# Include Genesis config block (provided by Genesis)
-	my ($out) = run('genesis_config_block');
+	my ($out) = run({interactive => 0},'genesis_config_block');
 	print $fh $out;
 
 	# Write domain configuration
@@ -581,7 +581,7 @@ sub generate_env_file {
 	close $fh;
 
 	# Offer environment editor to the user
-	run('offer_environment_editor');
+	run({interactive => 0},'offer_environment_editor');
 
 	return 1;
 }

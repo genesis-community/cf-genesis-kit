@@ -94,7 +94,7 @@ sub perform {
 	}
 
 	# Check if we can reach the API endpoint
-	my ( $curl_test, $curl_rc ) = run( { stderr => 0 },
+	my ( $curl_test, $curl_rc ) = run( {interactive => 0}, { stderr => 0 },
 		'curl', '-s', '-o', '/dev/null', '-w', '%{http_code}', '--connect-timeout', '5', $api_url );
 
 	if ( $curl_rc != 0
@@ -114,7 +114,7 @@ sub perform {
 	}
 
 	# Check if cf command is available
-	if ( !run( { passfail => 1 }, 'which', 'cf' ) ) {
+	if ( !run({interactive => 0}, { passfail => 1 }, 'which', 'cf' ) ) {
 		error( "\n#R{CF CLI Not Found:}\n" .
 			  "The 'cf' command line tool is not installed or not in PATH.\n" .
 			  "Please install the CF CLI to interact with Cloud Foundry.\n" );
@@ -124,7 +124,7 @@ sub perform {
 	# If the Load Balancer isn't availabe this will fail
 	# Also fails if "cf" command is missing
 	my ( $cf_api_output, $cf_api_rc ) =
-	  run( { stderr => 0 }, 'cf', 'api', $api_url, '--skip-ssl-validation' );
+	  run({interactive => 0}, { stderr => 0 }, 'cf', 'api', $api_url, '--skip-ssl-validation' );
 
 	if ( $cf_api_rc != 0 ) {
 		error(
@@ -137,7 +137,7 @@ sub perform {
 	}
 
 	my $cf_curl_output =
-	  run( { onfailure => "Error executing 'cf curl /info'", stderr => 0 }, 'cf', 'curl', '/info' );
+	  run({interactive => 0}, { onfailure => "Error executing 'cf curl /info'", stderr => 0 }, 'cf', 'curl', '/info' );
 
 	# Parse and format JSON for better display
 	my $data = eval { JSON::PP::decode_json($cf_curl_output) };

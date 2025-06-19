@@ -14,16 +14,17 @@ use Genesis::UI qw/prompt_for_boolean/;
 sub init {
 	my $class = shift;
 	my $obj   = $class->SUPER::init(@_);
-	$obj->check_minimum_genesis_version('3.1.0-rc.20');
+	$obj->check_minimum_genesis_version('3.1.0');
 	return $obj;
 }
 
 sub cmd_details {
-	return "Log into the Cloud Foundry instance as the admin user account.\n" .
-	  "This will overwrite local cf CLI configuration!\n" .
-	  "Supports the following options:\n" .
-"[[  #y{--yes, -y}          >>Skip all confirmations, useful for non-interactive environments like pipelines\n"
-	  . "[[  #y{--validate-ssl}     >>Enforce SSL validation when connecting to the CF API";
+	return
+	"Log into the Cloud Foundry instance as the admin user account.\n" .
+	"This will overwrite local cf CLI configuration!\n" .
+	"Supports the following options:\n" .
+	"[[  #y{--yes, -y}          >>Skip all confirmations, useful for non-interactive environments like pipelines\n".
+	"[[  #y{--validate-ssl}     >>Enforce SSL validation when connecting to the CF API";
 }
 
 sub perform {
@@ -45,10 +46,11 @@ sub perform {
 	my ( $out, $rc ) = run('cf plugins | grep -q \'^cf-targets\'');
 	if ( $rc != 0 ) {
 		$use_cf_targets = 0;
+		# TODO: Check now in 2025 if the NOTE below is still accurate.
 		info(
 			"#Y{The cf-targets plugin does not seem to be installed}\n" .
-			  "It is recommended you install it first, via #G{%s do setup-cli}'\n\n" .
-			  "[[NOTE: >>It is not compatible with Apple M1 (arm) architecture",
+			"It is recommended you install it first, via #G{%s do setup-cli}'\n\n" .
+			"[[NOTE: >>It is not currently compatible with Apple M1 (arm) architecture",
 			$env->get_call_path_with_env
 		);
 
@@ -71,15 +73,15 @@ sub perform {
 	# Handle SSL validation based on option
 	if ($validate_ssl) {
 		info("Using SSL validation for CF API connection");
-		run( 'cf api "$1"', $api_url );
+		run( {interactive => 0}, 'cf', 'api', $api_url);
 	}
 	else {
-		run( 'cf api "$1" --skip-ssl-validation', $api_url );
+		run( {interactive => 0}, 'cf', 'api', '--skip-ssl-validation', $api_url );
 	}
 
-	run( 'cf auth "$1" "$2"', $username, $password );
+	run( {interactive => 0},'cf', 'auth', $username, $password );
 
-	run( 'cf save-target -f "$1"', $ENV{GENESIS_ENVIRONMENT} ) if ($use_cf_targets);
+	run( {interactive => 0}, 'cf', 'save-target', '-f', $ENV{GENESIS_ENVIRONMENT} ) if ($use_cf_targets);
 
 	info("\n\n");
 	run('cf target');
