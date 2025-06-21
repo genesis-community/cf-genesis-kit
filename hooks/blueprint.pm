@@ -267,7 +267,7 @@ sub _dynamic_isolation_segments {
 			}
 			if ( $self->want_feature("ocfp") ) {
 				push @additional_trusted_certs_files,
-				  $self->_dynamic_isolation_template_render( "ocfp-trusted-certs", $group );
+				  $self->_dynamic_isolation_template_render( "trusted-certs", $group );
 			}
 		}
 		$additional_trusted_certs_str = join( " ", @additional_trusted_certs_files );
@@ -1261,11 +1261,14 @@ sub perform {
 		$self->add_files("overlay/blobstore/meta.yml");    # For OCFP controlled blobstore
 														   #}
 
-		$self->add_files( "ocfp/meta.yml", "ocfp/ocfp.yml", "ocfp/trusted-certs.yml" );
-		$self->add_files("ocfp/trusted-certs-cflinuxfs3.yml")
-		  if ( $self->want_feature('cflinuxfs3') );
-		$self->add_files("ocfp/trusted-certs-cflinuxfs4.yml")
-		  if ( $self->want_feature('cflinuxfs4') );
+		$self->add_files( "ocfp/meta.yml", "ocfp/ocfp.yml" );
+		if ( $self->want_feature('trusted-certs') ) {
+			$self->add_files("ocfp/trusted-certs-meta.yml", "ocfp/trusted-certs.yml");
+			$self->add_files("ocfp/trusted-certs-cflinuxfs3.yml")
+			  if ( $self->want_feature('cflinuxfs3') );
+			$self->add_files("ocfp/trusted-certs-cflinuxfs4.yml")
+			  if ( $self->want_feature('cflinuxfs4') );
+		}
 
 		unless ( $self->want_feature("local-postgres-db|internal-db|\+internal-db") ) {
 			if ( $self->{iaas_name} =~ /^(aws|azure|gcp)$/ ) {
@@ -1290,8 +1293,9 @@ sub perform {
 			"ocfp/$self->{iaas_name}/blobstore.yml"
 		);
 		if ( $self->want_feature("windows-diego-cells") ) {
-			$self->add_files( "ocfp/$self->{iaas_name}/windows.yml",
-				"ocfp/trusted-certs-windows.yml" );
+			$self->add_files( "ocfp/$self->{iaas_name}/windows.yml" );
+			$self->add_files( "ocfp/trusted-certs-windows.yml" )
+			  if ( $self->want_feature('trusted-certs') );
 		}
 		$self->add_files("ocfp/scale/${env_scale}.yml");
 
