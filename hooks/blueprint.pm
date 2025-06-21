@@ -284,7 +284,7 @@ sub _dynamic_isolation_segments {
 		# Process the JSON to extract segment data
 		# First apply sed transformation
 		my $sed_transformed = $params_json_str;
-		$sed_transformed =~ s/"(( */"(( defer /g;
+		$sed_transformed =~ s/"\(\( */"\(\( defer /g;
 
 		# Then use jq to extract the segment
 		my ( $segment_json, $jq_rc, $jq_err ) = run( { stderr => 0 },
