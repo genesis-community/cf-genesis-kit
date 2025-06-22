@@ -1,0 +1,14 @@
+---
+kit:
+  name:    dev
+  version: 2.0.0
+  features:
+    - aws-blobstore
+    - no-blobstore-suffix
+
+genesis:
+  env:         blobstore-aws-no-suffix
+
+params:
+  base_domain: cf.testing.example
+  blobstore_s3_region: blobstore-s3-region

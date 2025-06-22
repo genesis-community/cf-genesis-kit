@@ -1,0 +1,6 @@
+meta:
+  blobstore_bucket_path:
+    app-packages: (( concat meta.blobstore_bucket_prefix "-app-packages-" meta.blobstore_bucket_suffix ))
+    buildpacks:   (( concat meta.blobstore_bucket_prefix "-buildpacks-" meta.blobstore_bucket_suffix ))
+    droplets:     (( concat meta.blobstore_bucket_prefix "-droplets-" meta.blobstore_bucket_suffix ))
+    resources:    (( concat meta.blobstore_bucket_prefix "-resources-" meta.blobstore_bucket_suffix ))

@@ -63,6 +63,18 @@ var _ = Describe("Interal Kit", func() {
 		CPI: "aws",
 	})
 	Test(Environment{
+		Name:          "blobstore-aws-with-suffix",
+		CloudConfig:   "aws",
+		RuntimeConfig: "dns",
+		CPI: "aws",
+	})
+	Test(Environment{
+		Name:          "blobstore-aws-no-suffix",
+		CloudConfig:   "aws",
+		RuntimeConfig: "dns",
+		CPI: "aws",
+	})
+	Test(Environment{
 		Name:          "blobstore-gcp",
 		CloudConfig:   "aws",
 		RuntimeConfig: "dns",

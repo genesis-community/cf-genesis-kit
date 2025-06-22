@@ -48,9 +48,9 @@ The Cloud Foundry Genesis Kit requires:
 ## General Usage Guidelines
 
 As per usual with Genesis kits, you will need a Genesis deployment repository
-to contain your environment file. If you don't already have one from a previous 
-`cf` version, run `genesis init -k cf/<version>`, where <version> is replaced with 
-the current cf genesis kit version. If you have this already, you'll need to download 
+to contain your environment file. If you don't already have one from a previous
+`cf` version, run `genesis init -k cf/<version>`, where <version> is replaced with
+the current cf genesis kit version. If you have this already, you'll need to download
 the latest copy of this kit via `genesis fetch-kit` from within that directory.
 
 Once in the Genesis `cf` deployment repository, run `genesis new <env>` to
@@ -108,6 +108,8 @@ Choose one of the following database options:
 - `azure-blobstore` - Use Azure blob storage as external blobstore.
 - `gcp-blobstore` - Use GCS as external blobstore.
 - `gcp-use-access-key` - Use Google storage access key/secret to access the external GCS blobstore (instead of service account credentials which is the default).
+- `blobstore-suffix` - Include the blobstore bucket suffix with a dash separator (e.g., `prefix-app-packages-suffix`).
+- `no-blobstore-suffix` - Remove the blobstore bucket suffix entirely (e.g., `prefix-app-packages` instead of `prefix-app-packages-suffix`). This is the default.
 
 ### Load Balancing Options
 
@@ -543,7 +545,7 @@ following:
   Recommend `2 cpu / 4g mem`.
 
 - `tcp_router_vm_type` - What type of VM to deploy for the TCP router nodes.
-  Recommend `1 cpu / 2g mem`. 
+  Recommend `1 cpu / 2g mem`.
 
 - `uaa_vm_type` - What type of VM to deploy for the nodes in
   the UAA cluster.

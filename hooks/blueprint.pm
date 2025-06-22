@@ -800,6 +800,10 @@ sub _perform_feature_pre_validation {
 			push @curated_features, $want
 			  unless $self->want_feature_in_list( $want, \@curated_features );
 		}
+		elsif ( $want =~ /^(blobstore-suffix|no-blobstore-suffix)$/ ) {
+			push @curated_features, $want
+			  unless $self->want_feature_in_list( $want, \@curated_features );
+		}
 		elsif ( $want =~ /^cf-deployment\// ) {
 			if ( -f "$want.yml" ) {
 				push @curated_features, $want
@@ -1241,6 +1245,20 @@ sub perform {
 		# NOTE: isolation-segments and ocfp are major features often with their own blocks
 	}
 
+	# --- Handle blobstore suffix overlays ---
+	# Apply blobstore suffix handling if any external blobstore is configured
+	my $has_external_blobstore = scalar( @{ $self->{blobstore_selections} } ) > 0;
+	my $has_ocfp_external_blobstore = $self->want_feature("ocfp") && !$self->want_feature("internal-blobstore");
+
+	if ( $has_external_blobstore || $has_ocfp_external_blobstore ) {
+		# Default is no suffix for new deployments, but can be overridden with features
+		if ( $self->want_feature("blobstore-suffix") ) {
+			$self->add_files("overlay/blobstore-suffix.yml");
+		} else { # Default to no-blobstore-suffix for new behavior
+			$self->add_files("overlay/no-blobstore-suffix.yml");
+		}
+	}
+
 	# --- Isolation Segments (formerly features_isos) ---
 	if ( $self->want_feature("isolation-segments") ) {
 		$self->add_files("operations/diego-cells-networking.yml");
@@ -1326,6 +1344,9 @@ sub perform {
 	if ( scalar( @{ $self->{database_selections} } ) > 1 ) {
 		bail( "Too many databases selected; pick only one of: " .
 			  join( ", ", @{ $self->{database_selections} } ) );
+	}
+	if ( $self->want_feature("blobstore-suffix") && $self->want_feature("no-blobstore-suffix") ) {
+		bail( "Cannot specify both 'blobstore-suffix' and 'no-blobstore-suffix' features; pick only one." );
 	}
 
 	my $has_availability_zones = exists( $params_ref->{availability_zones} );
