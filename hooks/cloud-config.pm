@@ -74,35 +74,31 @@ sub perform {
 		},
 	};
 
-	if ( $self->want_feature('split-network') ) {
+	if ( $self->want_feature('partitioned-network') ) {
 		$self->relinquish_networks('ocf');
 		@networks = (
-			$self->network_definition(
-				'ocf-core',
+			$self->network_definition('ocf-core',
 				strategy        => 'ocfp',
 				dynamic_subnets => {
 					cloud_properties_for_iaas => $network_cloud_properties,
 					allocation                => { size => 11, statics => 0 }
 				}
 			),
-			$self->network_definition(
-				'ocf-edge',
+			$self->network_definition('ocf-edge',
 				strategy        => 'ocfp',
 				dynamic_subnets => {
 					cloud_properties_for_iaas => $network_cloud_properties,
 					allocation                => { size => 1, statics => 0 }
 				}
 			),
-			$self->network_definition(
-				'ocf-tcp',
+			$self->network_definition('ocf-tcp',
 				strategy        => 'ocfp',
 				dynamic_subnets => {
 					cloud_properties_for_iaas => $network_cloud_properties,
 					allocation                => { size => 1, statics => 0 }
 				}
 			),
-			$self->network_definition(
-				'ocf-db',
+			$self->network_definition('ocf-db',
 				strategy        => 'ocfp',
 				dynamic_subnets => {
 					subnets                   => ['ocfp-0'],
@@ -110,12 +106,11 @@ sub perform {
 					allocation                => { size => 1, statics => 0 }
 				}
 			),
-			$self->network_definition(
-				'ocf-runtime',
+			$self->network_definition('ocf-runtime',
 				strategy        => 'ocfp',
 				dynamic_subnets => {
 					cloud_properties_for_iaas => $network_cloud_properties,
-					allocation => { size => 40, statics => 0 }    # 120 diego cell vms max
+					allocation                => { size => 40, statics => 0 }    # 120 diego cell vms max
 				}
 			)
 		);

@@ -127,13 +127,13 @@ Production scale provides:
 
 ## Network Configuration
 
-By default, OCFP uses a single network for all components. For environments that need network separation, use the `split-network` feature:
+By default, OCFP uses a single network for all components. For environments that need network separation, use the `partitioned-network` feature:
 
 ```yaml
 kit:
   features:
     - ocfp
-    - split-network
+    - partitioned-network
 ```
 
 This will create separate networks for:
@@ -207,7 +207,7 @@ kit:
   version: 2.5.2
   features:
     - ocfp
-    - split-network
+    - partitioned-network
     - haproxy
     - tls
     - trust-blacksmith-ca
@@ -242,6 +242,6 @@ params:
 
 1. **Feature Compatibility**: Not all features are compatible with OCFP. If you encounter errors about incompatible features, review the features list.
 
-2. **Network Configuration**: If using `split-network`, ensure your cloud config has the correct networks defined.
+2. **Network Configuration**: If using `partitioned-network`, ensure your cloud config has the correct networks defined.
 
 3. **Resource Allocation**: Production scale may require more resources than are available in your infrastructure. Consider using `ocfp_env_scale: dev` for smaller environments.

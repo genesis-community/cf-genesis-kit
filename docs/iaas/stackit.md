@@ -105,15 +105,15 @@ params:
 Stackit deployments follow a similar networking model to OpenStack. You can use either:
 
 1. **Single Network**: All components on one network
-2. **Split Network**: Core, edge, and runtime components on separate networks
+2. **Partitioned Network**: Core, edge, and runtime components on separate networks
 
-For split networks, use:
+For partitioned networks, use:
 
 ```yaml
 kit:
   features:
     - ocfp
-    - split-network
+    - partitioned-network
 ```
 
 ## Availability Zones
@@ -135,7 +135,7 @@ kit:
   features:
     - ocfp
     - internal-blobstore
-    - split-network
+    - partitioned-network
     - haproxy
     - tls
     - self-signed
