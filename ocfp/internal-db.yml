@@ -8,5 +8,7 @@ params:
 
 instance_groups:
 - name: database
+  azs:
+  - (( grab meta.ocfp.azs[0] ))
   vm_type: (( grab params.database_vm_type ))
   persistent_disk_type: (( grab params.database_disk_type ))
