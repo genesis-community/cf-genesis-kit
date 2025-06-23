@@ -1032,6 +1032,13 @@ sub perform {
 				"overlay/blobstore/minio.yml",
 				"cf-deployment/operations/use-external-blobstore.yml"
 			);
+		}		elsif ( $feature eq "stackit-blobstore" ) {
+			push @{ $self->{blobstore_selections} }, $feature;
+			$self->add_files(
+				"overlay/blobstore/external.yml",
+				"overlay/blobstore/stackit.yml",
+				"cf-deployment/operations/use-external-blobstore.yml"
+			);
 		}
 		elsif ( $feature eq "gcp-blobstore" ) {
 			push @{ $self->{blobstore_selections} }, $feature;
@@ -1288,7 +1295,7 @@ sub perform {
 			  if ( $self->want_feature('cflinuxfs4') );
 		}
 
-		if ( $self->want_feature("local-postgres-db|internal-db|\+internal-db") ) {
+		if ( $self->want_feature(qr/local-postgres-db|internal-db|\+internal-db/) ) {
 			$self->add_files('ocfp/internal-db.yml');
 		} else {
 			$self->add_files("ocfp/external-db-prep.yml", "ocfp/external-db.yml");
