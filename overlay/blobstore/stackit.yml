@@ -1,0 +1,18 @@
+params:
+  blobstore_endpoint: (( param "Specify the STACKIT URL (including protocol) to use as your Cloud Controller blobstore" ))
+  blobstore_region:   (( param "Specify the AWS region for your Cloud Controller blobstore" ))
+
+bosh-variables:
+  fog_connection:
+    provider: AWS
+    endpoint: (( grab params.blobstore_endpoint ))
+    aws_access_key_id: ((blobstore_access_key_id))
+    aws_secret_access_key: ((blobstore_secret_access_key))
+    aws_signature_version: '2'
+    region: (( grab params.blobstore_region ))
+    path_style: true
+
+# Credhub Secrets
+#   blobstore_access_key_id
+#   blobstore_secret_access_key
+

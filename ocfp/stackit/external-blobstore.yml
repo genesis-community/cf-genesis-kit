@@ -1,0 +1,15 @@
+---
+params:
+  blobstore_s3_endpoint:   (( vault meta.ocfp.vault.config "/bosh/s3:endpoint" ))
+  blobstore_s3_path_style: (( vault meta.ocfp.vault.config "/bosh/s3:path_style" ))
+
+bosh-variables:
+  fog_connection:
+    provider: AWS
+    aws_access_key_id:     (( grab params.blobstore_s3_access_key ))
+    aws_secret_access_key: (( grab params.blobstore_s3_secret_key ))
+    region:                (( grab params.blobstore_s3_region ))
+    endpoint:              (( grab params.blobstore_s3_endpoint ))
+    path_style:            (( grab params.blobstore_s3_path_style ))
+    aws_signature_version: '2'
+

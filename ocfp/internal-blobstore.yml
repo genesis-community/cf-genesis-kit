@@ -1,0 +1,11 @@
+---
+# This configures the needed singleton blobstore for the OCF Platform
+# Use `internal-blobstore` feature to enable it.
+params:
+  blobstore_disk_type: (( concat meta.ocfp.env.cloud "disk-blobstore" ))
+  blobstore_vm_type:   (( concat meta.ocfp.env.cloud "vm-blobstore" ))
+
+instance_groups:
+- name: singleton-blobstore
+  vm_type: (( grab params.blobstore_vm_type ))
+  persistent_disk_type: (( grab params.blobstore_disk_type ))

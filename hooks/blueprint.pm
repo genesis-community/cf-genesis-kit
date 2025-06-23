@@ -747,7 +747,7 @@ sub _perform_feature_pre_validation {
 			  unless $self->want_feature_in_list( $want, \@curated_features );
 		}
 		elsif ( $want =~
-			/^(minio-blobstore|aws-blobstore|aws-blobstore-iam|azure-blobstore|gcp-blobstore)$/ )
+			/^(minio-blobstore|aws-blobstore|aws-blobstore-iam|azure-blobstore|gcp-blobstore|stackit-blobstore)$/ )
 		{
 			if ( $self->want_feature_in_list( "ocfp", \@curated_features ) )
 			{    # check against already curated ocfp
@@ -842,16 +842,16 @@ sub _perform_feature_pre_validation {
 	if ( $self->want_feature_in_list( "ocfp", \@curated_features ) ) {
 		my $iaas                       = $self->{iaas_name};
 		my $blobstore_feature_for_ocfp = "";
-		if ( $iaas =~ /^(aws|azure|gcp)$/ ) {
-			$blobstore_feature_for_ocfp = "${iaas}-blobstore";
-		}
-		elsif ( $iaas eq "vsphere" ) {
-			$blobstore_feature_for_ocfp = "minio-blobstore";
-		}
-		elsif ( $iaas =~ /^(openstack|stackit)$/ ) {
+		if ($self->want_feature_in_list('internal-blobstore', \@curated_features)) {
+			# If internal-blobstore is specified, use it for OCFP
 			$blobstore_feature_for_ocfp = "internal-blobstore";
-		}
-		else {
+		} elsif ( $iaas =~ /^(aws|azure|gcp|stackit)$/ ) {
+			$blobstore_feature_for_ocfp = "${iaas}-blobstore";
+		} elsif ( $iaas eq "vsphere" ) {
+			$blobstore_feature_for_ocfp = "minio-blobstore";
+		} elsif ( $iaas =~ /^(openstack)$/ ) {
+			$blobstore_feature_for_ocfp = "internal-blobstore";
+		} else {
 			bail("Blobstores are not supported on #c{${iaas}} yet for OCFP.");
 		}
 		if ( $blobstore_feature_for_ocfp
@@ -863,7 +863,7 @@ sub _perform_feature_pre_validation {
 			my $conflicting_blobstore = 0;
 			for my $f (@curated_features) {
 				if ( $f =~
-/^(minio-blobstore|aws-blobstore|aws-blobstore-iam|azure-blobstore|gcp-blobstore)$/
+/^(minio-blobstore|aws-blobstore|aws-blobstore-iam|azure-blobstore|gcp-blobstore|stackit-blobstore)$/
 					&& $f ne $blobstore_feature_for_ocfp )
 				{
 					$conflicting_blobstore = 1;
@@ -1288,27 +1288,23 @@ sub perform {
 			  if ( $self->want_feature('cflinuxfs4') );
 		}
 
-		unless ( $self->want_feature("local-postgres-db|internal-db|\+internal-db") ) {
-			if ( $self->{iaas_name} =~ /^(aws|azure|gcp)$/ ) {
-				$self->add_files( "ocfp/external-db-prep.yml", "ocfp/external-db.yml" );
-			}
-			elsif ( $self->{iaas_name} =~ /^(openstack|stackit)$/ ) {
-
-				# No special handling needed for openstack/stackit external databases
-				# TODO: Check if any specific ops files are needed for these IaaSes
-			}
+		if ( $self->want_feature("local-postgres-db|internal-db|\+internal-db") ) {
+			$self->add_files('ocfp/internal-db.yml');
+		} else {
+			$self->add_files("ocfp/external-db-prep.yml", "ocfp/external-db.yml");
 		}
 
-		unless ( $self->want_feature("internal-blobstore") ) {
-			if ( $self->{iaas_name} =~ /^(aws|azure|gcp|openstack|stackit)$/ ) {
-				$self->add_files("ocfp/external-blobstore.yml");
-			}
+		if ( $self->want_feature("internal-blobstore") ) {
+			$self->add_files("ocfp/internal-blobstore.yml");
+		} else {
+			$self->add_files("ocfp/external-blobstore.yml");
+			$self->add_files("ocfp/$self->{iaas_name}/external-blobstore.yml")
+				if -f $self->kit->path("ocfp/$self->{iaas_name}/external-blobstore.yml");
 		}
 
 		$self->add_files(
 			"ocfp/$self->{iaas_name}/ocf.yml",
 			"ocfp/$self->{iaas_name}/azs.yml",
-			"ocfp/$self->{iaas_name}/blobstore.yml"
 		);
 		if ( $self->want_feature("windows-diego-cells") ) {
 			$self->add_files( "ocfp/$self->{iaas_name}/windows.yml" );
