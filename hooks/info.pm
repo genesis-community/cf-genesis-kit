@@ -75,18 +75,16 @@ sub perform {
 	info("\nChecking API connectivity...\n");
 
 	# First check if we can resolve the domain
-	my ( $nslookup_output, $nslookup_rc ) =
-	  run( { stderr => 0 }, 'nslookup', $api_domain );
+	my ( $nslookup_output, $nslookup_rc ) = run( { stderr => 0 }, 'nslookup', $api_domain );
 
 	if ( $nslookup_rc != 0 ) {
-		error(
-			"\n#R{DNS Resolution Failed:}\n" .
-			  "Unable to resolve API domain: #Y{%s}\n" . "\n" .
-			  "This typically means:\n" .
-			  "  • The DNS is not configured or propagated yet\n" .
-			  "  • There's a typo in the domain name\n" .
-			  "  • The load balancer hasn't been set up yet\n" . "\n" .
-			  "Please ensure the Cloud Foundry deployment has completed successfully\n" .
+		error(    "\n#R{ DNS Resolution Failed: }\n".
+			  "Unable to resolve API domain: #Y{ %s }\n\n".
+			  "This typically means:\n".
+			  "  • The DNS is not configured or propagated yet\n".
+			  "  • There's a typo in the domain name\n".
+			  "  • The load balancer hasn't been set up yet\n\n".
+			  "Please ensure the Cloud Foundry deployment has completed successfully\n".
 			  "and that DNS records have been properly configured.\n",
 			$api_domain
 		);
@@ -94,11 +92,10 @@ sub perform {
 	}
 
 	# Check if we can reach the API endpoint
-	my ( $curl_test, $curl_rc ) = run( {interactive => 0}, { stderr => 0 },
-		'curl', '-s', '-o', '/dev/null', '-w', '%{http_code}', '--connect-timeout', '5', $api_url );
+	my ( $curl_test, $curl_rc ) = run( {interactive => 0,  stderr => 0 },
+		'curl', '-k', '-s', '-o', '/dev/null', '-w', '%{http_code}', '--connect-timeout', '5', $api_url );
 
-	if ( $curl_rc != 0
-		|| ( $curl_test !~ /^[23]\d\d$/ && $curl_test ne "000" ) )
+	if ( $curl_rc != 0 || ( $curl_test !~ /^[23]\d\d$/ && $curl_test ne "000" ) )
 	{
 		error(
 			"\n#R{API Endpoint Unreachable:}\n" .
@@ -114,7 +111,7 @@ sub perform {
 	}
 
 	# Check if cf command is available
-	if ( !run({interactive => 0}, { passfail => 1 }, 'which', 'cf' ) ) {
+	if ( !run({interactive => 0, passfail => 1 }, 'which', 'cf' ) ) {
 		error( "\n#R{CF CLI Not Found:}\n" .
 			  "The 'cf' command line tool is not installed or not in PATH.\n" .
 			  "Please install the CF CLI to interact with Cloud Foundry.\n" );
@@ -124,7 +121,7 @@ sub perform {
 	# If the Load Balancer isn't availabe this will fail
 	# Also fails if "cf" command is missing
 	my ( $cf_api_output, $cf_api_rc ) =
-	  run({interactive => 0}, { stderr => 0 }, 'cf', 'api', $api_url, '--skip-ssl-validation' );
+	  run({interactive => 0, stderr => 0 }, 'cf', 'api', $api_url, '--skip-ssl-validation' );
 
 	if ( $cf_api_rc != 0 ) {
 		error(
@@ -137,7 +134,7 @@ sub perform {
 	}
 
 	my $cf_curl_output =
-	  run({interactive => 0}, { onfailure => "Error executing 'cf curl /info'", stderr => 0 }, 'cf', 'curl', '/info' );
+	  run({interactive => 0, onfailure => "Error executing 'cf curl /info'", stderr => 0 }, 'cf', 'curl', '/info' );
 
 	# Parse and format JSON for better display
 	my $data = eval { JSON::PP::decode_json($cf_curl_output) };
