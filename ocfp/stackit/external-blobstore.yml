@@ -1,7 +1,7 @@
 ---
 params:
-  blobstore_s3_endpoint:   (( vault meta.ocfp.vault.config "/bosh/s3:endpoint" ))
-  blobstore_s3_path_style: (( vault meta.ocfp.vault.config "/bosh/s3:path_style" ))
+  blobstore_s3_endpoint:   (( vault meta.ocfp.vault.config "/cf/blobstores/buildpacks:endpoint" ))
+  blobstore_s3_path_style: (( vault meta.ocfp.vault.config "/cf/blobstores/buildpacks:path_style" ))
 
 bosh-variables:
   fog_connection:

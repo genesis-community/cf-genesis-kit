@@ -1,8 +1,10 @@
 ---
 params:
-  blobstore_s3_region:              (( vault meta.ocfp.vault.config "/bosh/s3:region" ))
-  blobstore_s3_access_key:          (( vault meta.ocfp.vault.config "/bosh/s3:access_key_id" ))
-  blobstore_s3_secret_key:          (( vault meta.ocfp.vault.config "/bosh/s3:secret_access_key" ))
+  # TODO: vvv Refactor to enable keys per bucket vs one set of keys
+  blobstore_s3_region:              (( vault meta.ocfp.vault.config "/cf/blobstores/buildpacks:region" ))
+  blobstore_s3_access_key:          (( vault meta.ocfp.vault.config "/cf/blobstores/buildpacks:access_key_id" ))
+  blobstore_s3_secret_key:          (( vault meta.ocfp.vault.config "/cf/blobstores/buildpacks:secret_access_key" ))
+
   blobstore_app_packages_directory: (( vault meta.ocfp.vault.config "/cf/blobstores/app-packages:name" ))
   blobstore_buildpacks_directory:   (( vault meta.ocfp.vault.config "/cf/blobstores/buildpacks:name" ))
   blobstore_droplets_directory:     (( vault meta.ocfp.vault.config "/cf/blobstores/droplets:name" ))
