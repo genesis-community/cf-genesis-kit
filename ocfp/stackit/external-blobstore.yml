@@ -1,6 +1,6 @@
 ---
 params:
-  blobstore_s3_endpoint:   (( vault meta.ocfp.vault.config "/cf/blobstores/buildpacks:endpoint" )) # :endpoint
+  blobstore_s3_endpoint:   (( vault meta.ocfp.vault.config "/cf/blobstores/buildpacks:url_path_style" )) # :endpoint
   blobstore_s3_path_style: (( vault meta.ocfp.vault.config "/cf/blobstores/buildpacks:pathstyle" ))
 
 bosh-variables:
