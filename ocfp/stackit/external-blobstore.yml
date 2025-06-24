@@ -1,7 +1,6 @@
 ---
 params:
-  # TODO: Should endpoint be the host + path?  https:// + ?  What is the expectation?
-  blobstore_s3_endpoint:   (( vault meta.ocfp.vault.config "/cf/blobstores/buildpacks:host" )) # :endpoint
+  blobstore_s3_endpoint:   (( vault meta.ocfp.vault.config "/cf/blobstores/buildpacks:endpoint" )) # :endpoint
   blobstore_s3_path_style: (( vault meta.ocfp.vault.config "/cf/blobstores/buildpacks:pathstyle" ))
 
 bosh-variables:
