@@ -24,31 +24,69 @@ sub perform {
 	my ($self) = @_;
 	return 1 if $self->completed;
 
-	# FIXME: Add support for other iaas types
-	# TODO: Add support for env-provided matrices
-	my $vm_matrix = {
-		map { ( $_->[0], { type_dev => $_->[1], type_prod => $_->[2], disk_size => $_->[3] } ) } (
-
-			#     Name        dev_type  prod_type  root_disk_size
-			[qw[  api            c2i.4     c1a.4d              15  ]], #  c1a.4d
-			[qw[  cc-worker      c2i.1     c1a.1d              15  ]], #  a1cpu_2ram_d     =  c1a.1d
-			[qw[  credhub        c2i.1     c1a.1d              30  ]], #  a1cpu_2ram_d
-			[qw[  diego-api      c2i.1     c1a.1d              15  ]], #  a1cpu_2ram_d
-			[qw[  diego-cell      g1.4    m1a.16d             256  ]]
-			,    #  a16cpu_128ram_d  =  m1a.16d
-			[qw[  doppler        c2i.2     c1a.2d              15  ]], #  a2cpu_4ram_d
-			[qw[  errand          c1.1       c1.1              15  ]], #
-			[qw[  log-api        c2i.1     c1a.1d              15  ]], #  a1cpu_2ram_d
-			[qw[  log-cache      c2i.2     c1a.2d              15  ]], #  a2cpu_4ram_d     =  c1a.2d
-			[qw[  nats           c2i.1     c1a.1d              15  ]], #  a1cpu_2ram_d
-			[qw[  router         c2i.4     c1a.4d              15  ]], #  c1a.4d
-			[qw[  scheduler      c2i.1     c1a.1d              15  ]], #  a1cpu_2ram_d
-			[qw[  tcp-router      c1.1       c1.1              10  ]], #  c1.1
-			[qw[  uaa            c2i.2     c1a.2d              30  ]], #  a2cpu_4ram_d
-			[qw[  database       c2i.4     g1a.8d              60  ]], #  database
-			[qw[  blobstore      c2i.1     c1a.1d              60  ]], #  a1cpu_2ram_d
-		)
+	my $iaas_vm_matrix = { # VM matrix structure keyed by IaaS type
+		stackit => {
+			map { ( $_->[0], { type_dev => $_->[1], type_prod => $_->[2], disk_size => $_->[3] } ) }
+			  (
+				#     Name           dev_type  prod_type           root_disk_size
+				[qw[  api            c2i.4     c1a.4d              15  ]],    #  c1a.4d
+				[qw[  cc-worker      c2i.1     c1a.1d              15  ]]
+				,    #  a1cpu_2ram_d     =  c1a.1d
+				[qw[  credhub        c2i.1     c1a.1d              30  ]],    #  a1cpu_2ram_d
+				[qw[  diego-api      c2i.1     c1a.1d              15  ]],    #  a1cpu_2ram_d
+				[qw[  diego-cell      g1.4    m1a.16d             256  ]]
+				,    #  a16cpu_128ram_d  =  m1a.16d
+				[qw[  doppler        c2i.2     c1a.2d              15  ]],    #  a2cpu_4ram_d
+				[qw[  errand          c1.1       c1.1              15  ]],    #
+				[qw[  log-api        c2i.1     c1a.1d              15  ]],    #  a1cpu_2ram_d
+				[qw[  log-cache      c2i.2     c1a.2d              15  ]]
+				,    #  a2cpu_4ram_d     =  c1a.2d
+				[qw[  nats           c2i.1     c1a.1d              15  ]],    #  a1cpu_2ram_d
+				[qw[  router         c2i.4     c1a.4d              15  ]],    #  c1a.4d
+				[qw[  scheduler      c2i.1     c1a.1d              15  ]],    #  a1cpu_2ram_d
+				[qw[  tcp-router      c1.1       c1.1              10  ]],    #  c1.1
+				[qw[  uaa            c2i.2     c1a.2d              30  ]],    #  a2cpu_4ram_d
+				[qw[  database       c2i.4     g1a.8d              60  ]],    #  database
+				[qw[  blobstore      c2i.1     c1a.1d              60  ]],    #  a1cpu_2ram_d
+			  )
+		},
+		aws => {
+			map {
+				(
+					$_->[0],
+					{
+						type_dev       => $_->[1],
+						type_prod      => $_->[2],
+						disk_size      => $_->[3],
+						ephemeral_dev  => $_->[4],
+						ephemeral_prod => $_->[5]
+					}
+				)
+			} (
+				#      Name          dev_type     prod_type          root_disk(MB)  ephemeral_dev  ephemeral_prod
+				[ qw[  api           t3.medium    m6i.xlarge         15360          32768          65536  ] ],
+				[ qw[  cc-worker     t3.medium    m6i.large          15360           4096           8192  ] ],
+				[ qw[  credhub       t3.medium    r6i.large          30720           4096          16384  ] ],
+				[ qw[  diego-api     t3.large     c6i.2xlarge        15360           4096          16384  ] ],
+				[ qw[  diego-cell    t3.large     r6i.2xlarge       262144          65536         393216  ] ],
+				[ qw[  doppler       t3.medium    c6i.xlarge         15360           4096          16384  ] ],
+				[ qw[  errand        t3.medium    m6i.large          15360           4096           8192  ] ],
+				[ qw[  log-api       t3.medium    c6i.xlarge         15360           8192          16384  ] ],
+				[ qw[  log-cache     t3.large     r6i.2xlarge        15360           8192          16384  ] ],
+				[ qw[  nats          t3.medium    m6i.large          15360           8192          16384  ] ],
+				[ qw[  router        t3.medium    c6i.xlarge         15360           4096          16384  ] ],
+				[ qw[  scheduler     t3.medium    m6i.large          15360           4096           8192  ] ],
+				[ qw[  tcp-router    t3.medium    c6i.xlarge         10240           4096          16384  ] ],
+				[ qw[  uaa           t3.large     c6i.large          30720           4096          16384  ] ],
+				[ qw[  database      t3.medium    m6i.xlarge         61440           4096          16384  ] ],
+				[ qw[  blobstore     t3.medium    m6i.large          61440           4096           8192  ] ],
+			)
+		}
 	};
+
+	# Determine the current IaaS
+	my $iaas      = $self->iaas              || 'stackit';
+	my $vm_matrix = $iaas_vm_matrix->{$iaas} || $iaas_vm_matrix->{stackit};
 
 	delete( $vm_matrix->{database} )
 	  unless $self->wants_feature('+internal-db')
@@ -77,28 +115,32 @@ sub perform {
 	if ( $self->want_feature('partitioned-network') ) {
 		$self->relinquish_networks('ocf');
 		@networks = (
-			$self->network_definition('ocf-core',
+			$self->network_definition(
+				'ocf-core',
 				strategy        => 'ocfp',
 				dynamic_subnets => {
 					cloud_properties_for_iaas => $network_cloud_properties,
 					allocation                => { size => 11, statics => 0 }
 				}
 			),
-			$self->network_definition('ocf-edge',
+			$self->network_definition(
+				'ocf-edge',
 				strategy        => 'ocfp',
 				dynamic_subnets => {
 					cloud_properties_for_iaas => $network_cloud_properties,
 					allocation                => { size => 1, statics => 0 }
 				}
 			),
-			$self->network_definition('ocf-tcp',
+			$self->network_definition(
+				'ocf-tcp',
 				strategy        => 'ocfp',
 				dynamic_subnets => {
 					cloud_properties_for_iaas => $network_cloud_properties,
 					allocation                => { size => 1, statics => 0 }
 				}
 			),
-			$self->network_definition('ocf-db',
+			$self->network_definition(
+				'ocf-db',
 				strategy        => 'ocfp',
 				dynamic_subnets => {
 					subnets                   => ['ocfp-0'],
@@ -106,11 +148,12 @@ sub perform {
 					allocation                => { size => 1, statics => 0 }
 				}
 			),
-			$self->network_definition('ocf-runtime',
+			$self->network_definition(
+				'ocf-runtime',
 				strategy        => 'ocfp',
 				dynamic_subnets => {
 					cloud_properties_for_iaas => $network_cloud_properties,
-					allocation                => { size => 40, statics => 0 }    # 120 diego cell vms max
+					allocation => { size => 40, statics => 0 }    # 120 diego cell vms max
 				}
 			)
 		);
@@ -162,18 +205,16 @@ sub perform {
 								aws => {
 									'instance_type' => $self->for_scale(
 										{
-											dev  => $_ =~ /diego-cell/ ? 't3.large' : 't3.medium',
-											prod => $_ =~ /diego-cell/ ? 'r6i.4xlarge'
-											: ( $_ =~ /api|router/ ? 'm6i.xlarge' : 'm6i.large' )
+											dev  => $vm_matrix->{$_}{type_dev},
+											prod => $vm_matrix->{$_}{type_prod}
 										}
 									),
 									'ephemeral_disk' => {
 										encrypted => $self->TRUE,
 										size      => $self->for_scale(
 											{
-												dev  => $_ =~ /diego-cell/ ? 65536 : 4096,
-												prod => $_ =~ /diego-cell/ ? 393216
-												: ( $_ =~ /api|router/ ? 16384 : 8192 ),
+												dev  => $vm_matrix->{$_}{ephemeral_dev}  || 4096,
+												prod => $vm_matrix->{$_}{ephemeral_prod} || 8192
 											}
 										),
 										type => 'gp3'
