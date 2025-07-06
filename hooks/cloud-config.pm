@@ -22,7 +22,6 @@ sub init {
 sub perform {
 	my ($self) = @_;
 	return 1 if $self->completed;
-	my $env = $self->env;
 
 	# Determine the current IaaS
 	my $vm_matrix = $self->get_matrix_for_iaas();
@@ -120,8 +119,8 @@ sub perform {
 					cloud_properties_for_iaas => $network_cloud_properties,
 					allocation => {
 						size => $self->for_scale({
-							dev  => $env->lookup('bosh-config.cloud.diego_cells_per_subnet',  4), #  12 diego cell vms max
-							prod => $env->lookup('bosh-config.cloud.diego_cells_per_subnet', 40)  # 120 diego cell vms max
+							dev  => $self->get_config_override('diego_cells_per_subnet',  4), #  12 diego cell vms max
+							prod => $self->get_config_override('diego_cells_per_subnet', 40)  # 120 diego cell vms max
 						}),
 						statics => 0
 					}
@@ -140,10 +139,10 @@ sub perform {
 					size    => $self->for_scale({
 						dev => 10
 							+ ($self->want_feature('no-tcp-router') ? 0 : 1)
-							+ ($env->lookup('bosh-config.cloud.diego_cells_per_subnet', 4)),
+							+ ($self->get_config_override('diego_cells_per_subnet', 4)),
 						prod => 20
 							+ ($self->want_feature('no-tcp-router') ? 0 : 5)
-							+ ($env->lookup('bosh-config.cloud.diego_cells_per_subnet', 40))
+							+ ($self->get_config_override('diego_cells_per_subnet', 40))
 					}),
 					statics => $self->for_scale({
 						dev => 1 # router
