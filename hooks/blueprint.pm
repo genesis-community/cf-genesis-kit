@@ -185,7 +185,7 @@ sub process_classic_features {
 
 		# Custom ops files from environment
 		} elsif (-f $self->env->path("$ops_dir/${feature}.yml")) {
-			$self->add_files("$ops_dir/${feature}.yml");
+			$self->add_files($self->env->path("$ops_dir/${feature}.yml"));
 
 		} else {
 			$self->_process_common_positional_features($feature);
@@ -367,7 +367,7 @@ sub process_ocfp_features {
 
 		# Custom ops files from environment
 		} elsif (-f $self->env->path("$ops_dir/${feature}.yml")) {
-			push @ops_files, "$ops_dir/${feature}.yml";
+			push @ops_files, $self->env->path("$ops_dir/${feature}.yml");
 
 		} else {
 			$self->_process_common_positional_features($feature, 'ocfp');
