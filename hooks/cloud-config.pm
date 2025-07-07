@@ -144,7 +144,7 @@ sub perform {
 							+ ($self->want_feature('no-tcp-router') ? 0 : 5)
 							+ ($self->get_config_override('diego_cells_per_subnet', 40))
 					}),
-					statics => $self->for_scale({
+					statics => $self->iaas =~ /^(aws)$/ ? 0 : $self->for_scale({
 						dev => 1 # router
 							+ ($self->want_feature('no-tcp-router') ? 0 : 1)
 							+ ($self->want_feature('haproxy')       ? 1 : 0)
@@ -159,130 +159,125 @@ sub perform {
 		);
 	}
 
-	my $config = $self->build_cloud_config(
-		{
-			'networks' => \@networks,
-			'vm_types' => [
-				(
-					map {
-						$self->vm_type_definition(
-							$_,
-							cloud_properties_for_iaas => {
-								openstack => {
-									'instance_type' => $self->for_scale(
-										{
-											dev  => $vm_matrix->{$_}{type_dev},
-											prod => $vm_matrix->{$_}{type_prod}
-										}
-									),
-									'ephemeral_disk'   => { encrypted => $self->TRUE },
-									'boot_from_volume' => $self->TRUE,
-									'root_disk' => { size => $vm_matrix->{$_}{disk_size} + 0 }
-									,    # Force conversion to integer
-								},
-								stackit => {
-									'instance_type' => $self->for_scale(
-										{
-											dev  => $vm_matrix->{$_}{type_dev},
-											prod => $vm_matrix->{$_}{type_prod}
-										}
-									),
-									'ephemeral_disk'   => { encrypted => $self->TRUE },
-									'boot_from_volume' => $self->TRUE,
-									'root_disk' => { size => $vm_matrix->{$_}{disk_size} + 0 },
-								},
-								aws => {
-									'instance_type' => $self->for_scale(
-										{
-											dev  => $vm_matrix->{$_}{type_dev},
-											prod => $vm_matrix->{$_}{type_prod}
-										}
-									),
-									'ephemeral_disk' => {
-										encrypted => $self->TRUE,
-										size      => $self->for_scale(
-											{
-												dev  => $vm_matrix->{$_}{ephemeral_dev}  || 4096,
-												prod => $vm_matrix->{$_}{ephemeral_prod} || 8192
-											}
-										),
-										type => 'gp3'
-									},
-									'metadata_options' => {
-										'http_tokens' => 'required'
-									},
-								},
+	my $config = $self->build_cloud_config({
+		'networks' => \@networks,
+		'vm_types' => [(map {
+			$self->vm_type_definition(
+				$_,
+				cloud_properties_for_iaas => {
+					openstack => {
+						'instance_type' => $self->for_scale(
+							{
+								dev  => $vm_matrix->{$_}{type_dev},
+								prod => $vm_matrix->{$_}{type_prod}
 							}
 						),
-					} ( sort keys %$vm_matrix )
-				),
-			],
-			'vm_extensions' => [
-				$self->vm_extension_definition('diego-ssh-proxy-network-properties' => {
-					aws => {
-						'lb_target_groups' => ['ocfp-ocf-cf-ssh-lb-tg'],
+						'ephemeral_disk'   => { encrypted => $self->TRUE },
+						'boot_from_volume' => $self->TRUE,
+						'root_disk' => { size => $vm_matrix->{$_}{disk_size} + 0 }
+						,    # Force conversion to integer
 					},
-				}),
-				$self->vm_extension_definition('cf-router-network-properties' => {
-					aws => {
-						'lb_target_groups' => ['ocfp-ocf-cf-system-apps-lb-tg'],
-					},
-				}),
-				$self->vm_extension_definition('cf-tcp-router-network-properties' => {
-					aws => {
-						'lb_target_groups' => ['ocfp-ocf-cf-tcp-lb-tg'],
-						'elbs'             => ['ocfp-ocf-cf-tcp-lb'],
-					},
-				}),
-			],
-			'disk_types' => [
-				$self->want_feature('+internal-db') ?
-				$self->disk_type_definition(
-					'database',
-					common => {
-						disk_size => gigabytes(10),
-					},
-					cloud_properties_for_iaas => {
-						openstack => {
-							'type' => 'storage_premium_perf6',
-						},
-						stackit => {
-							'type' => 'storage_premium_perf6',
-						},
-						aws => {
-							'type'      => 'gp3',
-							'encrypted' => $self->TRUE
-						},
-					},
-				) : (),
-				$self->want_feature('+internal-blobstore') ?
-				$self->disk_type_definition(
-					'blobstore',
-					common => {
-						disk_size => $self->for_scale(
+					stackit => {
+						'instance_type' => $self->for_scale(
 							{
-								dev  => gigabytes(100),
-								prod => gigabytes(200),
-							},
-							gigabytes(100)
-						)
+								dev  => $vm_matrix->{$_}{type_dev},
+								prod => $vm_matrix->{$_}{type_prod}
+							}
+						),
+						'ephemeral_disk'   => { encrypted => $self->TRUE },
+						'boot_from_volume' => $self->TRUE,
+						'root_disk' => { size => $vm_matrix->{$_}{disk_size} + 0 },
 					},
-					cloud_properties_for_iaas => {
-						openstack => {
-							'type' => 'storage_premium_perf6',
+					aws => {
+						'instance_type' => $self->for_scale(
+							{
+								dev  => $vm_matrix->{$_}{type_dev},
+								prod => $vm_matrix->{$_}{type_prod}
+							}
+						),
+						'ephemeral_disk' => {
+							encrypted => $self->TRUE,
+							size      => $self->for_scale(
+								{
+									dev  => $vm_matrix->{$_}{ephemeral_dev}  || 4096,
+									prod => $vm_matrix->{$_}{ephemeral_prod} || 8192
+								}
+							),
+							type => 'gp3'
 						},
-						stackit => {
-							'type' => 'storage_premium_perf6',
-						},
-						aws => {
-							'type'      => 'gp3',
-							'encrypted' => $self->TRUE
+						'metadata_options' => {
+							'http_tokens' => 'required'
 						},
 					},
-				): (),
-			],
-		}
-	);
+				}
+			),
+		} ( sort keys %$vm_matrix )),
+		],
+		'vm_extensions' => [
+			$self->vm_extension_definition('diego-ssh-proxy-network-properties' => {
+				aws => {
+					'lb_target_groups' => ['ocfp-ocf-cf-ssh-lb-tg'],
+				},
+			}),
+			$self->vm_extension_definition('cf-router-network-properties' => {
+				aws => {
+					'lb_target_groups' => ['ocfp-ocf-cf-system-apps-lb-tg'],
+				},
+			}),
+			$self->vm_extension_definition('cf-tcp-router-network-properties' => {
+				aws => {
+					'lb_target_groups' => ['ocfp-ocf-cf-tcp-lb-tg'],
+					'elbs'             => ['ocfp-ocf-cf-tcp-lb'],
+				},
+			}),
+		],
+		'disk_types' => [
+			$self->want_feature('+internal-db') ?
+			$self->disk_type_definition(
+				'database',
+				common => {
+					disk_size => gigabytes(10),
+				},
+				cloud_properties_for_iaas => {
+					openstack => {
+						'type' => 'storage_premium_perf6',
+					},
+					stackit => {
+						'type' => 'storage_premium_perf6',
+					},
+					aws => {
+						'type'      => 'gp3',
+						'encrypted' => $self->TRUE
+					},
+				},
+			) : (),
+			$self->want_feature('+internal-blobstore') ?
+			$self->disk_type_definition(
+				'blobstore',
+				common => {
+					disk_size => $self->for_scale(
+						{
+							dev  => gigabytes(100),
+							prod => gigabytes(200),
+						},
+						gigabytes(100)
+					)
+				},
+				cloud_properties_for_iaas => {
+					openstack => {
+						'type' => 'storage_premium_perf6',
+					},
+					stackit => {
+						'type' => 'storage_premium_perf6',
+					},
+					aws => {
+						'type'      => 'gp3',
+						'encrypted' => $self->TRUE
+					},
+				},
+			): (),
+		],
+	});
 	return $self->done($config);
 }
 
