@@ -113,8 +113,19 @@ sub check_environment {
 	my @retired_params_found = ();
 	foreach my $param (@$retired_params) {
 		$self->has_entry( 'environment', 'params', $param, retired => 1 )
-		  if ( $self->env->defines("params.$param") );
+			if ( $self->env->defines("params.$param") );
 	}
+
+	# Can't use params availability_zones or randomize_az_placement if using bare feature
+	if ($self->want_feature('bare')) {
+		$self->has_entry('environment', 'params', 'availability_zones',
+			retired => 1, msg => 'availability_zones is not supported with bare feature'
+		);
+		$self->has_entry('environment', 'params', 'randomize_az_placement',
+			retired => 1, msg => 'randomize_az_placement is not supported with bare feature'
+		);
+	}
+
 	return $self->check_result('environment');
 }
 
