@@ -131,8 +131,12 @@ sub process_classic_features {
 		isolation-segments
 	};
 
+	my ($remaining_features) = compare_arrays(
+		[$self->features], \@direct_features
+	);
+
 	# Configure each positional feature
-	for my $feature ($self->features) {
+	for my $feature (@$remaining_features) {
 
 		# Blobstores
 		if ($feature eq "+internal-blobstore") {
@@ -290,8 +294,8 @@ sub process_ocfp_features {
 
 	# Add OCFP specific operations
 	$self->add_files(
-		"ocfp/$self->{iaas_name}/ocf.yml",
-		"ocfp/$self->{iaas_name}/azs.yml",
+		"ocfp/${iaas}/ocf.yml",
+		"ocfp/${iaas}/azs.yml",
 	);
 
 	# Blobstores
