@@ -1274,27 +1274,30 @@ sub _process_common_positional_features {
 			'overlay/routing/haproxy-public-network.yml'
 		) if $self->env->params->{cf_lb_network};
 
-		if ( $self->want_feature("tls") ) {
+		if ($self->want_feature("tls") || $self->want_feature('ocfp')) {
 			$self->add_files("overlay/routing/haproxy-tls.yml");
 			$self->add_files(
 				'overlay/routing/haproxy-provided-cert.yml'
 			) unless $self->want_feature("self-signed");
 		}
-		$self->add_files(
+		$self->add_files_if_wants('small-footprint',
 			"overlay/routing/haproxy-small-footprint.yml"
-		) if $self->want_feature("small-footprint");
+		);
 
-	} elsif ( $feature eq "ssh-proxy-on-routers" ) {
+	} elsif ($feature eq "ssh-proxy-on-routers") {
 		$self->add_files("overlay/addons/ssh-proxy-on-routers.yml");
 
-	} elsif ( $feature eq "no-tcp-routers" ) {
+	} elsif ($feature eq "no-tcp-routers") {
 		$self->add_files("overlay/addons/no-tcp-routers.yml");
 
-	} elsif ( $feature eq "cflinuxfs3" ) {
+	} elsif ($feature eq "cflinuxfs3") {
 		$self->add_files("operations/use-cflinuxfs3.yml");
 
 	# Handle cf-deployment ops files
-	} elsif ( $feature =~ /^cf-deployment\// && -f "$feature.yml" ) {    # Upstream ops files
+	} elsif ($feature =~ /^cf-deployment\/operations\//) {
+		bail(
+			"Invalid cf-deployment operation requested: #c{$feature}"
+		) unless -f $self->kit->path("$feature.yml");
 		$self->add_files("$feature.yml");
 
 	} else {
