@@ -31,6 +31,7 @@ sub perform {
 
 	# Store raw features
 	$self->{raw_features} = [$self->features]; # Get raw features from env
+	$self->{params} = $self->env->params->{params}; # Get environment parameters
 
 	# Custom CF Versions
 	$self->handle_custom_cf_versions();
@@ -413,9 +414,9 @@ sub process_ocfp_features {
 	}
 
 	# IaaS peculiarities
-	if ($self->{cpi_name} eq 'azure') {
+	if ($iaas eq 'azure') {
 		$self->add_files("cf-deployment/operations/azure.yml", "overlay/azure_availability_sets.yml");
-	} elsif ($self->{cpi_name} eq 'warden') {
+	} elsif ($iaas eq 'warden') {
 		$self->add_files("cf-deployment/operations/bosh-lite.yml");
 	}
 
@@ -547,9 +548,9 @@ sub _dynamic_isolation_template_render {
 }
 
 sub _dynamic_isolation_segments {
-	my ($self) = @_; # params_json is $self->{parsed_params}
+	my ($self) = @_;
 	my @isolation_files = ();
-	my $params_ref = $self->{parsed_params};
+	my $params_ref = $self->{params}; # Get environment parameters
 
 	my @isolation_groups = ();
 	if (exists $params_ref->{isolation_segments} && ref($params_ref->{isolation_segments}) eq 'ARRAY') {
@@ -658,7 +659,7 @@ sub _dynamic_instance_vm_types {
 	# They should be predictable, but if we want different segments to have different vm types,
 	# we need to handle that here and in the cloud-cloud hook.
 	my ($self) = @_;
-	my $params_ref = $self->{parsed_params};
+	my $params_ref = $self->{params}; # Get environment parameters
 	my @instance_types_ops = ();
 	my $used_groups_for_vm_types = ''; # To track for duplicates
 	my $types_op_file_content = "--- # Dynamically created instance type overrides\n";
@@ -722,7 +723,7 @@ sub _dynamic_instance_vm_types {
 
 sub _dynamic_instance_counts {
 	my ($self) = @_;
-	my $params_ref = $self->{parsed_params};
+	my $params_ref = $self->{params}; # Get environment parameters
 	my @instance_counts_ops = ();
 	my $used_groups_for_counts = ''; # To track for duplicates
 
