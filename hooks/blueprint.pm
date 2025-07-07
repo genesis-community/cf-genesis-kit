@@ -2,15 +2,15 @@
 # vim: set ts=2 sw=2 sts=2 foldmethod=marker expandtab:
 package Genesis::Hook::Blueprint::CF v2.7.0; # Updated version
 
-use strict;
+use v5.20;
 use warnings;
-use v5.20; # Genesis min perl version is 5.20
 
 # Only needed for development
 BEGIN {push @INC, $ENV{GENESIS_LIB} ? $ENV{GENESIS_LIB} : $ENV{HOME}.'/.genesis/lib'}
 use parent qw(Genesis::Hook::Blueprint);
 
-use Genesis qw/info warning error bail new_enough in_array curl/;
+use Genesis qw/info warning error bail new_enough in_array curl mkdir_or_fail mkfile_or_fail compare_arrays sentence_join/;
+use Genesis::State qw/envset/;
 use Archive::Tar;
 use JSON::PP;
 
@@ -250,7 +250,7 @@ sub process_ocfp_features {
 	my $iaas      = $self->iaas; # Get IaaS from environment instead of feature.
 	my $blobstore = $self->requested_blobstore;
 	my $database  = $self->requested_database;
-	my $ops_dir	  = $self->ops_dir;
+	my $ops_dir   = $self->ops_dir;
 	my $trusted_certs_usage = 0;
 
 	# Setup the base configuration that OCFP is placed on top of
@@ -447,7 +447,7 @@ sub _gopatch_remove {
 
 # handle_custom_cf_versions - Handle custom cf-deployment versions if present
 sub handle_custom_cf_versions {
-	my ($self, $version) = @_;
+	my ($self) = @_;
 
 	# Check if we have one or more custom cf-deployment versions specified
 	my ($custom_cf_version, @extra_cf_versions) = map {
@@ -457,7 +457,7 @@ sub handle_custom_cf_versions {
 	# Only one custom cf-deployment version allowed
 	bail(
 		"Cannot specify more than one cf-deployment-version-* feature"
-	) if scalar(@extra_cf_versions) > 1;
+	) if scalar(@extra_cf_versions) > 0;
 	return unless $custom_cf_version;
 
 	warning(
@@ -487,10 +487,10 @@ sub handle_custom_cf_versions {
 		my $topdir = $tar_output[0];
 		chomp $topdir;
 
-		bail("Downloaded cf-deployment v${version} doesn't look like a valid release -- cannot continue")
-      unless $topdir eq "cf-deployment-${version}";
+		bail("Downloaded cf-deployment v${custom_cf_version} doesn't look like a valid release -- cannot continue")
+			unless $topdir eq "cf-deployment-${custom_cf_version}";
 	} else {
-		info({stderr => 1}, "  #i{Using cached copy of cf-deployment-${version} release}");
+		info({stderr => 1}, "  #i{Using cached copy of cf-deployment-${custom_cf_version} release}");
 	}
 
   # Remove the existing cf-deployment directory
@@ -528,11 +528,11 @@ sub _dynamic_isolation_template_render {
 	my $dst = "$dstdir/isolation-segment-${name}-${tmpl}.yml";
 
   # Ensure the destination directory exists
-  make_path($dstdir);
+  mkdir_or_fail($dstdir) unless -d $dstdir;
 
   # Read the source file, replace the placeholder, and write to the destination file
-  open my $src_fh, '<', $src or bail("Cannot open source file $src: $!");
-  open my $dst_fh, '>', $dst or bail("Cannot open destination file $dst: $!");
+  open my $src_fh, '<', $self->kit->path($src) or bail("Cannot open source file $src: $!");
+  open my $dst_fh, '>', $self->kit->path($dst) or bail("Cannot open destination file $dst: $!");
 
   while (my $line = <$src_fh>) {
     $line =~ s/\{\{segment-name\}\}/$name/g;
@@ -632,13 +632,9 @@ sub _dynamic_isolation_segments {
 		my $segment_json_file = $self->env->workpath("segment_$group.json");
 		my $append_json_file = $self->env->workpath("append_$group.json");
 
-		open my $fh_seg, '>', $segment_json_file or bail("Cannot write to $segment_json_file: $!");
-		print $fh_seg $segment_json;
-		close $fh_seg;
+		mkfile_or_fail($segment_json_file, $segment_json);
+		mkfile_or_fail($append_json_file, $append_json);
 
-		open my $fh_app, '>', $append_json_file or bail("Cannot write to $append_json_file: $!");
-		print $fh_app $append_json;
-		close $fh_app;
 
 		$cmd .= " \"$segment_json_file\" \"$append_json_file\" > \"$dynamic_segment_fragment_file\"";
 		system($cmd);
@@ -713,8 +709,7 @@ sub _dynamic_instance_vm_types {
 		foreach my $line (split /\n/, $used_groups_for_vm_types) { next unless $line; push @dups, $line if $seen{$line}++;}
 		if (@dups) { bail("Instance vm types specified (or translated as) multiple times: " . join(", ", @dups));}
 		my $types_op_file_path = "operations/dynamic/instance_types.yml";
-    make_path("operations/dynamic", {error => \my $err});
-    bail("Failed to create operations/dynamic directory: " . join(", ", map { $_->{message} } @$err)) if @$err;
+		mkdir_or_fail("operations/dynamic") unless -d "operations/dynamic";
 		open my $fh, '>', $types_op_file_path or bail("Cannot write to $types_op_file_path: $!");
 		print $fh $types_op_file_content;
 		close $fh;
@@ -776,17 +771,16 @@ sub _dynamic_instance_counts {
 		if (@dups) { bail("Instance counts specified (or translated as) multiple times: " . join(", ", @dups));}
 
 		my $counts_opsfile_path = "operations/dynamic/instance_counts.yml";
-    make_path("operations/dynamic", {error => \my $err});
-    bail("Failed to create operations/dynamic directory: " . join(", ", map { $_->{message} } @$err))
-      if @$err;
-    open my $fh, '>', $counts_opsfile_path or bail("Cannot write to $counts_opsfile_path: $!");
-		print $fh $counts_opsfile_content;
-		close $fh;
+		mkdir_or_fail("operations/dynamic") unless -d "operations/dynamic";
+		mkfile_or_fail
 		push @instance_counts_ops, $counts_opsfile_path;
 	}
 	return @instance_counts_ops;
 }
 
+# }}}
+
+# validate_classic_features - Validate and process classic features
 sub validate_classic_features {
 	my ($self) = @_;
 
@@ -899,6 +893,9 @@ sub validate_classic_features {
 	$self->_process_feature_validation(\@valid_features, \%deprecated_features);
 }
 
+# }}}
+
+# validate_ocfp_features - Validate OCFP features {{{
 sub validate_ocfp_features {
 	my ($self) = @_;
 	# This will go through the raw features, validate them, and "mutate" them to accomplish the
@@ -916,13 +913,13 @@ sub validate_ocfp_features {
 		'smb-volume-services',
 
 		# Blobstores:
-		'+internal_blobstore',
+		'+internal-blobstore',
 
 		# Blobstore support:
 		'blobstore-suffix',
 
 		# Databases:
-		'+internal_db', # FIXME: Maybe allow mysql-db in the future?
+		'+internal-db', # FIXME: Maybe allow mysql-db in the future?
 	);
 	push @valid_features, 'aws-blobstore-iam' if $self->iaas eq 'aws';
 	push @valid_features, 'gcp-use-access-key' if $self->iaas eq 'gcp';
@@ -969,7 +966,7 @@ sub validate_ocfp_features {
 	$self->_process_feature_validation(\@valid_features, \%deprecated_features);
 
 	# Handle OCFP blobstore selection
-	if (!$self->want_feature('+internal_blobstore')) {
+	if (!$self->want_feature('+internal-blobstore')) {
 		# Add the iaas-specific blobstore feature
 		my $type = $self->iaas;
 		$type = "minio" if $type eq "vsphere"; # vsphere uses minio blobstore
@@ -980,14 +977,17 @@ sub validate_ocfp_features {
 		}
 	}
 	# Handle OCFP database selection
-	if (!$self->want_feature('+internal_db')) {
+	if (!$self->want_feature('+internal-db')) {
 		# Add the iaas-specific database feature
 		$self->set_features(
-			$self->features, 'posgres-db' # FIXME: Postgres is currently the only supported database for OCFP
-		)
+			$self->features, 'postgres-db' # FIXME: Postgres is currently the only supported database for OCFP
+		);
 	}
 }
 
+# }}}
+
+# _process_feature_validation - Process feature validation {{{
 sub _process_feature_validation {
 	my ($self, $valid_features, $deprecated_features) = @_;
 
@@ -995,7 +995,7 @@ sub _process_feature_validation {
 	my @warnings = ();
 	my @errors   = ();
 
-	# map the valid features to a hash for quick lookup (Oₙ + m * O₁)
+	# map the valid features to a hash for quick lookup (O_n + m * O_1)
 	my %valid_features = map { $_ => 1 } @$valid_features;
 
 	my $ops_dir = $self->ops_dir;
@@ -1024,8 +1024,8 @@ sub _process_feature_validation {
 				push @errors, "Invalid cf-deployment operation requested: #c{$feature}";
 			}
 
-		} elsif (-f $self->top->path("$ops_dir/$feature.yml")) {
-			# Custom ops file from the kit
+		} elsif (-f $self->env->path("$ops_dir/$feature.yml")) {
+			# Custom ops file from the environment
 			push @curated_features, $feature;
 
 		} else {
@@ -1034,18 +1034,21 @@ sub _process_feature_validation {
 	}
 
 	warning(
-		"\nFeature validation encoundered the following warnings:\n%s",
-		map {"[[  - >>$_\n"} @warnings
+		"\nFeature validation encountered the following warnings:\n%s",
+		join('', map {"[[  - >>$_\n"} @warnings)
 	) if @warnings;
 
 	bail(
-		"\nFeature validation encoundered the following errors:\n%s",
-		map {"[[  - >>$_\n"} @errors
+		"\nFeature validation encountered the following errors:\n%s",
+		join('', map {"[[  - >>$_\n"} @errors)
 	) if @errors;
 
 	$self->set_features(@curated_features);
 }
 
+# }}}
+
+# _handle_deprecated_feature - Handle deprecated features {{{
 sub _handle_deprecated_feature {
 	my ($self, $feature, $resolution, $curated_features, $warnings_ref, $errors_ref) = @_;
 	my $msg = undef;
@@ -1053,12 +1056,12 @@ sub _handle_deprecated_feature {
 
 	$resolution = {replace => $resolution} unless ref($resolution) eq 'HASH';
 
-	if (!exists($replacement->{params})) {
-		$msg = $replacement->{msg};
-		$replacement = $replacement->{replace};
+	if (!exists($resolution->{params})) {
+		$msg = $resolution->{msg};
+		$replacement = $resolution->{replace};
 	} else {
 		# TODO: Deal with features that have been replaced by env params
-		... # not yet implemented
+		bail("Feature replacement by params not yet implemented for $feature");
 	}
 
 	if (ref($replacement) eq 'ARRAY') {
@@ -1067,16 +1070,16 @@ sub _handle_deprecated_feature {
 			push @$warnings_ref, $msg // sprintf(
 				"The #g{%s} feature is now the default behaviour %s",
 				$feature,
-				$msg //= "and no longer needs to be specified."
+				$msg // "and no longer needs to be specified."
 			);
-			next;
+		} else {
+			push @$warnings_ref, $msg // sprintf(
+				"The #y{%s} feature has been deprecated %s",
+				$feature,
+				$msg // "and should be replaced with ". sentence_join(map {"#c{$_}"} @$replacement)
+			);
+			push @$curated_features, @$replacement;
 		}
-		push @$warnings_ref, $msg // sprintf(
-			"The #y{%s} feature has been deprecated %s",
-			$feature,
-			$msg // "and should be replaced with ". sentence_join(map {"#c{$_}"} @$replacement)
-		);
-		push @$curated_features, @$replacement;
 	} elsif (!defined($replacement)) {
 		push @$errors_ref, sprintf(
 			"The #r{%s} feature is no longer supported and has been removed.%s",
@@ -1086,15 +1089,13 @@ sub _handle_deprecated_feature {
 	} else {
 		# Single replacement
 		push @$warnings_ref, sprintf(
-			"The #c{%s} feature has been replace with #c{%s}",
+			"The #c{%s} feature has been replaced with #c{%s}",
 			$feature, $replacement
 		);
 		push @$curated_features, $replacement;
 	}
-	return
+	return 1;
 }
-
-# --- new convenience methods for refactor ---
 
 sub add_files_if_wants {
 	my ($self, $feature_test, @files) = @_;
