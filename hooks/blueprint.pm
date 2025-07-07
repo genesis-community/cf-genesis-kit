@@ -323,8 +323,8 @@ sub process_ocfp_features {
 
 	# Process the remaining requested features in order
 	my @handled_features = (
-		'ocfp', 'tls',' self-signed', 'small-footprint',
-		'static-releases',
+		'ocfp',' self-signed', 'small-footprint',
+		'static-releases', 'isolation-segments',
 		'cf-deployment/operations/scale-to-one-az',
 		$blobstore, $database,
 	);
@@ -906,6 +906,7 @@ sub validate_ocfp_features {
 		'ocfp', # OCFP is the only feature that is always enabled in OCFP environments
 		'partitioned-network',
 		'small-footprint',
+		'static-releases',
 		'haproxy',
 		'self-signed',
 		'cflinuxfs3', 'cflinuxfs4',
@@ -950,6 +951,11 @@ sub validate_ocfp_features {
 
 		'trust-blacksmith-ca' => {
 			msg => "- it will automatically be applied if detected in secrets store",
+			replace => []
+		},
+		'compiled-releases' => {
+			msg => "- it is the default behaviour in OCFP; to turn it off, use the ".
+			"'static-releases' feature",
 			replace => []
 		},
 
