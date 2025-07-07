@@ -13,8 +13,6 @@ use Genesis qw/info warning error bail new_enough in_array curl mkdir_or_fail mk
 use Genesis::State qw/envset/;
 use Archive::Tar;
 use JSON::PP;
-
-
 sub init {
 	my $class = shift;
 	my $obj = $class->SUPER::init(@_);
@@ -901,7 +899,9 @@ sub validate_ocfp_features {
 	# This will go through the raw features, validate them, and "mutate" them to accomplish the
 	# desired processing flow.  It also checks params for dymnamic features.
 	my @valid_features = (
+		'ocfp', # OCFP is the only feature that is always enabled in OCFP environments
 		'partitioned-network',
+		'small-footprint',
 		'haproxy',
 		'self-signed',
 		'cflinuxfs3', 'cflinuxfs4',
@@ -1017,7 +1017,7 @@ sub _process_feature_validation {
 			push @curated_features, $feature;
 
 		} elsif ($feature =~ /^cf-deployment\/operations\/(.*)$/) {
-			if (-f $self->kit->path($feature)) {
+			if (-f $self->kit->path($feature.'.yml')) {
 				# Custom ops file from the kit
 				push @curated_features, $feature;
 			} else {
@@ -1067,13 +1067,13 @@ sub _handle_deprecated_feature {
 	if (ref($replacement) eq 'ARRAY') {
 		# Multiple replacements
 		if (!@$replacement) {
-			push @$warnings_ref, $msg // sprintf(
+			push @$warnings_ref, sprintf(
 				"The #g{%s} feature is now the default behaviour %s",
 				$feature,
 				$msg // "and no longer needs to be specified."
 			);
 		} else {
-			push @$warnings_ref, $msg // sprintf(
+			push @$warnings_ref, sprintf(
 				"The #y{%s} feature has been deprecated %s",
 				$feature,
 				$msg // "and should be replaced with ". sentence_join(map {"#c{$_}"} @$replacement)
