@@ -74,12 +74,12 @@ sub perform {
 					cloud_properties_for_iaas => $network_cloud_properties,
 					allocation => {
 						size => $self->for_scale({
-							dev  => 1 + $self->want_feature('haproxy') ? 1 : 0,
-							prod => 5 + $self->want_feature('haproxy') ? 2 : 0
+							dev  => 1 + ($self->want_feature('haproxy') ? 1 : 0),
+							prod => 5 + ($self->want_feature('haproxy') ? 2 : 0)
 						}),
 						statics => $self->for_scale({
-							dev  => 1 + $self->want_feature('haproxy') ? 1 : 0,
-							prod => 5 + $self->want_feature('haproxy') ? 2 : 0
+							dev  => 1 + ($self->want_feature('haproxy') ? 1 : 0),
+							prod => 5 + ($self->want_feature('haproxy') ? 2 : 0)
 						})
 					}
 				}
@@ -146,13 +146,13 @@ sub perform {
 					}),
 					statics => $self->for_scale({
 						dev => 1 # router
-							+ $self->want_feature('no-tcp-router') ? 0 : 1,
-							+ $self->want_feature('haproxy')       ? 1 : 0
-							+ $self->want_feature('+internal-db')  ? 1 : 0,
+							+ ($self->want_feature('no-tcp-router') ? 0 : 1)
+							+ ($self->want_feature('haproxy')       ? 1 : 0)
+							+ ($self->want_feature('+internal-db')  ? 1 : 0),
 						prod => 5 # routers
-							+ $self->want_feature('no-tcp-router') ? 0 : 5
-							+ $self->want_feature('haproxy')       ? 2 : 0
-							+ $self->want_feature('+internal-db')  ? 1 : 0
+							+ ($self->want_feature('no-tcp-router') ? 0 : 5)
+							+ ($self->want_feature('haproxy')       ? 2 : 0)
+							+ ($self->want_feature('+internal-db')  ? 1 : 0)
 					})
 				}
 			}
