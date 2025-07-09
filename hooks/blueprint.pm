@@ -183,6 +183,8 @@ sub process_classic_features {
 		} elsif ( $feature eq "enable-service-discovery" ) {
 			$self->add_files("overlay/enable-service-discovery.yml");
 
+		# TODO: Add windows-diego-cells feature support
+
 		# Custom ops files from environment
 		} elsif (-f $self->env->path("$ops_dir/${feature}.yml")) {
 			$self->add_files($self->env->path("$ops_dir/${feature}.yml"));
@@ -263,7 +265,6 @@ sub process_ocfp_features {
 		overlay/override-app-domains.yml
 		overlay/ten-year-ca-expiry.yml
 		overlay/uaa-branding.yml
-		overlay/enable-service-discovery.yml
 	});
 
 	# Handle custom AZs and singular AZ - REFACTOR: this is a common part
@@ -275,7 +276,7 @@ sub process_ocfp_features {
 		'cf-deployment/operations/scale-to-one-az.yml',
 		'operations/scale-to-one-az.yml'
 	) if $self->iaas eq 'azure' || $self->want_feature(
-		qr{^(small-footprint|cf-deployment/operations/scale-to-one-az|azure)$}
+		qr{^(small-footprint|cf-deployment/operations/scale-to-one-az)$}
 	);
 	$self->add_files('operations/custom-azs.yml');
 
@@ -288,9 +289,9 @@ sub process_ocfp_features {
 		overlay/addons/uaa-admin-client.yml
 		overlay/addons/stratos.yml
 		overlay/blobstore/meta.yml
+		overlay/enable-service-discovery.yml
 		ocfp/meta.yml
 		ocfp/ocfp.yml
-		ocfp/stratos.yml
 	));
 
 	# Add OCFP specific operations
@@ -298,6 +299,14 @@ sub process_ocfp_features {
 		"ocfp/${iaas}/ocf.yml",
 		"ocfp/${iaas}/azs.yml",
 	);
+
+	# Need to add compiled releases here, because external db selection
+	# deletes a path for pxc and upstream will fail to find it.
+	if (!$self->want_feature('static-releases')) {
+		$self->add_files(
+			"cf-deployment/operations/use-compiled-releases.yml",
+		);
+	}
 
 	# Blobstores
 	if ($blobstore eq '+internal-blobstore') {
@@ -311,13 +320,15 @@ sub process_ocfp_features {
 
 	# Databases
 	if ($database eq '+internal-db') {
-		$self->enable_requested_database('local-postgres-db');
+    $self->add_files();
 		$self->add_files("ocfp/internal-db.yml");
 	} else {
 		$trusted_certs_usage++;
-		$self->enable_requested_database($database);
 		my $db_type = ($database =~ s/-db//r);
 		$self->add_files_if_exists(
+      "cf-deployment/operations/use-postgres.yml",
+			"ocfp/external-db-prep.yml",
+			"ocfp/external-db.yml",
 			"ocfp/${db_type}/external_db.yml",
 		);
 	}
@@ -340,6 +351,7 @@ sub process_ocfp_features {
 		# Integrations - others are automatically included above
 		if ($feature eq 'stratos-integration') {
 			$self->add_files(
+				'ocfp/stratos.yml'
 			);
 
 		# Other OCFP features
@@ -358,7 +370,7 @@ sub process_ocfp_features {
 			);
 
 		} elsif ($feature eq 'windows-diego-cells') {
-			$self->enable_windows_diego_cells();
+			$self->enable_windows_diego_cells(!$self->want_feature('static-releases'));
 			$self->add_files(
 				"ocfp/$iaas/windows.yml",
 				"ocfp/trusted-certs-windows.yml"
@@ -424,10 +436,7 @@ sub process_ocfp_features {
 	if ($self->want_feature('static-releases')) {
 		$self->add_files('overlay/override-releases/static.yml');
 	} else {
-		$self->add_files(
-			'cf-deployment/operations/use-compiled-releases.yml',
-			'overlay/override-releases/compiled.yml'
-		);
+		$self->add_files('overlay/override-releases/compiled.yml');
 	}
 
 	# Add custom ops files collected for OCFP
@@ -913,6 +922,7 @@ sub validate_ocfp_features {
 		'cflinuxfs3', 'cflinuxfs4',
 		'isolation-segments',
 		'no-tcp-routers',
+    'stratos-integration',
 		'windows-diego-cells',
 
 		'nfs-volume-services', 'nfs-ldap', 'nfs-ldap-tls',
@@ -945,7 +955,6 @@ sub validate_ocfp_features {
 		'app-scheduler-integration' => $ocfp_included_resolution,
 		'app-autoscaler-integration' => $ocfp_included_resolution,
 		'prometheus-integration' => $ocfp_included_resolution,
-		'stratos-integration' => $ocfp_included_resolution,
 		'scs-integration' => $ocfp_included_resolution,
 		'uaa-admin-client' => $ocfp_included_resolution,
 		'ssh-proxy-on-routers' => $ocfp_included_resolution,
@@ -1157,7 +1166,10 @@ sub enable_external_blobstore {
 
 	my $type = $feature =~ s/-blobstore//r;
 
-	$self->add_files('overlay/blobstore/external.yml');
+	$self->add_files(
+		'overlay/blobstore/meta.yml',
+		'overlay/blobstore/external.yml'
+	);
 	$self->add_files_if_exists("overlay/blobstore/${type}.yml");
 	$self->add_files('cf-deployment/operations/use-external-blobstore.yml');
 
@@ -1176,7 +1188,7 @@ sub enable_external_blobstore {
 	}
 
 	$self->add_files_if_wants('blobstore-suffix',
-		"overlay/blobstore/${type}-suffix.yml"
+		"overlay/blobstore-suffix.yml"
 	);
 	return 1;
 }
@@ -1249,18 +1261,23 @@ sub enable_nfs_volume_services {
 }
 
 sub enable_windows_diego_cells {
-	my ($self) = @_;
+	my ($self, $compiled_releases) = @_;
 
 	$self->add_files(
 		"cf-deployment/operations/windows2019-cell.yml",
 		"cf-deployment/operations/use-online-windows2019fs.yml",
 		"cf-deployment/operations/use-latest-windows2019-stemcell.yml",
-		"overlay/override-releases/static-windows.yml"
 	);
-	$self->add_files_if_wants('compiled-releases',
-		"cf-deployment/operations/experimental/use-compiled-releases-windows.yml",
-		"overlay/override-releases/compiled-windows.yml"
-	);
+	if ($compiled_releases) {
+		$self->add_files(
+			"cf-deployment/operations/use-compiled-releases-windows.yml",
+			"overlay/override-releases/compiled-windows.yml"
+		);
+	} else {
+		$self->add_files(
+			"overlay/override-releases/static-windows.yml"
+		);
+	}
 	$self->add_files("overlay/windows.yml") unless $self->want_feature("bare");
 	return 1;
 }
