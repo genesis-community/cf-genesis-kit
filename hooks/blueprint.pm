@@ -1269,7 +1269,7 @@ sub enable_windows_diego_cells {
 		"cf-deployment/operations/use-latest-windows2019-stemcell.yml",
 	);
 	if ($compiled_releases) {
-		$self->add_files(
+		$self->add_files_if_exists(
 			"cf-deployment/operations/use-compiled-releases-windows.yml",
 			"overlay/override-releases/compiled-windows.yml"
 		);
