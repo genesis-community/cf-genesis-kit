@@ -2,7 +2,7 @@
 - type: replace
   path: /instance_groups/name=windows2019-cell/networks
   value: 
-    - name:  (( concat genesis.env "-ocf" ))
+    - name:  (( concat genesis.env ".cf.net-ocf" ))
 
 - type: replace
   path: /instance_groups/name=windows2019-cell/azs

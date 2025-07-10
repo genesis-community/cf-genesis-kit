@@ -199,8 +199,8 @@ sub perform {
 							encrypted => $self->TRUE,
 							size      => $self->for_scale(
 								{
-									dev  => $vm_matrix->{$_}{ephemeral_dev}  || 4096,
-									prod => $vm_matrix->{$_}{ephemeral_prod} || 8192
+									dev  => int($vm_matrix->{$_}{ephemeral_dev})  || 4096,
+									prod => int($vm_matrix->{$_}{ephemeral_prod}) || 8192
 								}
 							),
 							type => 'gp3'
@@ -214,21 +214,25 @@ sub perform {
 		} ( sort keys %$vm_matrix )),
 		],
 		'vm_extensions' => [
-			$self->vm_extension_definition('diego-ssh-proxy-network-properties' => {
+			$self->vm_extension_definition('cf-ssh-lb' => {
 				aws => {
 					'lb_target_groups' => ['ocfp-ocf-cf-ssh-lb-tg'],
 				},
 			}),
-			$self->vm_extension_definition('cf-router-network-properties' => {
+			$self->vm_extension_definition('cf-system-apps-lb' => {
 				aws => {
 					'lb_target_groups' => ['ocfp-ocf-cf-system-apps-lb-tg'],
 				},
 			}),
-			$self->vm_extension_definition('cf-tcp-router-network-properties' => {
+			$self->vm_extension_definition('cf-tcp-lb' => {
 				aws => {
 					'lb_target_groups' => ['ocfp-ocf-cf-tcp-lb-tg'],
-					'elbs'             => ['ocfp-ocf-cf-tcp-lb'],
 				},
+			}),
+			$self->vm_extension_definition('cf-tcp-elb' => {
+				aws => {
+					'elbs'             => ['ocfp-ocf-cf-tcp-lb'],
+				},			
 			}),
 		],
 		'disk_types' => [
@@ -343,6 +347,7 @@ sub _get_aws_vm_matrix {
 			[ qw[  uaa           t3.large     c6i.large          30720           4096          16384  ] ],
 			[ qw[  database      t3.medium    m6i.xlarge         61440           4096          16384  ] ],
 			[ qw[  blobstore     t3.medium    m6i.large          61440           4096           8192  ] ],
+			[ qw[  windows-cell  t3.medium    r6i.2xlarge       262144          65536         393216  ] ],
 		)
 	}
 }
