@@ -9,10 +9,10 @@ use warnings;
 BEGIN {push @INC, $ENV{GENESIS_LIB} ? $ENV{GENESIS_LIB} : $ENV{HOME}.'/.genesis/lib'}
 use parent qw(Genesis::Hook::Blueprint);
 
-use Genesis qw/info warning error bail new_enough in_array curl mkdir_or_fail mkfile_or_fail compare_arrays sentence_join/;
+use Genesis qw/info warning error bail new_enough in_array curl mkdir_or_fail mkfile_or_fail compare_arrays sentence_join load_yaml save_to_yaml_file/;
 use Genesis::State qw/envset/;
 use Archive::Tar;
-use JSON::PP;
+
 sub init {
 	my $class = shift;
 	my $obj = $class->SUPER::init(@_);
@@ -152,6 +152,7 @@ sub process_classic_features {
 		# Integrations
 		}	elsif ($feature eq "app-autoscaler-integration" ) {
 			$self->add_files("overlay/addons/autoscaler.yml");
+			$self->_add_app_autoscaler_releases();
 
 		}	elsif ($feature eq "app-scheduler-integration" ) {
 			$self->add_files("overlay/addons/app-scheduler.yml");
@@ -293,6 +294,8 @@ sub process_ocfp_features {
 		ocfp/meta.yml
 		ocfp/ocfp.yml
 	));
+
+	$self->_add_app_autoscaler_releases();
 
 	# Add OCFP specific operations
 	$self->add_files(
@@ -442,7 +445,6 @@ sub process_ocfp_features {
 	# Add custom ops files collected for OCFP
 	$self->add_files(@ops_files) if @ops_files;
 
-	# Process OCFP features
 	return $self->done();
 }
 
@@ -1323,6 +1325,36 @@ sub _process_common_positional_features {
 	}
 
 	return 1;
+}
+
+sub _add_app_autoscaler_releases {
+	my ($self) = @_;
+	# If cf-app-autoscaler integration is enabled, we need to dynamically
+	# generate a stringified JSON block containing the release versions
+	# that the autoscaler needs to be able to work with.
+	if ($self->want_feature('app-autoscaler-integration') || $self->want_feature('ocfp')) {
+		# Using our list of files, we need to merge them without evaluation,
+		# then cherry-pick the releases block.
+		my @autoscaler_releases = qw/bosh-dns-aliases routing loggregator-agent bpm/;
+		my @spruce_opts = qw/--skip-eval -m --go-patch --fallback-append --cherry-pick releases/;
+		my ($out, $rc, $err) = $self->spruce_merge(@spruce_opts,$self->{files}->@*);
+		bail(
+			"Failed to merge spruce files to determine releases for app-autoscaler integration: %s", $err//$out
+		) if $rc;
+
+		# Get the array of releases, and select only the ones we care about
+		# for the app-autoscaler integration.
+		my $releases = load_yaml($out);
+		my @releases = grep {
+			my $name = $_->{name};
+			in_array($name, @autoscaler_releases);
+		} $releases->{releases}->@*;
+
+		# Create a dynamic file containing the array of releases to stuff into exodus data.
+		my $file = $self->kit->path("overlay/dynamic/autoscaler-releases.yml");
+		save_to_yaml_file({exodus => {app_autoscaler_releases => \@releases}}, $file);
+		$self->add_files("overlay/dynamic/autoscaler-releases.yml");
+	}
 }
 
 sub ops_dir {
