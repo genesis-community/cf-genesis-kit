@@ -44,97 +44,94 @@ sub perform {
 	my ($self) = @_;
 	my $env = $self->env;
 
-	# Default configuration
+	# Argument to config key mapping, default values, and usage patterns
+	my $scs_url = 'https://github.com/cloudfoundry-community/scs-service-registry';
+	my $uri_regexp = qr{^https?://[-\w\@:%._+~#=]{1,256}\.[-\w\@:%\._+~#=]{1,256}(?:\:\d{1,5})?(?:/[-\w\@:%\._\+~#\?&/=]*)?$};
+	my $uri_err_msg = "must be a valid URI in the format 'http(s)://example.com/path'";
+	my $size_err_msg = 'must be in format "###M" (e.g., 256M, 1024M)';
+	my %config_desc = (
+		# Boolean flags (no value required)
+		deploy   => { type => 'flag', default => 0 },
+		register => { type => 'flag', default => 0 },
+
+		# Direct mappings (arg name matches config key)
+		memory                   => { type => 'value', usage => '<size>M', default => "256M", validate => qr/^\d+M$/, err_msg => $size_err_msg },
+		disk                     => { type => 'value', usage => '<size>M', default => "256M", validate => qr/^\d+M$/, err_msg => $size_err_msg },
+		stack                    => { type => 'value', usage => '<stack-name>', default => "cflinuxfs4" },
+		buildpack                => { type => 'value', usage => '<go-buildpack-name>', default => "go_buildpack" },
+		registry_buildpack       => { type => 'value', usage => '<java-buildpack-name>', default => "java_buildpack" },
+		configserver_buildpack   => { type => 'value', usage => '<java-buildpack-name>', default => "java_buildpack" },
+		release_tag              => { type => 'value', usage => '<tag>', default => "2023.0.1" },
+		broker_uri               => { type => 'value', usage => '<uri>', validate => $uri_regexp, err_msg => $uri_err_msg,
+		                              default => $scs_url . "/archive/refs/tags/v1.1.2.tar.gz" },
+		configserver_jar_uri     => { type => 'value', usage => '<uri>', validate => $uri_regexp, err_msg => $uri_err_msg,
+		                              default => $scs_url . "/releases/download/v2.0.0-2023.0.1/spring-cloud-config-server-2.0.0-2023.0.1.jar" },
+		registry_jar_uri         => { type => 'value', usage => '<uri>', validate => $uri_regexp, err_msg => $uri_err_msg,
+		                              default => $scs_url . "/releases/download/v2.0.0-3.4.0/service-registry-2.0.0-3.4.0.jar" },
+		java_version             => { type => 'value', usage => '<version>', default => "17.+" },
+		skip_ssl_validation      => { type => 'value', usage => '<true|false>', default => "true", validate => qr/^(true|false)$/,
+		                              err_msg => "must be 'true' or 'false'" },
+
+		# Mapped arguments (arg name differs from config key)
+		broker_username          => { key => 'broker_auth_username', type => 'value', usage => '<username>', default => "admin" },
+		broker_password          => { key => 'broker_auth_password', type => 'value', usage => '<password>', default => "admin" },
+	);
+
+	# Initialize config with defaults and immutable values
 	my %config = (
-		org         => "system",
-		space       => "scs",
-		memory      => "256M",
-		disk        => "1048M",
-		stack       => "cflinuxfs4",
-		buildpack   => "go_buildpack",
-		release_tag => "2023.0.1",
-		broker_uri  =>
-		  "https://github.com/cloudfoundry-community/scs-broker/archive/refs/tags/v1.1.2.tar.gz",
-		configserver_buildpack => "java_buildpack",
-		configserver_jar_uri   =>
-"https://github.com/cloudfoundry-community/cf-spring-cloud-config-server/releases/download/v2.0.0-2023.0.1/spring-cloud-config-server-2.0.0-2023.0.1.jar",
-		registry_buildpack => "java_buildpack",
-		registry_jar_uri   =>
-"https://github.com/cloudfoundry-community/scs-service-registry/releases/download/v2.0.0-3.4.0/service-registry-2.0.0-3.4.0.jar",
-		java_version         => "17.+",
-		broker_name          => "scs-broker",
-		broker_old_name      => "scs-broker",
-		broker_auth_username => "admin",
-		broker_auth_password => "admin",
-		skip_ssl_validation  => "true",
-		deploy               => 0,
-		register             => 0,
+		# Immutable configuration (not configurable via arguments)
+		org             => "system",
+		space           => "scs",
+		broker_name     => "scs-broker",
+		broker_old_name => "scs-broker",
 	);
 
 	# Parse arguments - process each arg and its corresponding value if needed
 	my @args = @{ $self->{args} };
+	my @errors;
 
 	while (@args) {
 		my $arg = shift @args;
 
-		if ( $arg eq 'memory' ) {
-			$config{memory} = shift @args || bail("Usage: ... memory <#M>");
-		}
-		elsif ( $arg eq 'disk' ) {
-			$config{disk} = shift @args || bail("Usage: ... disk <#M>");
-		}
-		elsif ( $arg eq 'stack' ) {
-			$config{stack} = shift @args || bail("Usage: ... stack <stack-name>");
-		}
-		elsif ( $arg eq 'buildpack' ) {
-			$config{buildpack} = shift @args || bail("Usage: ... buildpack <go-buildpack-name>");
-		}
-		elsif ( $arg eq 'registry_buildpack' ) {
-			$config{registry_buildpack} =
-			  shift @args || bail("Usage: ... registry_buildpack <java-buildpack-name>");
-		}
-		elsif ( $arg eq 'configserver_buildpack' ) {
-			$config{configserver_buildpack} =
-			  shift @args || bail("Usage: ... configserver_buildpack <java-buildpack-name>");
-		}
-		elsif ( $arg eq 'release_tag' ) {
-			$config{release_tag} = shift @args || bail("Usage: ... release_tag <tag>");
-		}
-		elsif ( $arg eq 'broker_uri' ) {
-			$config{broker_uri} = shift @args || bail("Usage: ... broker_uri <uri>");
-		}
-		elsif ( $arg eq 'broker_username' ) {
-			$config{broker_auth_username} =
-			  shift @args || bail("Usage: ... broker_username <username>");
-		}
-		elsif ( $arg eq 'broker_password' ) {
-			$config{broker_auth_password} =
-			  shift @args || bail("Usage: ... broker_password <password>");
-		}
-		elsif ( $arg eq 'configserver_jar_uri' ) {
-			$config{configserver_jar_uri} =
-			  shift @args || bail("Usage: ... configserver_jar_uri <uri>");
-		}
-		elsif ( $arg eq 'registry_jar_uri' ) {
-			$config{registry_jar_uri} = shift @args || bail("Usage: ... registry_jar_uri <uri>");
-		}
-		elsif ( $arg eq 'java_version' ) {
-			$config{java_version} = shift @args || bail("Usage: ... java_version <version>");
-		}
-		elsif ( $arg eq 'skip_ssl_validation' ) {
-			$config{skip_ssl_validation} =
-			  shift @args || bail("Usage: ... skip_ssl_validation <true|false>");
-		}
-		elsif ( $arg eq 'deploy' ) {
-			$config{deploy} = 1;
-		}
-		elsif ( $arg eq 'register' ) {
-			$config{register} = 1;
-		}
-		else {
-			bail("Unknown argument: $arg");
+		if ( my $arg_info = $config_desc{$arg} ) {
+			my $key = $arg_info->{key} // $arg;
+			if ( $arg_info->{type} eq 'flag' ) {
+				$config{$key} = 1;
+				next;
+			}
+
+			# If next arg is another config key, treat as no value
+			my $value = in_array($args[0], keys %config_desc) ? undef : shift @args;
+			if (!$value) {
+				push @errors, sprintf('%s expects %s argument', $key, $arg_info->{usage});
+				next;
+			}
+
+			# Validate value if a validation pattern is provided
+			if ($arg_info->{validate} && $value !~ $arg_info->{validate}) {
+				push @errors, sprintf(
+					"%s %s",
+					$key, $arg_info->{err_msg} // "must match pattern $arg_info->{validate}"
+				);
+			}
+			$config{$key} = $value;
+		} else {
+			push @errors, "Unknown argument: $arg";
 		}
 	}
+
+	# Check for errors and bail if any found
+	bail(
+		"Invalid arguments: \n%s",
+		join( "\n", map { "  - $_" } @errors )
+	) if @errors;
+
+	# Set defaults from arg_config
+	for my $arg (keys %config_desc) {
+		my $key = $config_desc{$arg}{key} // $arg;
+		$config{$key} //= $config_desc{$arg}{default} if exists $config_desc{$arg}{default};
+	}
+
 
 	# Get data from exodus
 	my $exodus_path       = $self->env->exodus_base();
@@ -150,11 +147,11 @@ sub perform {
 
 	# Create CF space
 	info("Setting up CF organization and space...");
-	run("cf create-space -o \"$config{org}\" \"$config{space}\"");
-	run("cf target -o \"$config{org}\" -s \"$config{space}\"");
+	run('cf', 'create-space', '-o', $config{org}, $config{space});
+	run('cf', 'target', '-o', $config{org}, '-s', $config{space});
 
 	# Get space GUID
-	my ( $scs_space_guid, $rc ) = run("cf space $config{space} --guid");
+	my ( $scs_space_guid, $rc ) = run('cf', 'space', $config{space}, '--guid');
 	chomp($scs_space_guid);
 
 	if ( $config{deploy} ) {
@@ -162,7 +159,7 @@ sub perform {
 
 		# Create temporary directory
 		my $tmp_dir = $env->workpath("scs-deploy");
-		run("mkdir -p $tmp_dir");
+		mkdir_or_fail($tmp_dir);
 		pushd($tmp_dir);
 
 		# Download broker archive
@@ -259,7 +256,7 @@ MANIFEST
 
 		# Push the app to CF
 		info("Pushing SCS Broker to Cloud Foundry...");
-		run({interactive => 0},"cf push -f manifest.yml");
+		run({interactive => 0}, 'cf', 'push', '-f', 'manifest.yml');
 
 		info(
 			"SCS service broker is now running, you should now be able to create a service, e.g.:\n".
@@ -274,9 +271,9 @@ MANIFEST
 	if ( $config{register} ) {
 		info("Registering SCS Broker...");
 
-		info("Checking if broker is already registered...")
+		info("Checking if broker is already registered...");
 		# TODO: Switch to read_json_from($self->env->bosh->execute())
-		my ( $broker_json, $rc ) = run("cf curl \"/v2/service_brokers\"");
+		my ($broker_json, $rc ) = run('cf', 'curl', '/v2/service_brokers');
 		my $json_data = eval { decode_json($broker_json) };
 		bail("Failed to parse broker list JSON: $@") if $@;
 
@@ -291,10 +288,14 @@ MANIFEST
 		}
 
 		my $action = $broker_found ? "update" : "create";
-		info( ucfirst($action) . "ing the service broker..." );
+		info( (ucfirst($action) =~ s/e$//r) . "ing the service broker..." );
 
 		run(
-"cf $action-service-broker \"$config{broker_name}\" \"$config{broker_auth_username}\" \"$config{broker_auth_password}\" \"https://scs-broker.$apps_domain\""
+			'cf', "$action-service-broker",
+			$config{broker_name},
+			$config{broker_auth_username},
+			$config{broker_auth_password},
+			"https://scs-broker.$apps_domain",
 		);
 	}
 
@@ -307,8 +308,7 @@ sub fetch_uri {
 	my $filename = basename($url);
 
 	info("Downloading $filename...");
-	my ( $out, $rc, $err ) =
-	  run("curl --fail --silent --show-error --location --remote-name --url \"$url\"");
+	my ( $out, $rc, $err ) = run('curl', '--fail', '--silent', '--show-error', '--location', '--remote-name', '--url', $url);
 
 	bail("Failed to download: $url\n$err") if $rc;
 	return $filename;
@@ -318,9 +318,9 @@ sub fetch_artifacts {
 	my ( $self, $configserver_jar_uri, $registry_jar_uri ) = @_;
 
 	info("Downloading service artifacts...");
-	run("mkdir -p artifacts");
+	mkdir_or_fail('artifacts');
 
-	pushd("artifacts");
+	pushd('artifacts');
 
 	$self->fetch_uri($configserver_jar_uri);
 	$self->fetch_uri($registry_jar_uri);
@@ -334,17 +334,15 @@ sub extract {
 	info("Extracting $archive...");
 
 	if ( $archive =~ /\.zip$/ ) {
-		run("unzip -o \"$archive\"");
+		run('unzip', '-o', $archive);
 	}
 	elsif ( $archive =~ /\.t?gz$/ ) {
-		run("tar zxf \"$archive\"");
+		run('tar', 'zxf', $archive);
 	}
 	else {
 		bail("Unknown file type: $archive");
 	}
-
-	# Remove the archive
-	run("rm \"$archive\"");
+	unlink($archive) or warn "Failed to remove archive $archive: $!";
 }
 
 1;
