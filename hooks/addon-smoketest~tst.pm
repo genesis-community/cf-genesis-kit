@@ -25,10 +25,10 @@ sub perform {
 	my ($self) = @_;
 
 	$self->bosh->execute(
+		{ interactive => 1 },    # Run in interactive mode means seeing output as it happens
 		'run-errand',
 		'smoke_tests',
-		{ interactive => 1 },    # Run in interactive mode means seeing output as it happens
-	  )
+	);
 
 	  return $self->done();
 }
