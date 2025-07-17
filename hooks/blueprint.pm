@@ -352,7 +352,8 @@ sub process_ocfp_features {
 		'ocfp',' self-signed', 'small-footprint',
 		'static-releases', 'isolation-segments',
 		'cf-deployment/operations/scale-to-one-az',
-		$blobstore, $database,
+		$blobstore, '+internal-db', 'local-postgres-db',
+		'local-mysql-db', 'mysql-db', 'postgres-db',
 	);
 
 	my ($remaining_features) = compare_arrays(
