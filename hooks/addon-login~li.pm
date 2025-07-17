@@ -43,6 +43,7 @@ sub perform {
 	my $validate_ssl    = $options{'validate-ssl'} ? 1 : 0;
 
 	my $use_cf_targets = 1;
+	info("#Y{Checking for cf-targets plugin}\n");
 	my ( $out, $rc ) = run('cf plugins | grep -q \'^cf-targets\'');
 	if ( $rc != 0 ) {
 		$use_cf_targets = 0;
@@ -72,19 +73,25 @@ sub perform {
 
 	# Handle SSL validation based on option
 	if ($validate_ssl) {
-		info("Using SSL validation for CF API connection");
-		run( {interactive => 0}, 'cf', 'api', $api_url);
+		info("Using SSL validation for CF API connection %s", $api_url);
+		my ( $out, $rc ) = run( {interactive => 0}, 'cf', 'api', $api_url);
+		info("%s\n", $out);
 	}
 	else {
-		run( {interactive => 0}, 'cf', 'api', '--skip-ssl-validation', $api_url );
+		info("#Y{Using skip-ssl-validation for CF API connection} %s\n", $api_url);
+		my ( $out, $rc ) = run( {interactive => 0}, 'cf', 'api', '--skip-ssl-validation', $api_url );
+		info("%s\n", $out);
 	}
 
-	run( {interactive => 0},'cf', 'auth', $username, $password );
+	info("#G{Logging in as} %s\n", $username);
+	( $out, $rc ) = run( {interactive => 0},'cf', 'auth', $username, $password );
+	info("%s\n", $out);
 
 	run( {interactive => 0}, 'cf', 'save-target', '-f', $ENV{GENESIS_ENVIRONMENT} ) if ($use_cf_targets);
 
 	info("\n\n");
-	run('cf target');
+	( $out, $rc ) = run('cf target');
+	info("%s\n", $out);
 
 	return $self->done();
 }
