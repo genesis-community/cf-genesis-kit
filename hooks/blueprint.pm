@@ -1,6 +1,4 @@
-#!/usr/bin/env perl
-# vim: set ts=2 sw=2 sts=2 foldmethod=marker expandtab:
-package Genesis::Hook::Blueprint::CF v2.7.0; # Updated version
+package Genesis::Hook::Blueprint::CF v3.0.0;
 
 use v5.20;
 use warnings;
@@ -12,6 +10,7 @@ use parent qw(Genesis::Hook::Blueprint);
 use Genesis qw/info warning error bail new_enough in_array curl mkdir_or_fail mkfile_or_fail compare_arrays sentence_join load_yaml save_to_yaml_file/;
 use Genesis::State qw/envset/;
 use Archive::Tar;
+use JSON::PP qw/decode_json encode_json/;
 
 sub init {
 	my $class = shift;
@@ -58,9 +57,15 @@ sub process_classic_features {
 	my ($self) = @_;
 	my $iaas       = $self->iaas; # Get IaaS from environment instead of feature.
 	my $blobstore  = $self->requested_blobstore;
-	my $database   = $self->requested_database;
 	my $env_params = $self->env->params; # Get environment parameters
 	my $ops_dir    = $self->ops_dir;
+
+	my @valid_databases = qw{
+		+internal-db
+		local-postgres-db local-mysql-db
+		mysql-db postgres-db
+	};
+	my ($database, $local_db) = $self->requested_database;
 
 	my $is_bare = $self->want_feature("bare");
 
@@ -147,8 +152,9 @@ sub process_classic_features {
 			$self->enable_external_blobstore($blobstore);
 
 		# Databases
-		} elsif ($feature eq $database) {
-			$self->enable_requested_database($feature);
+		} elsif ($feature eq "+internal-db" || in_array($feature, @valid_databases)) {
+			# We've already validated the database feature, so we can just add it.
+			$self->enable_requested_database($database, $local_db);
 
 		# Integrations
 		}	elsif ($feature eq "app-autoscaler-integration" ) {
@@ -256,9 +262,10 @@ sub process_ocfp_features {
 	my ($self) = @_;
 	my $iaas      = $self->iaas; # Get IaaS from environment instead of feature.
 	my $blobstore = $self->requested_blobstore;
-	my $database  = $self->requested_database;
 	my $ops_dir   = $self->ops_dir;
 	my $trusted_certs_usage = 0;
+
+	my ($database, $local_db) = $self->requested_database;
 
 	# Setup the base configuration that OCFP is placed on top of
 	$self->add_files(qw{
@@ -316,24 +323,27 @@ sub process_ocfp_features {
 	if ($blobstore eq '+internal-blobstore') {
 		$self->add_files('ocfp/internal-blobstore.yml');
 	} else {
-		$trusted_certs_usage++;
 		$self->enable_external_blobstore($blobstore);
 		$self->add_files('ocfp/external-blobstore.yml');
 		$self->add_files_if_exists("ocfp/${iaas}/external-blobstore.yml");
 	}
 
 	# Databases
-	if ($database eq '+internal-db') {
-    $self->add_files();
-		$self->add_files("ocfp/internal-db.yml");
+	$self->add_files("cf-deployment/operations/use-postgres.yml") if $database eq 'postgres';
+	# FIXME: Postgres is the only supported local database for OCFP
+	if ($local_db) {
+		$self->add_files_if_exists(
+			"ocfp/internal-db.yml",
+			"ocfp/internal-${database}-db.yml", # Add specific database ops file
+		);
 	} else {
 		$trusted_certs_usage++;
-		my $db_type = ($database =~ s/-db//r);
 		$self->add_files_if_exists(
-      "cf-deployment/operations/use-postgres.yml",
 			"ocfp/external-db-prep.yml",
 			"ocfp/external-db.yml",
-			"ocfp/${db_type}/external_db.yml",
+			"ocfp/${iaas}/external-db.yml",
+			"ocfp/external-${database}-db.yml", # Add specific database ops file
+			"ocfp/${iaas}/external-{$database}-db.yml",
 		);
 	}
 
@@ -510,12 +520,13 @@ sub handle_custom_cf_versions {
 
   # Remove the existing cf-deployment directory
 	my $cf_dir = $self->kit->path("cf-deployment");
-  remove_tree($cf_dir, {error => \my $err});
-  bail("Failed to remove ./cf-deployment: " . join(", ", map { $_->{message} } @$err))
-    if @$err;
+	require File::Path;
+	File::Path::remove_tree($cf_dir, {error => \my $err});
+	bail("Failed to remove ./cf-deployment: " . join(", ", map { $_->{message} } @$err))
+		if @$err;
 
-  # Create a new cf-deployment directory
-  mkdir_or_fail($cf_dir);
+	# Create a new cf-deployment directory
+	mkdir_or_fail($cf_dir);
 
 	# Extract the tar.gz file into the cf-deployment directory
 	my $tar = Archive::Tar->new;
@@ -698,7 +709,7 @@ sub _dynamic_instance_vm_types {
 			if ($dashed_inst_grp !~ /^(api|cc-worker|credhub|database|diego-(api|cell)|doppler|errand|haproxy|windows2019-cell|log-(api|cache)|nats|rotate-cc-database-key|(tcp-)?router|scheduler|singleton-blobstore|smoke-tests|uaa)$/) {
 				warning("Unknown instance group $dashed_inst_grp (from $inst_grp_orig) - this may be bug in your environment files.");
 			}
-			if ($self->is_ocfp) {
+			if ($self->want_feature('ocfp')) {
 				# OCFP uses a different naming convention for vms
 				# FIXME: Need to support different vm types for different segments
 				$type = $self->env->name . '.' . $self->env->type . '.vm-' . $dashed_inst_grp;
@@ -787,7 +798,7 @@ sub _dynamic_instance_counts {
 
 		my $counts_opsfile_path = "operations/dynamic/instance_counts.yml";
 		mkdir_or_fail("operations/dynamic") unless -d "operations/dynamic";
-		mkfile_or_fail
+		mkfile_or_fail($counts_opsfile_path, 0644, $counts_opsfile_content);
 		push @instance_counts_ops, $counts_opsfile_path;
 	}
 	return @instance_counts_ops;
@@ -1153,7 +1164,7 @@ sub requested_database {
 	my ($self) = @_;
 
 	my @valid_databases = qw(
-		+internal-db local-postgres-db local-mysql-db mysql-db  postgres-db
+		local-postgres-db local-mysql-db mysql-db  postgres-db
 	);
 
 	my @requested_databases = grep {in_array($_, @valid_databases)} $self->features;
@@ -1161,7 +1172,11 @@ sub requested_database {
 		"Conflicting database features specified: %s",
 		join(", ", @requested_databases)
 	) if scalar(@requested_databases) > 1;
-	return $requested_databases[0] // 'local-postgres-db';
+
+	push(@requested_databases, 'local-postgres-db') unless scalar(@requested_databases);
+
+	my $is_local = $self->wants_feature('+internal-db') // scalar(grep {$_ =~ /^local-/} @requested_databases);
+	return ($requested_databases[0] =~ s/^local-(.*?)-db$/$1/r, $is_local);
 }
 
 sub enable_external_blobstore {
@@ -1197,10 +1212,7 @@ sub enable_external_blobstore {
 }
 
 sub enable_requested_database {
-	my ($self, $feature) = @_;
-
-	my ($local,$type) = $feature =~ /^(local-)?(mysql|postgres)-db$/;
-	bail("Unknown database feature: $feature") unless $type;
+	my ($self, $type, $local) = @_;
 
 	if ($local) {
 		# Local database setup
@@ -1364,3 +1376,4 @@ sub ops_dir {
 	return $ops_dir;
 }
 1;
+# vim: set ts=2 sw=2 sts=2 noet foldmethod=marker foldlevel=1 nu
