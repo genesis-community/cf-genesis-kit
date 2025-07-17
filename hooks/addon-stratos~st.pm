@@ -14,7 +14,7 @@ use parent qw(Genesis::Hook::Addon);
 sub init {
 	my $class = shift;
 	my $obj   = $class->SUPER::init(@_);
-	$obj->check_minimum_genesis_version('3.1.0-rc.20');
+	$obj->check_minimum_genesis_version('3.1.0');
 
 	# Parse options first before getting info so we can check for version override
 	my %options = $obj->parse_options(

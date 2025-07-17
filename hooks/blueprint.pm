@@ -16,6 +16,7 @@ use Archive::Tar;
 sub init {
 	my $class = shift;
 	my $obj = $class->SUPER::init(@_);
+	$obj->check_minimum_genesis_version('3.1.0');
 
 	# FIXME: this should not be needed when we move to Genesis 3.2.x and branchified pipelines
 	# Set up operations directory path

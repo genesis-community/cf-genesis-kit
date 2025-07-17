@@ -1,6 +1,6 @@
 ---
 name:    cf
-version: 2.5.2
+version: 3.0.0
 authors: [ Dennis Bell <dennis@rubidiumstudios.com> ]
 docs:    https://github.com/genesis-community/cf-genesis-kit
 code:    https://github.com/genesis-community/cf-genesis-kit
@@ -16,14 +16,11 @@ required_configs:
   - cloud
   - runtime
 
-genesis_version_min: 3.1.0-rc.9
+genesis_version_min: 3.1.0
 secrets_store: credhub
 
 supports:
 - aws
-- azure
-- gcp
 - openstack
-- vsphere
 - stackit
 
