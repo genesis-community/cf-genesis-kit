@@ -36,11 +36,16 @@ sub perform {
 			push @features, 'nfs-lambda';
 		} elsif ($feature eq 'cf-deployment/operations/enable-smb-volume-services') {
 			push @features, 'smb-volume-services';
+		} elsif ($feature eq 'internal-db') {
+			push @features, $is_ocfp ? '+internal-db' : 'internal-db';
+		} elsif ($feature eq 'internal-blobstore') {
+			push @features, $is_ocfp ? '+internal-blobstore' : 'internal-blobstore';
 		} elsif ($feature eq 'split-network') { # Short-lived ocfp feature that is better handled by existing feature name
 			push @features, 'partitioned-network';
 		} else {
 			push @features, $feature;
-		}	}
+		}
+	}
 
 	# Check for database overrides
 	my $params = $self->env->lookup('params', {});

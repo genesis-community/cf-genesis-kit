@@ -199,9 +199,9 @@ sub perform {
 							encrypted => $self->TRUE,
 							size      => $self->for_scale(
 								{
-									dev  => int($vm_matrix->{$_}{ephemeral_dev})  || 4096,
-									prod => int($vm_matrix->{$_}{ephemeral_prod}) || 8192
-								}
+									dev  => $vm_matrix->{$_}{ephemeral_dev},
+									prod => $vm_matrix->{$_}{ephemeral_prod}
+								}, 4096
 							),
 							type => 'gp3'
 						},
@@ -232,7 +232,7 @@ sub perform {
 			$self->vm_extension_definition('cf-tcp-elb' => {
 				aws => {
 					'elbs'             => ['ocfp-ocf-cf-tcp-lb'],
-				},			
+				},
 			}),
 		],
 		'disk_types' => [
@@ -300,7 +300,7 @@ sub get_matrix_for_iaas {
 sub _get_stackit_vm_matrix {
 	my ($self) = @_;
 	return {
-		map { ( $_->[0], { type_dev => $_->[1], type_prod => $_->[2], disk_size => $_->[3] } ) } (
+		map { ( $_->[0], { type_dev => $_->[1], type_prod => $_->[2], disk_size => int($_->[3]) } ) } (
 			#     Name           dev_type  prod_type           root_disk_size
 			[qw[  api            c2i.4     c1a.4d              15  ]],    #  c1a.4d
 			[qw[  cc-worker      c2i.1     c1a.1d              15  ]]
@@ -329,7 +329,7 @@ sub _get_aws_vm_matrix {
 	# This is the VM matrix for AWS IaaS.
 	my ($self) = @_;
 	return {
-		map {( $_->[0], {type_dev => $_->[1], type_prod => $_->[2], disk_size => $_->[3], ephemeral_dev => $_->[4], ephemeral_prod => $_->[5]}) } (
+		map {( $_->[0], {type_dev => $_->[1], type_prod => $_->[2], disk_size => int($_->[3]), ephemeral_dev => int($_->[4]), ephemeral_prod => int($_->[5])}) } (
 			#      Name          dev_type     prod_type          root_disk(MB)  ephemeral_dev  ephemeral_prod
 			[ qw[  api           t3.medium    m6i.xlarge         15360          32768          65536  ] ],
 			[ qw[  cc-worker     t3.medium    m6i.large          15360           4096           8192  ] ],
@@ -353,5 +353,4 @@ sub _get_aws_vm_matrix {
 }
 
 1;
-
 # vim: set ts=2 sw=2 sts=2 noet fdm=marker foldlevel=1:
