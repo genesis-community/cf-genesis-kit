@@ -1,26 +1,4 @@
 ---
-params:
-  cf_router_vmx:       (( concat meta.ocfp.env.cloud "vmx-cf-router-network-properties" ))
-  cf_tcp_router_vmx:   (( concat meta.ocfp.env.cloud "vmx-cf-tcp-router-network-properties" ))
-  diego_cell_vmx:      (( concat meta.ocfp.env.cloud "vmx-diego-ssh-proxy-network-properties" ))
-
-instance_groups:
-- name: scheduler
-  vm_extensions:
-  - (( replace ))
-  - (( grab params.diego_cell_vmx ))
-
-- name: router
-  vm_extensions:
-  - (( replace ))
-  - (( grab params.cf_router_vmx ))
-
-- name: tcp-router
-  vm_extensions:
-  - (( replace ))
-  - (( grab params.cf_tcp_router_vmx ))
-
----
 # OCFP Cloud Config accounts for larger ephemeral disks vvv
 - type: remove
   path: /instance_groups/name=diego-cell/vm_extensions
