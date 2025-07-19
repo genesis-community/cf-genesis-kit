@@ -556,8 +556,9 @@ sub _dynamic_isolation_template_render {
 	my $src = "$srcdir/isolation-segment-${tmpl}.yml";
 	my $dst = "$dstdir/isolation-segment-${name}-${tmpl}.yml";
 
-  # Ensure the destination directory exists
-  mkdir_or_fail($dstdir) unless -d $dstdir;
+  # Ensure the destination directory exists with full kit path
+  my $kit_dynamic_dir = $self->kit->path($dstdir);
+  mkdir_or_fail($kit_dynamic_dir) unless -d $kit_dynamic_dir;
 
   # Read the source file, replace the placeholder, and write to the destination file
   open my $src_fh, '<', $self->kit->path($src) or bail("Cannot open source file $src: $!");
@@ -578,14 +579,18 @@ sub _dynamic_isolation_segments {
 	my @isolation_files = ();
 	my $params_ref = $self->{params}; # Get environment parameters
 
+	info("Processing isolation segments...") if $ENV{GENESIS_DEBUG};
+	
 	my @isolation_groups = ();
 	if (exists $params_ref->{isolation_segments} && ref($params_ref->{isolation_segments}) eq 'ARRAY') {
 		foreach my $segment (@{$params_ref->{isolation_segments}}) {
 			if (exists $segment->{name}) {
 				push @isolation_groups, $segment->{name};
+				info("  Found isolation segment: %s", $segment->{name}) if $ENV{GENESIS_DEBUG};
 			}
 		}
 	} else {
+		info("  No isolation segments found in params") if $ENV{GENESIS_DEBUG};
 		return ();
 	}
 
@@ -624,6 +629,8 @@ sub _dynamic_isolation_segments {
 	my $params_json_str = encode_json($params_ref);
 
 	foreach my $group (@isolation_groups) {
+		info("  Processing isolation segment: %s", $group) if $ENV{GENESIS_DEBUG};
+		
 		my $additional_trusted_certs_str = '';
 		my @additional_trusted_certs_files = ();
     my $isolation_segments = decode_json($params_json_str)->{isolation_segments};
@@ -648,12 +655,19 @@ sub _dynamic_isolation_segments {
 		$additional_trusted_certs_str = join(" ", @additional_trusted_certs_files);
 
 		my $dynamic_segment_fragment_file = "overlay/dynamic/isolation-segments-$group.yml";
+		my $dynamic_segment_fragment_path = $self->kit->path($dynamic_segment_fragment_file);
+		
 		my $cmd = "spruce merge -m --prune meta";
-		$cmd .= " \"overlay/dynamic-templates/isolation-segment.yml\"";
+		$cmd .= " \"" . $self->kit->path("overlay/dynamic-templates/isolation-segment.yml") . "\"";
 		foreach my $merge_file (@iso_seg_merges) {
-			$cmd .= " \"$merge_file\"";
+			$cmd .= " \"" . $self->kit->path($merge_file) . "\"";
 		}
-		$cmd .= " $additional_trusted_certs_str" if $additional_trusted_certs_str;
+		if ($additional_trusted_certs_str) {
+			my @certs_files = split(' ', $additional_trusted_certs_str);
+			foreach my $cert_file (@certs_files) {
+				$cmd .= " \"" . $self->kit->path($cert_file) . "\"";
+			}
+		}
 
 		my $segment_json = `echo '$params_json_str' | sed -e 's#"(( *#"(( defer #g' | jq --arg v "$group" '.isolation_segments[] | select(.name == \$v ) | {"meta": .}'`; # Corrected jq
 		my $append_json = '{"instance_groups": [ "((prepend))", "((defer append))" ]}';
@@ -665,8 +679,18 @@ sub _dynamic_isolation_segments {
 		mkfile_or_fail($append_json_file, $append_json);
 
 
-		$cmd .= " \"$segment_json_file\" \"$append_json_file\" > \"$dynamic_segment_fragment_file\"";
-		system($cmd);
+		$cmd .= " \"$segment_json_file\" \"$append_json_file\" > \"$dynamic_segment_fragment_path\"";
+		info("  Running spruce merge for segment %s...", $group) if $ENV{GENESIS_DEBUG};
+		info("  Command: %s", $cmd) if $ENV{GENESIS_DEBUG} && $ENV{GENESIS_TRACE};
+		
+		my $rc = system($cmd);
+		if ($rc != 0) {
+			error("Failed to generate isolation segment file for %s (exit code: %d)", $group, $rc >> 8);
+			error("Command was: %s", $cmd) if $ENV{GENESIS_DEBUG};
+			bail("Cannot continue with isolation segment generation");
+		}
+		
+		info("  Generated: %s", $dynamic_segment_fragment_file) if $ENV{GENESIS_DEBUG};
 		push @isolation_files, $dynamic_segment_fragment_file;
 
 		$self->_dynamic_isolation_template_render("dns-sd", $group);
