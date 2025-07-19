@@ -136,6 +136,7 @@ sub process_classic_features {
 		v1-vm-types v2-nats-credentials
 		aws-blobstore-iam gcp-use-access-key blobstore-suffix
 		isolation-segments
+		nfs-ldap nfs-ldap-tls
 	};
 
 	my ($remaining_features) = compare_arrays(
@@ -354,6 +355,7 @@ sub process_ocfp_features {
 		'cf-deployment/operations/scale-to-one-az',
 		$blobstore, '+internal-db', 'local-postgres-db',
 		'local-mysql-db', 'mysql-db', 'postgres-db',
+		'nfs-ldap', 'nfs-ldap-tls',
 	);
 
 	my ($remaining_features) = compare_arrays(
