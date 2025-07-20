@@ -10,8 +10,8 @@ use parent qw(Genesis::Hook::Blueprint);
 use Genesis qw/
 	info warning error bail new_enough
 	in_array uniq compare_arrays
-	run curl sentence_join
-	mkdir_or_fail mkfile_or_fail load_yaml save_to_yaml_file
+	run curl sentence_join struct_lookup
+	mkdir_or_fail mkfile_or_fail load_yaml save_to_yaml_file slurp
 /;
 use Genesis::State qw/envset/;
 use Archive::Tar;
@@ -36,7 +36,7 @@ sub perform {
 
 	# Store raw features
 	$self->{raw_features} = [$self->features]; # Get raw features from env
-	$self->{params} = $self->env->params->{params}; # Get environment parameters
+	$self->{params} = $self->env->params->{params} // {}; # Get environment parameters
 
 	# Custom CF Versions
 	$self->handle_custom_cf_versions();
@@ -662,7 +662,7 @@ sub _dynamic_isolation_segments {
 		push @spruce_cmd, (map { $self->kit->path($_) } split(' ', $additional_trusted_certs_str))
 			if $additional_trusted_certs_str;
 
-		my $segment_data = $params_ref->{isolation_segments}{$group}{meta} // {};
+		my $segment_data = struct_lookup($params_ref, 'isolation_segments.${group}.meta', {});
 		my $segment_json = encode_json($segment_data) =~ s/\(\( /(( defer /gr;
 		my $append_json = '{"instance_groups": [ "((prepend))", "((defer append))" ]}';
 
