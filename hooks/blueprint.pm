@@ -651,9 +651,7 @@ sub _dynamic_isolation_segments {
 
 		my $dynamic_segment_fragment_file = "overlay/dynamic/isolation-segments-$group.yml";
 		my $dynamic_segment_fragment_path = $self->kit->path($dynamic_segment_fragment_file);
-		unshift @iso_seg_merges, $self->kit->path(
-			"overlay/dynamic-templates/isolation-segment.yml"
-		);
+		unshift @iso_seg_merges, "overlay/dynamic-templates/isolation-segment.yml";
 		my @spruce_cmd = (
 			'spruce', 'merge', '-m', '--prune', 'meta',
 			(map {$self->kit->path($_)} @iso_seg_merges)
