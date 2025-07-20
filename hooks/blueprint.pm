@@ -660,7 +660,7 @@ sub _dynamic_isolation_segments {
 		push @spruce_cmd, (map { $self->kit->path($_) } split(' ', $additional_trusted_certs_str))
 			if $additional_trusted_certs_str;
 
-		my $segment_data = struct_lookup($params_ref, 'isolation_segments.${group}.meta', {});
+		my $segment_data = {meta => struct_lookup($params_ref, 'isolation_segments.${group}', {})};
 		my $segment_json = encode_json($segment_data) =~ s/\(\( /(( defer /gr;
 		my $append_json = '{"instance_groups": [ "((prepend))", "((defer append))" ]}';
 
