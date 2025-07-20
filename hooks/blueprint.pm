@@ -7,7 +7,12 @@ use warnings;
 BEGIN {push @INC, $ENV{GENESIS_LIB} ? $ENV{GENESIS_LIB} : $ENV{HOME}.'/.genesis/lib'}
 use parent qw(Genesis::Hook::Blueprint);
 
-use Genesis qw/info warning error bail new_enough in_array curl mkdir_or_fail mkfile_or_fail compare_arrays sentence_join load_yaml save_to_yaml_file/;
+use Genesis qw/
+	info warning error bail new_enough
+	in_array uniq compare_arrays
+	run curl sentence_join
+	mkdir_or_fail mkfile_or_fail load_yaml save_to_yaml_file
+/;
 use Genesis::State qw/envset/;
 use Archive::Tar;
 use JSON::PP qw/decode_json encode_json/;
@@ -560,27 +565,22 @@ sub _dynamic_isolation_template_render {
   my $kit_dynamic_dir = $self->kit->path($dstdir);
   mkdir_or_fail($kit_dynamic_dir) unless -d $kit_dynamic_dir;
 
-  # Read the source file, replace the placeholder, and write to the destination file
-  open my $src_fh, '<', $self->kit->path($src) or bail("Cannot open source file $src: $!");
-  open my $dst_fh, '>', $self->kit->path($dst) or bail("Cannot open destination file $dst: $!");
-
-  while (my $line = <$src_fh>) {
-    $line =~ s/\{\{segment-name\}\}/$name/g;
-    print $dst_fh $line;
-  }
-
-  close $src_fh;
-  close $dst_fh;
+	mkfile_or_fail(
+		$self->kit->path($dst), slurp(
+			$self->kit->path($src)
+		) =~ s/\{\{segment-name\}\}/$name/mgr
+	);
 	return $dst;
 }
 
 sub _dynamic_isolation_segments {
 	my ($self) = @_;
+	my $env = $self->env;
 	my @isolation_files = ();
 	my $params_ref = $self->{params}; # Get environment parameters
 
 	info("Processing isolation segments...") if $ENV{GENESIS_DEBUG};
-	
+
 	my @isolation_groups = ();
 	if (exists $params_ref->{isolation_segments} && ref($params_ref->{isolation_segments}) eq 'ARRAY') {
 		foreach my $segment (@{$params_ref->{isolation_segments}}) {
@@ -597,43 +597,38 @@ sub _dynamic_isolation_segments {
 	return () unless @isolation_groups;
 
 	my @iso_seg_merges = ();
-	if (!($self->want_feature("bare")) || $self->want_feature("partitioned-network")) {
-		push @iso_seg_merges, "overlay/dynamic-templates/isolation-segment-network.yml";
-	}
-	if ($self->want_feature("cflinuxfs3")) {
-		push @iso_seg_merges, "overlay/dynamic-templates/isolation-segment-cflinuxfs3.yml";
-	}
+	push @iso_seg_merges, "overlay/dynamic-templates/isolation-segment-network.yml"
+		if (!($self->want_feature("bare")) || $self->want_feature("partitioned-network"));
+
+	push @iso_seg_merges, "overlay/dynamic-templates/isolation-segment-cflinuxfs3.yml"
+		if ($self->want_feature("cflinuxfs3"));
+
 	if ($self->want_feature("nfs-volume-services")) {
 		push @iso_seg_merges, "overlay/dynamic-templates/isolation-segment-nfs.yml";
 		if ($self->want_feature("nfs-ldap") || $self->want_feature("nfs-ldap-tls")) {
 			push @iso_seg_merges, "overlay/dynamic-templates/isolation-segment-nfs-ldap.yml";
-			if ($self->want_feature("nfs-ldap-tls")) {
-				push @iso_seg_merges, "overlay/dynamic-templates/isolation-segment-nfs-ldap-tls.yml";
-			}
-			if ($self->want_feature("ocfp")) {
-				push @iso_seg_merges, "overlay/dynamic-templates/isolation-segment-nfs-ldap-ocfp.yml", "ocfp/nfs-ldap-data.yml";
-			}
-		}
-	}
-	if ($self->want_feature("smb-volume-services")) {
-		push @iso_seg_merges, "overlay/dynamic-templates/isolation-segment-smb.yml";
-	}
-	if ($self->want_feature("ocfp")) {
-		push @iso_seg_merges, "ocfp/meta.yml";
-		my $env = $self->env;
-		if ($env->vault->has($env->exodus_mount.$env->name."/blacksmith","blacksmith_ca")) {
-			push @iso_seg_merges, "ocfp/trust-blacksmith-ca.yml";
+			push @iso_seg_merges, "overlay/dynamic-templates/isolation-segment-nfs-ldap-tls.yml"
+				if ($self->want_feature("nfs-ldap-tls"));
+			push @iso_seg_merges, "overlay/dynamic-templates/isolation-segment-nfs-ldap-ocfp.yml", "ocfp/nfs-ldap-data.yml"
+				if ($self->want_feature("ocfp"));
 		}
 	}
 
-	my $params_json_str = encode_json($params_ref);
+	push @iso_seg_merges, "overlay/dynamic-templates/isolation-segment-smb.yml"
+		if ($self->want_feature("smb-volume-services"));
+
+	if ($self->want_feature("ocfp")) {
+		push @iso_seg_merges, "ocfp/meta.yml";
+		push @iso_seg_merges, "ocfp/trust-blacksmith-ca.yml"
+			if ($env->vault->has($env->exodus_mount.$env->name."/blacksmith","blacksmith_ca"));
+	}
 
 	foreach my $group (@isolation_groups) {
 		info("  Processing isolation segment: %s", $group) if $ENV{GENESIS_DEBUG};
-		
+
 		my $additional_trusted_certs_str = '';
 		my @additional_trusted_certs_files = ();
-    my $isolation_segments = decode_json($params_json_str)->{isolation_segments};
+    my $isolation_segments = $params_ref->{isolation_segments};
     my $has_additional_trusted_certs = 0;
 
     foreach my $segment (@$isolation_segments) {
@@ -656,49 +651,39 @@ sub _dynamic_isolation_segments {
 
 		my $dynamic_segment_fragment_file = "overlay/dynamic/isolation-segments-$group.yml";
 		my $dynamic_segment_fragment_path = $self->kit->path($dynamic_segment_fragment_file);
-		
-		my $cmd = "spruce merge -m --prune meta";
-		$cmd .= " \"" . $self->kit->path("overlay/dynamic-templates/isolation-segment.yml") . "\"";
-		foreach my $merge_file (@iso_seg_merges) {
-			$cmd .= " \"" . $self->kit->path($merge_file) . "\"";
-		}
-		if ($additional_trusted_certs_str) {
-			my @certs_files = split(' ', $additional_trusted_certs_str);
-			foreach my $cert_file (@certs_files) {
-				$cmd .= " \"" . $self->kit->path($cert_file) . "\"";
-			}
-		}
+		unshift @iso_seg_merges, $self->kit->path(
+			"overlay/dynamic-templates/isolation-segment.yml"
+		);
+		my @spruce_cmd = (
+			'spruce', 'merge', '-m', '--prune', 'meta',
+			(map {$self->kit->path($_)} @iso_seg_merges)
+		);
 
-		my $segment_json = `echo '$params_json_str' | sed -e 's#"(( *#"(( defer #g' | jq --arg v "$group" '.isolation_segments[] | select(.name == \$v ) | {"meta": .}'`; # Corrected jq
+		push @spruce_cmd, (map { $self->kit->path($_) } split(' ', $additional_trusted_certs_str))
+			if $additional_trusted_certs_str;
+
+		my $segment_data = $params_ref->{isolation_segments}{$group}{meta} // {};
+		my $segment_json = encode_json($segment_data) =~ s/\(\( /(( defer /gr;
 		my $append_json = '{"instance_groups": [ "((prepend))", "((defer append))" ]}';
 
 		my $segment_json_file = $self->env->workpath("segment_$group.json");
 		my $append_json_file = $self->env->workpath("append_$group.json");
 
-		mkfile_or_fail($segment_json_file, $segment_json);
-		mkfile_or_fail($append_json_file, $append_json);
+		push @spruce_cmd,
+			mkfile_or_fail($segment_json_file, $segment_json),
+			mkfile_or_fail($append_json_file, $append_json);
 
+		my $rc = run(@spruce_cmd);
+		bail(
+			"Failed to generate isolation segment file for %s: %s",
+			$group, $rc
+		) if $rc;;
 
-		$cmd .= " \"$segment_json_file\" \"$append_json_file\" > \"$dynamic_segment_fragment_path\"";
-		info("  Running spruce merge for segment %s...", $group) if $ENV{GENESIS_DEBUG};
-		info("  Command: %s", $cmd) if $ENV{GENESIS_DEBUG} && $ENV{GENESIS_TRACE};
-		
-		my $rc = system($cmd);
-		if ($rc != 0) {
-			error("Failed to generate isolation segment file for %s (exit code: %d)", $group, $rc >> 8);
-			error("Command was: %s", $cmd) if $ENV{GENESIS_DEBUG};
-			bail("Cannot continue with isolation segment generation");
-		}
-		
-		info("  Generated: %s", $dynamic_segment_fragment_file) if $ENV{GENESIS_DEBUG};
 		push @isolation_files, $dynamic_segment_fragment_file;
 
-		$self->_dynamic_isolation_template_render("dns-sd", $group);
-		if ($self->want_feature("nfs-volume-services") && $self->want_feature("ocfp")) {
-			$self->_dynamic_isolation_template_render("nfs-ldap-config", $group);
-		}
-		unlink $segment_json_file;
-		unlink $append_json_file;
+		push @isolation_files, $self->_dynamic_isolation_template_render("dns-sd", $group);
+		push @isolation_files, $self->_dynamic_isolation_template_render("nfs-ldap-config", $group)
+			if ($self->want_feature("nfs-volume-services") && $self->want_feature("ocfp"));
 	}
 	return @isolation_files;
 }
@@ -711,61 +696,68 @@ sub _dynamic_instance_vm_types {
 	my ($self) = @_;
 	my $params_ref = $self->{params}; # Get environment parameters
 	my @instance_types_ops = ();
-	my $used_groups_for_vm_types = ''; # To track for duplicates
+	my @used_groups_for_vm_types = (); # To track for duplicates
 	my $types_op_file_content = "--- # Dynamically created instance type overrides\n";
 	my $found_vm_types = 0;
 
+	my $trans_map = _instance_group_translations();
+
+	my @warnings = ();
 	foreach my $key (keys %$params_ref) {
 		if ($key =~ /^(.*)_vm_type$/) {
 			$found_vm_types = 1;
 			my ($inst_grp_orig, $type) = ($1, $params_ref->{$key});
 			my $inst_grp = $inst_grp_orig;
 
-			if ($inst_grp eq 'errand' || $inst_grp eq 'haproxy') { next; }
-			elsif ($inst_grp eq 'cell') { $inst_grp = "diego_cell"; warning("Translated: params.cell_vm_type => params.diego_cell_vm_type"); }
-			elsif ($inst_grp eq 'diego') { $inst_grp = "scheduler"; warning("Translated: params.diego_vm_type => params.scheduler_vm_type"); }
-			elsif ($inst_grp eq 'bbs') { $inst_grp = "diego_api"; warning("Translated: params.bbs_vm_type => params.diego_api_vm_type"); }
-			elsif ($inst_grp eq 'loggregator') { $inst_grp = "log_api"; warning("Translated: params.loggregator_vm_type => params.log_api_vm_type"); }
-			elsif ($inst_grp eq 'postgres') { $inst_grp = "database"; warning("Translated: params.postgres_vm_type => params.database_vm_type"); }
-			elsif ($inst_grp eq 'blobstore') { $inst_grp = "singleton-blobstore"; warning("Translated: params.blobstore_vm_type => params.singleton_blobstore_vm_type"); }
-			elsif ($inst_grp eq 'windows_diego_cell') { $inst_grp = "windows2019-cell"; warning("Translated: params.windows_diego_cell_vm_type => params.windows2019-cell_vm_type"); }
+			# Handle translations
+			if (exists $trans_map->{$inst_grp}) {
+				push @warnings, "Translated: params.$inst_grp_orig => params.$trans_map->{$inst_grp}";
+				$inst_grp = $trans_map->{$inst_grp};
+			}
+
+			next if ($inst_grp eq 'errand' || $inst_grp eq 'haproxy'); # dealt with elsewhere
 
 			my $dashed_inst_grp = $inst_grp;
 			$dashed_inst_grp =~ s/_/-/g;
+			push @warnings, "Unknown instance group $dashed_inst_grp (from $inst_grp_orig) - this may be bug in your environment files."
+				unless exists _is_instance_group()->{$dashed_inst_grp};
 
-			if ($dashed_inst_grp !~ /^(api|cc-worker|credhub|database|diego-(api|cell)|doppler|errand|haproxy|windows2019-cell|log-(api|cache)|nats|rotate-cc-database-key|(tcp-)?router|scheduler|singleton-blobstore|smoke-tests|uaa)$/) {
-				warning("Unknown instance group $dashed_inst_grp (from $inst_grp_orig) - this may be bug in your environment files.");
-			}
 			if ($self->want_feature('ocfp')) {
 				# OCFP uses a different naming convention for vms
 				# FIXME: Need to support different vm types for different segments
 				$type = $self->env->name . '.' . $self->env->type . '.vm-' . $dashed_inst_grp;
 			}
 			$types_op_file_content .= $self->_gopatch_replace("/instance_groups/name=$dashed_inst_grp/vm_type", $type);
-			$used_groups_for_vm_types .= "$dashed_inst_grp\n";
+			push @used_groups_for_vm_types, $dashed_inst_grp;
 		}
 	}
+
+	# Handle warning messages
+	warning(
+		"Found the following warnings while processing instance vm types:\n%s",
+		join("\n", map {"[[  - >>$_\n"} @warnings)
+	) if @warnings;
 
 	my $errand_vm_type = $params_ref->{errand_vm_type} || "";
 	if ($errand_vm_type) {
 		$found_vm_types = 1;
 		foreach my $errand_name (qw(smoke-tests rotate-cc-database-key)) {
-			if ($used_groups_for_vm_types !~ /^$errand_name$/m) {
+			if (! in_array($errand_name, @used_groups_for_vm_types)) {
 				$types_op_file_content .= $self->_gopatch_replace("/instance_groups/name=$errand_name/vm_type", $errand_vm_type);
-				$used_groups_for_vm_types .= "$errand_name\n";
+				push @used_groups_for_vm_types, $errand_name;
 			}
 		}
 	}
 
 	if ($found_vm_types) {
-		my %seen = (); my @dups = ();
-		foreach my $line (split /\n/, $used_groups_for_vm_types) { next unless $line; push @dups, $line if $seen{$line}++;}
-		if (@dups) { bail("Instance vm types specified (or translated as) multiple times: " . join(", ", @dups));}
+		my @uniq_groups = uniq(@used_groups_for_vm_types);
+		my ($dups) = compare_arrays(\@used_groups_for_vm_types, \@uniq_groups);
+		bail(
+			"Instance vm types specified (or translated as) multiple times: " . join(", ", @$dups)
+		) if scalar(@$dups) > 0;
+
 		my $types_op_file_path = "operations/dynamic/instance_types.yml";
-		mkdir_or_fail("operations/dynamic") unless -d "operations/dynamic";
-		open my $fh, '>', $types_op_file_path or bail("Cannot write to $types_op_file_path: $!");
-		print $fh $types_op_file_content;
-		close $fh;
+		mkfile_or_fail($self->kit->path($types_op_file_path), 0644, $types_op_file_content);
 		push @instance_types_ops, $types_op_file_path;
 	}
 	return @instance_types_ops;
@@ -775,11 +767,13 @@ sub _dynamic_instance_counts {
 	my ($self) = @_;
 	my $params_ref = $self->{params}; # Get environment parameters
 	my @instance_counts_ops = ();
-	my $used_groups_for_counts = ''; # To track for duplicates
+	my @used_groups_for_counts = (); # To track for duplicates
 
 	my $counts_opsfile_content = "--- # Dynamically created instance counts\n";
 	my $found_counts = 0;
 
+	my $trans_map = _instance_group_translations();
+	my @warnings = ();
 	foreach my $key (keys %$params_ref) {
 		if ($key =~ /^(.*)_instances$/) {
 			$found_counts = 1;
@@ -787,45 +781,49 @@ sub _dynamic_instance_counts {
 			my $inst_grp = $inst_grp_orig;
 
 			# Handle translations
-			if ($inst_grp eq 'errand' || $inst_grp eq 'haproxy') { next; } # dealt with elsewhere
-			elsif ($inst_grp eq 'cell') { $inst_grp = "diego_cell"; warning("Translated: params.cell_instances => params.diego_cell_instances");}
-			elsif ($inst_grp eq 'diego') { $inst_grp = "scheduler"; warning("Translated: params.diego_instances => params.scheduler_instances");}
-			elsif ($inst_grp eq 'bbs') { $inst_grp = "diego_api"; warning("Translated: params.bbs_instances => params.diego_api_instances");}
-			elsif ($inst_grp eq 'loggregator') { $inst_grp = "log_api"; warning("Translated: params.loggregator_instances => params.log_api_instances");}
-			elsif ($inst_grp eq 'postgres') { $inst_grp = "database"; warning("Translated: params.postgres_instances => params.database_instances");}
-			elsif ($inst_grp eq 'blobstore') { $inst_grp = "singleton-blobstore"; warning("Translated: params.blobstore_instances => params.singleton_blobstore_instances");}
-			elsif ($inst_grp eq 'windows_diego_cell') { $inst_grp = "windows2019-cell"; warning("Translated: params.windows_diego_cell_instances => params.windows2019-cell_instances");}
+			next if ($inst_grp eq 'errand' || $inst_grp eq 'haproxy'); # dealt with elsewhere
+
+			if (exists $trans_map->{$inst_grp}) {
+				push @warnings, "Translated: params.$inst_grp_orig => params.$trans_map->{$inst_grp}";
+				$inst_grp = $trans_map->{$inst_grp};
+			}
 
 			my $dashed_inst_grp = $inst_grp;
 			$dashed_inst_grp =~ s/_/-/g;
+			push @warnings, "Unknown instance group $dashed_inst_grp (from $inst_grp_orig) - this may be bug in your environment files."
+				unless exists _is_instance_group()->{$dashed_inst_grp};
 
-			if ($dashed_inst_grp !~ /^(api|cc-worker|credhub|database|diego-(api|cell)|doppler|errand|haproxy|log-(api|cache)|nats|windows2019-cell|rotate-cc-database-key|(tcp-)?router|scheduler|singleton-blobstore|smoke-tests|uaa)$/) {
-				warning("Unknown instance group $dashed_inst_grp (from $inst_grp_orig) - this may be bug in your environment files.");
-			}
 			$counts_opsfile_content .= $self->_gopatch_replace("/instance_groups/name=$dashed_inst_grp?/instances", $count);
-			$used_groups_for_counts .= "$dashed_inst_grp\n";
+			push @used_groups_for_counts, $dashed_inst_grp;
 		}
 	}
+
+	# Handle warning messages
+	warning(
+		"Found the following warnings while processing instance vm types:\n%s",
+		join("\n", map {"[[  - >>$_\n"} @warnings)
+	) if @warnings;
 
 	my $errand_instances = $params_ref->{errand_instances} || "";
 	if ($errand_instances) {
 		$found_counts = 1;
 		foreach my $errand_name (qw(smoke-tests rotate-cc-database-key)) {
-			if ($used_groups_for_counts !~ /^$errand_name$/m) {
-				$counts_opsfile_content .= $self->_gopatch_replace("/instance_groups/name=$errand_name?/instances", $errand_instances);
-				$used_groups_for_counts .= "$errand_name\n";
+			if (! in_array($errand_name, @used_groups_for_counts)) {
+				$counts_opsfile_content .= $self->_gopatch_replace("/instance_groups/name=$errand_name/instances", $errand_instances);
+				push @used_groups_for_counts, $errand_name;
 			}
 		}
 	}
 
 	if ($found_counts) {
-		my %seen = (); my @dups = ();
-		foreach my $line (split /\n/, $used_groups_for_counts) { next unless $line; push @dups, $line if $seen{$line}++;}
-		if (@dups) { bail("Instance counts specified (or translated as) multiple times: " . join(", ", @dups));}
+		my @uniq_groups = uniq(@used_groups_for_counts);
+		my ($dups) = compare_arrays(\@used_groups_for_counts, \@uniq_groups);
+		bail(
+			"Instance counts specified (or translated as) multiple times: " . join(", ", @$dups)
+		) if scalar(@$dups) > 0;
 
 		my $counts_opsfile_path = "operations/dynamic/instance_counts.yml";
-		mkdir_or_fail("operations/dynamic") unless -d "operations/dynamic";
-		mkfile_or_fail($counts_opsfile_path, 0644, $counts_opsfile_content);
+		mkfile_or_fail($self->kit->path($counts_opsfile_path), 0644, $counts_opsfile_content);
 		push @instance_counts_ops, $counts_opsfile_path;
 	}
 	return @instance_counts_ops;
@@ -1402,5 +1400,26 @@ sub ops_dir {
 	my $ops_dir = $self->env->lookup('genesis.ops_dir') // 'ops';
 	return $ops_dir;
 }
+
+sub _instance_group_translations {
+	return {
+		'cell' => 'diego_cell',
+		'diego' => 'scheduler',
+		'bbs' => 'diego_api',
+		'loggregator' => 'log_api',
+		'postgres' => 'database',
+		'blobstore' => 'singleton_blobstore',
+		'windows_diego_cell' => 'windows2019_cell'
+	};
+}
+
+sub _is_instance_group {
+	return {map {($_,1)} qw{
+		api cc-worker credhub database diego-api diego-cell doppler errand haproxy
+		log-api log-cache nats rotate-cc-database-key tcp-router scheduler
+		singleton-blobstore smoke-tests uaa windows2019-cell
+	}};
+}
+
 1;
 # vim: set ts=2 sw=2 sts=2 noet foldmethod=marker foldlevel=1 nu
