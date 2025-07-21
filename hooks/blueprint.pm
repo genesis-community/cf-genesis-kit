@@ -660,16 +660,48 @@ sub _dynamic_isolation_segments {
 		push @spruce_cmd, (map { $self->kit->path($_) } split(' ', $additional_trusted_certs_str))
 			if $additional_trusted_certs_str;
 
-		my $segment_data = {meta => scalar struct_lookup($params_ref, 'isolation_segments.${group}', {})};
+		# Add the user-provided isolation segment data
+		my $segment_data = {meta => scalar struct_lookup($params_ref, "isolation_segments.${group}", {})};
 		my $segment_json = encode_json($segment_data) =~ s/\(\( /(( defer /gr;
-		my $append_json = '{"instance_groups": [ "((prepend))", "((defer append))" ]}';
+		my $fin_data = {
+			"instance_groups" => [
+				$group,
+				"(( prepend ))",
+				"(( defer append ))"
+			],
+			genesis => {
+				"env" => $env->name,
+				"type" => $env->type,
+				"secrets_mount" => $env->secrets_mount,
+				"secrets_slug" => $env->secrets_slug,
+				"secrets_base" => $env->secrets_base,
+				"exodus_mount" => $env->exodus_mount,
+				"exodus_slug" => $env->exodus_slug,
+				"exodus_base" => $env->exodus_base,
+				"ci_mount" => $env->ci_mount,
+				"bosh_env" => $env->bosh_env,
+			}
+		};
+		if ($self->want_feature("ocfp")) {
+			$fin_data->{genesis}{is_ocfp} = 1;
+			$fin_data->{genesis}{ocfp_env} = $env->ocfp_name;
+			$fin_data->{genesis}{ocfp_type} = $env->ocfp_type;
+			$fin_data->{genesis}{ocfp_config_mount} = $env->ocfp_config_mount;
+			$fin_data->{genesis}{ocfp_config_base} = $env->ocfp_config_base;
+		};
+		my $fin_json = encode_json($fin_data);
 
 		my $segment_json_file = $self->env->workpath("segment_$group.json");
-		my $append_json_file = $self->env->workpath("append_$group.json");
+		my $append_json_file = $self->env->workpath("fin_$group.json");
+
+		trace({raw => 1},
+			"Isolation segment data for %s:\n",
+			$group, slurp($segment_json_file)
+		);
 
 		push @spruce_cmd,
 			mkfile_or_fail($segment_json_file, $segment_json),
-			mkfile_or_fail($append_json_file, $append_json);
+			mkfile_or_fail($append_json_file, $fin_json);
 
 		my $rc = run(@spruce_cmd);
 		bail(
