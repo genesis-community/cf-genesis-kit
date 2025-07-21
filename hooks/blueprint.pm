@@ -8,7 +8,7 @@ BEGIN {push @INC, $ENV{GENESIS_LIB} ? $ENV{GENESIS_LIB} : $ENV{HOME}.'/.genesis/
 use parent qw(Genesis::Hook::Blueprint);
 
 use Genesis qw/
-	info warning error bail new_enough
+	info warning error bail new_enough debug trace
 	in_array uniq compare_arrays
 	run curl sentence_join struct_lookup
 	mkdir_or_fail mkfile_or_fail load_yaml save_to_yaml_file slurp
@@ -665,7 +665,6 @@ sub _dynamic_isolation_segments {
 		my $segment_json = encode_json($segment_data) =~ s/\(\( /(( defer /gr;
 		my $fin_data = {
 			"instance_groups" => [
-				$group,
 				"(( prepend ))",
 				"(( defer append ))"
 			],
@@ -679,12 +678,12 @@ sub _dynamic_isolation_segments {
 				"exodus_slug" => $env->exodus_slug,
 				"exodus_base" => $env->exodus_base,
 				"ci_mount" => $env->ci_mount,
-				"bosh_env" => $env->bosh_env,
+				"bosh_env" => scalar $env->bosh_env,
 			}
 		};
 		if ($self->want_feature("ocfp")) {
 			$fin_data->{genesis}{is_ocfp} = 1;
-			$fin_data->{genesis}{ocfp_env} = $env->ocfp_name;
+			$fin_data->{genesis}{ocfp_env} = $env->ocfp_env;
 			$fin_data->{genesis}{ocfp_type} = $env->ocfp_type;
 			$fin_data->{genesis}{ocfp_config_mount} = $env->ocfp_config_mount;
 			$fin_data->{genesis}{ocfp_config_base} = $env->ocfp_config_base;
@@ -694,23 +693,18 @@ sub _dynamic_isolation_segments {
 		my $segment_json_file = $self->env->workpath("segment_$group.json");
 		my $append_json_file = $self->env->workpath("fin_$group.json");
 
-		trace({raw => 1},
-			"Isolation segment data for %s:\n",
-			$group, slurp($segment_json_file)
-		);
-
 		push @spruce_cmd,
 			mkfile_or_fail($segment_json_file, $segment_json),
 			mkfile_or_fail($append_json_file, $fin_json);
 
-		my $rc = run(@spruce_cmd);
+		my ($out, $rc, $err) = run(@spruce_cmd);
 		bail(
-			"Failed to generate isolation segment file for %s: %s",
-			$group, $rc
-		) if $rc;;
+			"Failed to generate isolation segment file for %s:\n%s",
+			$group, $err||$out
+		) if $rc;
+		mkfile_or_fail( $dynamic_segment_fragment_path, 0644, $out);
 
 		push @isolation_files, $dynamic_segment_fragment_file;
-
 		push @isolation_files, $self->_dynamic_isolation_template_render("dns-sd", $group);
 		push @isolation_files, $self->_dynamic_isolation_template_render("nfs-ldap-config", $group)
 			if ($self->want_feature("nfs-volume-services") && $self->want_feature("ocfp"));
