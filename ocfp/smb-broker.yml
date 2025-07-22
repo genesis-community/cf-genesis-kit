@@ -1,7 +1,7 @@
 ---
 - type: replace
   path: /instance_groups/name=smb-broker-push/networks
-  value: 
+  value:
     - name:  (( concat genesis.env "-ocf" ))
 
 - type: replace
@@ -10,5 +10,5 @@
 
 - type: replace
   path: /instance_groups/name=smb-broker-push/vm_type
-  value:  (( concat "errand-" meta.ocfp.env.scale ))
+  value:  (( grab params.errand_vm_type ))
 
