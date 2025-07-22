@@ -388,6 +388,7 @@ sub process_ocfp_features {
 		} elsif ($feature eq 'smb-volume-services') {
 			$self->add_files(
 				'cf-deployment/operations/enable-smb-volume-service.yml',
+				'overlay/addons/smb-volume-service.yml',
 				'ocfp/smb-broker.yml'
 			);
 
@@ -421,12 +422,12 @@ sub process_ocfp_features {
 		$trusted_certs_usage++
 	}
 	if ($trusted_certs_usage) {
-		$self->add_files("ocfp/trusted-certs.yml");
+		$self->add_files(
+			"ocfp/trusted-certs.yml",
+			"ocfp/trusted-certs-cflinuxfs4.yml"
+		);
 		if ($self->want_feature('cflinuxfs3')) {
 			$self->add_files("ocfp/trusted-certs-cflinuxfs3.yml");
-		}
-		if ($self->want_feature('cflinuxfs4')) {
-			$self->add_files("ocfp/trusted-certs-cflinuxfs4.yml");
 		}
 	}
 
@@ -982,7 +983,7 @@ sub validate_ocfp_features {
 		'source-releases',
 		'haproxy',
 		'self-signed',
-		'cflinuxfs3', 'cflinuxfs4',
+		'cflinuxfs3',
 		'isolation-segments',
 		'no-tcp-routers',
     'stratos-integration',
@@ -1021,6 +1022,7 @@ sub validate_ocfp_features {
 		'scs-integration' => $ocfp_included_resolution,
 		'uaa-admin-client' => $ocfp_included_resolution,
 		'ssh-proxy-on-routers' => $ocfp_included_resolution,
+		'cflinuxfs4' => $ocfp_included_resolution,
 
 		'trust-blacksmith-ca' => {
 			msg => "- it will automatically be applied if detected in secrets store",
