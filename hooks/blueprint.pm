@@ -1227,7 +1227,7 @@ sub requested_database {
 	push(@requested_databases, 'local-postgres-db') unless scalar(@requested_databases);
 
 	my $is_local = $self->wants_feature('+internal-db') // scalar(grep {$_ =~ /^local-/} @requested_databases);
-	return ($requested_databases[0] =~ s/^local-(.*?)-db$/$1/r, $is_local);
+	return ($requested_databases[0] =~ s/^(?:local-)?(.*?)-db$/$1/r, $is_local);
 }
 
 sub enable_external_blobstore {
