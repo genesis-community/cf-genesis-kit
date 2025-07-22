@@ -47,6 +47,14 @@ sub perform {
 		}
 	}
 
+	if ($is_ocfp) { # OCFP default integrations
+		push @features, 'blacksmith-integration';
+		push @features, 'app-scheduler-integration';
+		push @features, 'app-autoscaler-integration';
+		push @features, 'prometheus-integration';
+		push @features, 'stratos-integration';
+		push @features, 'scs-integration';
+	}
 	# Check for database overrides
 	my $params = $self->env->lookup('params', {});
 	if ($params && ref($params) eq 'HASH') {
