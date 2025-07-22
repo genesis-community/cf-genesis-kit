@@ -123,8 +123,8 @@ sub process_classic_features {
 		# FIXME: This should appear near the end
 		# REFACTOR: this is a common part, should be moved to a common method
 		# Use whatever release overrides are specified in the kit.
-		if ($self->want_feature('static-releases')) {
-			$self->add_files('overlay/override-releases/static.yml');
+		if ($self->want_feature('source-releases')) {
+			$self->add_files('overlay/override-releases/source.yml');
 		} else {
 			$self->add_files('overlay/override-releases/compiled.yml');
 		}
@@ -319,7 +319,7 @@ sub process_ocfp_features {
 
 	# Need to add compiled releases here, because external db selection
 	# deletes a path for pxc and upstream will fail to find it.
-	if (!$self->want_feature('static-releases')) {
+	if (!$self->want_feature('source-releases')) {
 		$self->add_files(
 			"cf-deployment/operations/use-compiled-releases.yml",
 		);
@@ -356,7 +356,7 @@ sub process_ocfp_features {
 	# Process the remaining requested features in order
 	my @handled_features = (
 		'ocfp',' self-signed', 'small-footprint',
-		'static-releases', 'isolation-segments',
+		'source-releases', 'isolation-segments',
 		'cf-deployment/operations/scale-to-one-az',
 		$blobstore, '+internal-db', 'local-postgres-db',
 		'local-mysql-db', 'mysql-db', 'postgres-db',
@@ -392,7 +392,7 @@ sub process_ocfp_features {
 			);
 
 		} elsif ($feature eq 'windows-diego-cells') {
-			$self->enable_windows_diego_cells(!$self->want_feature('static-releases'));
+			$self->enable_windows_diego_cells(!$self->want_feature('source-releases'));
 			$self->add_files(
 				"ocfp/$iaas/windows.yml",
 				"ocfp/trusted-certs-windows.yml"
@@ -455,8 +455,8 @@ sub process_ocfp_features {
 	}
 
 	# Use whatever release overrides are specified in the kit.
-	if ($self->want_feature('static-releases')) {
-		$self->add_files('overlay/override-releases/static.yml');
+	if ($self->want_feature('source-releases')) {
+		$self->add_files('overlay/override-releases/source.yml');
 	} else {
 		$self->add_files('overlay/override-releases/compiled.yml');
 	}
@@ -979,7 +979,7 @@ sub validate_ocfp_features {
 		'ocfp', # OCFP is the only feature that is always enabled in OCFP environments
 		'partitioned-network',
 		'small-footprint',
-		'static-releases',
+		'source-releases',
 		'haproxy',
 		'self-signed',
 		'cflinuxfs3', 'cflinuxfs4',
@@ -1028,7 +1028,7 @@ sub validate_ocfp_features {
 		},
 		'compiled-releases' => {
 			msg => "- it is the default behaviour in OCFP; to turn it off, use the ".
-			"'static-releases' feature",
+			"'source-releases' feature",
 			replace => []
 		},
 
@@ -1339,7 +1339,7 @@ sub enable_windows_diego_cells {
 		);
 	} else {
 		$self->add_files(
-			"overlay/override-releases/static-windows.yml"
+			"overlay/override-releases/source-windows.yml"
 		);
 	}
 	$self->add_files("overlay/windows.yml") unless $self->want_feature("bare");
