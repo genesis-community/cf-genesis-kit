@@ -234,21 +234,20 @@ sub perform {
 					'elbs'             => ['ocfp-ocf-cf-tcp-lb'],
 				},
 			}),
-			# For STACKIT use the cf-deployment defaults
 			$self->vm_extension_definition('cf-router-network-properties' => {
 				stackit => {
-					'security_groups' => ['cf-router-ingress'],
+					'security_groups' => [$self->env->name.'-cf-router-ingress'],
 				},
 			}),
 			$self->vm_extension_definition('cf-tcp-router-network-properties' => {
 				stackit => {
-					'security_groups' => ['cf-tcp-router-ingress'],
+					'security_groups' => [$self->env->name.'-cf-tcp-router-ingress'],
 				},
 
 			}),
 			$self->vm_extension_definition('diego-ssh-proxy-network-properties' => {
 				stackit => {
-					'security_groups' => ['cf-ssh-ingress'],
+					'security_groups' => [$self->env->name.'-cf-ssh-ingress'],
 				},
 			}),
 		],

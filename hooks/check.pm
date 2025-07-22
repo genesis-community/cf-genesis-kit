@@ -58,7 +58,6 @@ sub check_runtime_config {
 	  unless $self->env->has_config('runtime');
 
 	$self->has_entry( 'runtime-config', 'job', 'bosh-dns' );
-	$self->has_entry( 'runtime-config', 'job', 'toolbelt' );
 
 	#FIXME: Need to ensure the job is for the target stemcell os
 	return $self->check_result('runtime-config');
