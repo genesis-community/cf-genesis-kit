@@ -620,14 +620,11 @@ sub _dynamic_isolation_segments {
 
 	if ($self->want_feature("ocfp")) {
 		push @iso_seg_merges, "ocfp/meta.yml";
-		push @iso_seg_merges, "ocfp/trust-blacksmith-ca.yml"
-			if ($env->vault->has($env->exodus_mount.$env->name."/blacksmith","blacksmith_ca"));
 	}
 
 	foreach my $group (@isolation_groups) {
 		info("  Processing isolation segment: %s", $group) if $ENV{GENESIS_DEBUG};
 
-		my $additional_trusted_certs_str = '';
 		my @additional_trusted_certs_files = ();
     my $isolation_segments = $params_ref->{isolation_segments};
     my $has_additional_trusted_certs = 0;
@@ -644,11 +641,7 @@ sub _dynamic_isolation_segments {
 			if ($self->want_feature("cflinuxfs3")) {
 				push @additional_trusted_certs_files, $self->_dynamic_isolation_template_render("additional-trusted-certs-cflinuxfs3", $group);
 			}
-			if ($self->want_feature("ocfp")) {
-				push @additional_trusted_certs_files, $self->_dynamic_isolation_template_render("ocfp-trusted-certs", $group);
-			}
 		}
-		$additional_trusted_certs_str = join(" ", @additional_trusted_certs_files);
 
 		my $dynamic_segment_fragment_file = "overlay/dynamic/isolation-segments-$group.yml";
 		my $dynamic_segment_fragment_path = $self->kit->path($dynamic_segment_fragment_file);
@@ -658,8 +651,7 @@ sub _dynamic_isolation_segments {
 			(map {$self->kit->path($_)} @iso_seg_merges)
 		);
 
-		push @spruce_cmd, (map { $self->kit->path($_) } split(' ', $additional_trusted_certs_str))
-			if $additional_trusted_certs_str;
+		push @spruce_cmd, (map { $self->kit->path($_) } @additional_trusted_certs_files);
 
 		# Add the user-provided isolation segment data
 		my $segment_data = {meta => scalar struct_lookup($params_ref, "isolation_segments.${group}", {})};

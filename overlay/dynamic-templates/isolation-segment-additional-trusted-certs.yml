@@ -8,14 +8,21 @@ params:
     additional_trusted_certs:
     - (( append ))
 
+# Default to empty if not ocfp
+meta:
+  ocfp:
+    certs:
+      trusted:
+      - ((append))
+
 instance_groups:
 - name: (( grab meta.name ))
   jobs:
   - name: cflinuxfs4-rootfs-setup
     properties:
       cflinuxfs4-rootfs:
-        trusted_certs: (( defer grab params.isolation_segments.{{segment-name}}.base_trusted_certs params.isolation_segments.{{segment-name}}.additional_trusted_certs ))
+        trusted_certs: (( defer grab params.isolation_segments.{{segment-name}}.base_trusted_certs meta.ocfp.certs.trusted params.isolation_segments.{{segment-name}}.additional_trusted_certs ))
   - name: rep
     properties:
       containers:
-        trusted_ca_certificates: (( defer grab params.isolation_segments.{{segment-name}}.base_trusted_certs params.isolation_segments.{{segment-name}}.additional_trusted_certs ))
+        trusted_ca_certificates: (( defer grab params.isolation_segments.{{segment-name}}.base_trusted_certs meta.ocfp.certs.trusted params.isolation_segments.{{segment-name}}.additional_trusted_certs ))

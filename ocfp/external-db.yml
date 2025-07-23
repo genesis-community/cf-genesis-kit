@@ -78,9 +78,19 @@ meta:
       hostname: (( vault meta.vault "/db/uaa:hostname" ))
       port:     5432 # Components fail on strings so hardcoding this... :|
       database: (( vault meta.vault "/db/uaa:database" ))
-      ca:       
+      ca:
         - (( vault meta.vault "/db/uaa:ca"       ))
       tls:      "enabled"
+
+---
+# Trusted DB certificates
+meta:
+  ocfp:
+    certs:
+      trusted:
+      - (( append ))
+      - (( vault genesis.secrets_mount "certs/dbs:ca" ))
+
 ---
 # UAA
 - type: replace

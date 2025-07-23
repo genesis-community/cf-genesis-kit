@@ -5,7 +5,7 @@
 - type: remove
   path: /releases/name=pxc?
 - type: remove
-  path: /releases/name=postgres
+  path: /releases/name=postgres?
 
 # Remove MySQL variables
 - type: remove
