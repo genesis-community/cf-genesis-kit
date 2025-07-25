@@ -50,7 +50,17 @@ sub perform {
 		},
 	};
 
-	if ( $self->want_feature('partitioned-network') ) {
+	if ($self->ocfp_config_lookup('net.topology', 'v2') eq 'v1') {
+		# OCFP v1 topology - ocf uses up entire available subnet
+		$self->relinquish_networks(qw/ocf-core ocf-edge ocf-tcp ocf-runtime ocf-db/);
+		@networks = $self->network_definition(
+			'ocf',
+			strategy       => 'ocfp',
+			greedy_subnets => {
+				cloud_properties_for_iaas => $network_cloud_properties,
+			}
+		);
+	} elsif ( $self->want_feature('partitioned-network') ) {
 		$self->relinquish_networks('ocf');
 		@networks = (
 			$self->network_definition(
