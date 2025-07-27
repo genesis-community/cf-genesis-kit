@@ -24,6 +24,6 @@
   path: /releases/-
   value:
     name: syslog
-    sha1: 17dcdf7b4c65ea59dd7f8aa845171c80f950ade0
-    url: https://bosh.io/d/github.com/cloudfoundry/syslog-release?v=12.3.3
-    version: 12.3.3
+    sha1: 9ba8e91b1895fcf96ebfb9dbcb55c3a35ca3f919
+    url: https://bosh.io/d/github.com/cloudfoundry/syslog-release?v=12.3.9
+    version: 12.3.9

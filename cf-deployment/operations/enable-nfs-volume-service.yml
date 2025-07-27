@@ -86,11 +86,6 @@
           server_key: ((nfsv3driver_cert.private_key))
     release: nfs-volume
 - type: replace
-  path: /instance_groups/name=diego-cell/jobs/name=mapfs?
-  value:
-    name: mapfs
-    release: mapfs
-- type: replace
   path: /variables/-
   value:
     name: nfs-broker-password
@@ -147,13 +142,6 @@
   path: /releases/-
   value:
     name: nfs-volume
-    sha1: eb323c4732558405a699861eff4e241bc226bac0
-    url: https://bosh.io/d/github.com/cloudfoundry/nfs-volume-release?v=7.5.0
-    version: 7.5.0
-- type: replace
-  path: /releases/name=mapfs?
-  value:
-    name: mapfs
-    sha1: dc17a8963ad9b9771a90d5c260102ecd0e14175d
-    url: https://bosh.io/d/github.com/cloudfoundry/mapfs-release?v=1.4.0
-    version: 1.4.0
+    sha1: 8cf0e9f14b3784e10e458bdd90de1850ce8d07b8
+    url: https://bosh.io/d/github.com/cloudfoundry/nfs-volume-release?v=7.28.0
+    version: 7.28.0
