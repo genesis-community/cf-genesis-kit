@@ -50,7 +50,7 @@ sub perform {
 		},
 	};
 
-	if ($self->ocfp_config_lookup('net.topology', 'v2') eq 'v1') {
+	if ($self->env->ocfp_config_lookup('net.topology', 'v2') eq 'v1') {
 		# OCFP v1 topology - ocf uses up entire available subnet
 		$self->relinquish_networks(qw/ocf-core ocf-edge ocf-tcp ocf-runtime ocf-db/);
 		@networks = $self->network_definition(
