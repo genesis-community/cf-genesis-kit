@@ -1174,20 +1174,6 @@ sub _handle_deprecated_feature {
 	return 1;
 }
 
-sub add_files_if_wants {
-	my ($self, $feature_test, @files) = @_;
-	return unless $self->want_feature($feature_test);
-	$self->add_files(@files);
-}
-
-sub add_files_if_exists {
-	my ($self, @files) = @_;
-	for my $file (@files) {
-		next unless -f $self->kit->path($file);
-		$self->add_files($file);
-	}
-}
-
 sub requested_blobstore {
 	my ($self) = @_;
 
