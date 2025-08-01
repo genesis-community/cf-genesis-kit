@@ -22,7 +22,7 @@ sub cmd_details {
 	return
 	"Installs cf CLI plugins like 'Targets', which helps to manage multiple Cloud Foundries from a single jumpbox.\n".
 	"Supports the following options:\n".
-	"[[  #y{--f}                 >>Force installation of plugins, overwriting existing versions";
+	"[[  #y{-f}                 >>Force installation of plugins, overwriting existing versions";
 }
 
 sub perform {
@@ -35,37 +35,72 @@ sub perform {
 			'f', # Force installation of plugins
 		]
 	);
-
-	# Check for unexpected arguments
-	if ( scalar( @{ $self->{args} } ) > 0 ) {
-		bail("#R{[ERROR]} setup-cli does not take any arguments");
-	}
-
 	my $force = $options{f} ? 1 : 0;
 
-	my ( $out, $rc ) = run({interactive => 0}, 'cf list-plugin-repos | grep -q CF-Community');
-	if ( $rc != 0 ) {
-		info('Adding #G{Cloud Foundry Community} plugins repository...');
-		run(
-			{interactive => 0},
-			'cf', 'add-plugin-repo', 'CF-Community', 'http://plugins.cloudfoundry.org'
-		);
+	my ( $out, $rc ) = run(
+		{interactive => 0}, q{cf plugins | grep -q '^cf-targets'}
+	);
+	if ( $rc == 0 && !$force ) {
+        my ($existing) = run(
+            { interactive => 0 },
+            q{cf plugins --checksum | grep '^cf-targets' | tr -s ' ' | cut -d ' ' -f2}
+        );
+        chomp $existing;
+        info("#G{cf-targets is already installed} #C{(version $existing)}. No action needed.");
+        return $self->done(1);
 	}
 
-	# TODO: Parse output in Perl not grep
-	( $out, $rc ) = run(
-		{interactive => 0}, 'cf plugins | grep -q \'^cf-targets\''
+	# 1) Determine OS/ARCH
+    my ($os)   = run('uname -s | tr A-Z a-z'); chomp $os;
+    $os = 'darwin' if $os eq 'darwin';
+    $os = 'linux'  if $os eq 'linux';
+
+    my ($arch) = run('uname -m'); chomp $arch;
+    $arch = 'amd64' if $arch eq 'x86_64';
+    $arch = 'arm64' if $arch eq 'aarch64';
+
+    # 2) Fetch latest release tag from GitHub
+    info("Fetching latest cf-targets-plugin release from GitHub...");
+    my ($tag) = run(
+      q{curl -s https://api.github.com/repos/cloudfoundry-community/cf-targets-plugin/releases/latest} .
+      q{ | jq -r .tag_name}
+    );
+    chomp $tag;
+    $tag =~ s/^v//;   # strip leading “v”, e.g. “v2.0.1” → “2.0.1”
+
+	# 3) Find the right download URL for our OS/ARCH, using jq
+	info("Resolving download URL for $os/$arch ...");
+	my $api       = 'https://api.github.com/repos/cloudfoundry-community/cf-targets-plugin/releases/latest';
+	my $asset     = "cf-targets-plugin-$os-$arch";
+	my $jq_filter = qq{.assets[] | select(.name=="$asset") | .browser_download_url};
+
+	my ($download_url) = run(
+	{ interactive => 0 },
+	"curl -s $api | jq -r '$jq_filter'"
 	);
-	bail("#R{[ERROR]} cf plugins listing failed with rc=$rc") unless ( $rc == 0 );
+	chomp $download_url;
+	bail("Couldn’t find a $asset asset in release $tag") unless $download_url;
 
-	info('Installing the #C{cf-targets} plugin...');
-	my $cmd = 'cf install-plugin -r CF-Community Targets';
-	$cmd += ' -f' if ($force);
-	run($cmd);
+	# 4) Download, chmod and install
+    info("Downloading cf-targets #C{v$tag} from $download_url ...");
+    my $tmp = "/tmp/cf-targets-$tag-$$";
+    run("curl -sL -f -o $tmp '$download_url'");
+    bail("Download failed or empty") unless -s $tmp;
+    run("chmod +x $tmp");
 
-	run({interactive => 0},'cf plugins');
+	info("Installing plugin (force) ...");
+    ($out, $rc) = run("cf install-plugin -f $tmp");
+    run("rm -f $tmp");    # cleanup
 
-	return $self->done(1);
+	# 5) Verify
+    ( undef, $rc ) = run(q{cf plugins | grep -q '^cf-targets'});
+    bail("Installation failed; cf-targets not found after install") if $rc;
+
+	info("#G{[OK]} cf-targets v$tag installed successfully.");
+    run('cf plugins');
+
+    return $self->done(1);
+
 }
 
 1;
