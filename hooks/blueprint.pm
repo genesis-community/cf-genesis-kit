@@ -24,9 +24,13 @@ sub init {
 
 	# FIXME: this should not be needed when we move to Genesis 3.2.x and branchified pipelines
 	# Set up operations directory path
+	# REFACTOR: this should be moved to a common method in Genesis::Hook::Blueprint, so all kits can be updated en masse
 	$obj->{custom_ops_dir} = envset('PREVIOUS_ENV')
 		? ".genesis/cached/$ENV{PREVIOUS_ENV}/ops"
 		: "ops";
+
+	$obj->{upstream_dir} = '.'; # user must specify the cf-deployment dir as part of the feature
+	$obj->{upstream_pattern_match} = qr/^cf-deployment\/operations\/(.*)$/;
 
 	return $obj;
 }
@@ -898,6 +902,11 @@ sub validate_classic_features {
 	push @valid_features, 'aws-blobstore-iam' if $self->iaas eq 'aws';
 	push @valid_features, 'gcp-use-access-key' if $self->iaas eq 'gcp';
 
+	# This has already been validated, but we need to account for it # in the valid features list.
+	if (my ($upgrade_feature) = grep { m{^cf-deployment-version-(?:.*)$} } @{$self->{raw_features}}) {
+		push @valid_features, $upgrade_feature;
+	}
+
 	my $enable_service_discovery_resolution = {
 		msg => "- automatically enabled in upstream cf-deployment now",
 		replace => []
@@ -958,7 +967,10 @@ sub validate_classic_features {
 		'cf-deployment/operations/enable-nfs-ldap-tls' => ['nfs-ldap-tls'],
 	);
 
-	$self->_process_feature_validation(\@valid_features, \%deprecated_features);
+	$self->validate_features(
+		valid_features      => \@valid_features,
+		deprecated_features => \%deprecated_features
+	);
 }
 
 # }}}
@@ -995,6 +1007,11 @@ sub validate_ocfp_features {
 	);
 	push @valid_features, 'aws-blobstore-iam' if $self->iaas eq 'aws';
 	push @valid_features, 'gcp-use-access-key' if $self->iaas eq 'gcp';
+
+	# This has already been validated, but we need to account for it # in the valid features list.
+	if (my ($upgrade_feature) = grep { m{^cf-deployment-version-(?:.*)$} } @{$self->{raw_features}}) {
+		push @valid_features, $upgrade_feature;
+	}
 
 	my $ocfp_included_resolution = {
 		msg => "- included as part of OCFP feature",
@@ -1040,7 +1057,10 @@ sub validate_ocfp_features {
 		'cf-deployment/operations/enable-nfs-ldap-tls' => ['nfs-ldap-tls'],
 	);
 
-	$self->_process_feature_validation(\@valid_features, \%deprecated_features);
+	$self->validate_features(
+		valid_features      => \@valid_features,
+		deprecated_features => \%deprecated_features
+	);
 
 	# Handle OCFP blobstore selection
 	if (!$self->want_feature('+internal-blobstore')) {
@@ -1063,116 +1083,6 @@ sub validate_ocfp_features {
 }
 
 # }}}
-
-# _process_feature_validation - Process feature validation {{{
-sub _process_feature_validation {
-	my ($self, $valid_features, $deprecated_features) = @_;
-
-	my @curated_features = ();
-	my @warnings = ();
-	my @errors   = ();
-
-	# map the valid features to a hash for quick lookup (O_n + m * O_1)
-	my %valid_features = map { $_ => 1 } @$valid_features;
-
-	my $ops_dir = $self->ops_dir;
-
-	for my $feature (@{$self->{raw_features}}) {
-		if ($valid_features{$feature}) {
-			# Valid feature, add it to the curated list
-			push @curated_features, $feature;
-
-		} elsif (exists($deprecated_features->{$feature})) {
-			my $resolution = $deprecated_features->{$feature}//{};
-			$self->_handle_deprecated_feature(
-				$feature, $resolution,
-				\@curated_features, \@warnings, \@errors
-			);
-
-		# Automatically approve cf-deployment-version
-		} elsif ($feature =~ /^cf-deployment-version-(.*)$/) {
-			push @curated_features, $feature;
-
-		} elsif ($feature =~ /^cf-deployment\/operations\/(.*)$/) {
-			if (-f $self->kit->path($feature.'.yml')) {
-				# Custom ops file from the kit
-				push @curated_features, $feature;
-			} else {
-				push @errors, "Invalid cf-deployment operation requested: #c{$feature}";
-			}
-
-		} elsif (-f $self->env->path("$ops_dir/$feature.yml")) {
-			# Custom ops file from the environment
-			push @curated_features, $feature;
-
-		} else {
-			push @errors, "Invalid feature requested: #c{$feature}";
-		}
-	}
-
-	warning(
-		"\nFeature validation encountered the following warnings:\n%s",
-		join('', map {"[[  - >>$_\n"} @warnings)
-	) if @warnings;
-
-	bail(
-		"\nFeature validation encountered the following errors:\n%s",
-		join('', map {"[[  - >>$_\n"} @errors)
-	) if @errors;
-
-	$self->set_features(@curated_features);
-}
-
-# }}}
-
-# _handle_deprecated_feature - Handle deprecated features {{{
-sub _handle_deprecated_feature {
-	my ($self, $feature, $resolution, $curated_features, $warnings_ref, $errors_ref) = @_;
-	my $msg = undef;
-	my $replacement = undef;
-
-	$resolution = {replace => $resolution} unless ref($resolution) eq 'HASH';
-
-	if (!exists($resolution->{params})) {
-		$msg = $resolution->{msg};
-		$replacement = $resolution->{replace};
-	} else {
-		# TODO: Deal with features that have been replaced by env params
-		bail("Feature replacement by params not yet implemented for $feature");
-	}
-
-	if (ref($replacement) eq 'ARRAY') {
-		# Multiple replacements
-		if (!@$replacement) {
-			push @$warnings_ref, sprintf(
-				"The #g{%s} feature is now the default behaviour %s",
-				$feature,
-				$msg // "and no longer needs to be specified."
-			);
-		} else {
-			push @$warnings_ref, sprintf(
-				"The #y{%s} feature has been deprecated %s",
-				$feature,
-				$msg // "and should be replaced with ". sentence_join(map {"#c{$_}"} @$replacement)
-			);
-			push @$curated_features, @$replacement;
-		}
-	} elsif (!defined($replacement)) {
-		push @$errors_ref, sprintf(
-			"The #r{%s} feature is no longer supported and has been removed.%s",
-			$feature,
-			$msg ? " $msg" : ""
-		);
-	} else {
-		# Single replacement
-		push @$warnings_ref, sprintf(
-			"The #c{%s} feature has been replaced with #c{%s}",
-			$feature, $replacement
-		);
-		push @$curated_features, $replacement;
-	}
-	return 1;
-}
 
 sub requested_blobstore {
 	my ($self) = @_;
@@ -1399,11 +1309,6 @@ sub _add_app_autoscaler_releases {
 	}
 }
 
-sub ops_dir {
-	my ($self) = @_;
-	my $ops_dir = $self->env->lookup('genesis.ops_dir') // 'ops';
-	return $ops_dir;
-}
 
 sub _instance_group_translations {
 	return {
