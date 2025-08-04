@@ -2,15 +2,15 @@ package Genesis::Hook::Addon::CF::Springcloudservices v3.0.1;
 
 use v5.20;
 use warnings;    # Genesis min perl version is 5.20
-use Genesis     qw/bail info run pushd popd mkfile_or_fail mkdir_or_fail in_array/;
-use Genesis::UI qw/prompt_for_boolean/;
 
 # Only needed for development
 BEGIN { push @INC, $ENV{GENESIS_LIB} ? $ENV{GENESIS_LIB} : $ENV{HOME} . './.genesis/lib' }
+use parent qw(Genesis::Hook::Addon);
 
-use parent         qw(Genesis::Hook::Addon);
+use Genesis        qw/bail info run pushd popd mkfile_or_fail mkdir_or_fail/;
+use Genesis::UI    qw/prompt_for_boolean/;
 use File::Basename qw/basename/;
-use JSON::PP qw/decode_json/;
+use JSON::PP       qw/decode_json/;
 
 sub init {
 	my $class = shift;
@@ -64,9 +64,12 @@ sub perform {
 		registry_buildpack       => { type => 'value', usage => '<java-buildpack-name>', default => "java_buildpack" },
 		configserver_buildpack   => { type => 'value', usage => '<java-buildpack-name>', default => "java_buildpack" },
 		release_tag              => { type => 'value', usage => '<tag>', default => "2023.0.1" },
-		broker_uri               => { type => 'value', usage => '<uri>', default => $scs_broker_url . "/archive/refs/tags/v1.1.2.tar.gz" },
-		configserver_jar_uri     => { type => 'value', usage => '<uri>', default => $scs_configserver_url . "/releases/download/v2.0.0-2023.0.1/spring-cloud-config-server-2.0.0-2023.0.1.jar" },
-		registry_jar_uri         => { type => 'value', usage => '<uri>', default => $scs_registry_url . "/releases/download/v2.0.0-3.4.0/service-registry-2.0.0-3.4.0.jar" },
+		broker_uri               => { type => 'value', usage => '<uri>', validate => $uri_regexp, err_msg => $uri_err_msg,
+		                              default => $scs_broker_url . "/archive/refs/tags/v1.1.2.tar.gz" },
+		configserver_jar_uri     => { type => 'value', usage => '<uri>', validate => $uri_regexp, err_msg => $uri_err_msg,
+		                              default => $scs_configserver_url . "/releases/download/v2.0.0-2023.0.1/spring-cloud-config-server-2.0.0-2023.0.1.jar" },
+		registry_jar_uri         => { type => 'value', usage => '<uri>', validate => $uri_regexp, err_msg => $uri_err_msg,
+		                              default => $scs_registry_url . "/releases/download/v2.0.0-3.4.0/service-registry-2.0.0-3.4.0.jar" },
 		java_version             => { type => 'value', usage => '<version>', default => "17.+" },
 		skip_ssl_validation      => { type => 'value', usage => '<true|false>', default => "true", validate => qr/^(true|false)$/,
 		                              err_msg => "must be 'true' or 'false'" },
@@ -258,13 +261,15 @@ MANIFEST
 
 		# Push the app to CF
 		info("Pushing SCS Broker to Cloud Foundry...");
-		my ($out, $rc, $err) = run( 'cf', 'push', '-f', 'manifest.yml');
-		bail("Failed to push SCS broker app:\n%s", $err//$out) if $rc;
-
+		my ($push_out, $push_rc, $push_err) = run({interactive => 0, stderr => 0}, 'cf', 'push', '-f', 'manifest.yml');
+		if ($push_rc) {
+			bail("cf push failed (rc=$push_rc)\nSTDOUT:\n$push_out\nSTDERR:\n" . ($push_err // ''));
+		}
 		info(
 			"SCS service broker is now running, you should now be able to create a service, e.g.:\n".
 			"  \$ cf create-service config-server default test-service -c \"{...whatever json configuration you wish to use for config-server - see config-server docs from Spring.io...}\""
 		);
+
 
 		# Clean up
 		popd();    # from broker dir
@@ -324,7 +329,7 @@ sub fetch_uri {
 	info("Downloading $filename...");
 	my ( $out, $rc, $err ) = run('curl', '--fail', '--silent', '--show-error', '--location', '--remote-name', '--url', $url);
 
-	bail("Failed to download: $url\n$err") if $rc;
+	bail("Failed to download: $url\nSTDOUT: $out\nSTDERR: $err") if $rc;
 	return $filename;
 }
 
