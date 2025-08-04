@@ -2,7 +2,7 @@ package Genesis::Hook::Addon::CF::SCS;
 
 use v5.20;
 use warnings;    # Genesis min perl version is 5.20
-use Genesis     qw/bail info run pushd popd mkfile_or_fail/;
+use Genesis     qw/bail info run pushd popd mkfile_or_fail mkdir_or_fail/;
 use Genesis::UI qw/prompt_for_boolean/;
 
 # Only needed for development
@@ -45,7 +45,6 @@ sub perform {
 	my $env = $self->env;
 
 	# Argument to config key mapping, default values, and usage patterns
-	my $scs_url = 'https://github.com/cloudfoundry-community/scs-service-registry';
 	my $uri_regexp = qr{^https?://[-\w\@:%._+~#=]{1,256}\.[-\w\@:%\._+~#=]{1,256}(?:\:\d{1,5})?(?:/[-\w\@:%\._\+~#\?&/=]*)?$};
 	my $uri_err_msg = "must be a valid URI in the format 'http(s)://example.com/path'";
 	my $size_err_msg = 'must be in format "###M" (e.g., 256M, 1024M)';
@@ -63,11 +62,11 @@ sub perform {
 		configserver_buildpack   => { type => 'value', usage => '<java-buildpack-name>', default => "java_buildpack" },
 		release_tag              => { type => 'value', usage => '<tag>', default => "2023.0.1" },
 		broker_uri               => { type => 'value', usage => '<uri>', validate => $uri_regexp, err_msg => $uri_err_msg,
-		                              default => $scs_url . "/archive/refs/tags/v1.1.2.tar.gz" },
+		                              default => "https://github.com/cloudfoundry-community/scs-broker/archive/refs/tags/v1.1.2.tar.gz" },
 		configserver_jar_uri     => { type => 'value', usage => '<uri>', validate => $uri_regexp, err_msg => $uri_err_msg,
-		                              default => $scs_url . "/releases/download/v2.0.0-2023.0.1/spring-cloud-config-server-2.0.0-2023.0.1.jar" },
+		                              default =>  "https://github.com/cloudfoundry-community/cf-spring-cloud-config-server/releases/download/v2.0.0-2023.0.1/spring-cloud-config-server-2.0.0-2023.0.1.jar" },
 		registry_jar_uri         => { type => 'value', usage => '<uri>', validate => $uri_regexp, err_msg => $uri_err_msg,
-		                              default => $scs_url . "/releases/download/v2.0.0-3.4.0/service-registry-2.0.0-3.4.0.jar" },
+		                              default => "https://github.com/cloudfoundry-community/scs-service-registry/releases/download/v2.0.0-3.4.0/service-registry-2.0.0-3.4.0.jar" },
 		java_version             => { type => 'value', usage => '<version>', default => "17.+" },
 		skip_ssl_validation      => { type => 'value', usage => '<true|false>', default => "true", validate => qr/^(true|false)$/,
 		                              err_msg => "must be 'true' or 'false'" },
@@ -232,6 +231,7 @@ sub perform {
 		};
 
 		my $broker_config_json = JSON::PP->new->utf8->pretty->encode($broker_config);
+		my $indented_json = indent($broker_config_json, 8);
 
 		# Create manifest.yml
 		my $manifest_content = <<"MANIFEST";
@@ -249,19 +249,22 @@ applications:
       GOPACKAGENAME: scs-broker
       GO_VERSION: 1.22
       SCS_BROKER_CONFIG: |-
-      $broker_config_json
+$indented_json
 MANIFEST
 
 		mkfile_or_fail( "manifest.yml", $manifest_content );
 
 		# Push the app to CF
 		info("Pushing SCS Broker to Cloud Foundry...");
-		run({interactive => 0}, 'cf', 'push', '-f', 'manifest.yml');
-
+		my ($push_out, $push_rc, $push_err) = run({interactive => 0}, 'cf', 'push', '-f', 'manifest.yml');
+		if ($push_rc) {
+			bail("cf push failed (rc=$push_rc)\nSTDOUT:\n$push_out\nSTDERR:\n" . ($push_err // ''));
+		}
 		info(
 			"SCS service broker is now running, you should now be able to create a service, e.g.:\n".
 			"  \$ cf create-service config-server default test-service -c \"{...whatever json configuration you wish to use for config-server - see config-server docs from Spring.io...}\""
 		);
+
 
 		# Clean up
 		popd();    # from broker dir
@@ -310,7 +313,7 @@ sub fetch_uri {
 	info("Downloading $filename...");
 	my ( $out, $rc, $err ) = run('curl', '--fail', '--silent', '--show-error', '--location', '--remote-name', '--url', $url);
 
-	bail("Failed to download: $url\n$err") if $rc;
+	bail("Failed to download: $url\nSTDOUT: $out\nSTDERR: $err") if $rc;
 	return $filename;
 }
 
@@ -326,6 +329,14 @@ sub fetch_artifacts {
 	$self->fetch_uri($registry_jar_uri);
 
 	popd();
+}
+
+sub indent {
+  my ($text, $spaces) = @_;
+  $spaces //= 2;
+  my $pad = ' ' x $spaces;
+  $text =~ s/^/$pad/mg;
+  return $text;
 }
 
 sub extract {
