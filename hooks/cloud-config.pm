@@ -169,8 +169,6 @@ sub perform {
 		);
 	}
 
-	my $security_group_prefix = $self->env->ocfp_env =~ s/\/.*//r;
-
 	my $config = $self->build_cloud_config({
 		'networks' => \@networks,
 		'vm_types' => [(map {
@@ -248,18 +246,18 @@ sub perform {
 			}),
 			$self->vm_extension_definition('cf-router-network-properties' => {
 				stackit => {
-					'security_groups' => [$security_group_prefix.'-cf-router-ingress'],
+					'security_groups' => [$self->env->name.'-cf-router-ingress'],
 				},
 			}),
 			$self->vm_extension_definition('cf-tcp-router-network-properties' => {
 				stackit => {
-					'security_groups' => [$security_group_prefix.'-cf-tcp-router-ingress'],
+					'security_groups' => [$self->env->name.'-cf-tcp-router-ingress'],
 				},
 
 			}),
 			$self->vm_extension_definition('diego-ssh-proxy-network-properties' => {
 				stackit => {
-					'security_groups' => [$security_group_prefix.'-cf-ssh-proxy-ingress'],
+					'security_groups' => [$self->env->name.'-cf-ssh-ingress'],
 				},
 			}),
 		],
