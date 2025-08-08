@@ -27,6 +27,7 @@ sub perform {
 	if ( $ENV{GENESIS_DEPLOY_RC} == 0 ) {
 		my $genesis_env      = "$ENV{GENESIS_ENVIRONMENT}";
 		my $genesis_call_env = "$ENV{GENESIS_CALL_ENV}";
+		$self->upload_runtime_configs();
 		info(
 			"#M{%s} Cloud Foundry deployed!\n\n" .
 			  "For details about the deployment, run\n\n" .

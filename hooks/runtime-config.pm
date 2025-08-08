@@ -82,7 +82,7 @@ sub build_system_metrics_runtime {
 				name => 'system-metrics',
 				exclude => {
 					deployments => [
-						map { {name => $_} } @excluded_deployments
+						@excluded_deployments
 					]
 				},
 				jobs => [

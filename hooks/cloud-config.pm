@@ -361,7 +361,7 @@ sub _get_aws_vm_matrix {
 			[ qw[  cc-worker     t3.medium    m6i.large          15360           8192          16384  ] ],
 			[ qw[  credhub       t3.medium    r6i.large          30720           4096          16384  ] ],
 			[ qw[  diego-api     t3.large     c6i.2xlarge        15360           4096          16384  ] ],
-			[ qw[  diego-cell    t3.large     r6i.2xlarge       262144          65536         393216  ] ],
+			[ qw[  diego-cell    t3.large     r6i.4xlarge       262144          65536         393216  ] ],
 			[ qw[  doppler       t3.medium    c6i.xlarge         15360           4096          16384  ] ],
 			[ qw[  errand        t3.medium    m6i.large          15360           4096           8192  ] ],
 			[ qw[  log-api       t3.medium    c6i.xlarge         15360           8192          16384  ] ],
@@ -373,7 +373,7 @@ sub _get_aws_vm_matrix {
 			[ qw[  uaa           t3.large     c6i.large          30720           8192          16384  ] ],
 			[ qw[  database      t3.medium    m6i.xlarge         61440           4096          16384  ] ],
 			[ qw[  blobstore     t3.medium    m6i.large          61440           4096           8192  ] ],
-			[ qw[  windows-cell  t3.large    r6i.2xlarge       262144          65536         393216  ] ],
+			[ qw[  windows-cell  t3.large     r6i.2xlarge       262144          65536         393216  ] ],
 		)
 	}
 }
