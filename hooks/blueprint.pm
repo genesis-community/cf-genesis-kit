@@ -179,6 +179,13 @@ sub process_classic_features {
 		} elsif ($feature eq "stratos-integration" ) {
 			$self->add_files("overlay/addons/stratos.yml");
 
+		} elsif ($feature eq "trust-blacksmith-ca" ) {
+			$self->add_files("overlay/addons/trust-blacksmith-ca.yml");
+			if ($self->want_feature("cflinuxfs3")) {
+				$self->add_files("overlay/addons/trust-blacksmith-ca-cflinuxfs3.yml");
+			}
+			# OCFP handling is already done automatically via vault detection
+
 		} elsif ($feature eq "uaa-admin-client") {
 			$self->add_files("overlay/addons/uaa-admin-client.yml");
 
@@ -865,7 +872,6 @@ sub validate_classic_features {
 		'isolation-segments',
 		'ssh-proxy-on-routers',
 		'no-tcp-routers',
-		'blacksmith-integration',
 		'trust-blacksmith-ca',
 		'app-scheduler-integration',
 		'app-autoscaler-integration',
@@ -932,16 +938,13 @@ sub validate_classic_features {
 			msg => "- it will automatically be applied when deploying via an Azure CPI",
 			replace => []
 		},
-		'trust-blacksmith-ca' => {
-			msg => "- it will automatically be applied if detected in secrets store",
-			replace => []
-		},
 
 		'cflinuxfs2' => undef,
 		'no-nats-tls' => undef,
 		'local-ha-db' => {msg => "Consider using external High Availability databases instead"},
 		'autoscaler' => {msg => "Use the 'cf-app-autoscaler' genesis kit"},
 		'autoscaler-postgres' => {msg => "Use the 'cf-app-autoscaler' genesis kit"},
+		'blacksmith-integration' => {msg => "This feature was never implemented. Use 'trust-blacksmith-ca' for CA trust only"},
 		'native-garden-runc' => ['cf-deployment/operations/native-garden-runc-runner'],
 
 		# Service Discovery redundant features
@@ -1007,7 +1010,6 @@ sub validate_ocfp_features {
 
 	my %deprecated_features = ( # values: undef - not valid, [] - not needed, [feature,...] - replacement, {params => [xxx]} - moved to params
 		'tls' => $ocfp_included_resolution,
-		'blacksmith-integration' => $ocfp_included_resolution,
 		'app-scheduler-integration' => $ocfp_included_resolution,
 		'app-autoscaler-integration' => $ocfp_included_resolution,
 		'prometheus-integration' => $ocfp_included_resolution,
@@ -1016,10 +1018,6 @@ sub validate_ocfp_features {
 		'ssh-proxy-on-routers' => $ocfp_included_resolution,
 		'cflinuxfs4' => $ocfp_included_resolution,
 
-		'trust-blacksmith-ca' => {
-			msg => "- it will automatically be applied if detected in secrets store",
-			replace => []
-		},
 		'compiled-releases' => {
 			msg => "- it is the default behaviour in OCFP; to turn it off, use the ".
 			"'source-releases' feature",
