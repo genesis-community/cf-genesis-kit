@@ -652,6 +652,27 @@ sub _dynamic_isolation_segments {
 			}
 		}
 
+		# Handle VM type override for isolation segment diego-cell instances
+		my $diego_cell_vm_type_name = "diego-cell-$group";
+		if ($self->env->lookup("bosh-configs.cloud.vm_types.$diego_cell_vm_type_name")) {
+			my $vm_type_actual = $self->want_feature('ocfp')
+				? $self->env->name . '.' . $self->env->type . '.vm-diego-cell-' . $group
+				: $diego_cell_vm_type_name;
+
+			my $vm_override_content = <<"EOF";
+---
+meta:
+  vm_type: $vm_type_actual
+EOF
+
+			my $dstdir = 'overlay/dynamic';
+			my $vm_override_file = "$dstdir/isolation-segment-$group-vm-type-override.yml";
+			my $kit_dynamic_dir = $self->kit->path($dstdir);
+			mkdir_or_fail($kit_dynamic_dir) unless -d $kit_dynamic_dir;
+			mkfile_or_fail($self->kit->path($vm_override_file), 0644, $vm_override_content);
+			push @iso_seg_merges, $vm_override_file;
+		}
+
 		my $dynamic_segment_fragment_file = "overlay/dynamic/isolation-segments-$group.yml";
 		my $dynamic_segment_fragment_path = $self->kit->path($dynamic_segment_fragment_file);
 		unshift @iso_seg_merges, "overlay/dynamic-templates/isolation-segment.yml";
