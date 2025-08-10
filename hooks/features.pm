@@ -49,6 +49,7 @@ sub perform {
 
 	if ($is_ocfp) { # OCFP default integrations
 		push @features, 'blacksmith-integration';
+		push @features, 'trust-blacksmith-ca';
 		push @features, 'app-scheduler-integration';
 		push @features, 'app-autoscaler-integration';
 		push @features, 'prometheus-integration';
