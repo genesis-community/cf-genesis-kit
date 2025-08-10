@@ -302,6 +302,8 @@ sub process_ocfp_features {
 	);
 	$self->add_files('operations/custom-azs.yml');
 
+  # NOTE: blacksmith-integration is simply adding the trust CAs which is handled elsewhere.
+
 	# Base OCFP configuration
 	$self->add_files(qw(
 		overlay/addons/autoscaler.yml
