@@ -990,7 +990,7 @@ sub validate_ocfp_features {
 		'cflinuxfs3',
 		'isolation-segments',
 		'no-tcp-routers',
-    'stratos-integration',
+        'stratos-integration',
 		'windows-diego-cells',
 
 		'nfs-volume-services', 'nfs-ldap', 'nfs-ldap-tls',
