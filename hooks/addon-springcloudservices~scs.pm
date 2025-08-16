@@ -64,12 +64,9 @@ sub perform {
 		registry_buildpack       => { type => 'value', usage => '<java-buildpack-name>', default => "java_buildpack" },
 		configserver_buildpack   => { type => 'value', usage => '<java-buildpack-name>', default => "java_buildpack" },
 		release_tag              => { type => 'value', usage => '<tag>', default => "2023.0.1" },
-		broker_uri               => { type => 'value', usage => '<uri>', validate => $uri_regexp, err_msg => $uri_err_msg,
-		                              default => $scs_broker_url . "/archive/refs/tags/v1.1.2.tar.gz" },
-		configserver_jar_uri     => { type => 'value', usage => '<uri>', validate => $uri_regexp, err_msg => $uri_err_msg,
-		                              default => $scs_configserver_url . "/releases/download/v2.0.0-2023.0.1/spring-cloud-config-server-2.0.0-2023.0.1.jar" },
-		registry_jar_uri         => { type => 'value', usage => '<uri>', validate => $uri_regexp, err_msg => $uri_err_msg,
-		                              default => $scs_registry_url . "/releases/download/v2.0.0-3.4.0/service-registry-2.0.0-3.4.0.jar" },
+		broker_uri               => { type => 'value', usage => '<uri>', default => $scs_broker_url . "/archive/refs/tags/v1.1.2.tar.gz" },
+		configserver_jar_uri     => { type => 'value', usage => '<uri>', default => $scs_configserver_url . "/releases/download/v2.0.0-2023.0.1/spring-cloud-config-server-2.0.0-2023.0.1.jar" },
+		registry_jar_uri         => { type => 'value', usage => '<uri>', default => $scs_registry_url . "/releases/download/v2.0.0-3.4.0/service-registry-2.0.0-3.4.0.jar" },
 		java_version             => { type => 'value', usage => '<version>', default => "17.+" },
 		skip_ssl_validation      => { type => 'value', usage => '<true|false>', default => "true", validate => qr/^(true|false)$/,
 		                              err_msg => "must be 'true' or 'false'" },
@@ -236,7 +233,7 @@ sub perform {
 		my $broker_config_json = JSON::PP->new->utf8->pretty->encode($broker_config);
 		$broker_config_json =~ s/^/        /gm;
 		# Create manifest.yml
-		my $manifest_content = <<"MANIFEST"
+		my $manifest_content = <<"MANIFEST";
 ---
 applications:
 	- name: scs-broker
@@ -309,6 +306,14 @@ sub fetch_uri {
 	my ( $self, $url ) = @_;
 	my $filename = basename($url);
 
+	# Check if it's a local file
+	if ( -f $url ) {
+		info("Copying local file $filename");
+		run('cp', $url, $filename);
+		return $filename;
+	}
+
+	# Otherwise, download from URL
 	info("Downloading $filename...");
 	my ( $out, $rc, $err ) = run('curl', '--fail', '--silent', '--show-error', '--location', '--remote-name', '--url', $url);
 
