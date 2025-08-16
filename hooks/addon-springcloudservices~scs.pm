@@ -2,7 +2,7 @@ package Genesis::Hook::Addon::CF::SCS;
 
 use v5.20;
 use warnings;    # Genesis min perl version is 5.20
-use Genesis     qw/bail info run pushd popd mkfile_or_fail/;
+use Genesis     qw/bail info run pushd popd mkfile_or_fail in_array/;
 use Genesis::UI qw/prompt_for_boolean/;
 
 # Only needed for development
@@ -10,7 +10,7 @@ BEGIN { push @INC, $ENV{GENESIS_LIB} ? $ENV{GENESIS_LIB} : $ENV{HOME} . './.gene
 
 use parent         qw(Genesis::Hook::Addon);
 use File::Basename qw/basename/;
-use JSON::PP;
+use JSON::PP qw/decode_json/;
 
 sub init {
 	my $class = shift;
@@ -45,7 +45,9 @@ sub perform {
 	my $env = $self->env;
 
 	# Argument to config key mapping, default values, and usage patterns
-	my $scs_url = 'https://github.com/cloudfoundry-community/scs-service-registry';
+	my $scs_broker_url = 'https://github.com/cloudfoundry-community/scs-broker';
+	my $scs_configserver_url = 'https://github.com/cloudfoundry-community/scs-config-server';
+	my $scs_registry_url = 'https://github.com/cloudfoundry-community/scs-service-registry';
 	my $uri_regexp = qr{^https?://[-\w\@:%._+~#=]{1,256}\.[-\w\@:%\._+~#=]{1,256}(?:\:\d{1,5})?(?:/[-\w\@:%\._\+~#\?&/=]*)?$};
 	my $uri_err_msg = "must be a valid URI in the format 'http(s)://example.com/path'";
 	my $size_err_msg = 'must be in format "###M" (e.g., 256M, 1024M)';
@@ -56,18 +58,18 @@ sub perform {
 
 		# Direct mappings (arg name matches config key)
 		memory                   => { type => 'value', usage => '<size>M', default => "256M", validate => qr/^\d+M$/, err_msg => $size_err_msg },
-		disk                     => { type => 'value', usage => '<size>M', default => "256M", validate => qr/^\d+M$/, err_msg => $size_err_msg },
+		disk                     => { type => 'value', usage => '<size>M', default => "1024M", validate => qr/^\d+M$/, err_msg => $size_err_msg },
 		stack                    => { type => 'value', usage => '<stack-name>', default => "cflinuxfs4" },
 		buildpack                => { type => 'value', usage => '<go-buildpack-name>', default => "go_buildpack" },
 		registry_buildpack       => { type => 'value', usage => '<java-buildpack-name>', default => "java_buildpack" },
 		configserver_buildpack   => { type => 'value', usage => '<java-buildpack-name>', default => "java_buildpack" },
 		release_tag              => { type => 'value', usage => '<tag>', default => "2023.0.1" },
 		broker_uri               => { type => 'value', usage => '<uri>', validate => $uri_regexp, err_msg => $uri_err_msg,
-		                              default => $scs_url . "/archive/refs/tags/v1.1.2.tar.gz" },
+		                              default => $scs_broker_url . "/archive/refs/tags/v1.1.2.tar.gz" },
 		configserver_jar_uri     => { type => 'value', usage => '<uri>', validate => $uri_regexp, err_msg => $uri_err_msg,
-		                              default => $scs_url . "/releases/download/v2.0.0-2023.0.1/spring-cloud-config-server-2.0.0-2023.0.1.jar" },
+		                              default => $scs_configserver_url . "/releases/download/v2.0.0-2023.0.1/spring-cloud-config-server-2.0.0-2023.0.1.jar" },
 		registry_jar_uri         => { type => 'value', usage => '<uri>', validate => $uri_regexp, err_msg => $uri_err_msg,
-		                              default => $scs_url . "/releases/download/v2.0.0-3.4.0/service-registry-2.0.0-3.4.0.jar" },
+		                              default => $scs_registry_url . "/releases/download/v2.0.0-3.4.0/service-registry-2.0.0-3.4.0.jar" },
 		java_version             => { type => 'value', usage => '<version>', default => "17.+" },
 		skip_ssl_validation      => { type => 'value', usage => '<true|false>', default => "true", validate => qr/^(true|false)$/,
 		                              err_msg => "must be 'true' or 'false'" },
@@ -232,24 +234,24 @@ sub perform {
 		};
 
 		my $broker_config_json = JSON::PP->new->utf8->pretty->encode($broker_config);
-
+		$broker_config_json =~ s/^/        /gm;
 		# Create manifest.yml
-		my $manifest_content = <<"MANIFEST";
+		my $manifest_content = <<"MANIFEST"
 ---
 applications:
-  - name: scs-broker
-    stack: $config{stack}
-    buildpack: $config{buildpack}
-    memory: $config{memory}
-    disk_quota: $config{disk}
-    host: console
-    timeout: 180
-    health-check-type: port
-    env:
-      GOPACKAGENAME: scs-broker
-      GO_VERSION: 1.22
-      SCS_BROKER_CONFIG: |-
-      $broker_config_json
+	- name: scs-broker
+	stack: $config{stack}
+	buildpack: $config{buildpack}
+	memory: $config{memory}
+	disk_quota: $config{disk}
+	host: console
+	timeout: 180
+	health-check-type: port
+	env:
+		GOPACKAGENAME: scs-broker
+		GO_VERSION: 1.22
+		SCS_BROKER_CONFIG: |-
+$broker_config_json
 MANIFEST
 
 		mkfile_or_fail( "manifest.yml", $manifest_content );
