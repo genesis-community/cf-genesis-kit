@@ -98,11 +98,13 @@ sub perform {
 				$config{$key} = 1;
 				next;
 			}
-
-			# If next arg is another config key, treat as no value
-			my $value = in_array($args[0], keys %config_desc) ? undef : shift @args;
+			# Check if there's a next argument and if it's not another config key
+			my $value;
+			if (@args && !exists $config_desc{$args[0]}) {
+				$value = shift @args;
+			}
 			if (!$value) {
-				push @errors, sprintf('%s expects %s argument', $key, $arg_info->{usage});
+				push @errors, sprintf('%s expects %s argument', $arg, $arg_info->{usage});
 				next;
 			}
 
