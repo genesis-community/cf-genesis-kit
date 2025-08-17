@@ -2,7 +2,7 @@ package Genesis::Hook::Addon::CF::SCS;
 
 use v5.20;
 use warnings;    # Genesis min perl version is 5.20
-use Genesis     qw/bail info run pushd popd mkfile_or_fail in_array/;
+use Genesis     qw/bail info run pushd popd mkfile_or_fail mkdir_or_fail in_array/;
 use Genesis::UI qw/prompt_for_boolean/;
 
 # Only needed for development
@@ -152,7 +152,8 @@ sub perform {
 	run('cf', 'target', '-o', $config{org}, '-s', $config{space});
 
 	# Get space GUID
-	my ( $scs_space_guid, $rc ) = run('cf', 'space', $config{space}, '--guid');
+	my ( $scs_space_guid, $rc, $err ) = run('cf', 'space', $config{space}, '--guid');
+	bail("Failed to get GUID for space $config{space}: $err") if $rc;
 	chomp($scs_space_guid);
 
 	if ( $config{deploy} ) {
@@ -257,7 +258,8 @@ MANIFEST
 
 		# Push the app to CF
 		info("Pushing SCS Broker to Cloud Foundry...");
-		run({interactive => 0}, 'cf', 'push', '-f', 'manifest.yml');
+		my ($out, $rc, $err ) = run( 'cf', 'push', '-f', 'manifest.yml');
+		bail("Failed to push SCS broker app: $err") if $rc;
 
 		info(
 			"SCS service broker is now running, you should now be able to create a service, e.g.:\n".
@@ -274,7 +276,9 @@ MANIFEST
 
 		info("Checking if broker is already registered...");
 		# TODO: Switch to read_json_from($self->env->bosh->execute())
-		my ($broker_json, $rc ) = run('cf', 'curl', '/v2/service_brokers');
+		my ($broker_json, $rc, $err) = run('cf', 'curl', '/v2/service_brokers');
+		bail("Failed to query service brokers: $err") if $rc;
+
 		my $json_data = eval { decode_json($broker_json) };
 		bail("Failed to parse broker list JSON: $@") if $@;
 
@@ -291,13 +295,14 @@ MANIFEST
 		my $action = $broker_found ? "update" : "create";
 		info( (ucfirst($action) =~ s/e$//r) . "ing the service broker..." );
 
-		run(
+		my ($out, $rc2, $err2) = run(
 			'cf', "$action-service-broker",
 			$config{broker_name},
 			$config{broker_auth_username},
 			$config{broker_auth_password},
 			"https://scs-broker.$apps_domain",
 		);
+		bail("Failed to $action service broker: $err2") if $rc2;
 	}
 
 	return $self->done();
