@@ -239,18 +239,18 @@ sub perform {
 		my $manifest_content = <<"MANIFEST";
 ---
 applications:
-	- name: scs-broker
-	stack: $config{stack}
-	buildpack: $config{buildpack}
-	memory: $config{memory}
-	disk_quota: $config{disk}
-	host: console
-	timeout: 180
-	health-check-type: port
-	env:
-		GOPACKAGENAME: scs-broker
-		GO_VERSION: 1.22
-		SCS_BROKER_CONFIG: |-
+  - name: scs-broker
+    stack: $config{stack}
+    buildpack: $config{buildpack}
+    memory: $config{memory}
+    disk_quota: $config{disk}
+    host: console
+    timeout: 180
+    health-check-type: port
+    env:
+      GOPACKAGENAME: scs-broker
+      GO_VERSION: 1.22
+      SCS_BROKER_CONFIG: |-
 $broker_config_json
 MANIFEST
 
@@ -258,8 +258,8 @@ MANIFEST
 
 		# Push the app to CF
 		info("Pushing SCS Broker to Cloud Foundry...");
-		my ($out, $rc, $err ) = run( 'cf', 'push', '-f', 'manifest.yml');
-		bail("Failed to push SCS broker app: $err") if $rc;
+		my ($out, $rc, $err) = run( 'cf', 'push', '-f', 'manifest.yml');
+		bail("Failed to push SCS broker app:\n%s", $err//$out) if $rc;
 
 		info(
 			"SCS service broker is now running, you should now be able to create a service, e.g.:\n".
