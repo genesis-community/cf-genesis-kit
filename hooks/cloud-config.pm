@@ -170,6 +170,13 @@ sub perform {
 		);
 	}
 
+	if ($self->want_feature('vip')) { # Maybe add alias for 'public-network'
+	push @networks, $self->network_definition(
+			'vip',
+			strategy => 'vip',
+		);
+	}
+
 	my $config = $self->build_cloud_config({
 		'networks' => \@networks,
 		'vm_types' => [(map {

@@ -16,6 +16,7 @@ use Genesis qw/
 use Genesis::State qw/envset/;
 use Archive::Tar;
 use JSON::PP qw/decode_json encode_json/;
+use IPv4;
 
 sub init {
 	my $class = shift;
@@ -254,6 +255,10 @@ sub process_classic_features {
 		$self->add_files(@vm_type_ops) if @vm_type_ops;
 		my @count_ops = $self->_dynamic_instance_counts();
 		$self->add_files(@count_ops) if @count_ops;
+
+		# VIP network support
+		my @vip_ops = $self->_dynamic_vip_network_support();
+		$self->add_files(@vip_ops) if @vip_ops;
 	}
 
 	# Exodus migration fragments
@@ -452,6 +457,10 @@ sub process_ocfp_features {
 	$self->add_files(@vm_type_ops) if @vm_type_ops;
 	my @count_ops = $self->_dynamic_instance_counts();
 	$self->add_files(@count_ops) if @count_ops;
+
+	# VIP network support
+	my @vip_ops = $self->_dynamic_vip_network_support();
+	$self->add_files(@vip_ops) if @vip_ops;
 
 	if (! $self->env->lookup('params.skip_ssl_validation')) { # Should this always be on in OCFP?
 		$self->add_files("cf-deployment/operations/stop-skipping-tls-validation.yml");
@@ -810,39 +819,50 @@ sub _dynamic_instance_vm_types {
 	return @instance_types_ops;
 }
 
-sub _dynamic_instance_counts {
+sub _instance_count_overrides {
 	my ($self) = @_;
+	# This is a helper method to get the instance counts overrides from the environment parameters.
+	return $self->{_memoized_instance_counts} if exists $self->{_memoized_instance_counts};
+
 	my $params_ref = $self->{params}; # Get environment parameters
-	my @instance_counts_ops = ();
-	my @used_groups_for_counts = (); # To track for duplicates
-
-	my $counts_opsfile_content = "--- # Dynamically created instance counts\n";
-	my $found_counts = 0;
-
 	my $trans_map = _instance_group_translations();
+	my $counts = {};
 	my @warnings = ();
-	foreach my $key (keys %$params_ref) {
-		if ($key =~ /^(.*)_instances$/) {
-			$found_counts = 1;
-			my ($inst_grp_orig, $count) = ($1, $params_ref->{$key});
-			my $inst_grp = $inst_grp_orig;
+	my @used_groups_for_counts = (); # To track for duplicates
+	foreach my $key (grep {/^(.*)_instances$/} keys %$params_ref) {
+		my ($inst_grp_orig, $count) = ($key =~ s/^(.*)_instances$/$1/r, $params_ref->{$key});
+		my $inst_grp = $inst_grp_orig;
 
-			# Handle translations
-			next if ($inst_grp eq 'errand' || $inst_grp eq 'haproxy'); # dealt with elsewhere
+		# Handle translations
+		next if ($inst_grp eq 'errand' || $inst_grp eq 'haproxy'); # dealt with elsewhere
 
-			if (exists $trans_map->{$inst_grp}) {
-				push @warnings, "Translated: params.$inst_grp_orig => params.$trans_map->{$inst_grp}";
-				$inst_grp = $trans_map->{$inst_grp};
-			}
-
-			my $dashed_inst_grp = $inst_grp;
-			$dashed_inst_grp =~ s/_/-/g;
-			push @warnings, "Unknown instance group $dashed_inst_grp (from $inst_grp_orig) - this may be bug in your environment files."
-				unless exists _is_instance_group()->{$dashed_inst_grp};
-
-			$counts_opsfile_content .= $self->_gopatch_replace("/instance_groups/name=$dashed_inst_grp?/instances", $count);
-			push @used_groups_for_counts, $dashed_inst_grp;
+		if (exists $trans_map->{$inst_grp}) {
+			push @warnings, "Translated: params.$inst_grp_orig => params.$trans_map->{$inst_grp}";
+			$inst_grp = $trans_map->{$inst_grp};
 		}
+
+		my $dashed_inst_grp = $inst_grp;
+		$dashed_inst_grp =~ s/_/-/g;
+		push @warnings, "Unknown instance group $dashed_inst_grp (from $inst_grp_orig) - this may be bug in your environment files."
+			unless exists _is_instance_group()->{$dashed_inst_grp};
+
+		$counts->{$dashed_inst_grp} = $count;
+		push @used_groups_for_counts, $dashed_inst_grp;
+	}
+
+	my $errand_instances = $params_ref->{errand_instances} || "";
+	if (defined $errand_instances) { # 0 is a valid value
+		my @unconfigured_errands = grep { !exists $counts->{$_} } qw(smoke-tests rotate-cc-database-key);
+		$counts->{$_} = $errand_instances for @unconfigured_errands;
+	}
+
+	# Check for duplicate instance group counts
+	if (@used_groups_for_counts) {
+		my @uniq_groups = uniq(@used_groups_for_counts);
+		my ($dups) = compare_arrays(\@used_groups_for_counts, \@uniq_groups);
+		bail(
+			"Instance counts specified (or translated as) multiple times: " . join(", ", @$dups)
+		) if scalar(@$dups) > 0;
 	}
 
 	# Handle warning messages
@@ -850,33 +870,159 @@ sub _dynamic_instance_counts {
 		"Found the following warnings while processing instance vm types:\n%s",
 		join("\n", map {"[[  - >>$_\n"} @warnings)
 	) if @warnings;
+	return $self->{_memoized_instance_counts} = $counts;
+}
 
-	my $errand_instances = $params_ref->{errand_instances} || "";
-	if ($errand_instances) {
-		$found_counts = 1;
-		foreach my $errand_name (qw(smoke-tests rotate-cc-database-key)) {
-			if (! in_array($errand_name, @used_groups_for_counts)) {
-				$counts_opsfile_content .= $self->_gopatch_replace("/instance_groups/name=$errand_name/instances", $errand_instances);
-				push @used_groups_for_counts, $errand_name;
-			}
-		}
+
+sub _dynamic_instance_counts {
+	my ($self) = @_;
+	my @instance_counts_ops = ();
+
+	my $counts_opsfile_content = "--- # Dynamically created instance counts\n";
+	my $count_overrides = $self->_instance_count_overrides();
+
+	for my $dashed_inst_grp (keys %$count_overrides) {
+		my $count = $count_overrides->{$dashed_inst_grp};
+		$counts_opsfile_content .= $self->_gopatch_replace("/instance_groups/name=$dashed_inst_grp?/instances", $count);
 	}
 
-	if ($found_counts) {
-		my @uniq_groups = uniq(@used_groups_for_counts);
-		my ($dups) = compare_arrays(\@used_groups_for_counts, \@uniq_groups);
-		bail(
-			"Instance counts specified (or translated as) multiple times: " . join(", ", @$dups)
-		) if scalar(@$dups) > 0;
 
+	if (keys %$count_overrides) {
 		my $counts_opsfile_path = "operations/dynamic/instance_counts.yml";
 		mkfile_or_fail($self->kit->path($counts_opsfile_path), 0644, $counts_opsfile_content);
 		push @instance_counts_ops, $counts_opsfile_path;
 	}
+
 	return @instance_counts_ops;
 }
 
+sub _dynamic_vip_network_support {
+	my ($self) = @_;
+	debug("Processing VIP network support...");
+
+	my $env = $self->env;
+	my $param_vips = $env->lookup('params.vip') || {};
+	my $vault_vips = $env->vault->get("secret/config/" . $env->ocfp_env . "/net/public_ips") || {};
+	my @vip_ops = ();
+
+	my @supported_types = ('router');
+	push @supported_types, 'tcp-router' unless $self->want_feature('no-tcp-routers');
+	push @supported_types, 'scheduler' unless $self->want_feature('ssh-proxy-on-routers');
+
+	# Check for invalid VIP types
+	my $msg = '';
+	my @invalid_param_vips = grep {!in_array($_, @supported_types)} keys %$param_vips;
+	$msg .= sprintf(
+		"Invalid VIP types specified in params.vip: %s\n\n",
+		join(", ", @invalid_param_vips)
+	) if @invalid_param_vips;
+
+	if ($self->want_feature('ocfp')) {
+		my @invalid_vault_vips = grep {!in_array($_, @supported_types)} keys %$vault_vips;
+		$msg .= sprintf(
+			"Invalid VIP types specified in vault: %s\n\n",
+			join(", ", @invalid_vault_vips)
+		) if @invalid_vault_vips;
+	}
+
+	warning(
+		"${msg}Supported VIP targets are: %s\n\nThe invalid VIP types will be ignored.",
+		join(", ", @supported_types)
+	) if $msg;
+
+	foreach my $type (@supported_types) {
+		my $public_ips = undef;
+		my $source = "";
+
+		if ($self->want_feature("ocfp")) {
+			# OCFP mode: check vault first, then allow params override
+			my $vault_path = "secret/config/" . $env->ocfp_env . "/net/public_ips";
+
+			if ($env->vault->has($vault_path, $type)) {
+				debug("Found VIP config for $type in vault");
+				$public_ips = $env->vault->get($vault_path, $type);
+				$source = "$vault_path:$type";
+			}
+		}
+
+		# Check for params override
+		if ($param_vips->{$type}) {
+			debug("%s", $self->want_feature('ocfp') && $public_ips
+				? "OCFP mode: VIP config for $type overridden by params"
+				: "Found VIP config for $type in params"
+			);
+			$public_ips = $param_vips->{$type};
+			$source = "params.vip.$type";
+		}
+
+		if ($public_ips) {
+			# 		Generate the dynamic overlay fragment
+			my $vip_file = $self->_generate_vip_overlay($type, $public_ips, $source);
+			push @vip_ops, $vip_file if $vip_file; # Only add if a file was generated
+
+			debug("Generated VIP support for $type: $vip_file");
+		}
+	}
+	return @vip_ops;
+}
+
+sub _generate_vip_overlay {
+	my ($self, $type, $public_ips, $source) = @_;
+
+	my $instance_count = $self->get_instance_count_for($type);
+	return undef unless $instance_count;
+
+	my $available_ips = IPv4->new($public_ips);
+	if ($available_ips < $instance_count) {
+		bail("Not enough VIPs available for %s (need %d, have %d) from %s -- cannot continue",
+			$type, $instance_count, $available_ips->size, $source
+		);
+	}
+
+	my $dstdir = 'overlay/dynamic';
+	my $vip_file = "$dstdir/vip-for-${type}.yml";
+	my $kit_dynamic_dir = $self->kit->path($dstdir);
+	mkdir_or_fail($kit_dynamic_dir) unless -d $kit_dynamic_dir;
+
+	my $basename = join('.', $self->env->name, $self->env->type); # FIXME: extract from CloudConfig, move to Hooks
+
+	# Generate YAML content for VIP support
+	my $content = <<"YAML";
+---
+instance_groups:
+- name: $type
+  networks:
+  - default: [gateway, dns]
+  - (( append ))
+  - name: $basename-net-vip
+    static_ips:
+YAML
+	$content .= sprintf("    - %s\n", $_) for $available_ips->spans;
+
+	mkfile_or_fail($self->kit->path($vip_file), 0644, $content);
+	return $vip_file;
+}
+
 # }}}
+# get_instance_count_for - Get the instance count for a given instance group
+sub get_instance_count_for {
+	my ($self, $instance_group) = @_;
+
+	# The instance count is determined by the features chosen, but can be
+	# overridden by params.  # Not sure if `ocfp` feature should also be able to
+	# specify instance counts, but it currently does not.
+
+	# We're going to hardcode the default instance counts for each supported VIP
+	# type.  This is a bit of a hack, but it works for now.  We can improve this
+	# later if needed.
+	my %default_instance_counts = (
+		'router'     => 2, # Default instance counts for routers
+		'tcp-router' => 1, # Default instance counts for TCP routers
+		'scheduler'  => 1, # Default instance counts for schedulers
+	);
+	my $instance_count_overrides = $self->_instance_count_overrides();
+	return $instance_count_overrides->{$instance_group}//$default_instance_counts{$instance_group}//0;
+}
 
 # validate_classic_features - Validate and process classic features
 sub validate_classic_features {
