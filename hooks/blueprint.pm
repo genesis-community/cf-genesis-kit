@@ -313,6 +313,11 @@ sub process_ocfp_features {
 		ocfp/ocfp.yml
 	));
 
+	if ($self->env->ocfp_config_lookup('net.topology', 'v2') eq 'v1') {
+		# Wee need to use the greedy ocfp topology for v1
+		$self->add_files('ocfp/v1-network.yml');
+	}
+
 	$self->_add_app_autoscaler_releases();
 
 	# Add OCFP specific operations

@@ -56,6 +56,7 @@ sub perform {
 		@networks = $self->network_definition(
 			'ocf',
 			strategy       => 'ocfp',
+			name_prefix    => $self->env->name . '-',
 			greedy_subnets => {
 				cloud_properties_for_iaas => $network_cloud_properties,
 			}

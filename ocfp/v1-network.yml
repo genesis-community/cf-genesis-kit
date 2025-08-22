@@ -1,0 +1,4 @@
+params:
+  cf_core_network:     (( concat genesis.env "-ocf" ))
+  cf_edge_network:     (( concat genesis.env "-ocf" ))
+  cf_runtime_network:  (( concat genesis.env "-ocf" ))
