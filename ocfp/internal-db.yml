@@ -2,7 +2,6 @@
 # This file is used to configure the internal database for OCF Platform.
 # Use `internal-db` feature to enable it.
 params:
-  cf_db_network:       (( concat meta.ocfp.env.cloud "net-ocf" ))
   database_disk_type:  (( concat meta.ocfp.env.cloud "disk-database" ))
   database_vm_type:    (( concat meta.ocfp.env.cloud "vm-database" ))
 

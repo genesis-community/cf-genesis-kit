@@ -2,7 +2,7 @@
 - type: replace
   path: /instance_groups/name=smb-broker-push/networks
   value:
-    - name:  (( concat meta.ocfp.env.cloud "net-ocf" ))
+    - name:  (( grab params.cf_core_network ))
 
 - type: replace
   path: /instance_groups/name=smb-broker-push/azs

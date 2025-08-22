@@ -8,7 +8,9 @@ params:
 
   cf_core_network:     (( concat meta.ocfp.env.cloud "net-ocf" ))
   cf_edge_network:     (( concat meta.ocfp.env.cloud "net-ocf" ))
+  cf_tcp_edge_network: (( concat meta.ocfp.env.cloud "net-ocf" ))
   cf_runtime_network:  (( concat meta.ocfp.env.cloud "net-ocf" ))
+  cf_db_network:       (( concat meta.ocfp.env.cloud "net-ocf" ))
 
   api_vm_type:         (( concat meta.ocfp.env.cloud "vm-api" ))
   cc_worker_vm_type:   (( concat meta.ocfp.env.cloud "vm-cc-worker" ))

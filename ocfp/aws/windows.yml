@@ -1,12 +1,12 @@
 ---
 - type: replace
   path: /instance_groups/name=windows2019-cell/networks
-  value: 
-    - name:  (( concat genesis.env ".cf.net-ocf" ))
+  value:
+    - name:  (( concat genesis.env "-ocf" ))
 
 - type: replace
   path: /instance_groups/name=windows2019-cell/azs
-  value: 
+  value:
     - (( concat genesis.env "-z1" ))
     - (( concat genesis.env "-z2" ))
     - (( concat genesis.env "-z3" ))
@@ -27,11 +27,11 @@
 
 #- type: replace
 #  path: /instance_groups/name=smoke-tests-windows/networks
-#  value: 
+#  value:
 #    - name:  (( concat genesis.env "-ocf" ))
 #
 #  path: /instance_groups/name=smoke-tests-windows/azs
-#  value: 
+#  value:
 #    - (( concat genesis.env "-z1" ))
 #
 #- type: replace
