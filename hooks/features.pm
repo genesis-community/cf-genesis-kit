@@ -1,4 +1,4 @@
-package Genesis::Hook::Features::CF;
+package Genesis::Hook::Features::CF v3.0.0;
 
 use v5.20;
 use warnings;

@@ -1,4 +1,4 @@
-package Genesis::Hook::CF::Check;
+package Genesis::Hook::Check::CF v3.0.0;
 
 use v5.20;
 use warnings;    # Genesis min perl version is 5.20

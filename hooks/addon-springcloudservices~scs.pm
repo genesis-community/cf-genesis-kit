@@ -1,4 +1,4 @@
-package Genesis::Hook::Addon::CF::SCS;
+package Genesis::Hook::Addon::CF::Springcloudservices v3.0.0;
 
 use v5.20;
 use warnings;    # Genesis min perl version is 5.20

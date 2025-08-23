@@ -1,4 +1,4 @@
-package Genesis::Hook::Addon::CF::Login;
+package Genesis::Hook::Addon::CF::Login v3.0.0;
 
 use v5.20;
 use warnings;
