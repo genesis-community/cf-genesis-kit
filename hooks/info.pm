@@ -2,12 +2,13 @@ package Genesis::Hook::CF::Info;
 
 use v5.20;
 use warnings;    # Genesis min perl version is 5.20
-use Genesis qw/info error bail run/;
 
 # Only needed for development
 BEGIN { push @INC, $ENV{GENESIS_LIB} ? $ENV{GENESIS_LIB} : $ENV{HOME} . './.genesis/lib'; }
 
 use parent qw(Genesis::Hook);
+
+use Genesis qw/info error bail run/;
 use JSON::PP;
 
 sub init {
