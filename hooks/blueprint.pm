@@ -850,7 +850,7 @@ sub _instance_count_overrides {
 		push @used_groups_for_counts, $dashed_inst_grp;
 	}
 
-	my $errand_instances = $params_ref->{errand_instances} || "";
+	my $errand_instances = $params_ref->{errand_instances};
 	if (defined $errand_instances) { # 0 is a valid value
 		my @unconfigured_errands = grep { !exists $counts->{$_} } qw(smoke-tests rotate-cc-database-key);
 		$counts->{$_} = $errand_instances for @unconfigured_errands;
