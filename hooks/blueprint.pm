@@ -903,7 +903,7 @@ sub _dynamic_vip_network_support {
 
 	my $env = $self->env;
 	my $param_vips = $env->lookup('params.vip') || {};
-	my $vault_vips = $env->vault->get("secret/config/" . $env->ocfp_env . "/net/public_ips") || {};
+	my $vault_vips = $env->ocfp_config_lookup("public_ips") || {};
 	my @vip_ops = ();
 
 	my @supported_types = ('router');
@@ -919,6 +919,21 @@ sub _dynamic_vip_network_support {
 	) if @invalid_param_vips;
 
 	if ($self->want_feature('ocfp')) {
+		# Need to remap vault keys to supported types due to historical reasons
+		my %remap = (
+			'cf_router' => 'router',
+			'cf_tcp-router' => 'tcp-router',
+			'cf_scheduler' => 'scheduler',
+		);
+		for my $key (keys %remap) {
+			my $i = 0;
+			my $idx_key;
+			my @ips = ();
+			while (exists $vault_vips->{$idx_key = "${key}_".$i++}) {
+				push @ips, delete($vault_vips->{$idx_key});
+			}
+			$vault_vips->{$remap{$key}} = join(',', @ips) if @ips;
+		}
 		my @invalid_vault_vips = grep {!in_array($_, @supported_types)} keys %$vault_vips;
 		$msg .= sprintf(
 			"Invalid VIP types specified in vault: %s\n\n",
@@ -937,12 +952,12 @@ sub _dynamic_vip_network_support {
 
 		if ($self->want_feature("ocfp")) {
 			# OCFP mode: check vault first, then allow params override
-			my $vault_path = "secret/config/" . $env->ocfp_env . "/net/public_ips";
+			my $vault_path = $env->ocfp_config_base . "public_ips";
 
 			if ($env->vault->has($vault_path, $type)) {
 				debug("Found VIP config for $type in vault");
 				$public_ips = $env->vault->get($vault_path, $type);
-				$source = "$vault_path:$type";
+				$source = $env->vault->exists("$vault_path:$type") ? "$vault_path:$type" : "$vault_path:cf_" . ($type =~ s/-/_/gr) . "_[0..n]";
 			}
 		}
 
