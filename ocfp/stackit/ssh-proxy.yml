@@ -1,0 +1,12 @@
+nstance_groups:
+- name: scheduler
+  vm_extensions:
+  - (( delete "diego-ssh-proxy-network-properties" ))
+
+- name: router
+  jobs:
+  - name: ssh_proxy
+    .: (( inject instance_groups.scheduler.jobs.ssh_proxy ))
+  vm_extensions:
+    - (( append ))
+    - diego-ssh-proxy-network-properties

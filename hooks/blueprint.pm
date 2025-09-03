@@ -329,6 +329,7 @@ sub process_ocfp_features {
 	$self->add_files(
 		"ocfp/${iaas}/ocf.yml",
 		"ocfp/${iaas}/azs.yml",
+		"ocfp/${iaas}/ssh-proxy.yml", # integrated support for ssh-proxy on routers - must come after ocf.yml
 	);
 
 	# Need to add compiled releases here, because external db selection
@@ -907,7 +908,7 @@ sub _dynamic_vip_network_support {
 
 	my @supported_types = ('router');
 	push @supported_types, 'tcp-router' unless $self->want_feature('no-tcp-routers');
-	push @supported_types, 'scheduler' unless $self->want_feature('ssh-proxy-on-routers');
+	push @supported_types, 'scheduler' unless $self->want_feature('ssh-proxy-on-routers') || $self->want_feature('ocfp');
 
 	# Check for invalid VIP types
 	my $msg = '';
