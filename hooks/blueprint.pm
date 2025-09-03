@@ -1108,6 +1108,7 @@ sub validate_classic_features {
 		'haproxy-self-signed' => ['haproxy', 'self-signed'],
 		'haproxy-notls' => ['haproxy'],
 		'minimum-vms' => 'small-footprint',
+		'blacksmith-integration' => ['trust-blacksmith-ca'],
 
 		# Special Case:
 		'azure' => {
@@ -1197,7 +1198,6 @@ sub validate_ocfp_features {
 
 	my %deprecated_features = ( # values: undef - not valid, [] - not needed, [feature,...] - replacement, {params => [xxx]} - moved to params
 		'tls' => $ocfp_included_resolution,
-		'blacksmith-integration' => $ocfp_included_resolution,
 		'app-scheduler-integration' => $ocfp_included_resolution,
 		'app-autoscaler-integration' => $ocfp_included_resolution,
 		'prometheus-integration' => $ocfp_included_resolution,
@@ -1206,8 +1206,12 @@ sub validate_ocfp_features {
 		'ssh-proxy-on-routers' => $ocfp_included_resolution,
 		'cflinuxfs4' => $ocfp_included_resolution,
 
+		'blacksmith-integration' => {
+			msg => "- was never implemented, and Blacksmith CA is now automatically trusted if detected in secrets store",
+			replace => []
+		},
 		'trust-blacksmith-ca' => {
-			msg => "- it will automatically be applied if detected in secrets store",
+			msg => "- it will be automatically applied if detected in secrets store",
 			replace => []
 		},
 		'compiled-releases' => {
