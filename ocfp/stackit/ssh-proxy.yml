@@ -1,4 +1,17 @@
-nstance_groups:
+addons:
+- name: bosh-dns-aliases
+  jobs:
+  - name: bosh-dns-aliases
+    properties:
+      aliases:
+      - (( merge on domain ))
+      - domain: ssh-proxy.service.cf.internal
+        targets:
+        - (( merge on query ))
+        - query: "*"
+          instance_group: router
+
+instance_groups:
 - name: scheduler
   vm_extensions:
   - (( delete "diego-ssh-proxy-network-properties" ))
