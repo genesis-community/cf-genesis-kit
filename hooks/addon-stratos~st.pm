@@ -111,7 +111,7 @@ sub _get_stratos_info {
 
 	# Get Stratos specific configuration
 	# Command line version takes precedence over environment config
-	my $stratos_version = $self->{options}->{version} // $env->lookup( 'stratos.version', '4.8.1' );
+	my $stratos_version = $self->{options}->{version} // $env->lookup( 'stratos.version', '4.9.2' );
 	my $stratos_admin   = $env->lookup( 'stratos.admin_user', 'admin' );
 
 	# Get database connection information
@@ -132,7 +132,7 @@ sub _get_stratos_info {
 
 		# Get Stratos configuration from vault.
 		# FIXME: Should we bail if not set?
-		$stratos_domain    = $env->vault->get( $env->secrets_base . "fqdns:stratos" ) || '';
+		$stratos_domain    = $env->ocfp_config_lookup("fqdns")->{stratos} || '';
 		$stratos_url       = "https://${stratos_domain}";
 		$stratos_db_scheme = $env->vault->get( $env->secrets_base . "stratos/db/stratos:scheme" )
 		  || 'postgres';
@@ -158,14 +158,14 @@ sub _get_stratos_info {
 	my $cf_app_status      = "unknown";
 
 	# Check if CF app is deployed
-	if ( !run( {interactive => 0}, { passfail => 1 }, 'cf', 'app', $cf_app_name ) ) {
+	if ( !run( {interactive => 0, passfail => 1 }, 'cf', 'app', $cf_app_name ) ) {
 		$is_cf_app_deployed = 0;
 	}
 	else {
 		$is_cf_app_deployed = 1;
 
 		# Get the app status
-		my ( $app_info, $app_rc ) = run( {interactive => 0}, { stderr => 0 }, 'cf', 'app', $cf_app_name );
+		my ( $app_info, $app_rc ) = run( {interactive => 0, stderr => 0 }, 'cf', 'app', $cf_app_name );
 		if ( $app_rc == 0 ) {
 
 			# Parse the status from the output
@@ -176,8 +176,8 @@ sub _get_stratos_info {
 	}
 
 	# FIXME: Should we bail or generate instead of "" if not set?
-	my $admin_password = $env->vault->get( $env->secrets_base . "stratos/admin_password" ) || "";
-	my $session_secret = $env->vault->get( $env->secrets_base . "stratos/session_secret" ) || "";
+	my $admin_password = $env->vault->get( $env->secrets_base . "stratos:admin_password" ) || "";
+	my $session_secret = $env->vault->get( $env->secrets_base . "stratos:session_secret" ) || "";
 	my $data           = $self->exodus_data;
 
 	# FIXME: Should we bail if not set?
@@ -186,7 +186,7 @@ sub _get_stratos_info {
 
 	# Build info structure
 	return {
-		name => $env->lookup( 'stratos.deployment_name', $env->name . "-stratos" ),
+		name => scalar $env->lookup( 'stratos.deployment_name', $env->name . "-stratos" ),
 
 		#status => $deployment_exists ? "Deployed via BOSH" :
 		status => $is_cf_app_deployed
@@ -260,7 +260,7 @@ sub display_info {
 		close $fh;
 
 		my ( $json_out, $rc ) =
-		  run( {interactive => 0}, { stderr => 0 }, 'spruce', 'json', "$tmp/info.yml" );
+		  run( {interactive => 0, stderr => 0 }, 'spruce', 'json', "$tmp/info.yml" );
 		bail("Failed to convert to JSON") if $rc != 0;
 		info($json_out);
 		return 1;
@@ -356,7 +356,7 @@ sub deploy_stratos {
 
 	# Check CF CLI is available
 	unless ( $options{'skip-cf-check'} ) {
-		if ( !run( {interactive => 0}, { passfail => 1 }, 'cf', '--version' )
+		if ( !run( {interactive => 0, passfail => 1 }, 'cf', '--version' )
 		) {
 			bail(
 "CF CLI not found. Please install it or use --skip-cf-check if you're sure it's available."
@@ -369,7 +369,7 @@ sub deploy_stratos {
 	  unless $info->{cf_api};
 
 	# Check if we're logged in to CF
-	if ( !run( {interactive => 0}, { passfail => 1 }, 'cf', 'target' ) ) {
+	if ( !run( {interactive => 0, passfail => 1 }, 'cf', 'target' ) ) {
 		warning("Not logged in to CF. Please log in first with 'cf login'");
 		bail("CF authentication required before deployment");
 	}
@@ -422,7 +422,7 @@ sub deploy_stratos {
 	info( "Using Stratos version: %s%s",
 		$stratos_version, $options{version} ? " (from command line)" : "" );
 	my $stratos_releases_url =
-"https://github.com/cloudfoundry/stratos/releases/download/v${stratos_version}/stratos-ui-${stratos_version}.zip";
+"https://github.com/cloudfoundry/stratos/releases/download/v${stratos_version}/stratos-ui-v${stratos_version}.zip";
 	my $stratos_sso_options = $env->lookup( 'stratos.sso_options', 'nosplash, logout' );
 
 	# Domain setup
