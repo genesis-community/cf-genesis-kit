@@ -171,7 +171,7 @@ sub perform {
 	}
 
 	if ($self->want_feature('vip')) { # Maybe add alias for 'public-network'
-	push @networks, $self->network_definition(
+		push @networks, $self->network_definition(
 			'vip',
 			strategy => 'vip',
 		);

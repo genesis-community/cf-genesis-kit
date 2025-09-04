@@ -1019,7 +1019,7 @@ instance_groups:
   networks:
   - default: [gateway, dns]
   - (( append ))
-  - name: $basename-net-vip
+  - name: $basename.net-vip
     static_ips:
 YAML
 	$content .= sprintf("    - %s\n", $_) for $available_ips->spans;
