@@ -1043,8 +1043,8 @@ sub get_instance_count_for {
 	# later if needed.
 	my %default_instance_counts = (
 		'router'     => 2, # Default instance counts for routers
-		'tcp-router' => 1, # Default instance counts for TCP routers
-		'scheduler'  => 1, # Default instance counts for schedulers
+		'tcp-router' => 2, # Default instance counts for TCP routers
+		'scheduler'  => 2, # Default instance counts for schedulers
 	);
 	my $instance_count_overrides = $self->_instance_count_overrides();
 	return $instance_count_overrides->{$instance_group}//$default_instance_counts{$instance_group}//0;
