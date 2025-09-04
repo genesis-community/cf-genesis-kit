@@ -1003,6 +1003,7 @@ sub _generate_vip_overlay {
 			$type, $instance_count, $available_ips->size, $source
 		);
 	}
+	$available_ips = $available_ips->slice($instance_count);
 
 	my $dstdir = 'overlay/dynamic';
 	my $vip_file = "$dstdir/vip-for-${type}.yml";
