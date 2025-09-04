@@ -147,6 +147,7 @@ sub process_classic_features {
 		aws-blobstore-iam gcp-use-access-key blobstore-suffix
 		isolation-segments
 		nfs-ldap nfs-ldap-tls
+		vip
 	};
 
 	my ($remaining_features) = compare_arrays(
@@ -257,8 +258,13 @@ sub process_classic_features {
 		$self->add_files(@count_ops) if @count_ops;
 
 		# VIP network support
-		my @vip_ops = $self->_dynamic_vip_network_support();
-		$self->add_files(@vip_ops) if @vip_ops;
+		if ($self->want_feature('vip')) {
+			my @vip_ops = $self->_dynamic_vip_network_support();
+			bail(
+				"VIP feature requested but no VIPs configured!"
+			) unless @vip_ops;
+			$self->add_files(@vip_ops);
+		}
 	}
 
 	# Exodus migration fragments
@@ -375,7 +381,7 @@ sub process_ocfp_features {
 		'cf-deployment/operations/scale-to-one-az',
 		$blobstore, '+internal-db', 'local-postgres-db',
 		'local-mysql-db', 'mysql-db', 'postgres-db',
-		'nfs-ldap', 'nfs-ldap-tls',
+		'nfs-ldap', 'nfs-ldap-tls', 'vip'
 	);
 
 	my ($remaining_features) = compare_arrays(
@@ -460,8 +466,13 @@ sub process_ocfp_features {
 	$self->add_files(@count_ops) if @count_ops;
 
 	# VIP network support
-	my @vip_ops = $self->_dynamic_vip_network_support();
-	$self->add_files(@vip_ops) if @vip_ops;
+	if ($self->want_feature('vip')) {
+		my @vip_ops = $self->_dynamic_vip_network_support();
+		bail(
+			"VIP feature requested but no VIPs configured!"
+		) unless @vip_ops;
+		$self->add_files(@vip_ops);
+	}
 
 	if (! $self->env->lookup('params.skip_ssl_validation')) { # Should this always be on in OCFP?
 		$self->add_files("cf-deployment/operations/stop-skipping-tls-validation.yml");
@@ -903,7 +914,8 @@ sub _dynamic_vip_network_support {
 
 	my $env = $self->env;
 	my $param_vips = $env->lookup('params.vip') || {};
-	my $vault_vips = $env->ocfp_config_lookup("public_ips") || {};
+	my $vault_vips = $env->ocfp_config_lookup("public-ips") || {};
+	my $vault_path = $env->ocfp_config_base . "public-ips";
 	my @vip_ops = ();
 
 	my @supported_types = ('router');
@@ -922,7 +934,7 @@ sub _dynamic_vip_network_support {
 		# Need to remap vault keys to supported types due to historical reasons
 		my %remap = (
 			'cf_router' => 'router',
-			'cf_tcp-router' => 'tcp-router',
+			'cf_tcp_router' => 'tcp-router',
 			'cf_scheduler' => 'scheduler',
 		);
 		for my $key (keys %remap) {
@@ -951,13 +963,10 @@ sub _dynamic_vip_network_support {
 		my $source = "";
 
 		if ($self->want_feature("ocfp")) {
-			# OCFP mode: check vault first, then allow params override
-			my $vault_path = $env->ocfp_config_base . "public_ips";
-
-			if ($env->vault->has($vault_path, $type)) {
+			if (exists $vault_vips->{$type}) {
 				debug("Found VIP config for $type in vault");
-				$public_ips = $env->vault->get($vault_path, $type);
-				$source = $env->vault->exists("$vault_path:$type") ? "$vault_path:$type" : "$vault_path:cf_" . ($type =~ s/-/_/gr) . "_[0..n]";
+				$public_ips = $vault_vips->{$type};
+				$source = $env->vault->has("$vault_path:$type") ? "$vault_path:$type" : "$vault_path:cf_" . ($type =~ s/-/_/gr) . "_[0..n]";
 			}
 		}
 
@@ -1066,6 +1075,7 @@ sub validate_classic_features {
 		'scs-integration',
 		'uaa-admin-client',
 		'windows-diego-cells',
+		'vip',
 
 		'nfs-volume-services', 'nfs-ldap', 'nfs-ldap-tls',
 		'smb-volume-services',
@@ -1179,8 +1189,9 @@ sub validate_ocfp_features {
 		'cflinuxfs3',
 		'isolation-segments',
 		'no-tcp-routers',
-        'stratos-integration',
+		'stratos-integration',
 		'windows-diego-cells',
+		'vip',
 
 		'nfs-volume-services', 'nfs-ldap', 'nfs-ldap-tls',
 		'smb-volume-services',
