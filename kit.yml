@@ -1,6 +1,6 @@
 ---
 name:    cf
-version: 3.0.1
+version: 3.0.2
 authors: [ Dennis Bell <dennis@rubidiumstudios.com> ]
 docs:    https://github.com/genesis-community/cf-genesis-kit
 code:    https://github.com/genesis-community/cf-genesis-kit
