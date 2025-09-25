@@ -2,17 +2,17 @@
 instance_groups:
 - name: router
   vm_extensions:
-  - ((replace))
+  - (( replace ))
   - cf-system-apps-lb
 
 - name: scheduler
   vm_extensions:
-  - ((replace))
+  - (( replace ))
   - cf-ssh-lb
 
 - name: tcp-router
   vm_extensions:
-  - ((replace))
+  - (( replace ))
   - (( grab params.tcp_lb_vm_ext || "cf-tcp-lb" ))
 
 ---
