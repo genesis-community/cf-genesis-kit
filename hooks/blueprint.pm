@@ -43,6 +43,17 @@ sub perform {
 	$self->{raw_features} = [$self->features]; # Get raw features from env
 	$self->{params} = $self->env->params->{params} // {}; # Get environment parameters
 
+	# Override instance counts if small-footprint is requested
+	if ($self->want_feature('small-footprint')) {
+		for my $instance_group (keys $self->_is_instance_group->%*) {
+			# These default to a single instance.
+			next if in_array($instance_group, qw{errand smoke-tests database singleton-blobstore rotate-cc-database-key});
+			# Don't add windows diego cells if not requested
+			next if $instance_group eq 'windows2019-cell' && !$self->want_feature('windows-diego-cells');
+			$self->{params}{"${instance_group}_instances"} //= 1;
+		}
+	}
+
 	# Custom CF Versions
 	$self->handle_custom_cf_versions();
 
@@ -898,7 +909,6 @@ sub _dynamic_instance_counts {
 		$counts_opsfile_content .= $self->_gopatch_replace("/instance_groups/name=$dashed_inst_grp?/instances", $count);
 	}
 
-
 	if (keys %$count_overrides) {
 		my $counts_opsfile_path = "operations/dynamic/instance_counts.yml";
 		mkfile_or_fail($self->kit->path($counts_opsfile_path), 0644, $counts_opsfile_content);
@@ -1038,13 +1048,11 @@ sub get_instance_count_for {
 	# overridden by params.  # Not sure if `ocfp` feature should also be able to
 	# specify instance counts, but it currently does not.
 
-	# We're going to hardcode the default instance counts for each supported VIP
-	# type.  This is a bit of a hack, but it works for now.  We can improve this
-	# later if needed.
+	my $is_small_footprint = $self->want_feature('small-footprint');
 	my %default_instance_counts = (
-		'router'     => 2, # Default instance counts for routers
-		'tcp-router' => 2, # Default instance counts for TCP routers
-		'scheduler'  => 2, # Default instance counts for schedulers
+		'router'     => $is_small_footprint ? 1 :2,
+		'tcp-router' => $is_small_footprint ? 1 :2,
+		'scheduler'  => $is_small_footprint ? 1 :2,
 	);
 	my $instance_count_overrides = $self->_instance_count_overrides();
 	return $instance_count_overrides->{$instance_group}//$default_instance_counts{$instance_group}//0;
