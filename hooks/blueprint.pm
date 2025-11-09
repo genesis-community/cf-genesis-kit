@@ -328,7 +328,6 @@ sub process_ocfp_features {
 		overlay/addons/scs.yml
 		overlay/addons/prometheus.yml
 		overlay/addons/uaa-admin-client.yml
-		overlay/addons/stratos.yml
 		overlay/blobstore/meta.yml
 		overlay/enable-service-discovery.yml
 		ocfp/meta.yml
@@ -405,6 +404,7 @@ sub process_ocfp_features {
 		# Integrations - others are automatically included above
 		if ($feature eq 'stratos-integration') {
 			$self->add_files(
+				'overlay/addons/stratos.yml',
 				'ocfp/stratos.yml'
 			);
 
