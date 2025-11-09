@@ -24,3 +24,8 @@ supports:
 - openstack
 - stackit
 
+credentials:
+  stratos-integration:
+    stratos:
+      session_store: random 64 allowed-chars 0-9a-f fixed
+

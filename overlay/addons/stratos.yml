@@ -1,6 +1,6 @@
 ---
 meta:
-  stratos_domain: (( concat "console." params.apps_domain )) 
+  stratos_domain: (( concat "console." params.apps_domain ))
 
 instance_groups:
 - name: uaa
@@ -17,16 +17,16 @@ instance_groups:
             authorities: uaa.none
             override: true
             refresh-token-validity: 2592000
-            scopes:  
-            - network.admin 
-            - network.write 
+            scopes:
+            - network.admin
+            - network.write
             - cloud_controller.read
             - cloud_controller.write
-            - openid,password.write 
-            - cloud_controller.admin 
-            - scim.read,scim.write 
+            - openid,password.write
+            - cloud_controller.admin
+            - scim.read,scim.write
             - doppler.firehose
-            - uaa.user 
+            - uaa.user
             - routing.router_groups.read
             - routing.router_groups.write
             - cloud_controller.admin_read_only
