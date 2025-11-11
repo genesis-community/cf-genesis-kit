@@ -20,6 +20,3 @@ instance_groups:
   jobs:
   - name: ssh_proxy
     .: (( inject instance_groups.scheduler.jobs.ssh_proxy ))
-  vm_extensions:
-    - (( append ))
-    - cf-ssh-lb

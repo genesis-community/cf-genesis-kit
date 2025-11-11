@@ -232,17 +232,17 @@ sub perform {
 		} ( sort keys %$vm_matrix )),
 		],
 		'vm_extensions' => [
-			$self->vm_extension_definition('cf-ssh-lb' => {
-				aws => {
-					'lb_target_groups' => ['ocfp-ocf-cf-ssh-lb-tg'],
-				},
-			}),
+#			$self->vm_extension_definition('cf-ssh-lb' => {
+#				aws => {
+#					'lb_target_groups' => ['ocfp-ocf-cf-ssh-lb-tg'],
+#				},
+#			}),
 			$self->vm_extension_definition('cf-system-apps-lb' => {
-				aws => {
-					'lb_target_groups' => ['ocfp-ocf-cf-system-apps-lb-tg'],
-				},
-			}),
-			$self->vm_extension_definition('cf-tcp-lb' => {
+				aws =>, {
+					'lb_target_groups' => ['ocfp-ocf-cf-system-apps-lb-tg','ocfp-ocf-cf-ssh-lb-tg'],
+				,},
+			},),
+			$self->vm_extension_definition('cf-tcp-lb' =>, {
 				aws => {
 					'lb_target_groups' => ['ocfp-ocf-cf-tcp-lb-tg'],
 				},
