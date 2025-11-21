@@ -71,7 +71,7 @@ sub perform {
 	# 3) Find the right download URL for our OS/ARCH, using jq
 	info("Resolving download URL for $os/$arch ...");
 	my $api       = 'https://api.github.com/repos/cloudfoundry-community/cf-targets-plugin/releases/latest';
-	my $asset     = "cf-targets-plugin-$os-$arch";
+	my $asset     = "cf-targets-plugin-$os.$arch";
 	my $jq_filter = qq{.assets[] | select(.name=="$asset") | .browser_download_url};
 
 	my ($download_url) = run(
