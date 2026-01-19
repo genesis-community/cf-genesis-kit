@@ -13,10 +13,29 @@ use Genesis::Hook::CloudConfig::Helpers qw/gigabytes megabytes/;
 use JSON::PP;
 
 sub init {
-	my $class = shift;
-	my $obj   = $class->SUPER::init(@_);
-	$obj->check_minimum_genesis_version('3.1.0');
-	return $obj;
+    my $class = shift;
+    my %opts = @_;
+    
+    my $env = $opts{env};
+    
+    # Use dash separator by default for OCFP (DNS-friendly)
+    # Legacy deployments can set params.cloud_config_separator: '.'
+    if ($env->is_ocfp) {
+        my $sep = $env->lookup('params.cloud_config_separator', '-');
+        $opts{basename} //= join($sep, $env->name, $env->type);
+        $opts{_separator} = $sep;  # Store for name_for override
+    }
+    
+    my $obj = $class->SUPER::init(%opts);
+    $obj->check_minimum_genesis_version('3.1.0');
+    return $obj;
+}
+
+# Override name_for to use consistent separator for OCFP
+sub name_for {
+    my $self = shift;
+    my $sep = $self->{_separator} // '.';  # Fall back to default for non-OCFP
+    return join $sep, $self->{basename}, join('-', @_);
 }
 
 sub perform {

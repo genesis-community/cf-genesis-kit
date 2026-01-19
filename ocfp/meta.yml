@@ -2,7 +2,7 @@
 meta:
   ocfp:
     env:
-      cloud: (( concat genesis.env "." genesis.type "." ))
+      cloud: (( concat genesis.env "-" genesis.type "-" ))
 
     vault:
       config:        (( grab genesis.ocfp_config_base ))
