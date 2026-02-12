@@ -1,4 +1,4 @@
-package Genesis::Hook::PostDeploy::CF v3.0.2;
+package Genesis::Hook::PostDeploy::CF v3.1.0;
 
 use v5.20;
 use warnings;
