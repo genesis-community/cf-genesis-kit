@@ -1,0 +1,75 @@
+---
+meta:
+  ocfp:
+    # CF deploys onto env-BOSH, whose cloud-config AZ is named after the
+    # *deploying* director's env (e.g. ocfp-lab-wayne-ocf-z1), not this CF
+    # env. Default to genesis.env for self-deployed cases; override via
+    # params.cf_az when bosh_env differs (cross-deploy onto env-BOSH).
+    azs:
+      - (( grab params.cf_az || params.default_cf_az ))
+  azs: (( grab meta.ocfp.azs ))  # haproxy overlay reads meta.azs (not meta.ocfp.azs)
+params:
+  default_cf_az: (( concat genesis.env "-z1" ))
+---
+# Single PVE node — all instance groups run in one AZ alias.
+# The AZ name matches the BOSH cloud-config AZ defined by the
+# ocfp-pve BOSH director (e.g. ocfp-pve-wayne-z1).
+- type: replace
+  path: /instance_groups/name=nats/azs
+  value: (( grab meta.ocfp.azs ))
+- type: replace
+  path: /instance_groups/name=diego-api/azs
+  value: (( grab meta.ocfp.azs ))
+- type: replace
+  path: /instance_groups/name=uaa/azs
+  value: (( grab meta.ocfp.azs ))
+- type: replace
+  path: /instance_groups/name=scheduler/azs
+  value: (( grab meta.ocfp.azs ))
+- type: replace
+  path: /instance_groups/name=diego-cell/azs
+  value: (( grab meta.ocfp.azs ))
+- type: replace
+  path: /instance_groups/name=router/azs
+  value: (( grab meta.ocfp.azs ))
+- type: replace
+  path: /instance_groups/name=api/azs
+  value: (( grab meta.ocfp.azs ))
+- type: replace
+  path: /instance_groups/name=cc-worker/azs
+  value: (( grab meta.ocfp.azs ))
+- type: replace
+  path: /instance_groups/name=doppler/azs
+  value: (( grab meta.ocfp.azs ))
+- type: replace
+  path: /instance_groups/name=log-api/azs
+  value: (( grab meta.ocfp.azs ))
+- type: replace
+  path: /instance_groups/name=log-cache/azs
+  value: (( grab meta.ocfp.azs ))
+- type: replace
+  path: /instance_groups/name=tcp-router/azs
+  value: (( grab meta.ocfp.azs ))
+- type: replace
+  path: /instance_groups/name=credhub/azs
+  value: (( grab meta.ocfp.azs ))
+- type: replace
+  path: /instance_groups/name=rotate-cc-database-key?/azs
+  value: (( grab meta.ocfp.azs ))
+- type: replace
+  path: /instance_groups/name=smoke-tests/azs
+  value: (( grab meta.ocfp.azs ))
+# Internal-feature instance groups: on PVE the internal DB (database) and
+# internal blobstore (singleton-blobstore) are always deployed, and haproxy is
+# present with the haproxy feature. cf-deployment assigns them z1/z2, which do
+# not exist on the single-AZ PVE network. Optional (?) so the op is skipped when
+# a given IG is absent (e.g. haproxy feature off).
+- type: replace
+  path: /instance_groups/name=database?/azs
+  value: (( grab meta.ocfp.azs ))
+- type: replace
+  path: /instance_groups/name=singleton-blobstore?/azs
+  value: (( grab meta.ocfp.azs ))
+- type: replace
+  path: /instance_groups/name=haproxy?/azs
+  value: (( grab meta.ocfp.azs ))

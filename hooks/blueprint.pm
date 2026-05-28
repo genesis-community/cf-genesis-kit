@@ -356,6 +356,39 @@ sub process_ocfp_features {
 		);
 	}
 
+	# PVE bloc invariant: ubuntu-noble only (the OCFP PVE CPI is built and
+	# tested against noble; jammy is unsupported). The base overlay defaults
+	# the stemcell to jammy, so force noble for PVE regardless of which
+	# cf-deployment version is in play.
+	if ($iaas eq 'pve') {
+		$self->add_files("ocfp/pve/stemcell.yml");
+
+		if (-f $self->kit->path("cf-deployment/operations/use-noble-stemcell.yml")) {
+			# Pre-noble-default cf-deployment (e.g. 52.0.0): jammy is the default
+			# and use-compiled-releases.yml is jammy-compiled, so it cannot pair
+			# with the noble stemcell PVE requires. Swap to noble via the upstream
+			# ops file and compile from source.
+			if (!$self->want_feature('source-releases')) {
+				$self->kit_bug(
+					"On PVE this cf-deployment defaults to jammy; its jammy-compiled\n"
+				  . "use-compiled-releases.yml is incompatible with the required\n"
+				  . "noble stemcell. Add the 'source-releases' feature, or select a\n"
+				  . "cf-deployment that defaults to noble (e.g. the\n"
+				  . "'cf-deployment-version-56.5.0' feature) whose compiled releases\n"
+				  . "are noble-built and work with 'compiled-releases'."
+				);
+			}
+			$self->add_files(
+				"cf-deployment/operations/use-noble-stemcell.yml",
+			);
+		}
+		# else: cf-deployment defaults to noble (upstream removed
+		# use-noble-stemcell.yml once noble became the default). Its compiled
+		# releases are noble-compiled and bundle a cgroup-v2-clean bpm, so no
+		# stemcell swap or source compile is needed -- 'compiled-releases' works
+		# as-is on PVE.
+	}
+
 	# Blobstores
 	if ($blobstore eq '+internal-blobstore') {
 		$self->add_files('ocfp/internal-blobstore.yml');
@@ -386,7 +419,7 @@ sub process_ocfp_features {
 
 	# Process the remaining requested features in order
 	my @handled_features = (
-		'ocfp',' self-signed', 'small-footprint',
+		'ocfp', 'self-signed', 'small-footprint',
 		'source-releases', 'isolation-segments',
 		'cf-deployment/operations/scale-to-one-az',
 		$blobstore, '+internal-db', 'local-postgres-db',
@@ -1098,7 +1131,7 @@ sub validate_classic_features {
 
 		# Blobstores:
 		'aws-blobstore',   'azure-blobstore',   'gcp-blobstore',
-		'minio-blobstore', 'stackit-blobstore',
+		'minio-blobstore', 'stackit-blobstore', 'pve-blobstore',
 
 		# Blobstore support:
 		'blobstore-suffix',
@@ -1206,7 +1239,7 @@ sub validate_ocfp_features {
 		'smb-volume-services',
 
 		# Blobstores:
-		'+internal-blobstore',
+		'+internal-blobstore', 'pve-blobstore',
 
 		# Blobstore support:
 		'blobstore-suffix',
@@ -1279,7 +1312,13 @@ sub validate_ocfp_features {
 		# Add the iaas-specific blobstore feature
 		my $type = $self->iaas;
 		$type = "minio" if $type eq "vsphere"; # vsphere uses minio blobstore
-		if (-f $self->kit->path("overlay/blobstore/${type}.yml")) {
+		# PVE has no native object store. Default behaviour falls back to the
+		# BOSH internal blobstore (WebDAV); operators with an S3-compatible
+		# endpoint (RustFS, MinIO, etc.) provisioned alongside the bloc opt
+		# in by adding `pve-blobstore` to features.
+		if ($type eq "pve" && !$self->want_feature("pve-blobstore")) {
+			$self->set_features($self->features, "+internal-blobstore");
+		} elsif (-f $self->kit->path("overlay/blobstore/${type}.yml")) {
 			$self->set_features($self->features, "${type}-blobstore");
 		} else {
 			bail("OCFP blobstores are not supported on #c{$type} IaaS.");
@@ -1287,10 +1326,16 @@ sub validate_ocfp_features {
 	}
 	# Handle OCFP database selection
 	if (!$self->want_feature('+internal-db')) {
-		# Add the iaas-specific database feature
-		$self->set_features(
-			$self->features, 'postgres-db' # FIXME: Postgres is currently the only supported database for OCFP
-		);
+		my $type = $self->iaas;
+		# PVE has no managed DB service — fall back to BOSH internal db
+		if ($type eq "pve") {
+			$self->set_features($self->features, "+internal-db");
+		} else {
+			# Add the iaas-specific database feature
+			$self->set_features(
+				$self->features, 'postgres-db' # FIXME: Postgres is currently the only supported database for OCFP
+			);
+		}
 	}
 }
 
@@ -1302,6 +1347,7 @@ sub requested_blobstore {
 	my @valid_blobstores = qw(
 		+internal-blobstore  aws-blobstore  azure-blobstore
 		stackit-blobstore    gcp-blobstore  minio-blobstore
+		pve-blobstore
 	);
 
 	my @requested_blobstores = grep {in_array($_, @valid_blobstores)} $self->features;

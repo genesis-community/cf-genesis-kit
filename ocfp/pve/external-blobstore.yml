@@ -1,0 +1,50 @@
+---
+# PVE/RustFS external blobstore — OCFP overlay.
+#
+# Loaded after ocfp/external-blobstore.yml and overlay/blobstore/pve.yml.
+# Overrides the upstream params with values from the bloc's vault tree
+# populated by `ocfp bootstrap artifacts`:
+#
+#   secret/config/<bloc>/ocf/cf/blobstores/main
+#     :bucket      bucket-name prefix (e.g. <bloc>-ocf-cf)
+#     :endpoint    RustFS URL (e.g. https://<host>:9000)
+#     :region      S3 region label
+#     :ca_cert     optional PEM
+#
+#   secret/config/<bloc>/ocf/cf/blobstores/main/creds
+#     :access_key
+#     :secret_key
+#
+# meta.ocfp.vault.config resolves to `secret/config/<bloc>/ocf`.
+
+params:
+  blobstore_s3_region:              (( vault meta.ocfp.vault.config "/cf/blobstores/main:region" ))
+  blobstore_s3_access_key:          (( vault meta.ocfp.vault.config "/cf/blobstores/main/creds:access_key" ))
+  blobstore_s3_secret_key:          (( vault meta.ocfp.vault.config "/cf/blobstores/main/creds:secret_key" ))
+  blobstore_s3_endpoint:            (( vault meta.ocfp.vault.config "/cf/blobstores/main:endpoint" ))
+  blobstore_s3_path_style:          true
+
+  # Bucket-prefix is sourced from vault (`<bloc>-ocf-cf`). The four CF
+  # directory keys derive their bucket names by suffixing this prefix. These
+  # names must match the buckets created by `ocfp bootstrap artifacts`
+  # (artifactsBucketList in internal/bootstrap/artifacts.go).
+  blobstore_bucket_prefix:          (( vault meta.ocfp.vault.config "/cf/blobstores/main:bucket" ))
+  blobstore_app_packages_directory: (( concat params.blobstore_bucket_prefix "-packages" ))
+  blobstore_buildpacks_directory:   (( concat params.blobstore_bucket_prefix "-buildpacks" ))
+  blobstore_droplets_directory:     (( concat params.blobstore_bucket_prefix "-droplets" ))
+  blobstore_resources_directory:    (( concat params.blobstore_bucket_prefix "-resource-pool" ))
+
+bosh-variables:
+  # Override the credhub-style vars referenced by overlay/blobstore/pve.yml
+  # with the vault-sourced creds.
+  blobstore_s3_access_key_id:     (( grab params.blobstore_s3_access_key ))
+  blobstore_s3_secret_access_key: (( grab params.blobstore_s3_secret_key ))
+
+  fog_connection:
+    provider:              AWS
+    aws_access_key_id:     (( grab params.blobstore_s3_access_key ))
+    aws_secret_access_key: (( grab params.blobstore_s3_secret_key ))
+    aws_signature_version: 4
+    region:                (( grab params.blobstore_s3_region ))
+    endpoint:              (( grab params.blobstore_s3_endpoint ))
+    path_style:            (( grab params.blobstore_s3_path_style ))

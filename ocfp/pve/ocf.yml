@@ -1,0 +1,7 @@
+---
+# PVE cloud config uses larger ephemeral disks via vm_type definitions;
+# vm_extensions are not used, so strip them to avoid manifest errors.
+- type: remove
+  path: /instance_groups/name=diego-cell/vm_extensions
+- type: remove
+  path: /instance_groups/name=api/vm_extensions

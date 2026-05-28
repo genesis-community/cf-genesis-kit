@@ -1,0 +1,32 @@
+---
+# PVE external blobstore overlay — wires CF to an S3-compatible endpoint
+# (RustFS, MinIO, or any other) provisioned outside CF on the same bloc.
+#
+# This file declares the fog_connection skeleton. The actual endpoint URL,
+# region, and creds are sourced by the OCFP-layer overlay at
+# ocfp/pve/external-blobstore.yml from the bloc's vault tree.
+#
+# Bucket names are derived in ocfp/pve/external-blobstore.yml from the
+# `cf/blobstores/main:bucket` prefix populated by `ocfp bootstrap artifacts`.
+
+params:
+  blobstore_s3_endpoint:   (( param "blobstore_s3_endpoint must come from ocfp/pve/external-blobstore.yml — populate secret/config/<bloc>/ocf/cf/blobstores/main:endpoint" ))
+  blobstore_s3_region:     (( param "blobstore_s3_region must come from ocfp/pve/external-blobstore.yml — populate secret/config/<bloc>/ocf/cf/blobstores/main:region" ))
+  blobstore_s3_path_style: true
+
+bosh-variables:
+  fog_connection:
+    provider:              AWS
+    aws_access_key_id:     ((blobstore_s3_access_key_id))
+    aws_secret_access_key: ((blobstore_s3_secret_access_key))
+    aws_signature_version: 4
+    region:                (( grab params.blobstore_s3_region ))
+    endpoint:              (( grab params.blobstore_s3_endpoint ))
+    path_style:            (( grab params.blobstore_s3_path_style ))
+
+# Credhub-style vars consumed by `fog_connection` above; the OCFP overlay
+# populates them from vault via `blobstore_s3_access_key`/`blobstore_s3_secret_key`.
+#
+# Credhub secrets (when not using OCFP vault flow):
+#   blobstore_s3_access_key_id
+#   blobstore_s3_secret_access_key

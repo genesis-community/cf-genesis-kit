@@ -26,12 +26,19 @@ sub perform {
 	# Determine the current IaaS
 	my $vm_matrix = $self->get_matrix_for_iaas();
 
+	# PVE always uses BOSH-internal db + blobstore (derived in blueprint.pm);
+	# those derived features don't propagate to this hook's feature list, so
+	# keep their vm types for pve regardless of the wanted-feature check.
+	my $pve = $self->iaas eq 'pve';
+
 	delete( $vm_matrix->{database} )
-		unless $self->wants_feature('+internal-db')
+		unless $pve
+		or $self->wants_feature('+internal-db')
 		or $self->wants_feature('internal-db');
 
 	delete( $vm_matrix->{blobstore} )
-		unless $self->wants_feature('+internal-blobstore')
+		unless $pve
+		or $self->wants_feature('+internal-blobstore')
 		or $self->wants_feature('internal-blobstore');
 
 	my @networks                 = ();
@@ -47,6 +54,9 @@ sub perform {
 		aws => {
 			'subnet' => $self->subnet_reference('id'),
 			'security_groups' => $self->get_network_security_groups(),
+		},
+		pve => {
+			'bridge' => scalar($self->env->lookup('bosh-configs.cpi.pve_network_bridge', 'lvnet001')),
 		},
 	};
 
@@ -227,6 +237,27 @@ sub perform {
 							'http_tokens' => 'required'
 						},
 					},
+					pve => {
+						'cpu'            => $self->for_scale(
+							{
+								dev  => $vm_matrix->{$_}{cpu_dev},
+								prod => $vm_matrix->{$_}{cpu_prod}
+							}, 1
+						),
+						'ram'            => $self->for_scale(
+							{
+								dev  => $vm_matrix->{$_}{ram_dev},
+								prod => $vm_matrix->{$_}{ram_prod}
+							}, 1024
+						),
+						'disk'           => $self->for_scale(
+							{
+								dev  => $vm_matrix->{$_}{disk_dev},
+								prod => $vm_matrix->{$_}{disk_prod}
+							}, 8192
+						),
+						'network_bridge' => scalar($self->env->lookup('bosh-configs.cpi.pve_network_bridge', 'lvnet001')),
+					},
 				}
 			),
 		} ( sort keys %$vm_matrix )),
@@ -252,25 +283,32 @@ sub perform {
 					'elbs'             => ['ocfp-ocf-cf-tcp-lb'],
 				},
 			}),
+			# PVE has no IaaS LB/security-group layer; emit these as empty
+			# extensions so instance groups referencing them still validate.
 			$self->vm_extension_definition('cf-router-network-properties' => {
 				stackit => {
 					'security_groups' => [$self->env->name.'-cf-router-ingress'],
 				},
+				pve => {},
 			}),
 			$self->vm_extension_definition('cf-tcp-router-network-properties' => {
 				stackit => {
 					'security_groups' => [$self->env->name.'-cf-tcp-router-ingress'],
 				},
-
+				pve => {},
 			}),
 			$self->vm_extension_definition('diego-ssh-proxy-network-properties' => {
 				stackit => {
 					'security_groups' => [$self->env->name.'-cf-ssh-ingress'],
 				},
+				pve => {},
 			}),
 		],
 		'disk_types' => [
-			$self->want_feature('+internal-db') ?
+			# PVE always uses BOSH-internal db + blobstore (derived in
+			# blueprint.pm); those derived features don't propagate to this
+			# hook's feature list, so emit their disk types for pve directly.
+			($self->want_feature('+internal-db') || $self->iaas eq 'pve') ?
 			$self->disk_type_definition(
 				'database',
 				common => {
@@ -287,9 +325,13 @@ sub perform {
 						'type'      => 'gp3',
 						'encrypted' => $self->TRUE
 					},
+					pve => {
+						'storage'     => scalar($self->env->lookup('bosh-configs.cpi.pve_disk_storage', 'zfs-1')),
+						'disk_format' => 'raw',
+					},
 				},
 			) : (),
-			$self->want_feature('+internal-blobstore') ?
+			($self->want_feature('+internal-blobstore') || $self->iaas eq 'pve') ?
 			$self->disk_type_definition(
 				'blobstore',
 				common => {
@@ -311,6 +353,10 @@ sub perform {
 					aws => {
 						'type'      => 'gp3',
 						'encrypted' => $self->TRUE
+					},
+					pve => {
+						'storage'     => scalar($self->env->lookup('bosh-configs.cpi.pve_disk_storage', 'zfs-1')),
+						'disk_format' => 'raw',
 					},
 				},
 			): (),
@@ -355,6 +401,39 @@ sub _get_stackit_vm_matrix {
 			[qw[  uaa            c2i.2     c1a.2d              30  ]],    #  a2cpu_4ram_d
 			[qw[  database       c2i.4     g1a.8d              60  ]],    #  database
 			[qw[  blobstore      c2i.1     c1a.1d              60  ]],    #  a1cpu_2ram_d
+		)
+	}
+}
+
+sub _get_pve_vm_matrix {
+	# PVE single-node lab sizing. Values are integers consumed by the pve
+	# branch of vm_type cloud_properties (cpu, ram[MiB], disk[MiB]).
+	# Dev row tuned for sm-0 (~32 GiB RAM / 32 vCPU host); prod row
+	# scaled for a larger node — adjust when multi-node PVE arrives.
+	my ($self) = @_;
+	return {
+		map { ( $_->[0], {
+			cpu_dev  => int($_->[1]), ram_dev  => int($_->[2]), disk_dev  => int($_->[3]),
+			cpu_prod => int($_->[4]), ram_prod => int($_->[5]), disk_prod => int($_->[6]),
+		} ) } (
+			#     Name         cpu_dev  ram_dev  disk_dev   cpu_prod  ram_prod  disk_prod
+			[qw[  api            1       2048    16384       4         8192     32768  ]],
+			[qw[  cc-worker      1       1024     8192       2         4096     16384  ]],
+			[qw[  credhub        1       2048    16384       2         4096     32768  ]],
+			[qw[  diego-api      1       1024     8192       4         8192     16384  ]],
+			[qw[  diego-cell     2       4096    32768       8        16384    102400  ]],
+			[qw[  doppler        1       1024     8192       2         4096     16384  ]],
+			[qw[  errand         1       1024     8192       1         2048      8192  ]],
+			[qw[  log-api        1       1024     8192       2         4096     16384  ]],
+			[qw[  log-cache      1       2048     8192       4         8192     16384  ]],
+			[qw[  nats           1       1024     8192       2         2048      8192  ]],
+			[qw[  router         1       1024     8192       2         4096     16384  ]],
+			[qw[  scheduler      1       1024     8192       2         4096     16384  ]],
+			[qw[  tcp-router     1       1024     8192       2         4096     16384  ]],
+			[qw[  uaa            1       2048    16384       2         4096     32768  ]],
+			[qw[  database       1       2048    16384       4         8192     65536  ]],
+			[qw[  blobstore      1       1024    16384       2         4096     65536  ]],
+			[qw[  haproxy        1       1024     8192       2         2048      8192  ]],
 		)
 	}
 }
