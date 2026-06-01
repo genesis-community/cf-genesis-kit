@@ -8,3 +8,4 @@
 # aligns the VM stemcell with the noble-compiled releases.
 params:
   stemcell_os: ubuntu-noble
+  stemcell_version: "1.383"

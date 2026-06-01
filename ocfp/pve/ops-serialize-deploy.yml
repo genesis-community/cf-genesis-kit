@@ -1,0 +1,13 @@
+---
+# Set the deployment-level update policy to serial so instance groups run one
+# at a time. This is the baseline for PVE deploys: it prevents concurrent VM
+# creates from racing on PVE storage locks.
+#
+# ops-deserialize-igs.yml then lifts the serial barrier selectively on the
+# stateless route tier (router, tcp-router, diego-cell) so those groups roll
+# in parallel while stateful singletons (database, singleton-blobstore) still
+# update one at a time.
+
+- type: replace
+  path: /update/serial
+  value: true

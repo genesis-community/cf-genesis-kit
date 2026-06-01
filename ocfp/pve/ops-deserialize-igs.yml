@@ -1,0 +1,34 @@
+---
+# Per-instance-group de-serialization for the stateless route tier.
+#
+# ops-serialize-deploy.yml sets /update/serial: true at deployment level so
+# instance groups run sequentially by default — correct for stateful singletons
+# (database, singleton-blobstore). This file lifts that barrier on groups where
+# parallel rolling is safe, cutting total deploy wall-clock substantially.
+#
+# router, tcp-router — stateless route tier; parallelizing is safe and lets
+#                      haproxy resolve bosh-dns names sooner (works in concert
+#                      with no-canaries.yml).
+#
+# diego-cell — carries no per-group update block in cf-deployment, so it
+#              inherits the deployment serial default. Pin explicit policy so
+#              both cells update in the same wave. max_in_flight: 2 covers the
+#              full group; serial: false guards against future deployment-level
+#              changes inadvertently serializing it again.
+#
+# MUST be layered last (after ops-serialize-deploy.yml and no-canaries.yml) so
+# these per-IG overrides win over the deployment-level settings.
+
+- type: replace
+  path: /instance_groups/name=router/update?/serial
+  value: false
+
+- type: replace
+  path: /instance_groups/name=tcp-router/update?/serial
+  value: false
+
+- type: replace
+  path: /instance_groups/name=diego-cell/update?
+  value:
+    serial: false
+    max_in_flight: 2

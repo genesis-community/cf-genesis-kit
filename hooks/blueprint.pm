@@ -350,7 +350,13 @@ sub process_ocfp_features {
 
 	# Need to add compiled releases here, because external db selection
 	# deletes a path for pxc and upstream will fail to find it.
-	if (!$self->want_feature('source-releases')) {
+	# Gate the vendored upstream file behind an explicit opt-in feature.
+	# The vendored use-compiled-releases.yml targets xenial/jammy stemcells
+	# and is stale for noble. When ocfp supplies its own compiled-release pin
+	# (env-level ops layered after kit ops) this file must not be included, or
+	# its stale URLs and sha1 values conflict. Omit it unless the operator
+	# explicitly requests it via the 'vendored-compiled-releases' feature.
+	if (!$self->want_feature('source-releases') && $self->want_feature('vendored-compiled-releases')) {
 		$self->add_files(
 			"cf-deployment/operations/use-compiled-releases.yml",
 		);
@@ -387,6 +393,20 @@ sub process_ocfp_features {
 		# releases are noble-compiled and bundle a cgroup-v2-clean bpm, so no
 		# stemcell swap or source compile is needed -- 'compiled-releases' works
 		# as-is on PVE.
+
+		# Deploy-time wall-clock optimization ops for PVE. Order is load-bearing:
+		# 1. ops-serialize-deploy: set /update/serial true as the baseline so
+		#    stateful singletons (database, singleton-blobstore) remain sequential.
+		# 2. no-canaries: zero the canary count to avoid the haproxy/bosh-dns
+		#    deadlock on fresh deploys.
+		# 3. ops-deserialize-igs: LAST — per-IG serial:false on the stateless route
+		#    tier (router, tcp-router, diego-cell) so they roll in parallel. Must
+		#    win over the deployment-level settings set by the files above.
+		$self->add_files(
+			"ocfp/pve/ops-serialize-deploy.yml",
+			"ocfp/pve/no-canaries.yml",
+			"ocfp/pve/ops-deserialize-igs.yml",
+		);
 	}
 
 	# Blobstores
@@ -1226,6 +1246,12 @@ sub validate_ocfp_features {
 		'partitioned-network',
 		'small-footprint',
 		'source-releases',
+		# Opt-in: include the vendored cf-deployment use-compiled-releases.yml.
+		# That file targets xenial/jammy compiled tarballs and is intentionally
+		# excluded by default on noble. Only add this feature when you are certain
+		# the vendored file matches your stemcell and have not supplied an ocfp
+		# compiled-release pin via env-level ops.
+		'vendored-compiled-releases',
 		'haproxy',
 		'self-signed',
 		'cflinuxfs3',

@@ -1,0 +1,19 @@
+---
+# Disable the canary phase to break the canary deadlock on fresh deploys.
+#
+# Symptom: haproxy canary fails with "could not resolve address
+# '<uuid>.router.default.cf.bosh'" because bosh-dns only publishes records for
+# instances that have completed at least one update. On a fresh deploy the
+# canary is the first update, so router/tcp-router/scheduler are absent from
+# DNS. haproxy references those names and cannot start.
+#
+# Setting update.canaries to 0 skips the canary phase. All instance groups
+# update in parallel (capped by max_in_flight), letting router/tcp-router/
+# scheduler register in DNS before haproxy needs to resolve them.
+#
+# Apply after ops-serialize-deploy.yml. ops-deserialize-igs.yml must be
+# layered last so its per-IG serial:false overrides win.
+
+- type: replace
+  path: /update/canaries
+  value: 0
