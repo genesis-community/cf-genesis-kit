@@ -2,6 +2,9 @@
 exodus:
   firehose_exporter_secret: (( grab instance_groups.uaa.jobs.uaa.properties.uaa.clients.firehose_exporter.secret ))
   cf_exporter_secret:       (( grab instance_groups.uaa.jobs.uaa.properties.uaa.clients.cf_exporter.secret ))
+  bbs_ca:                   ((service_cf_internal_ca.certificate))
+  bbs_client_cert:          ((diego_bbs_client.certificate))
+  bbs_client_key:           ((diego_bbs_client.private_key))
 
 instance_groups:
 - name: uaa
