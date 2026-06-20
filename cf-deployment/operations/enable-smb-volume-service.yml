@@ -129,6 +129,6 @@
   path: /releases/-
   value:
     name: smb-volume
-    sha1: sha256:ea1fb31d54f7e5119f6f8cd207b82b7c6098482ecfb70b5986a913046e507d77
-    url: https://bosh.io/d/github.com/cloudfoundry/smb-volume-release?v=3.36.0
-    version: 3.36.0
+    sha1: sha256:ba80e70a6f4b412b28a5665ead508cb598bb64dbe92b808e1e84daf914d2ca61
+    url: https://bosh.io/d/github.com/cloudfoundry/smb-volume-release?v=3.61.0
+    version: 3.61.0
