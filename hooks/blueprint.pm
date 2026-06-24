@@ -158,7 +158,7 @@ sub process_classic_features {
 		aws-blobstore-iam gcp-use-access-key blobstore-suffix
 		isolation-segments
 		nfs-ldap nfs-ldap-tls
-		vip
+		vip use-jammy
 	};
 
 	my ($remaining_features) = compare_arrays(
@@ -278,6 +278,11 @@ sub process_classic_features {
 		}
 	}
 
+	# Use Jammy stemcell instead of Noble (also fixes silk-cni DNS address)
+	if ($self->want_feature('use-jammy')) {
+		$self->add_files('cf-deployment/operations/use-jammy-stemcell.yml');
+	}
+
 	# Exodus migration fragments
 	my $exodus_version = $self->env->exodus_lookup("kit_version", ""); # Use $self->env
 	if ($exodus_version && !new_enough($exodus_version, "2.0.0-rc0")) {
@@ -387,7 +392,7 @@ sub process_ocfp_features {
 	# Process the remaining requested features in order
 	my @handled_features = (
 		'ocfp',' self-signed', 'small-footprint',
-		'source-releases', 'isolation-segments',
+		'source-releases', 'use-jammy', 'isolation-segments',
 		'cf-deployment/operations/scale-to-one-az',
 		$blobstore, '+internal-db', 'local-postgres-db',
 		'local-mysql-db', 'mysql-db', 'postgres-db',
@@ -501,6 +506,11 @@ sub process_ocfp_features {
 		$self->add_files('overlay/override-releases/source.yml');
 	} else {
 		$self->add_files('overlay/override-releases/compiled.yml');
+	}
+
+	# Use Jammy stemcell instead of Noble (also fixes silk-cni DNS address)
+	if ($self->want_feature('use-jammy')) {
+		$self->add_files('cf-deployment/operations/use-jammy-stemcell.yml');
 	}
 
 	# Add custom ops files collected for OCFP
@@ -1074,6 +1084,7 @@ sub validate_classic_features {
 		'cflinuxfs3', 'cflinuxfs4',
 		'isolation-segments',
 		'ssh-proxy-on-routers',
+		'use-jammy',
 		'no-tcp-routers',
 		'blacksmith-integration',
 		'trust-blacksmith-ca',
@@ -1193,6 +1204,7 @@ sub validate_ocfp_features {
 		'partitioned-network',
 		'small-footprint',
 		'source-releases',
+		'use-jammy',
 		'haproxy',
 		'self-signed',
 		'cflinuxfs3',
