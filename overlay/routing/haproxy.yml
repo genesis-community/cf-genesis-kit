@@ -20,7 +20,11 @@ instance_groups:
   - name: scheduler
     vm_extensions: (( empty array ))
 
-  - (( insert before "router" ))
+  # Append the haproxy instance group by name rather than `(( insert before
+  # "router" ))`: Genesis' adaptive (multi-pass) merge re-applies this fragment,
+  # and the non-idempotent `(( insert ))` then fails with "new list entry 'name:
+  # haproxy' is detected multiple times". A by-name entry merges idempotently;
+  # instance-group order is irrelevant to BOSH.
   - name: haproxy
     instances: (( grab params.haproxy_instances ))
     vm_type:   (( grab params.haproxy_vm_type ))

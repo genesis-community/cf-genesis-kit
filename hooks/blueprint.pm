@@ -1561,6 +1561,10 @@ sub _process_common_positional_features {
 	# HAProxy and related features
 	if ( $feature eq "haproxy" ) {
 		$self->add_files("overlay/routing/haproxy.yml");
+		# OCFP: default haproxy_vm_type to the kit-generated <env>.<type>.vm-haproxy
+		# (the base overlay's bare "haproxy" does not exist in a kit-populated
+		# cloud-config). Added after the base overlay so it wins the merge.
+		$self->add_files("ocfp/routing/haproxy.yml") if $self->want_feature('ocfp');
 		$self->add_files(
 			'overlay/routing/haproxy-public-network.yml'
 		) if $self->env->params->{cf_lb_network};

@@ -1,0 +1,16 @@
+---
+# OCFP haproxy vm_type alignment.
+#
+# Under Genesis 3.2 kit-populated cloud-config, the kit generates a prefixed
+# vm type "<env>.<type>.vm-haproxy" (haproxy is in the vm_matrix, see
+# hooks/cloud-config.pm). The base routing overlay (overlay/routing/haproxy.yml)
+# defaults haproxy_vm_type to the bare "haproxy", which does not exist in an
+# OCFP kit-generated cloud-config -> "instance group 'haproxy' references an
+# unknown vm type". Override to the generated name, mirroring how ocfp/ocfp.yml
+# derives every other vm type from meta.ocfp.env.cloud.
+#
+# This file is added immediately after overlay/routing/haproxy.yml (which itself
+# merges after ocfp/ocfp.yml), so this value wins. Operators no longer need to
+# set haproxy_vm_type in the environment file.
+params:
+  haproxy_vm_type: (( concat meta.ocfp.env.cloud "vm-haproxy" ))
