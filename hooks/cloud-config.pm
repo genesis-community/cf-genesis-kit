@@ -8,7 +8,7 @@ BEGIN { push @INC, $ENV{GENESIS_LIB} ? $ENV{GENESIS_LIB} : $ENV{HOME} . '/.genes
 
 use parent qw(Genesis::Hook::CloudConfig);
 
-use Genesis qw//;
+use Genesis qw/bail/;
 use Genesis::Hook::CloudConfig::Helpers qw/gigabytes megabytes/;
 use JSON::PP;
 
@@ -63,7 +63,7 @@ sub perform {
 			'security_groups' => $self->get_network_security_groups(),
 		},
 		pve => {
-			'bridge' => scalar($self->env->lookup('bosh-configs.cpi.pve_network_bridge', 'lvnet001')),
+			'bridge' => $self->_pve_cpi_setting('pve_network_bridge', 'network_bridge'),
 		},
 	};
 
@@ -291,7 +291,7 @@ sub perform {
 									}, 8192
 								)
 							)),
-							'network_bridge' => scalar($self->env->lookup('bosh-configs.cpi.pve_network_bridge', 'lvnet001')),
+							'network_bridge' => $self->_pve_cpi_setting('pve_network_bridge', 'network_bridge'),
 						},
 					}
 				);
@@ -361,8 +361,8 @@ sub perform {
 						'encrypted' => $self->TRUE
 					},
 					pve => {
-						'storage'     => scalar($self->env->lookup('bosh-configs.cpi.pve_disk_storage', 'zfs-1')),
-						'disk_format' => scalar($self->env->lookup('bosh-configs.cpi.pve_disk_format', 'raw')),
+						'storage'     => $self->_pve_cpi_setting('pve_disk_storage', 'disk_storage'),
+						'disk_format' => $self->_pve_cpi_setting('pve_disk_format', 'disk_format', 'raw'),
 					},
 				},
 			) : (),
@@ -390,8 +390,8 @@ sub perform {
 						'encrypted' => $self->TRUE
 					},
 					pve => {
-						'storage'     => scalar($self->env->lookup('bosh-configs.cpi.pve_disk_storage', 'zfs-1')),
-						'disk_format' => scalar($self->env->lookup('bosh-configs.cpi.pve_disk_format', 'raw')),
+						'storage'     => $self->_pve_cpi_setting('pve_disk_storage', 'disk_storage'),
+						'disk_format' => $self->_pve_cpi_setting('pve_disk_format', 'disk_format', 'raw'),
 					},
 				},
 			): (),
@@ -500,6 +500,26 @@ sub _get_aws_vm_matrix {
 	}
 }
 
+# _pve_cpi_setting - resolve a PVE cloud property from the environment file,
+# falling back to the bloc's OCFP CPI config in vault (written by `ocfp vault
+# populate`). There is no literal default: PVE bridge and storage names are
+# site-specific, so an unset value is a configuration error, not something a
+# kit can guess. {{{
+sub _pve_cpi_setting {
+	my ($self, $env_key, $vault_key, $default) = @_;
+	my $value = scalar($self->env->lookup("bosh-configs.cpi.$env_key", undef));
+	$value //= scalar($self->env->ocfp_config_lookup("cpi.pve.$vault_key", undef));
+	$value //= $default;
+	bail(
+		"No PVE %s configured for %s: set #c{bosh-configs.cpi.%s} in the ".
+		"environment file, or run #g{ocfp vault populate} so the OCFP config ".
+		"provides #c{cpi/pve:%s}.",
+		$vault_key, $self->env->name, $env_key, $vault_key
+	) unless defined($value) && length($value);
+	return $value;
+}
+
+# }}}
 # _resolve_haproxy_default - make haproxy default-on with explicit opt-out {{{
 sub _resolve_haproxy_default {
 	my ($self) = @_;
