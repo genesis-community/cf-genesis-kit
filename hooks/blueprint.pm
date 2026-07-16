@@ -366,6 +366,7 @@ sub process_ocfp_features {
 	# its stale URLs and sha1 values conflict. Omit it unless the operator
 	# explicitly requests it via the 'vendored-compiled-releases' feature.
 	if (!$self->want_feature('source-releases') && $self->want_feature('vendored-compiled-releases')) {
+		$self->_validate_vendored_compiled_releases($iaas);
 		$self->add_files(
 			"cf-deployment/operations/use-compiled-releases.yml",
 		);
@@ -580,6 +581,41 @@ sub _gopatch_replace {
 sub _gopatch_remove {
 	my ($self, $path) = @_;
 	return "  - type: remove\n    path: ${path}\n";
+}
+
+# _validate_vendored_compiled_releases - Bail when the vendored
+# use-compiled-releases.yml pins blobs compiled against a different stemcell
+# lineage than the one this environment deploys. The ops file ships inside
+# whichever cf-deployment tree is present at render time (bundled, or swapped
+# in by a cf-deployment-version-* feature), so its lineage is only knowable by
+# reading the file itself. A mismatch deploys fine and then fails at runtime
+# against the wrong stemcell ABI, so catch it here instead.
+sub _validate_vendored_compiled_releases {
+	my ($self, $iaas) = @_;
+
+	my $ops_path = $self->kit->path("cf-deployment/operations/use-compiled-releases.yml");
+	return unless -f $ops_path;
+
+	# Effective stemcell OS, mirroring overlay merge order: env params override
+	# ocfp/pve/stemcell.yml (noble, PVE invariant), which overrides the
+	# overlay/base.yml default (jammy).
+	my $stemcell_os = $self->env->lookup('params.stemcell_os',
+		$iaas eq 'pve' ? 'ubuntu-noble' : 'ubuntu-jammy');
+
+	my %lineages = map { ($_ => 1) } (slurp($ops_path) =~ /^\s*os:\s*["']?([\w.-]+)/mg);
+	my @foreign = sort grep { $_ ne $stemcell_os } keys %lineages;
+	return unless @foreign;
+
+	bail(
+		"The vendored #c{use-compiled-releases.yml} in the current cf-deployment ".
+		"tree pins\nreleases compiled for #Y{%s}, but environment #C{%s} deploys ".
+		"the #Y{%s}\nstemcell. Compiled blobs only run on the stemcell lineage ".
+		"they were built\nagainst. Either select a cf-deployment whose compiled ".
+		"releases match the\nstemcell (e.g. a #c{cf-deployment-version-*} feature ".
+		"with %s-built blobs),\nor drop #c{vendored-compiled-releases} and compile ".
+		"from source or supply an\nenv-level compiled-release pin.",
+		join(', ', @foreign), $self->env->name, $stemcell_os, $stemcell_os
+	);
 }
 
 # handle_custom_cf_versions - Handle custom cf-deployment versions if present
