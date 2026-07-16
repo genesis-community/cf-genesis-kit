@@ -114,8 +114,16 @@ Choose one of the following database options:
 ### Load Balancing Options
 
 - `haproxy` - Deploy an HAProxy loadbalancer in front of CF.
+- `no-haproxy` (alias `external-lb`) - Skip HAProxy and expose the routers
+  for an external load balancer. (`omit-haproxy` is a deprecated alias.)
 - `tls` - Configure HAProxy to use TLS.
 - `self-signed` - Generate self-signed certs for HAProxy.
+
+The HAProxy default is IaaS-aware: on `aws`, `gcp`, and `azure` the platform
+load balancer is assumed to front the routers, so HAProxy defaults to off
+unless the environment file lists `haproxy` explicitly. On all other IaaSes
+HAProxy is deployed by default unless the environment file lists `no-haproxy`
+(or `external-lb`). Listing both `haproxy` and an opt-out flag is an error.
 
 ### Runtime Stack Options
 

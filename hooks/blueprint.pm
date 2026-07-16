@@ -43,12 +43,14 @@ sub perform {
 	$self->{raw_features} = [$self->features]; # Get raw features from env
 	$self->{params} = $self->env->params->{params} // {}; # Get environment parameters
 
-	# HAProxy is DEFAULT-ON. The features hook resolves this for the persisted
-	# feature list, but blueprint reads the raw env feature list via
-	# want_feature()/iteration, so resolve it here too for consistency.
+	# The HAProxy default is IaaS-aware: opt-out on aws/gcp/azure (platform LB
+	# fronts the routers), default-on elsewhere. The features hook resolves
+	# this for the persisted feature list, but blueprint reads the raw env
+	# feature list via want_feature()/iteration, so resolve it here too.
+	#   - explicit 'haproxy' keeps haproxy on any IaaS (no double-add)
 	#   - opt out with 'no-haproxy' (alias 'external-lb'; deprecated 'omit-haproxy')
-	#   - explicit 'haproxy' still works (no double-add)
-	# When opting out, the haproxy ops file + TLS overlays and the haproxy
+	#   - listing both is a hard error
+	# When opted out, the haproxy ops file + TLS overlays and the haproxy
 	# cloud-config allocation are skipped; routers are exposed for external LB.
 	$self->_resolve_haproxy_default();
 
@@ -1572,19 +1574,30 @@ sub enable_windows_diego_cells {
 	return 1;
 }
 
-# _resolve_haproxy_default - make haproxy default-on with explicit opt-out {{{
+# _resolve_haproxy_default - IaaS-aware haproxy default with explicit override {{{
 sub _resolve_haproxy_default {
 	my ($self) = @_;
 
 	my %opt_out = map { ($_ => 1) } qw/no-haproxy external-lb omit-haproxy/;
 	my @current = $self->features;
-	my $opted_out = grep { $opt_out{$_} } @current;
+	my ($opt_out_marker) = grep { $opt_out{$_} } @current;
 	my $has_haproxy = grep { $_ eq 'haproxy' } @current;
 
-	if ($opted_out) {
-		# Opt-out wins: strip any haproxy so no ops file / static IP is added.
-		# Drop the opt-out markers themselves; they are not real ops features
-		# and would otherwise hit the "Unknown feature" dispatch branch.
+	bail(
+		"Conflicting features: environment #C{%s} lists both #c{haproxy} and ".
+		"#c{%s}.\nKeep #c{haproxy} to deploy the kit-managed haproxy, or keep ".
+		"#c{%s} to expose\nthe routers for an external load balancer -- not both.",
+		$self->env->name, $opt_out_marker, $opt_out_marker
+	) if $has_haproxy && $opt_out_marker;
+
+	# On aws, gcp, and azure the platform load balancer fronts the routers, so
+	# haproxy defaults to opt-out there; on all other IaaSes it defaults to on.
+	my $iaas_defaults_off = ($self->iaas // '') =~ /^(aws|gcp|azure)$/;
+
+	if ($opt_out_marker || ($iaas_defaults_off && !$has_haproxy)) {
+		# No haproxy: strip it so no ops file / static IP is added. Drop the
+		# opt-out markers themselves; they are not real ops features and would
+		# otherwise hit the "Unknown feature" dispatch branch.
 		$self->set_features(grep { $_ ne 'haproxy' && !$opt_out{$_} } @current);
 		return;
 	}

@@ -23,11 +23,13 @@ sub perform {
 	my ($self) = @_;
 	return 1 if $self->completed;
 
-	# HAProxy is DEFAULT-ON. This hook keys haproxy static IP / edge sizing on
-	# want_feature('haproxy'), which reads the raw env feature list, so resolve
-	# the default-on / opt-out here for consistency with blueprint + features.
+	# The HAProxy default is IaaS-aware: opt-out on aws/gcp/azure (platform LB
+	# fronts the routers), default-on elsewhere. This hook keys haproxy static
+	# IP / edge sizing on want_feature('haproxy'), which reads the raw env
+	# feature list, so resolve it here for consistency with blueprint + features.
+	#   - explicit 'haproxy' keeps haproxy on any IaaS (no double-add)
 	#   - opt out with 'no-haproxy' (alias 'external-lb'; deprecated 'omit-haproxy')
-	#   - explicit 'haproxy' still works (no double-add)
+	#   - listing both is a hard error
 	$self->_resolve_haproxy_default();
 
 	# Determine the current IaaS
@@ -530,18 +532,29 @@ sub _pve_cpi_setting {
 }
 
 # }}}
-# _resolve_haproxy_default - make haproxy default-on with explicit opt-out {{{
+# _resolve_haproxy_default - IaaS-aware haproxy default with explicit override {{{
 sub _resolve_haproxy_default {
 	my ($self) = @_;
 
 	my %opt_out = map { ($_ => 1) } qw/no-haproxy external-lb omit-haproxy/;
 	my @current = $self->features;
-	my $opted_out = grep { $opt_out{$_} } @current;
+	my ($opt_out_marker) = grep { $opt_out{$_} } @current;
 	my $has_haproxy = grep { $_ eq 'haproxy' } @current;
 
-	if ($opted_out) {
-		# Opt-out wins: strip haproxy so no static IP / edge allocation is added.
-		# Drop the opt-out markers; they are not real cloud-config features.
+	bail(
+		"Conflicting features: environment #C{%s} lists both #c{haproxy} and ".
+		"#c{%s}.\nKeep #c{haproxy} to deploy the kit-managed haproxy, or keep ".
+		"#c{%s} to expose\nthe routers for an external load balancer -- not both.",
+		$self->env->name, $opt_out_marker, $opt_out_marker
+	) if $has_haproxy && $opt_out_marker;
+
+	# On aws, gcp, and azure the platform load balancer fronts the routers, so
+	# haproxy defaults to opt-out there; on all other IaaSes it defaults to on.
+	my $iaas_defaults_off = ($self->iaas // '') =~ /^(aws|gcp|azure)$/;
+
+	if ($opt_out_marker || ($iaas_defaults_off && !$has_haproxy)) {
+		# No haproxy: strip it so no static IP / edge allocation is added. Drop
+		# the opt-out markers; they are not real cloud-config features.
 		$self->set_features(grep { $_ ne 'haproxy' && !$opt_out{$_} } @current);
 		return;
 	}
