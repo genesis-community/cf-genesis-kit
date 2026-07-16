@@ -212,77 +212,90 @@ sub perform {
 	my $config = $self->build_cloud_config({
 		'networks' => \@networks,
 		'vm_types' => [(map {
-			$self->vm_type_definition(
-				$_,
-				cloud_properties_for_iaas => {
-					openstack => {
-						'instance_type' => $self->for_scale(
-							{
-								dev  => $vm_matrix->{$_}{type_dev},
-								prod => $vm_matrix->{$_}{type_prod}
-							}
-						),
-						'ephemeral_disk'   => { encrypted => $self->TRUE },
-						'boot_from_volume' => $self->TRUE,
-						'root_disk' => { size => $vm_matrix->{$_}{disk_size} + 0 }
-						,    # Force conversion to integer
-					},
-					stackit => {
-						'instance_type' => $self->for_scale(
-							{
-								dev  => $vm_matrix->{$_}{type_dev},
-								prod => $vm_matrix->{$_}{type_prod}
-							}
-						),
-						'ephemeral_disk'   => { encrypted => $self->TRUE },
-						'boot_from_volume' => $self->TRUE,
-						'root_disk' => { size => $vm_matrix->{$_}{disk_size} + 0 },
-					},
-					aws => {
-						'instance_type' => $self->for_scale(
-							{
-								dev  => $vm_matrix->{$_}{type_dev},
-								prod => $vm_matrix->{$_}{type_prod}
-							}
-						),
-						'ephemeral_disk' => {
-							encrypted => $self->TRUE,
-							size      => $self->for_scale(
+			do {
+				# Sanitize vm_type name to a valid config-key segment:
+				# lowercase, non-alnum runs collapsed to '_'.
+				my $vmk = do { (my $k = lc($_)) =~ s/[^a-z0-9]+/_/g; $k };
+				$self->vm_type_definition(
+					$_,
+					cloud_properties_for_iaas => {
+						openstack => {
+							'instance_type' => $self->for_scale(
 								{
-									dev  => $vm_matrix->{$_}{ephemeral_dev},
-									prod => $vm_matrix->{$_}{ephemeral_prod}
-								}, 4096
+									dev  => $vm_matrix->{$_}{type_dev},
+									prod => $vm_matrix->{$_}{type_prod}
+								}
 							),
-							type => 'gp3'
+							'ephemeral_disk'   => { encrypted => $self->TRUE },
+							'boot_from_volume' => $self->TRUE,
+							'root_disk' => { size => $vm_matrix->{$_}{disk_size} + 0 }
+							,    # Force conversion to integer
 						},
-						'metadata_options' => {
-							'http_tokens' => 'required'
+						stackit => {
+							'instance_type' => $self->for_scale(
+								{
+									dev  => $vm_matrix->{$_}{type_dev},
+									prod => $vm_matrix->{$_}{type_prod}
+								}
+							),
+							'ephemeral_disk'   => { encrypted => $self->TRUE },
+							'boot_from_volume' => $self->TRUE,
+							'root_disk' => { size => $vm_matrix->{$_}{disk_size} + 0 },
 						},
-					},
-					pve => {
-						'cpu'            => $self->for_scale(
-							{
-								dev  => $vm_matrix->{$_}{cpu_dev},
-								prod => $vm_matrix->{$_}{cpu_prod}
-							}, 1
-						),
-						'ram'            => $self->for_scale(
-							{
-								dev  => $vm_matrix->{$_}{ram_dev},
-								prod => $vm_matrix->{$_}{ram_prod}
-							}, 1024
-						),
-						'disk'           => $self->for_scale(
-							{
-								dev  => $vm_matrix->{$_}{disk_dev},
-								prod => $vm_matrix->{$_}{disk_prod}
-							}, 8192
-						),
-						'network_bridge' => scalar($self->env->lookup('bosh-configs.cpi.pve_network_bridge', 'lvnet001')),
-					},
-				}
-			),
-		} ( sort keys %$vm_matrix )),
+						aws => {
+							'instance_type' => $self->for_scale(
+								{
+									dev  => $vm_matrix->{$_}{type_dev},
+									prod => $vm_matrix->{$_}{type_prod}
+								}
+							),
+							'ephemeral_disk' => {
+								encrypted => $self->TRUE,
+								size      => $self->for_scale(
+									{
+										dev  => $vm_matrix->{$_}{ephemeral_dev},
+										prod => $vm_matrix->{$_}{ephemeral_prod}
+									}, 4096
+								),
+								type => 'gp3'
+							},
+							'metadata_options' => {
+								'http_tokens' => 'required'
+							},
+						},
+						pve => {
+							'cpu'            => scalar($self->env->lookup(
+								"bosh-configs.cpi.pve_${vmk}_cpu",
+								$self->for_scale(
+									{
+										dev  => $vm_matrix->{$_}{cpu_dev},
+										prod => $vm_matrix->{$_}{cpu_prod}
+									}, 1
+								)
+							)),
+							'ram'            => scalar($self->env->lookup(
+								"bosh-configs.cpi.pve_${vmk}_ram",
+								$self->for_scale(
+									{
+										dev  => $vm_matrix->{$_}{ram_dev},
+										prod => $vm_matrix->{$_}{ram_prod}
+									}, 1024
+								)
+							)),
+							'disk'           => scalar($self->env->lookup(
+								"bosh-configs.cpi.pve_${vmk}_disk",
+								$self->for_scale(
+									{
+										dev  => $vm_matrix->{$_}{disk_dev},
+										prod => $vm_matrix->{$_}{disk_prod}
+									}, 8192
+								)
+							)),
+							'network_bridge' => scalar($self->env->lookup('bosh-configs.cpi.pve_network_bridge', 'lvnet001')),
+						},
+					}
+				);
+			} } ( sort keys %$vm_matrix )),
 		],
 		'vm_extensions' => [
 #			$self->vm_extension_definition('cf-ssh-lb' => {
@@ -349,7 +362,7 @@ sub perform {
 					},
 					pve => {
 						'storage'     => scalar($self->env->lookup('bosh-configs.cpi.pve_disk_storage', 'zfs-1')),
-						'disk_format' => 'raw',
+						'disk_format' => scalar($self->env->lookup('bosh-configs.cpi.pve_disk_format', 'raw')),
 					},
 				},
 			) : (),
@@ -378,7 +391,7 @@ sub perform {
 					},
 					pve => {
 						'storage'     => scalar($self->env->lookup('bosh-configs.cpi.pve_disk_storage', 'zfs-1')),
-						'disk_format' => 'raw',
+						'disk_format' => scalar($self->env->lookup('bosh-configs.cpi.pve_disk_format', 'raw')),
 					},
 				},
 			): (),
