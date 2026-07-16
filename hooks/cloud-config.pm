@@ -158,10 +158,21 @@ sub perform {
 	}
 	else {
 		$self->relinquish_networks(qw/ocf-core ocf-edge ocf-tcp ocf-runtime ocf-db/);
+
+		# On PVE the SDN vnet is a flat net — all three ocfp-* subnets share the
+		# same CIDR, so genesis IPAM tracks claims by (network, subnet-name) only.
+		# The BOSH director compilation network is pinned to ocfp-2; restricting
+		# the CF workload network to ocfp-0/1 prevents net-compilation IP
+		# exhaustion ("no more available") on the shared address space.
+		# AWS/STACKIT/OpenStack/vSphere use physically distinct CIDRs per subnet
+		# so they are unaffected and must continue spanning all subnets.
+		my @ocf_subnets = $self->iaas eq 'pve' ? ('ocfp-0', 'ocfp-1') : ();
+
 		@networks = $self->network_definition(
 			'ocf',
 			strategy        => 'ocfp',
 			dynamic_subnets => {
+				(@ocf_subnets ? (subnets => \@ocf_subnets) : ()),
 				cloud_properties_for_iaas => $network_cloud_properties,
 				allocation => {
 					size    => $self->for_scale({
@@ -185,6 +196,10 @@ sub perform {
 				}
 			}
 		);
+		# NOTE: the partitioned-network branch above (ocf-core, ocf-edge,
+		# ocf-tcp, ocf-runtime) similarly spans all subnets.  Apply the same
+		# @ocf_subnets guard there if the partitioned topology is ever used on
+		# PVE to avoid the same compilation-subnet contention.
 	}
 
 	if ($self->want_feature('vip')) { # Maybe add alias for 'public-network'
