@@ -1356,7 +1356,12 @@ sub validate_ocfp_features {
 		if ($type eq "pve" && !$self->want_feature("pve-blobstore")) {
 			$self->set_features($self->features, "+internal-blobstore");
 		} elsif (-f $self->kit->path("overlay/blobstore/${type}.yml")) {
-			$self->set_features($self->features, "${type}-blobstore");
+			# Only add the derived <iaas>-blobstore feature if it isn't already
+			# requested explicitly; set_features() replaces (does not dedupe) the
+			# list, so re-adding an explicit feature here yields a duplicate that
+			# trips requested_blobstore()'s "Conflicting blobstore features" bail.
+			$self->set_features($self->features, "${type}-blobstore")
+				unless $self->want_feature("${type}-blobstore");
 		} else {
 			bail("OCFP blobstores are not supported on #c{$type} IaaS.");
 		}
