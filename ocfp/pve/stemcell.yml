@@ -6,6 +6,11 @@
 # cf-deployment default. Force noble here. With a noble-default cf-deployment
 # (>= 56.5.0, selected via the cf-deployment-version-* feature) this also
 # aligns the VM stemcell with the noble-compiled releases.
+#
+# No version pin: base.yml defaults params.stemcell_version to "latest", which
+# resolves to the newest noble uploaded to the deploying director. The GCS
+# noble-compiled releases pair with any same-OS stemcell >= their compile
+# version, so a hard pin here only desynchronises from whatever the director
+# actually has (pin per-env via params.stemcell_version if ever needed).
 params:
   stemcell_os: ubuntu-noble
-  stemcell_version: "1.383"
