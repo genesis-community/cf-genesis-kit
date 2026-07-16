@@ -23,6 +23,13 @@ sub perform {
 	my ($self) = @_;
 	return 1 if $self->completed;
 
+	# HAProxy is DEFAULT-ON. This hook keys haproxy static IP / edge sizing on
+	# want_feature('haproxy'), which reads the raw env feature list, so resolve
+	# the default-on / opt-out here for consistency with blueprint + features.
+	#   - opt out with 'no-haproxy' (alias 'external-lb'; deprecated 'omit-haproxy')
+	#   - explicit 'haproxy' still works (no double-add)
+	$self->_resolve_haproxy_default();
+
 	# Determine the current IaaS
 	my $vm_matrix = $self->get_matrix_for_iaas();
 
@@ -464,6 +471,29 @@ sub _get_aws_vm_matrix {
 		)
 	}
 }
+
+# _resolve_haproxy_default - make haproxy default-on with explicit opt-out {{{
+sub _resolve_haproxy_default {
+	my ($self) = @_;
+
+	my %opt_out = map { ($_ => 1) } qw/no-haproxy external-lb omit-haproxy/;
+	my @current = $self->features;
+	my $opted_out = grep { $opt_out{$_} } @current;
+	my $has_haproxy = grep { $_ eq 'haproxy' } @current;
+
+	if ($opted_out) {
+		# Opt-out wins: strip haproxy so no static IP / edge allocation is added.
+		# Drop the opt-out markers; they are not real cloud-config features.
+		$self->set_features(grep { $_ ne 'haproxy' && !$opt_out{$_} } @current);
+		return;
+	}
+
+	# Default-on: add haproxy unless explicitly requested already (no double-add).
+	$self->set_features(@current, 'haproxy') unless $has_haproxy;
+	return;
+}
+
+# }}}
 
 1;
 # vim: set ts=2 sw=2 sts=2 noet fdm=marker foldlevel=1:

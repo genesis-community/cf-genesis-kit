@@ -27,6 +27,14 @@ sub perform {
 	# Build features list based on requested features
 	my @features;
 
+	# HAProxy is DEFAULT-ON. Operators opt out with 'no-haproxy' (alias
+	# 'external-lb'; deprecated alias 'omit-haproxy'). When opting out the
+	# routers are exposed for an external load balancer and no haproxy
+	# instance group, ops file, or cloud-config allocation is produced.
+	my %haproxy_opt_out = map { ($_ => 1) } qw/no-haproxy external-lb omit-haproxy/;
+	my $haproxy_opted_out = grep { $haproxy_opt_out{$_} } $self->features;
+	my $haproxy_requested = grep { $_ eq 'haproxy' } $self->features;
+
 	# Process requested features with transformations
 	my $is_ocfp = $self->want_feature('ocfp');
 	foreach my $feature ($self->features) {
@@ -42,9 +50,20 @@ sub perform {
 			push @features, $is_ocfp ? '+internal-blobstore' : 'internal-blobstore';
 		} elsif ($feature eq 'split-network') { # Short-lived ocfp feature that is better handled by existing feature name
 			push @features, 'partitioned-network';
+		} elsif ($haproxy_opt_out{$feature}) {
+			# Opt-out markers are not real ops/cloud-config features; preserve
+			# them in the resolved list so downstream hooks can detect the
+			# opt-out and skip haproxy. Never emit 'haproxy' for these.
+			push @features, $feature;
 		} else {
 			push @features, $feature;
 		}
+	}
+
+	# Default-on: add 'haproxy' unless the operator opted out or already
+	# requested it explicitly (prevents a double-add).
+	if (!$haproxy_opted_out && !$haproxy_requested) {
+		push @features, 'haproxy';
 	}
 
 	# Check for database overrides

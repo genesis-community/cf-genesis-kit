@@ -43,6 +43,15 @@ sub perform {
 	$self->{raw_features} = [$self->features]; # Get raw features from env
 	$self->{params} = $self->env->params->{params} // {}; # Get environment parameters
 
+	# HAProxy is DEFAULT-ON. The features hook resolves this for the persisted
+	# feature list, but blueprint reads the raw env feature list via
+	# want_feature()/iteration, so resolve it here too for consistency.
+	#   - opt out with 'no-haproxy' (alias 'external-lb'; deprecated 'omit-haproxy')
+	#   - explicit 'haproxy' still works (no double-add)
+	# When opting out, the haproxy ops file + TLS overlays and the haproxy
+	# cloud-config allocation are skipped; routers are exposed for external LB.
+	$self->_resolve_haproxy_default();
+
 	# Override instance counts if small-footprint is requested
 	if ($self->want_feature('small-footprint')) {
 		for my $instance_group (keys $self->_is_instance_group->%*) {
@@ -1122,6 +1131,7 @@ sub validate_classic_features {
 		'bare',
 		'partitioned-network',
 		'haproxy',
+		'no-haproxy', 'external-lb', # opt out of default-on haproxy
 		'tls',
 		'self-signed',
 		'cflinuxfs3', 'cflinuxfs4',
@@ -1253,6 +1263,7 @@ sub validate_ocfp_features {
 		# compiled-release pin via env-level ops.
 		'vendored-compiled-releases',
 		'haproxy',
+		'no-haproxy', 'external-lb', # opt out of default-on haproxy
 		'self-signed',
 		'cflinuxfs3',
 		'isolation-segments',
@@ -1520,6 +1531,30 @@ sub enable_windows_diego_cells {
 	return 1;
 }
 
+# _resolve_haproxy_default - make haproxy default-on with explicit opt-out {{{
+sub _resolve_haproxy_default {
+	my ($self) = @_;
+
+	my %opt_out = map { ($_ => 1) } qw/no-haproxy external-lb omit-haproxy/;
+	my @current = $self->features;
+	my $opted_out = grep { $opt_out{$_} } @current;
+	my $has_haproxy = grep { $_ eq 'haproxy' } @current;
+
+	if ($opted_out) {
+		# Opt-out wins: strip any haproxy so no ops file / static IP is added.
+		# Drop the opt-out markers themselves; they are not real ops features
+		# and would otherwise hit the "Unknown feature" dispatch branch.
+		$self->set_features(grep { $_ ne 'haproxy' && !$opt_out{$_} } @current);
+		return;
+	}
+
+	# Default-on: add haproxy unless explicitly requested already (no double-add).
+	$self->set_features(@current, 'haproxy') unless $has_haproxy;
+	return;
+}
+
+# }}}
+
 sub _process_common_positional_features {
 	my ($self, $feature) = @_;
 
@@ -1555,6 +1590,12 @@ sub _process_common_positional_features {
 			"Invalid cf-deployment operation requested: #c{$feature}"
 		) unless -f $self->kit->path("$feature.yml");
 		$self->add_files("$feature.yml");
+
+	} elsif ($feature =~ /^(no-haproxy|external-lb|omit-haproxy)$/) {
+		# HAProxy opt-out markers. _resolve_haproxy_default() consumes these to
+		# suppress the haproxy overlay/static IP; the features hook preserves
+		# them in the resolved list so every hook can detect the opt-out. Accept
+		# them here as a no-op so this dispatch does not treat them as unknown.
 
 	} else {
 		bail("Unknown feature: $feature. Please check your environment file.");
