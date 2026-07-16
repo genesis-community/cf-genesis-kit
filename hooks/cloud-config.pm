@@ -443,8 +443,8 @@ sub _get_stackit_vm_matrix {
 sub _get_pve_vm_matrix {
 	# PVE single-node lab sizing. Values are integers consumed by the pve
 	# branch of vm_type cloud_properties (cpu, ram[MiB], disk[MiB]).
-	# Dev row tuned for sm-0 (~32 GiB RAM / 32 vCPU host); prod row
-	# scaled for a larger node — adjust when multi-node PVE arrives.
+	# Dev row sized for a single large PVE node (e.g. sm-0, ~1.5 TiB RAM);
+	# prod row scaled wider — adjust when multi-node PVE arrives.
 	my ($self) = @_;
 	return {
 		map { ( $_->[0], {
@@ -456,7 +456,7 @@ sub _get_pve_vm_matrix {
 			[qw[  cc-worker      1       1024     8192       2         4096     16384  ]],
 			[qw[  credhub        1       2048    16384       2         4096     32768  ]],
 			[qw[  diego-api      1       1024     8192       4         8192     16384  ]],
-			[qw[  diego-cell     2       4096    32768       8        16384    102400  ]],
+			[qw[  diego-cell     2      16384    32768       8        16384    102400  ]],
 			[qw[  doppler        1       1024     8192       2         4096     16384  ]],
 			[qw[  errand         1       1024     8192       1         2048      8192  ]],
 			[qw[  log-api        1       1024     8192       2         4096     16384  ]],
