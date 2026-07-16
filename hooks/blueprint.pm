@@ -449,7 +449,7 @@ sub process_ocfp_features {
 	# Process the remaining requested features in order
 	my @handled_features = (
 		'ocfp', 'self-signed', 'small-footprint',
-		'source-releases', 'isolation-segments',
+		'source-releases', 'vendored-compiled-releases', 'isolation-segments',
 		'cf-deployment/operations/scale-to-one-az',
 		$blobstore, '+internal-db', 'local-postgres-db',
 		'local-mysql-db', 'mysql-db', 'postgres-db',
@@ -1599,6 +1599,14 @@ sub _process_common_positional_features {
 			"Invalid cf-deployment operation requested: #c{$feature}"
 		) unless -f $self->kit->path("$feature.yml");
 		$self->add_files("$feature.yml");
+
+	# cf-deployment version override is resolved early in perform() by
+  # handle_custom_cf_versions(), which fetches the requested upstream
+  # cf-deployment and swaps the kit's ./cf-deployment tree in place.
+  # It contributes no merge file here -- accept it as a no-op so this
+  # dispatch chain does not treat it as an unknown feature.
+	} elsif ($feature =~ /^cf-deployment-version-/) {
+		# no-op (handled in handle_custom_cf_versions)
 
 	} elsif ($feature =~ /^(no-haproxy|external-lb|omit-haproxy)$/) {
 		# HAProxy opt-out markers. _resolve_haproxy_default() consumes these to
