@@ -445,6 +445,16 @@ sub _get_pve_vm_matrix {
 	# branch of vm_type cloud_properties (cpu, ram[MiB], disk[MiB]).
 	# Dev row sized for a single large PVE node (e.g. sm-0, ~1.5 TiB RAM);
 	# prod row scaled wider — adjust when multi-node PVE arrives.
+	#
+	# Disk sizing rule: PVE VMs get NO separate ephemeral disk, so the BOSH
+	# agent carves the ROOT disk into ~5G system (root/home) + swap
+	# (min(ram, half of the remainder)) + the rest as /var/vcap/data. Keep
+	#   disk >= ram + 5120 + intended data space
+	# with data space never below ~2G, or jobs have nowhere to unpack.
+	# Diego cells additionally lose a grootfs store reserve out of data and
+	# must cover staging disk requests: a 16G-RAM cell at 32G disk leaves the
+	# rep advertising ~4G and cf push fails with InsufficientResources; 64G
+	# yields ~39G data / ~33G advertised.
 	my ($self) = @_;
 	return {
 		map { ( $_->[0], {
@@ -456,19 +466,19 @@ sub _get_pve_vm_matrix {
 			[qw[  cc-worker      1       1024     8192       2         4096     16384  ]],
 			[qw[  credhub        1       2048    16384       2         4096     32768  ]],
 			[qw[  diego-api      1       1024     8192       4         8192     16384  ]],
-			[qw[  diego-cell     2      16384    32768       8        16384    102400  ]],
+			[qw[  diego-cell     2      16384    65536       8        16384    102400  ]],
 			[qw[  doppler        1       1024     8192       2         4096     16384  ]],
-			[qw[  errand         1       1024     8192       1         2048      8192  ]],
+			[qw[  errand         1       1024     8192       1         2048     16384  ]],
 			[qw[  log-api        1       1024     8192       2         4096     16384  ]],
-			[qw[  log-cache      1       2048     8192       4         8192     16384  ]],
-			[qw[  nats           1       1024     8192       2         2048      8192  ]],
+			[qw[  log-cache      1       2048    16384       4         8192     16384  ]],
+			[qw[  nats           1       1024     8192       2         2048     16384  ]],
 			[qw[  router         1       1024     8192       2         4096     16384  ]],
 			[qw[  scheduler      1       1024     8192       2         4096     16384  ]],
 			[qw[  tcp-router     1       1024     8192       2         4096     16384  ]],
 			[qw[  uaa            1       2048    16384       2         4096     32768  ]],
 			[qw[  database       1       2048    16384       4         8192     65536  ]],
 			[qw[  blobstore      1       1024    16384       2         4096     65536  ]],
-			[qw[  haproxy        1       1024     8192       2         2048      8192  ]],
+			[qw[  haproxy        1       1024     8192       2         2048    16384  ]],
 		)
 	}
 }
