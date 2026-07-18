@@ -48,3 +48,9 @@ bosh-variables:
     region:                (( grab params.blobstore_s3_region ))
     endpoint:              (( grab params.blobstore_s3_endpoint ))
     path_style:            (( grab params.blobstore_s3_path_style ))
+    # Excon does not consult the OS trust store by default, so a blobstore
+    # cert signed by the bloc's internal CA fails verification even after
+    # that CA is distributed to VMs (os-conf ca_certs). Point Excon at the
+    # system bundle, which the runtime-config addon keeps current.
+    connection_options:
+      ssl_ca_file: /etc/ssl/certs/ca-certificates.crt
