@@ -1205,6 +1205,11 @@ sub _generate_service_routes_ops {
 		) unless $r->{backend} =~ $backend_re;
 
 		my $port = $r->{port} // 443;
+		bail(
+			"params.ocfp_haproxy_service_routes[%d].port '%s' is invalid -- must ".
+			"be an integer between 1 and 65535",
+			$i, $port
+		) unless $port =~ /^[0-9]+$/ && $port >= 1 && $port <= 65535;
 		my $ssl  = $r->{ssl}  // 'noverify';
 		bail(
 			"params.ocfp_haproxy_service_routes[%d].ssl '%s' is invalid -- must be ".

@@ -378,7 +378,7 @@ a dedicated backend, and a SAN entry on the haproxy cert for each route.
 | --- | --- | --- |
 | `hostname` | The Host header to match and route (also added as a SAN on the haproxy cert) | *required* |
 | `backend` | The IP or hostname of the backend service | *required* |
-| `port` | The backend port | `443` |
+| `port` | The backend port (1-65535) | `443` |
 | `ssl` | `noverify` re-encrypts to the backend without verifying its certificate; `none` speaks plain HTTP to the backend | `noverify` |
 
 ```yaml
