@@ -374,6 +374,11 @@ Requires the `haproxy` feature (an OCFP deployment enables it by default on
 most IaaSes) and generates a dynamic ops file with a host-ACL frontend rule,
 a dedicated backend, and a SAN entry on the haproxy cert for each route.
 
+Also requires the `self-signed` feature: each route hostname is added as a
+SAN on the `haproxy_ssl` cert, and this kit cannot add SANs to an
+operator-provided cert. If you bring your own haproxy cert, add the route
+hostnames to it yourself and do not set this param.
+
 | param | description | default |
 | --- | --- | --- |
 | `hostname` | The Host header to match and route (also added as a SAN on the haproxy cert) | *required* |

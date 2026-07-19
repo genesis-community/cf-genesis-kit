@@ -1172,6 +1172,21 @@ sub _generate_service_routes_ops {
 		"feature is not active -- there is no CF haproxy to route through."
 	) unless $self->want_feature('haproxy');
 
+	# The SAN ops below add each route hostname to the haproxy_ssl cert.
+	# On the provided-cert path (TLS/OCFP active, 'self-signed' not
+	# requested), overlay/routing/haproxy-provided-cert.yml deletes the
+	# haproxy_ssl variable entirely -- this kit cannot add SANs to a cert
+	# an operator brings, so surface that as a clear bail rather than let
+	# the SAN ops fail cryptically at go-patch merge time.
+	bail(
+		"params.ocfp_haproxy_service_routes requires the 'self-signed' feature -- ".
+		"these routes' hostnames are added as SANs on the haproxy_ssl cert, but ".
+		"an operator-provided cert (the default once TLS is on without ".
+		"'self-signed') is not something this kit can add SANs to. Add ".
+		"'self-signed', or remove the routes param and ensure your provided ".
+		"cert already covers these hostnames."
+	) unless $self->want_feature('self-signed');
+
 	my $dstdir = 'overlay/dynamic';
 	my $file   = "$dstdir/ocfp-haproxy-service-routes.yml";
 	my $kit_dynamic_dir = $self->kit->path($dstdir);

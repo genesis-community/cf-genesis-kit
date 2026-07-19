@@ -103,4 +103,26 @@ subtest 'port validation' => sub {
 	like(generated_content($self, $result), qr/:443\b/, 'omitted port defaults to 443');
 };
 
+# --- self-signed / provided-cert interaction (Important finding 2) ----------
+
+subtest 'provided-cert path' => sub {
+	my $self = build_self(
+		routes   => [{ hostname => 'svc.example.com', backend => '10.0.0.5' }],
+		features => ['haproxy'], # self-signed NOT active -> provided-cert path
+	);
+	eval { $self->_generate_service_routes_ops };
+	like($@, qr/self-signed/i,
+		'bails clearly when routes are configured without self-signed');
+
+	# The self-signed path (as used on the lab) must be unaffected.
+	$self = build_self(
+		routes   => [{ hostname => 'svc.example.com', backend => '10.0.0.5' }],
+		features => ['haproxy', 'self-signed'],
+	);
+	my $result = eval { $self->_generate_service_routes_ops };
+	is($@, '', 'self-signed path is unaffected by the provided-cert bail');
+	like(generated_content($self, $result), qr{path: /variables/name=haproxy_ssl},
+		'self-signed path still emits the SAN op');
+};
+
 done_testing;
