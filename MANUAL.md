@@ -365,6 +365,39 @@ These params need to be set when using external databases:
 | `disable_tls_10` | Disable TLS 1.0? | `true` |
 | `disable_tls_11` | Disable TLS 1.1? | `true` |
 
+#### `ocfp` - HAProxy Service Route Parameters
+
+`params.ocfp_haproxy_service_routes` host-routes non-CF service UIs (e.g.
+SHIELD, Grafana, Doomsday, Concourse) through the CF haproxy, so they can
+share its public IP and TLS termination instead of needing their own.
+Requires the `haproxy` feature (an OCFP deployment enables it by default on
+most IaaSes) and generates a dynamic ops file with a host-ACL frontend rule,
+a dedicated backend, and a SAN entry on the haproxy cert for each route.
+
+| param | description | default |
+| --- | --- | --- |
+| `hostname` | The Host header to match and route (also added as a SAN on the haproxy cert) | *required* |
+| `backend` | The IP or hostname of the backend service | *required* |
+| `port` | The backend port | `443` |
+| `ssl` | `noverify` re-encrypts to the backend without verifying its certificate; `none` speaks plain HTTP to the backend | `noverify` |
+
+```yaml
+params:
+  ocfp_haproxy_service_routes:
+  - hostname: shield.example.com
+    backend: 10.0.0.20
+    port: 443
+    ssl: noverify
+  - hostname: grafana.example.com
+    backend: 10.0.0.21
+    port: 8080
+    ssl: none
+```
+
+`ssl: verify` (validating the backend's certificate against a CA bundle) is
+not supported yet -- it would require plumbing a CA bundle to the haproxy
+job, which no route in this feature currently configures.
+
 ### Windows Diego Cell Parameters
 
 #### `windows-diego-cells` - Windows Diego Cell Parameters

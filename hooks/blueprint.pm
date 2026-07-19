@@ -571,6 +571,13 @@ sub process_ocfp_features {
 	# Add custom ops files collected for OCFP
 	$self->add_files(@ops_files) if @ops_files;
 
+	# Route non-CF service UIs (shield, grafana, doomsday, concourse, etc.)
+	# through the CF haproxy via host-based ACLs. Generated last so it lands
+	# after the haproxy/tls overlays above in the merge order -- see
+	# _generate_service_routes_ops for why that ordering matters.
+	my $service_routes_ops = $self->_generate_service_routes_ops();
+	$self->add_files($service_routes_ops) if $service_routes_ops;
+
 	return $self->done();
 }
 
@@ -1137,6 +1144,108 @@ YAML
 
 	mkfile_or_fail($self->kit->path($vip_file), 0644, $content);
 	return $vip_file;
+}
+
+# _generate_service_routes_ops - render params.ocfp_haproxy_service_routes
+# into an ops file: haproxy frontend ACLs + use_backend lines, one raw_blocks
+# backend per route, and a cert SAN per hostname. Returns the kit-relative
+# file path, or undef when no routes are configured.
+#
+# Must be called after the 'haproxy' feature's ops files (overlay/routing/
+# haproxy.yml and haproxy-tls.yml) have already been added via add_files --
+# the generated ops target the haproxy job's properties and the haproxy_ssl
+# cert's SAN list, both of which are created by those overlays. Placed after
+# them in the merge order (spruce --go-patch applies ops in file order) so
+# the paths already exist when these ops run.
+sub _generate_service_routes_ops {
+	my ($self) = @_;
+
+	my $routes = $self->env->lookup('params.ocfp_haproxy_service_routes', []);
+	bail(
+		"params.ocfp_haproxy_service_routes must be an array of route hashes, got %s",
+		ref($routes) || (defined($routes) ? "'$routes'" : '<undef>')
+	) unless ref($routes) eq 'ARRAY';
+	return undef unless @$routes;
+
+	bail(
+		"params.ocfp_haproxy_service_routes is configured but the 'haproxy' ".
+		"feature is not active -- there is no CF haproxy to route through."
+	) unless $self->want_feature('haproxy');
+
+	my $dstdir = 'overlay/dynamic';
+	my $file   = "$dstdir/ocfp-haproxy-service-routes.yml";
+	my $kit_dynamic_dir = $self->kit->path($dstdir);
+	mkdir_or_fail($kit_dynamic_dir) unless -d $kit_dynamic_dir;
+
+	# Conservative DNS-name validation -- these values are interpolated
+	# straight into hand-built YAML (haproxy config lines, ops paths, and a
+	# cert SAN), so anything that isn't a plain label/hostname (colons,
+	# spaces, YAML metacharacters like a trailing ": ") must be rejected
+	# loudly here rather than silently corrupting the generated ops file or
+	# smuggling itself into a cert SAN.
+	my $hostname_re = qr/^[A-Za-z0-9]([A-Za-z0-9-]*[A-Za-z0-9])?(\.[A-Za-z0-9]([A-Za-z0-9-]*[A-Za-z0-9])?)+$/;
+	# Backend may be a bare hostname or an IP -- same character class, but a
+	# single label is fine (no forced trailing domain).
+	my $backend_re = qr/^[A-Za-z0-9]([A-Za-z0-9-]*[A-Za-z0-9])?(\.[A-Za-z0-9]([A-Za-z0-9-]*[A-Za-z0-9])?)*$/;
+
+	my (@frontend, @backends, @sans);
+	my $i = 0;
+	for my $r (@$routes) {
+		bail("params.ocfp_haproxy_service_routes[%d] requires hostname and backend", $i)
+			unless ref($r) eq 'HASH' && $r->{hostname} && $r->{backend};
+
+		bail(
+			"params.ocfp_haproxy_service_routes[%d].hostname '%s' is not a valid DNS hostname",
+			$i, $r->{hostname}
+		) unless $r->{hostname} =~ $hostname_re;
+
+		bail(
+			"params.ocfp_haproxy_service_routes[%d].backend '%s' is not a valid hostname or IP",
+			$i, $r->{backend}
+		) unless $r->{backend} =~ $backend_re;
+
+		my $port = $r->{port} // 443;
+		my $ssl  = $r->{ssl}  // 'noverify';
+		bail(
+			"params.ocfp_haproxy_service_routes[%d].ssl '%s' is invalid -- must be ".
+			"'noverify' or 'none' ('verify' is not yet supported, see MANUAL.md)",
+			$i, $ssl
+		) unless $ssl eq 'noverify' || $ssl eq 'none';
+		my $name = "ocfp_route_$i";
+
+		push @frontend, "acl host_$name req.hdr(host),host_only -i $r->{hostname}";
+		push @frontend, "use_backend $name if host_$name";
+
+		my $server = "server svc $r->{backend}:$port";
+		$server .= " ssl verify none" if $ssl eq 'noverify';
+		push @backends, [$name, "mode http\n$server\n"];
+
+		push @sans, $r->{hostname};
+		$i++;
+	}
+
+	my $content = "---\n";
+	$content .= "- type: replace\n";
+	$content .= "  path: /instance_groups/name=haproxy/jobs/name=haproxy/properties/ha_proxy/frontend_config?\n";
+	$content .= "  value:\n";
+	$content .= "  - $_\n" for @frontend;
+
+	for my $b (@backends) {
+		my ($name, $block) = @$b;
+		$content .= "- type: replace\n";
+		$content .= "  path: /instance_groups/name=haproxy/jobs/name=haproxy/properties/ha_proxy/raw_blocks?/backend/$name\n";
+		$content .= "  value: |\n";
+		$content .= "    $_\n" for split /\n/, $block;
+	}
+
+	for my $san (@sans) {
+		$content .= "- type: replace\n";
+		$content .= "  path: /variables/name=haproxy_ssl/options/alternative_names/-\n";
+		$content .= "  value: $san\n";
+	}
+
+	mkfile_or_fail($self->kit->path($file), 0644, $content);
+	return $file;
 }
 
 # }}}
