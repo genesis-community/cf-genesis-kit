@@ -1670,6 +1670,24 @@ sub _process_common_positional_features {
 	return 1;
 }
 
+# _add_trusted_certs - Automatically trust the Blacksmith CA if it has been
+# deposited in the exodus store, mirroring the org/blacksmith CA detection
+# process_ocfp_features() performs for OCFP environments. The classic
+# 'trust-blacksmith-ca' feature flag is deprecated in favour of this
+# automatic detection (there is no classic equivalent of org CA trust --
+# that overlay is OCFP-only).
+sub _add_trusted_certs {
+	my ($self) = @_;
+	my $env = $self->env;
+
+	if ($env->vault->has($env->exodus_mount.$env->name."/blacksmith","blacksmith_ca")) {
+		$self->add_files("overlay/addons/trust-blacksmith-ca.yml");
+		$self->add_files("overlay/addons/trust-blacksmith-ca-cflinuxfs3.yml")
+			if $self->want_feature("cflinuxfs3");
+	}
+	return 1;
+}
+
 sub _add_app_autoscaler_releases {
 	my ($self) = @_;
 	# If cf-app-autoscaler integration is enabled, we need to dynamically
