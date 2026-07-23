@@ -56,7 +56,7 @@ sub perform {
 		register => { type => 'flag', default => 0 },
 
 		# Direct mappings (arg name matches config key)
-		memory                   => { type => 'value', usage => '<size>M', default => "256M", validate => qr/^\d+M$/, err_msg => $size_err_msg },
+		memory                   => { type => 'value', usage => '<size>M', default => "512M", validate => qr/^\d+M$/, err_msg => $size_err_msg },
 		disk                     => { type => 'value', usage => '<size>M', default => "1024M", validate => qr/^\d+M$/, err_msg => $size_err_msg },
 		stack                    => { type => 'value', usage => '<stack-name>', default => "cflinuxfs4" },
 		buildpack                => { type => 'value', usage => '<go-buildpack-name>', default => "go_buildpack" },
