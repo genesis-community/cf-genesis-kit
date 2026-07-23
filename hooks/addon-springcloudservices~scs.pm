@@ -30,7 +30,6 @@ sub cmd_details {
 	"[[  #y{buildpack <name>}     >>Buildpack to use for the broker (default: go_buildpack)\n" .
 	"[[  #y{registry_buildpack <name>}  >>Buildpack for registry service (default: java_buildpack)\n".
 	"[[  #y{configserver_buildpack <name>} >>Buildpack for config server (default: java_buildpack)\n".
-	"[[  #y{release_tag <tag>}    >>Release tag to use (default: 2023.0.1)\n".
 	"[[  #y{broker_uri <uri>}     >>URI to download the broker from\n".
 	"[[  #y{broker_username <user>} >>Username for broker auth (default: admin)\n".
 	"[[  #y{broker_password <pwd>}  >>Password for broker auth (default: admin)\n".
@@ -63,13 +62,12 @@ sub perform {
 		buildpack                => { type => 'value', usage => '<go-buildpack-name>', default => "go_buildpack" },
 		registry_buildpack       => { type => 'value', usage => '<java-buildpack-name>', default => "java_buildpack" },
 		configserver_buildpack   => { type => 'value', usage => '<java-buildpack-name>', default => "java_buildpack" },
-		release_tag              => { type => 'value', usage => '<tag>', default => "2023.0.1" },
 		broker_uri               => { type => 'value', usage => '<uri>', validate => $uri_regexp, err_msg => $uri_err_msg,
-		                              default => $scs_broker_url . "/archive/refs/tags/v1.1.2.tar.gz" },
+		                              default => $scs_broker_url . "/archive/refs/tags/v2.0.0.tar.gz" },
 		configserver_jar_uri     => { type => 'value', usage => '<uri>', validate => $uri_regexp, err_msg => $uri_err_msg,
-		                              default => $scs_configserver_url . "/releases/download/v2.0.0-2023.0.1/spring-cloud-config-server-2.0.0-2023.0.1.jar" },
+		                              default => $scs_configserver_url . "/releases/download/v2.0.2-2025.0.2/spring-cloud-config-server-2.0.2-2025.0.2.jar" },
 		registry_jar_uri         => { type => 'value', usage => '<uri>', validate => $uri_regexp, err_msg => $uri_err_msg,
-		                              default => $scs_registry_url . "/releases/download/v2.0.0-3.4.0/service-registry-2.0.0-3.4.0.jar" },
+		                              default => $scs_registry_url . "/releases/download/v2.0.2-4.3.2/service-registry-2.0.2-4.3.2.jar" },
 		java_version             => { type => 'value', usage => '<version>', default => "17.+" },
 		skip_ssl_validation      => { type => 'value', usage => '<true|false>', default => "true", validate => qr/^(true|false)$/,
 		                              err_msg => "must be 'true' or 'false'" },
@@ -183,7 +181,7 @@ sub perform {
 		$self->fetch_artifacts( $config{configserver_jar_uri}, $config{registry_jar_uri} );
 
 		# Create .go-version file
-		mkfile_or_fail( ".go-version", "1.22\n" );
+		mkfile_or_fail( ".go-version", "1.26\n" );
 
 		# Create JSON for broker config
 		my $broker_config = {
@@ -252,7 +250,7 @@ applications:
     health-check-type: port
     env:
       GOPACKAGENAME: scs-broker
-      GO_VERSION: 1.22
+      GO_VERSION: 1.26
       SCS_BROKER_CONFIG: |-
 $broker_config_json
 MANIFEST
