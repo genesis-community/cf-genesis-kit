@@ -111,6 +111,9 @@ sub perform {
 				next;
 			}
 
+			# Reduce file:///abs/path URIs to plain /abs/path (fetch_uri copies local files)
+			$value =~ s{^file://(?=/)}{};
+
 			# Validate value if a validation pattern is provided; a value naming an
 			# existing local file is accepted as-is (fetch_uri copies local files)
 			if ($arg_info->{validate} && $value !~ $arg_info->{validate} && !-f $value) {
