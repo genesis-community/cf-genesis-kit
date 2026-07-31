@@ -180,7 +180,10 @@ sub perform {
 
 		# Find the extracted directory and change into it
 		my ($broker_dir) = glob("scs-broker-*");
-		bail("Failed to find extracted broker directory") unless $broker_dir && -d $broker_dir;
+		bail(
+			"Failed to find extracted broker directory (workdir contains: %s)",
+			join(", ", glob("*")) || "nothing"
+		) unless $broker_dir && -d $broker_dir;
 		pushd($broker_dir);
 
 		# Create artifacts directory and download files
@@ -356,15 +359,17 @@ sub extract {
 
 	info("Extracting $archive...");
 
+	my ($out, $rc);
 	if ( $archive =~ /\.zip$/ ) {
-		run('unzip', '-o', $archive);
+		($out, $rc) = run('unzip', '-o', $archive);
 	}
 	elsif ( $archive =~ /\.t?gz$/ ) {
-		run('tar', 'zxf', $archive);
+		($out, $rc) = run('tar', 'zxf', $archive);
 	}
 	else {
 		bail("Unknown file type: $archive");
 	}
+	bail("Failed to extract %s (rc=%s):\n%s", $archive, $rc, $out // '') if $rc;
 	unlink($archive) or warn "Failed to remove archive $archive: $!";
 }
 
