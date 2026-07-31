@@ -111,8 +111,9 @@ sub perform {
 				next;
 			}
 
-			# Validate value if a validation pattern is provided
-			if ($arg_info->{validate} && $value !~ $arg_info->{validate}) {
+			# Validate value if a validation pattern is provided; a value naming an
+			# existing local file is accepted as-is (fetch_uri copies local files)
+			if ($arg_info->{validate} && $value !~ $arg_info->{validate} && !-f $value) {
 				push @errors, sprintf(
 					"%s %s",
 					$key, $arg_info->{err_msg} // "must match pattern $arg_info->{validate}"
