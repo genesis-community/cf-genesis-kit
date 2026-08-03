@@ -41,6 +41,7 @@ sub perform {
 
 	# 2. Cloud Config checks
 	info("checking BOSH Cloud Config meets requirements of generated manifest...");
+	$self->{cc_ok} = 'yes';
 
 	my $manifest_json = $self->get_manifest_json();
 

@@ -141,6 +141,7 @@ sub process_classic_features {
 		|| $blobstore ne "+internal-blobstore";
 
 	my @direct_features = qw{
+		tls self-signed
 		compiled-releases
 		small-footprint cf-deployment/operations/scale-to-one-az
 		v1-vm-types v2-nats-credentials
@@ -1060,6 +1061,7 @@ sub validate_classic_features {
 	my @valid_features = (
 		'bare',
 		'partitioned-network',
+		'small-footprint',
 		'haproxy',
 		'tls',
 		'self-signed',
