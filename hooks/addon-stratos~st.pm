@@ -97,14 +97,18 @@ sub _get_stratos_info {
 	#my @deployments = $self->bosh->deployments();
 	#$deployment_exists = grep { $_ eq $deployment_name } @deployments;
 
-	# Get Stratos information from environment
-	my $system_domain  = $env->lookup( 'cf.system_domain', '' );
-	my $apps_domain    = $env->lookup( 'cf.apps_domain',   '' );
+	# Get Stratos information from environment; env-file cf.* params override,
+	# with the kit's own exodus data (api_domain/system_domain/apps_domain) as
+	# the default source, so no extra env params are needed to deploy.
+	my $exodus         = $self->exodus_data;
+	my $system_domain  = $env->lookup( 'cf.system_domain', '' ) || $exodus->{system_domain} // '';
+	my $apps_domain    = $env->lookup( 'cf.apps_domain',   '' ) || $exodus->{apps_domain}   // '';
 	my $stratos_domain = '';
 	my $stratos_url    = '';
 
 	# Get CF configuration
-	my $cf_api      = $env->lookup( 'cf.api_url',          '' );
+	my $cf_api      = $env->lookup( 'cf.api_url', '' )
+		|| ( $exodus->{api_domain} ? "https://$exodus->{api_domain}" : '' );
 	my $cf_org      = $env->lookup( 'stratos.cf_org',      'system' );
 	my $cf_space    = $env->lookup( 'stratos.cf_space',    'stratos' );
 	my $cf_app_name = $env->lookup( 'stratos.cf_app_name', 'apps' );
@@ -380,17 +384,18 @@ sub deploy_stratos {
 
 	# Get environment config and exodus data
 	my $data              = $self->exodus_data;
-	my $system_api_domain = $data->{cf}{api_url} || '';
+	my $system_api_domain = $info->{cf_api} || '';
 	$system_api_domain =~ s/^https?:\/\///;    # Remove protocol
 
-	# Get database connection information
-	my $stratos_db_scheme   = $data->{stratos}{db}{scheme}   || 'postgres';
-	my $stratos_db_hostname = $data->{stratos}{db}{hostname} || '';
-	my $stratos_db_username = $data->{stratos}{db}{username} || 'stratos';
-	my $stratos_db_password = $data->{stratos}{db}{password} || 'stratos';
-	my $stratos_db_port     = $data->{stratos}{db}{port}     || 5432;
-	my $stratos_db_database = $data->{stratos}{db}{database} || 'stratos';
-	my $stratos_db_sslmode  = $data->{stratos}{db}{sslmode}  || 'disabled';
+	# Get database connection information - already resolved by
+	# _get_stratos_info (env params in classic mode, vault in ocfp mode)
+	my $stratos_db_scheme   = $info->{db}{scheme}   || 'postgres';
+	my $stratos_db_hostname = $info->{db}{hostname} || '';
+	my $stratos_db_username = $info->{db}{username} || 'stratos';
+	my $stratos_db_password = $info->{db}{password} || 'stratos';
+	my $stratos_db_port     = $info->{db}{port}     || 5432;
+	my $stratos_db_database = $info->{db}{database} || 'stratos';
+	my $stratos_db_sslmode  = $info->{db}{sslmode}  || 'disabled';
 
 	# Get or generate session store secret
 	my $stratos_session_store_sekret =
@@ -425,9 +430,9 @@ sub deploy_stratos {
 "https://github.com/cloudfoundry/stratos/releases/download/v${stratos_version}/stratos-ui-v${stratos_version}.zip";
 	my $stratos_sso_options = $env->lookup( 'stratos.sso_options', 'nosplash, logout' );
 
-	# Domain setup
-	my $apps_domain    = $env->lookup( 'cf.apps_domain', '' );
-	my $stratos_domain = "console.${apps_domain}";
+	# Domain setup - already resolved by _get_stratos_info (console.<apps_domain>
+	# in classic mode, the ocfp fqdns entry from vault in ocfp mode)
+	my $stratos_domain = $info->{stratos_domain} || "console." . $info->{apps_domain};
 
 	# Get file or download Stratos release
 	my $chdir = $tmp_dir;
