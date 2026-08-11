@@ -5,6 +5,7 @@ use warnings;    # Genesis min perl version is 5.20
 use Genesis       qw/bail info warning run/;
 use Genesis::Term qw/terminal_width/;
 use Genesis::UI   qw/prompt_for_boolean/;
+use JSON::PP      qw//;
 
 # Only needed for development
 BEGIN { push @INC, $ENV{GENESIS_LIB} ? $ENV{GENESIS_LIB} : $ENV{HOME} . './.genesis/lib'; }
@@ -495,28 +496,12 @@ sub deploy_stratos {
 	bail("Failed to query service instances") if $svc_rc != 0;
 
 	# Parse the JSON to check if our service exists
-	my $svc_exists = '';
-	my ( $jq_out, $jq_rc ) =
-	  run(
-			{interactive => 0, stderr => 0}, 'jq', '-r', ".resources[]|select(.name|test(\"${svc_name}\"))|.name"
-		);
-	if ( $jq_rc == 0 ) {
-
-		# Write the service list to a temp file for jq processing
-		my $temp_svc_file = "$tmp_dir/services.json";
-		open my $svc_fh, '>', $temp_svc_file
-		  or bail("Cannot write to $temp_svc_file: $!");
-		print $svc_fh $svc_list;
-		close $svc_fh;
-
-		( $svc_exists, $jq_rc ) = run(
-			{interactive => 0, stderr => 0},
-			'jq', '-r', ".resources[]|select(.name|test(\"${svc_name}\"))|.name",
-			$temp_svc_file
-		);
-		chomp($svc_exists) if $jq_rc == 0;
-		unlink $temp_svc_file;
-	}
+	my $svc_data = eval { JSON::PP->new->utf8->decode($svc_list) };
+	bail( "Failed to parse service instance list from CF: %s", $@ ) if $@;
+	my ($svc_exists) =
+	  grep { $_ eq $svc_name }
+	  map  { $_->{name} // '' } @{ $svc_data->{resources} || [] };
+	$svc_exists //= '';
 
 	# Prepare database connection JSON using spruce
 	open my $db_fh, '>', "$tmp_dir/db.yml"
