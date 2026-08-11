@@ -618,10 +618,16 @@ sub _validate_vendored_compiled_releases {
 	return unless -f $ops_path;
 
 	# Effective stemcell OS, mirroring overlay merge order: env params override
-	# ocfp/pve/stemcell.yml (noble, PVE invariant), which overrides the
-	# overlay/base.yml default (jammy).
-	my $stemcell_os = $self->env->lookup('params.stemcell_os',
-		$iaas eq 'pve' ? 'ubuntu-noble' : 'ubuntu-jammy');
+	# ocfp/pve/stemcell.yml (noble, a PVE invariant), which overrides the
+	# overlay/base.yml default. Both are noble since cf-deployment v56.4.0, so
+	# the two layers no longer differ and one fallback covers every iaas.
+	#
+	# WARNING: this fallback duplicates overlay/base.yml's stemcell_os. The
+	# hook runs before the merge and so cannot read the effective value --
+	# base.yml is one of the files this very hook returns. Change the default
+	# there and you must change it here, or the comparison below inverts:
+	# it bails on matching pairs and passes mismatched ones.
+	my $stemcell_os = $self->env->lookup('params.stemcell_os', 'ubuntu-noble');
 
 	my %lineages = map { ($_ => 1) } (slurp($ops_path) =~ /^\s*os:\s*["']?([\w.-]+)/mg);
 	my @foreign = sort grep { $_ ne $stemcell_os } keys %lineages;
