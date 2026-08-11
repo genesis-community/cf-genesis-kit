@@ -441,19 +441,16 @@ sub deploy_stratos {
 	if ( $options{file} && -f $options{file} ) {
 		info( "Using provided Stratos file: %s", $options{file} );
 		run(
-			{interactive => 0},
-			{ onfailure => "Failed to unzip Stratos file" }, 'unzip', '-o', $options{file}
+			{interactive => 0, onfailure => "Failed to unzip Stratos file"}, 'unzip', '-o', $options{file}
 		);
 	}
 	else {
 		info( "Downloading Stratos %s...", $stratos_version );
 		run(
-			{interactive => 0},
-			{ onfailure => "Failed to download Stratos" }, 'wget', $stratos_releases_url
+			{interactive => 0, onfailure => "Failed to download Stratos"}, 'wget', $stratos_releases_url
 		);
 		run(
-			{interactive => 0},
-			{ onfailure => "Failed to unzip Stratos" },
+			{interactive => 0, onfailure => "Failed to unzip Stratos"},
 			'unzip', '-o', "stratos-ui-${stratos_version}.zip"
 		);
 		unlink("stratos-ui-${stratos_version}.zip");
@@ -462,13 +459,11 @@ sub deploy_stratos {
 	# Target the correct CF organization and space
 	info("Targeting CF organization 'system' and space 'stratos'...");
 	run(
-		{interactive => 0},
-		{ onfailure => "Failed to create space" },
+			{interactive => 0, onfailure => "Failed to create space"},
 		'cf', 'create-space', '-o', 'system', 'stratos'
 	);
 	run(
-		{interactive => 0},
-		{ onfailure => "Failed to target space" },
+			{interactive => 0, onfailure => "Failed to target space"},
 		'cf', 'target', '-o', 'system', '-s', 'stratos'
 	);
 
@@ -479,24 +474,21 @@ sub deploy_stratos {
 	# Check if service already exists
 	my ( $org_guid, $org_rc ) =
 	  run(
-			{interactive => 0},
-			{ stderr => 0 }, 'cf', 'org', 'system', '--guid'
+			{interactive => 0, stderr => 0}, 'cf', 'org', 'system', '--guid'
 		);
 	bail("Failed to get organization GUID") if $org_rc != 0;
 	chomp($org_guid);
 
 	my ( $space_guid, $space_rc ) =
 	  run(
-			{interactive => 0},
-			{ stderr => 0 }, 'cf', 'space', 'stratos', '--guid'
+			{interactive => 0, stderr => 0}, 'cf', 'space', 'stratos', '--guid'
 		);
 	bail("Failed to get space GUID") if $space_rc != 0;
 	chomp($space_guid);
 
 	# Check if service exists using CF API
 	my ( $svc_list, $svc_rc ) = run(
-		{interactive => 0},
-		{ stderr => 0 },
+			{interactive => 0, stderr => 0},
 		'cf', 'curl',
 		"/v3/service_instances?organization_guids=${org_guid}&space_guids=${space_guid}"
 	);
@@ -506,8 +498,7 @@ sub deploy_stratos {
 	my $svc_exists = '';
 	my ( $jq_out, $jq_rc ) =
 	  run(
-			{interactive => 0},
-			{ stderr => 0 }, 'jq', '-r', ".resources[]|select(.name|test(\"${svc_name}\"))|.name"
+			{interactive => 0, stderr => 0}, 'jq', '-r', ".resources[]|select(.name|test(\"${svc_name}\"))|.name"
 		);
 	if ( $jq_rc == 0 ) {
 
@@ -519,8 +510,7 @@ sub deploy_stratos {
 		close $svc_fh;
 
 		( $svc_exists, $jq_rc ) = run(
-			{interactive => 0},
-			{ stderr => 0 },
+			{interactive => 0, stderr => 0},
 			'jq', '-r', ".resources[]|select(.name|test(\"${svc_name}\"))|.name",
 			$temp_svc_file
 		);
@@ -544,8 +534,7 @@ EOF
 
 	my ( $db_json, $rc_db ) =
 	  run(
-			{interactive => 0},
-			{ stderr => 0 }, 'spruce', 'json', "$tmp_dir/db.yml"
+			{interactive => 0, stderr => 0}, 'spruce', 'json', "$tmp_dir/db.yml"
 		);
 	bail("Failed to convert database config to JSON") if $rc_db != 0;
 	chomp($db_json);
@@ -561,16 +550,14 @@ EOF
 	if ( $svc_exists eq $svc_name ) {
 		info( "Service %s was found, updating existing cups service definition.", $svc_name );
 		run(
-			{interactive => 0},
-			{ onfailure => "Failed to update service" },
+			{interactive => 0, onfailure => "Failed to update service"},
 			'cf', 'uups', $svc_name, '-p', $db_json_file
 		);
 	}
 	else {
 		info( "Service %s was not found, creating cups service definition.", $svc_name );
 		run(
-			{interactive => 0},
-			{ onfailure => "Failed to create service" },
+			{interactive => 0, onfailure => "Failed to create service"},
 			'cf', 'cups', $svc_name, '-p', $db_json_file
 		);
 	}
