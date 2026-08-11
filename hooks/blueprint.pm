@@ -1310,6 +1310,7 @@ sub validate_classic_features {
 		'bare',
 		'partitioned-network',
 		'small-footprint',
+		'compiled-releases',
 		'haproxy',
 		'no-haproxy', 'external-lb', # opt out of default-on haproxy
 		'tls',
