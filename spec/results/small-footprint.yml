@@ -2301,9 +2301,9 @@ releases:
   url: https://bosh.io/d/github.com/bosh-packages/cf-cli-release?v=1.67.0
   version: 1.67.0
 - name: haproxy
-  sha1: 70acc9dfcd550c8efbd85287f82ce7a396e46a0a
-  url: https://bosh.io/d/github.com/cloudfoundry-incubator/haproxy-boshrelease?v=12.1.0%2B2.7.7
-  version: 12.1.0+2.7.7
+  sha1: sha256:0a16acf438f7e10eafc728229b1aeb6342fcca8ade8f1ad42ddb101e7f37fb17
+  url: https://bosh.io/d/github.com/cloudfoundry-incubator/haproxy-boshrelease?v=15.3.0%2B2.8.16
+  version: 15.3.0+2.8.16
 - name: postgres
   sha1: c00282991b51ca0b3a7399c1c96fb18eff907659
   url: https://bosh.io/d/github.com/cloudfoundry/postgres-release?v=52

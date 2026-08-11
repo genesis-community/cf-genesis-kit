@@ -43,6 +43,17 @@ sub perform {
 	$self->{raw_features} = [$self->features]; # Get raw features from env
 	$self->{params} = $self->env->params->{params} // {}; # Get environment parameters
 
+	# The HAProxy default is IaaS-aware: opt-out on aws/gcp/azure (platform LB
+	# fronts the routers), default-on elsewhere. The features hook resolves
+	# this for the persisted feature list, but blueprint reads the raw env
+	# feature list via want_feature()/iteration, so resolve it here too.
+	#   - explicit 'haproxy' keeps haproxy on any IaaS (no double-add)
+	#   - opt out with 'no-haproxy' (alias 'external-lb'; deprecated 'omit-haproxy')
+	#   - listing both is a hard error
+	# When opted out, the haproxy ops file + TLS overlays and the haproxy
+	# cloud-config allocation are skipped; routers are exposed for external LB.
+	$self->_resolve_haproxy_default();
+
 	# Override instance counts if small-footprint is requested
 	if ($self->want_feature('small-footprint')) {
 		for my $instance_group (keys $self->_is_instance_group->%*) {
@@ -355,9 +366,63 @@ sub process_ocfp_features {
 
 	# Need to add compiled releases here, because external db selection
 	# deletes a path for pxc and upstream will fail to find it.
-	if (!$self->want_feature('source-releases')) {
+	# Gate the vendored upstream file behind an explicit opt-in feature.
+	# The vendored use-compiled-releases.yml targets xenial/jammy stemcells
+	# and is stale for noble. When ocfp supplies its own compiled-release pin
+	# (env-level ops layered after kit ops) this file must not be included, or
+	# its stale URLs and sha1 values conflict. Omit it unless the operator
+	# explicitly requests it via the 'vendored-compiled-releases' feature.
+	if (!$self->want_feature('source-releases') && $self->want_feature('vendored-compiled-releases')) {
+		$self->_validate_vendored_compiled_releases($iaas);
 		$self->add_files(
 			"cf-deployment/operations/use-compiled-releases.yml",
+		);
+	}
+
+	# PVE bloc invariant: ubuntu-noble only (the OCFP PVE CPI is built and
+	# tested against noble; jammy is unsupported). The base overlay defaults
+	# the stemcell to jammy, so force noble for PVE regardless of which
+	# cf-deployment version is in play.
+	if ($iaas eq 'pve') {
+		$self->add_files("ocfp/pve/stemcell.yml");
+
+		if (-f $self->kit->path("cf-deployment/operations/use-noble-stemcell.yml")) {
+			# Pre-noble-default cf-deployment (e.g. 52.0.0): jammy is the default
+			# and use-compiled-releases.yml is jammy-compiled, so it cannot pair
+			# with the noble stemcell PVE requires. Swap to noble via the upstream
+			# ops file and compile from source.
+			if (!$self->want_feature('source-releases')) {
+				$self->kit_bug(
+					"On PVE this cf-deployment defaults to jammy; its jammy-compiled\n"
+				  . "use-compiled-releases.yml is incompatible with the required\n"
+				  . "noble stemcell. Add the 'source-releases' feature, or select a\n"
+				  . "cf-deployment that defaults to noble (e.g. the\n"
+				  . "'cf-deployment-version-56.5.0' feature) whose compiled releases\n"
+				  . "are noble-built and work with 'compiled-releases'."
+				);
+			}
+			$self->add_files(
+				"cf-deployment/operations/use-noble-stemcell.yml",
+			);
+		}
+		# else: cf-deployment defaults to noble (upstream removed
+		# use-noble-stemcell.yml once noble became the default). Its compiled
+		# releases are noble-compiled and bundle a cgroup-v2-clean bpm, so no
+		# stemcell swap or source compile is needed -- 'compiled-releases' works
+		# as-is on PVE.
+
+		# Deploy-time wall-clock optimization ops for PVE. Order is load-bearing:
+		# 1. ops-serialize-deploy: set /update/serial true as the baseline so
+		#    stateful singletons (database, singleton-blobstore) remain sequential.
+		# 2. no-canaries: zero the canary count to avoid the haproxy/bosh-dns
+		#    deadlock on fresh deploys.
+		# 3. ops-deserialize-igs: LAST — per-IG serial:false on the stateless route
+		#    tier (router, tcp-router, diego-cell) so they roll in parallel. Must
+		#    win over the deployment-level settings set by the files above.
+		$self->add_files(
+			"ocfp/pve/ops-serialize-deploy.yml",
+			"ocfp/pve/no-canaries.yml",
+			"ocfp/pve/ops-deserialize-igs.yml",
 		);
 	}
 
@@ -391,8 +456,9 @@ sub process_ocfp_features {
 
 	# Process the remaining requested features in order
 	my @handled_features = (
-		'ocfp',' self-signed', 'small-footprint',
-		'source-releases', 'use-jammy', 'isolation-segments',
+		'ocfp', 'self-signed', 'small-footprint',
+		'source-releases', 'use-jammy', 'vendored-compiled-releases',
+		'isolation-segments',
 		'cf-deployment/operations/scale-to-one-az',
 		$blobstore, '+internal-db', 'local-postgres-db',
 		'local-mysql-db', 'mysql-db', 'postgres-db',
@@ -516,6 +582,13 @@ sub process_ocfp_features {
 	# Add custom ops files collected for OCFP
 	$self->add_files(@ops_files) if @ops_files;
 
+	# Route non-CF service UIs (shield, grafana, doomsday, concourse, etc.)
+	# through the CF haproxy via host-based ACLs. Generated last so it lands
+	# after the haproxy/tls overlays above in the merge order -- see
+	# _generate_service_routes_ops for why that ordering matters.
+	my $service_routes_ops = $self->_generate_service_routes_ops();
+	$self->add_files($service_routes_ops) if $service_routes_ops;
+
 	return $self->done();
 }
 
@@ -528,6 +601,41 @@ sub _gopatch_replace {
 sub _gopatch_remove {
 	my ($self, $path) = @_;
 	return "  - type: remove\n    path: ${path}\n";
+}
+
+# _validate_vendored_compiled_releases - Bail when the vendored
+# use-compiled-releases.yml pins blobs compiled against a different stemcell
+# lineage than the one this environment deploys. The ops file ships inside
+# whichever cf-deployment tree is present at render time (bundled, or swapped
+# in by a cf-deployment-version-* feature), so its lineage is only knowable by
+# reading the file itself. A mismatch deploys fine and then fails at runtime
+# against the wrong stemcell ABI, so catch it here instead.
+sub _validate_vendored_compiled_releases {
+	my ($self, $iaas) = @_;
+
+	my $ops_path = $self->kit->path("cf-deployment/operations/use-compiled-releases.yml");
+	return unless -f $ops_path;
+
+	# Effective stemcell OS, mirroring overlay merge order: env params override
+	# ocfp/pve/stemcell.yml (noble, PVE invariant), which overrides the
+	# overlay/base.yml default (jammy).
+	my $stemcell_os = $self->env->lookup('params.stemcell_os',
+		$iaas eq 'pve' ? 'ubuntu-noble' : 'ubuntu-jammy');
+
+	my %lineages = map { ($_ => 1) } (slurp($ops_path) =~ /^\s*os:\s*["']?([\w.-]+)/mg);
+	my @foreign = sort grep { $_ ne $stemcell_os } keys %lineages;
+	return unless @foreign;
+
+	bail(
+		"The vendored #c{use-compiled-releases.yml} in the current cf-deployment ".
+		"tree pins\nreleases compiled for #Y{%s}, but environment #C{%s} deploys ".
+		"the #Y{%s}\nstemcell. Compiled blobs only run on the stemcell lineage ".
+		"they were built\nagainst. Either select a cf-deployment whose compiled ".
+		"releases match the\nstemcell (e.g. a #c{cf-deployment-version-*} feature ".
+		"with %s-built blobs),\nor drop #c{vendored-compiled-releases} and compile ".
+		"from source or supply an\nenv-level compiled-release pin.",
+		join(', ', @foreign), $self->env->name, $stemcell_os, $stemcell_os
+	);
 }
 
 # handle_custom_cf_versions - Handle custom cf-deployment versions if present
@@ -1049,6 +1157,128 @@ YAML
 	return $vip_file;
 }
 
+# _generate_service_routes_ops - render params.ocfp_haproxy_service_routes
+# into an ops file: haproxy frontend ACLs + use_backend lines, one raw_blocks
+# backend per route, and a cert SAN per hostname. Returns the kit-relative
+# file path, or undef when no routes are configured.
+#
+# Must be called after the 'haproxy' feature's ops files (overlay/routing/
+# haproxy.yml and haproxy-tls.yml) have already been added via add_files --
+# the generated ops target the haproxy job's properties and the haproxy_ssl
+# cert's SAN list, both of which are created by those overlays. Placed after
+# them in the merge order (spruce --go-patch applies ops in file order) so
+# the paths already exist when these ops run.
+sub _generate_service_routes_ops {
+	my ($self) = @_;
+
+	my $routes = $self->env->lookup('params.ocfp_haproxy_service_routes', []);
+	bail(
+		"params.ocfp_haproxy_service_routes must be an array of route hashes, got %s",
+		ref($routes) || (defined($routes) ? "'$routes'" : '<undef>')
+	) unless ref($routes) eq 'ARRAY';
+	return undef unless @$routes;
+
+	bail(
+		"params.ocfp_haproxy_service_routes is configured but the 'haproxy' ".
+		"feature is not active -- there is no CF haproxy to route through."
+	) unless $self->want_feature('haproxy');
+
+	# The SAN ops below add each route hostname to the haproxy_ssl cert.
+	# On the provided-cert path (TLS/OCFP active, 'self-signed' not
+	# requested), overlay/routing/haproxy-provided-cert.yml deletes the
+	# haproxy_ssl variable entirely -- this kit cannot add SANs to a cert
+	# an operator brings, so surface that as a clear bail rather than let
+	# the SAN ops fail cryptically at go-patch merge time.
+	bail(
+		"params.ocfp_haproxy_service_routes requires the 'self-signed' feature -- ".
+		"these routes' hostnames are added as SANs on the haproxy_ssl cert, but ".
+		"an operator-provided cert (the default once TLS is on without ".
+		"'self-signed') is not something this kit can add SANs to. Add ".
+		"'self-signed', or remove the routes param and ensure your provided ".
+		"cert already covers these hostnames."
+	) unless $self->want_feature('self-signed');
+
+	my $dstdir = 'overlay/dynamic';
+	my $file   = "$dstdir/ocfp-haproxy-service-routes.yml";
+	my $kit_dynamic_dir = $self->kit->path($dstdir);
+	mkdir_or_fail($kit_dynamic_dir) unless -d $kit_dynamic_dir;
+
+	# Conservative DNS-name validation -- these values are interpolated
+	# straight into hand-built YAML (haproxy config lines, ops paths, and a
+	# cert SAN), so anything that isn't a plain label/hostname (colons,
+	# spaces, YAML metacharacters like a trailing ": ") must be rejected
+	# loudly here rather than silently corrupting the generated ops file or
+	# smuggling itself into a cert SAN.
+	my $hostname_re = qr/^[A-Za-z0-9]([A-Za-z0-9-]*[A-Za-z0-9])?(\.[A-Za-z0-9]([A-Za-z0-9-]*[A-Za-z0-9])?)+$/;
+	# Backend may be a bare hostname or an IP -- same character class, but a
+	# single label is fine (no forced trailing domain).
+	my $backend_re = qr/^[A-Za-z0-9]([A-Za-z0-9-]*[A-Za-z0-9])?(\.[A-Za-z0-9]([A-Za-z0-9-]*[A-Za-z0-9])?)*$/;
+
+	my (@frontend, @backends, @sans);
+	my $i = 0;
+	for my $r (@$routes) {
+		bail("params.ocfp_haproxy_service_routes[%d] requires hostname and backend", $i)
+			unless ref($r) eq 'HASH' && $r->{hostname} && $r->{backend};
+
+		bail(
+			"params.ocfp_haproxy_service_routes[%d].hostname '%s' is not a valid DNS hostname",
+			$i, $r->{hostname}
+		) unless $r->{hostname} =~ $hostname_re;
+
+		bail(
+			"params.ocfp_haproxy_service_routes[%d].backend '%s' is not a valid hostname or IP",
+			$i, $r->{backend}
+		) unless $r->{backend} =~ $backend_re;
+
+		my $port = $r->{port} // 443;
+		bail(
+			"params.ocfp_haproxy_service_routes[%d].port '%s' is invalid -- must ".
+			"be an integer between 1 and 65535",
+			$i, $port
+		) unless $port =~ /^[0-9]+$/ && $port >= 1 && $port <= 65535;
+		my $ssl  = $r->{ssl}  // 'noverify';
+		bail(
+			"params.ocfp_haproxy_service_routes[%d].ssl '%s' is invalid -- must be ".
+			"'noverify' or 'none' ('verify' is not yet supported, see MANUAL.md)",
+			$i, $ssl
+		) unless $ssl eq 'noverify' || $ssl eq 'none';
+		my $name = "ocfp_route_$i";
+
+		push @frontend, "acl host_$name req.hdr(host),host_only -i $r->{hostname}";
+		push @frontend, "use_backend $name if host_$name";
+
+		my $server = "server svc $r->{backend}:$port";
+		$server .= " ssl verify none" if $ssl eq 'noverify';
+		push @backends, [$name, "mode http\n$server\n"];
+
+		push @sans, $r->{hostname};
+		$i++;
+	}
+
+	my $content = "---\n";
+	$content .= "- type: replace\n";
+	$content .= "  path: /instance_groups/name=haproxy/jobs/name=haproxy/properties/ha_proxy/frontend_config?\n";
+	$content .= "  value:\n";
+	$content .= "  - $_\n" for @frontend;
+
+	for my $b (@backends) {
+		my ($name, $block) = @$b;
+		$content .= "- type: replace\n";
+		$content .= "  path: /instance_groups/name=haproxy/jobs/name=haproxy/properties/ha_proxy/raw_blocks?/backend/$name\n";
+		$content .= "  value: |\n";
+		$content .= "    $_\n" for split /\n/, $block;
+	}
+
+	for my $san (@sans) {
+		$content .= "- type: replace\n";
+		$content .= "  path: /variables/name=haproxy_ssl/options/alternative_names/-\n";
+		$content .= "  value: $san\n";
+	}
+
+	mkfile_or_fail($self->kit->path($file), 0644, $content);
+	return $file;
+}
+
 # }}}
 # get_instance_count_for - Get the instance count for a given instance group
 sub get_instance_count_for {
@@ -1079,6 +1309,7 @@ sub validate_classic_features {
 		'bare',
 		'partitioned-network',
 		'haproxy',
+		'no-haproxy', 'external-lb', # opt out of default-on haproxy
 		'tls',
 		'self-signed',
 		'cflinuxfs3', 'cflinuxfs4',
@@ -1109,7 +1340,7 @@ sub validate_classic_features {
 
 		# Blobstores:
 		'aws-blobstore',   'azure-blobstore',   'gcp-blobstore',
-		'minio-blobstore', 'stackit-blobstore',
+		'minio-blobstore', 'stackit-blobstore', 'pve-blobstore',
 
 		# Blobstore support:
 		'blobstore-suffix',
@@ -1205,7 +1436,14 @@ sub validate_ocfp_features {
 		'small-footprint',
 		'source-releases',
 		'use-jammy',
+		# Opt-in: include the vendored cf-deployment use-compiled-releases.yml.
+		# That file targets xenial/jammy compiled tarballs and is intentionally
+		# excluded by default on noble. Only add this feature when you are certain
+		# the vendored file matches your stemcell and have not supplied an ocfp
+		# compiled-release pin via env-level ops.
+		'vendored-compiled-releases',
 		'haproxy',
+		'no-haproxy', 'external-lb', # opt out of default-on haproxy
 		'self-signed',
 		'cflinuxfs3',
 		'isolation-segments',
@@ -1218,7 +1456,7 @@ sub validate_ocfp_features {
 		'smb-volume-services',
 
 		# Blobstores:
-		'+internal-blobstore',
+		'+internal-blobstore', 'pve-blobstore',
 
 		# Blobstore support:
 		'blobstore-suffix',
@@ -1291,18 +1529,35 @@ sub validate_ocfp_features {
 		# Add the iaas-specific blobstore feature
 		my $type = $self->iaas;
 		$type = "minio" if $type eq "vsphere"; # vsphere uses minio blobstore
-		if (-f $self->kit->path("overlay/blobstore/${type}.yml")) {
-			$self->set_features($self->features, "${type}-blobstore");
+		# PVE has no native object store. Default behaviour falls back to the
+		# BOSH internal blobstore (WebDAV); operators with an S3-compatible
+		# endpoint (RustFS, MinIO, etc.) provisioned alongside the bloc opt
+		# in by adding `pve-blobstore` to features.
+		if ($type eq "pve" && !$self->want_feature("pve-blobstore")) {
+			$self->set_features($self->features, "+internal-blobstore");
+		} elsif (-f $self->kit->path("overlay/blobstore/${type}.yml")) {
+			# Only add the derived <iaas>-blobstore feature if it isn't already
+			# requested explicitly; set_features() replaces (does not dedupe) the
+			# list, so re-adding an explicit feature here yields a duplicate that
+			# trips requested_blobstore()'s "Conflicting blobstore features" bail.
+			$self->set_features($self->features, "${type}-blobstore")
+				unless $self->want_feature("${type}-blobstore");
 		} else {
 			bail("OCFP blobstores are not supported on #c{$type} IaaS.");
 		}
 	}
 	# Handle OCFP database selection
 	if (!$self->want_feature('+internal-db')) {
-		# Add the iaas-specific database feature
-		$self->set_features(
-			$self->features, 'postgres-db' # FIXME: Postgres is currently the only supported database for OCFP
-		);
+		my $type = $self->iaas;
+		# PVE has no managed DB service — fall back to BOSH internal db
+		if ($type eq "pve") {
+			$self->set_features($self->features, "+internal-db");
+		} else {
+			# Add the iaas-specific database feature
+			$self->set_features(
+				$self->features, 'postgres-db' # FIXME: Postgres is currently the only supported database for OCFP
+			);
+		}
 	}
 }
 
@@ -1314,6 +1569,7 @@ sub requested_blobstore {
 	my @valid_blobstores = qw(
 		+internal-blobstore  aws-blobstore  azure-blobstore
 		stackit-blobstore    gcp-blobstore  minio-blobstore
+		pve-blobstore
 	);
 
 	my @requested_blobstores = grep {in_array($_, @valid_blobstores)} $self->features;
@@ -1460,12 +1716,51 @@ sub enable_windows_diego_cells {
 	return 1;
 }
 
+# _resolve_haproxy_default - IaaS-aware haproxy default with explicit override {{{
+sub _resolve_haproxy_default {
+	my ($self) = @_;
+
+	my %opt_out = map { ($_ => 1) } qw/no-haproxy external-lb omit-haproxy/;
+	my @current = $self->features;
+	my ($opt_out_marker) = grep { $opt_out{$_} } @current;
+	my $has_haproxy = grep { $_ eq 'haproxy' } @current;
+
+	bail(
+		"Conflicting features: environment #C{%s} lists both #c{haproxy} and ".
+		"#c{%s}.\nKeep #c{haproxy} to deploy the kit-managed haproxy, or keep ".
+		"#c{%s} to expose\nthe routers for an external load balancer -- not both.",
+		$self->env->name, $opt_out_marker, $opt_out_marker
+	) if $has_haproxy && $opt_out_marker;
+
+	# On aws, gcp, and azure the platform load balancer fronts the routers, so
+	# haproxy defaults to opt-out there; on all other IaaSes it defaults to on.
+	my $iaas_defaults_off = ($self->iaas // '') =~ /^(aws|gcp|azure)$/;
+
+	if ($opt_out_marker || ($iaas_defaults_off && !$has_haproxy)) {
+		# No haproxy: strip it so no ops file / static IP is added. Drop the
+		# opt-out markers themselves; they are not real ops features and would
+		# otherwise hit the "Unknown feature" dispatch branch.
+		$self->set_features(grep { $_ ne 'haproxy' && !$opt_out{$_} } @current);
+		return;
+	}
+
+	# Default-on: add haproxy unless explicitly requested already (no double-add).
+	$self->set_features(@current, 'haproxy') unless $has_haproxy;
+	return;
+}
+
+# }}}
+
 sub _process_common_positional_features {
 	my ($self, $feature) = @_;
 
 	# HAProxy and related features
 	if ( $feature eq "haproxy" ) {
 		$self->add_files("overlay/routing/haproxy.yml");
+		# OCFP: default haproxy_vm_type to the kit-generated <env>.<type>.vm-haproxy
+		# (the base overlay's bare "haproxy" does not exist in a kit-populated
+		# cloud-config). Added after the base overlay so it wins the merge.
+		$self->add_files("ocfp/routing/haproxy.yml") if $self->want_feature('ocfp');
 		$self->add_files(
 			'overlay/routing/haproxy-public-network.yml'
 		) if $self->env->params->{cf_lb_network};
@@ -1496,10 +1791,42 @@ sub _process_common_positional_features {
 		) unless -f $self->kit->path("$feature.yml");
 		$self->add_files("$feature.yml");
 
+	# cf-deployment version override is resolved early in perform() by
+  # handle_custom_cf_versions(), which fetches the requested upstream
+  # cf-deployment and swaps the kit's ./cf-deployment tree in place.
+  # It contributes no merge file here -- accept it as a no-op so this
+  # dispatch chain does not treat it as an unknown feature.
+	} elsif ($feature =~ /^cf-deployment-version-/) {
+		# no-op (handled in handle_custom_cf_versions)
+
+	} elsif ($feature =~ /^(no-haproxy|external-lb|omit-haproxy)$/) {
+		# HAProxy opt-out markers. _resolve_haproxy_default() consumes these to
+		# suppress the haproxy overlay/static IP; the features hook preserves
+		# them in the resolved list so every hook can detect the opt-out. Accept
+		# them here as a no-op so this dispatch does not treat them as unknown.
+
 	} else {
 		bail("Unknown feature: $feature. Please check your environment file.");
 	}
 
+	return 1;
+}
+
+# _add_trusted_certs - Automatically trust the Blacksmith CA if it has been
+# deposited in the exodus store, mirroring the org/blacksmith CA detection
+# process_ocfp_features() performs for OCFP environments. The classic
+# 'trust-blacksmith-ca' feature flag is deprecated in favour of this
+# automatic detection (there is no classic equivalent of org CA trust --
+# that overlay is OCFP-only).
+sub _add_trusted_certs {
+	my ($self) = @_;
+	my $env = $self->env;
+
+	if ($env->vault->has($env->exodus_mount.$env->name."/blacksmith","blacksmith_ca")) {
+		$self->add_files("overlay/addons/trust-blacksmith-ca.yml");
+		$self->add_files("overlay/addons/trust-blacksmith-ca-cflinuxfs3.yml")
+			if $self->want_feature("cflinuxfs3");
+	}
 	return 1;
 }
 

@@ -114,8 +114,16 @@ Choose one of the following database options:
 ### Load Balancing Options
 
 - `haproxy` - Deploy an HAProxy loadbalancer in front of CF.
+- `no-haproxy` (alias `external-lb`) - Skip HAProxy and expose the routers
+  for an external load balancer. (`omit-haproxy` is a deprecated alias.)
 - `tls` - Configure HAProxy to use TLS.
 - `self-signed` - Generate self-signed certs for HAProxy.
+
+The HAProxy default is IaaS-aware: on `aws`, `gcp`, and `azure` the platform
+load balancer is assumed to front the routers, so HAProxy defaults to off
+unless the environment file lists `haproxy` explicitly. On all other IaaSes
+HAProxy is deployed by default unless the environment file lists `no-haproxy`
+(or `external-lb`). Listing both `haproxy` and an opt-out flag is an error.
 
 ### Runtime Stack Options
 
@@ -356,6 +364,44 @@ These params need to be set when using external databases:
 | --- | --- | --- |
 | `disable_tls_10` | Disable TLS 1.0? | `true` |
 | `disable_tls_11` | Disable TLS 1.1? | `true` |
+
+#### `ocfp` - HAProxy Service Route Parameters
+
+`params.ocfp_haproxy_service_routes` host-routes non-CF service UIs (e.g.
+SHIELD, Grafana, Doomsday, Concourse) through the CF haproxy, so they can
+share its public IP and TLS termination instead of needing their own.
+Requires the `haproxy` feature (an OCFP deployment enables it by default on
+most IaaSes) and generates a dynamic ops file with a host-ACL frontend rule,
+a dedicated backend, and a SAN entry on the haproxy cert for each route.
+
+Also requires the `self-signed` feature: each route hostname is added as a
+SAN on the `haproxy_ssl` cert, and this kit cannot add SANs to an
+operator-provided cert. If you bring your own haproxy cert, add the route
+hostnames to it yourself and do not set this param.
+
+| param | description | default |
+| --- | --- | --- |
+| `hostname` | The Host header to match and route (also added as a SAN on the haproxy cert) | *required* |
+| `backend` | The IP or hostname of the backend service | *required* |
+| `port` | The backend port (1-65535) | `443` |
+| `ssl` | `noverify` re-encrypts to the backend without verifying its certificate; `none` speaks plain HTTP to the backend | `noverify` |
+
+```yaml
+params:
+  ocfp_haproxy_service_routes:
+  - hostname: shield.example.com
+    backend: 10.0.0.20
+    port: 443
+    ssl: noverify
+  - hostname: grafana.example.com
+    backend: 10.0.0.21
+    port: 8080
+    ssl: none
+```
+
+`ssl: verify` (validating the backend's certificate against a CA bundle) is
+not supported yet -- it would require plumbing a CA bundle to the haproxy
+job, which no route in this feature currently configures.
 
 ### Windows Diego Cell Parameters
 

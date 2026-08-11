@@ -1,0 +1,13 @@
+---
+# PVE uses flat layer-2 networking (bridge-based); there is no
+# security-group mechanism, and every VM is reachable on the lvnet bridge.
+#
+# Unlike the stackit pattern, we do NOT relocate ssh_proxy to the router:
+# on a flat network haproxy reaches the scheduler's ssh_proxy directly, and
+# keeping a single ssh_proxy provider avoids BOSH "multiple link providers"
+# errors for haproxy's tcp_backend link. We only strip the security-group
+# vm_extension, which has no meaning on pve.
+instance_groups:
+- name: scheduler
+  vm_extensions:
+  - (( delete "diego-ssh-proxy-network-properties" ))

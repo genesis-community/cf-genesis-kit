@@ -8,7 +8,7 @@ BEGIN { push @INC, $ENV{GENESIS_LIB} ? $ENV{GENESIS_LIB} : $ENV{HOME} . '/.genes
 
 use parent qw(Genesis::Hook::Features);
 
-use Genesis qw(new_enough);
+use Genesis qw(new_enough bail);
 
 # init - Initialize the hook {{{
 sub init {
@@ -27,6 +27,24 @@ sub perform {
 	# Build features list based on requested features
 	my @features;
 
+	# The HAProxy default is IaaS-aware: on aws, gcp, and azure the platform
+	# load balancer fronts the routers, so haproxy defaults to opt-out; on all
+	# other IaaSes haproxy is default-on. Operators override the default with
+	# an explicit 'haproxy', or opt out with 'no-haproxy' (alias 'external-lb';
+	# deprecated alias 'omit-haproxy'). When opted out the routers are exposed
+	# for an external load balancer and no haproxy instance group, ops file, or
+	# cloud-config allocation is produced.
+	my %haproxy_opt_out = map { ($_ => 1) } qw/no-haproxy external-lb omit-haproxy/;
+	my ($haproxy_opt_out_marker) = grep { $haproxy_opt_out{$_} } $self->features;
+	my $haproxy_requested = grep { $_ eq 'haproxy' } $self->features;
+
+	bail(
+		"Conflicting features: environment #C{%s} lists both #c{haproxy} and ".
+		"#c{%s}.\nKeep #c{haproxy} to deploy the kit-managed haproxy, or keep ".
+		"#c{%s} to expose\nthe routers for an external load balancer -- not both.",
+		$self->env->name, $haproxy_opt_out_marker, $haproxy_opt_out_marker
+	) if $haproxy_requested && $haproxy_opt_out_marker;
+
 	# Process requested features with transformations
 	my $is_ocfp = $self->want_feature('ocfp');
 	foreach my $feature ($self->features) {
@@ -42,9 +60,22 @@ sub perform {
 			push @features, $is_ocfp ? '+internal-blobstore' : 'internal-blobstore';
 		} elsif ($feature eq 'split-network') { # Short-lived ocfp feature that is better handled by existing feature name
 			push @features, 'partitioned-network';
+		} elsif ($haproxy_opt_out{$feature}) {
+			# Opt-out markers are not real ops/cloud-config features; preserve
+			# them in the resolved list so downstream hooks can detect the
+			# opt-out and skip haproxy. Never emit 'haproxy' for these.
+			push @features, $feature;
 		} else {
 			push @features, $feature;
 		}
+	}
+
+	# Apply the IaaS-aware default when the operator did not choose explicitly:
+	# opt-out on aws/gcp/azure (the platform LB fronts the routers there),
+	# default-on everywhere else.
+	if (!$haproxy_opt_out_marker && !$haproxy_requested) {
+		push @features, 'haproxy'
+			unless ($self->iaas // '') =~ /^(aws|gcp|azure)$/;
 	}
 
 	# Check for database overrides
