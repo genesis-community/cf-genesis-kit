@@ -1,6 +1,40 @@
---- {}
+---
+# routing 0.382.0 -- mandatory over cf-deployment v56.4.0's 0.380.0.
+#
+# routing-release 0.380.0 and 0.381.0 fail their routing-api schema migration
+# on MySQL with error 1170 (BLOB/TEXT column in a key without a prefix length,
+# from GORM v2 LONGTEXT index handling). Upstream 0.382.0 release notes:
+#
+#   "Fixes a bug when migrating routing-api's database schema from
+#    routing-release 0.361.0 or earlier to routing-releases 0.380.0/0.381.0."
+#
+# Every classic env upgrading to the Q3 cut crosses exactly that path: kit
+# 3.0.2 ships routing 0.338.0, which is under the 0.361.0 boundary. Postgres
+# is unaffected (the fix commit notes Postgres needs no prefix lengths), so
+# this is a no-op there and a hard requirement on any MySQL-backed routing-api.
+#
+# Source release rather than a compiled one, deliberately: it is stemcell
+# agnostic, so it holds whether the deploy lands on noble or takes use-jammy.
+# Costs one routing compile. NOTE for restricted environments with no egress
+# (see NG-6): the director must be able to reach bosh.io, or the release has
+# to be uploaded out of band.
+#
+# sha1 below is the sha256 of the fetched tarball, matching the form
+# cf-deployment itself uses for this release. Verified against the bytes:
+# 161370168 bytes, sha1 aca47f82fadae699910beaeb95009619c8886d49, which is
+# also the digest bosh.io publishes for this version.
+releases:
+- (( merge on name ))
+- name: routing
+  url: https://bosh.io/d/github.com/cloudfoundry/routing-release?v=0.382.0
+  version: 0.382.0
+  sha1: sha256:31d95ad1ec7888539323afb23bcea7e453a9339daec1eb5f2ba832ba82fa1b7a
 
-# releases:
+exodus:
+  cf-deployment-hotfixes: true
+
+# Template for further overrides -- a compiled release pins to one stemcell:
+#
 # - name: routing
 #   sha1: 6feb59ec3e2687b469aa9451ab72a5922baf8025
 #   stemcell:
@@ -8,4 +42,3 @@
 #     version: "1.80"
 #   url: https://storage.googleapis.com/cf-deployment-compiled-releases/routing-0.275.0-ubuntu-jammy-1.80-20230712-204705-863429293.tgz
 #   version: 0.275.0
-# cf-deployment-hotfixes: true
