@@ -1308,6 +1308,7 @@ sub validate_classic_features {
 	my @valid_features = (
 		'bare',
 		'partitioned-network',
+		'small-footprint',
 		'haproxy',
 		'no-haproxy', 'external-lb', # opt out of default-on haproxy
 		'tls',
