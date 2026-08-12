@@ -2,10 +2,11 @@ package Genesis::Hook::Addon::CF::Stratos v3.1.0;
 
 use v5.20;
 use warnings;    # Genesis min perl version is 5.20
-use Genesis       qw/bail info warning run/;
-use Genesis::Term qw/terminal_width/;
-use Genesis::UI   qw/prompt_for_boolean/;
-use JSON::PP      qw//;
+use Genesis        qw/bail info warning run/;
+use Genesis::Term  qw/terminal_width/;
+use Genesis::UI    qw/prompt_for_boolean/;
+use JSON::PP       qw//;
+use File::Basename qw/basename/;
 
 # Only needed for development
 BEGIN { push @INC, $ENV{GENESIS_LIB} ? $ENV{GENESIS_LIB} : $ENV{HOME} . './.genesis/lib'; }
@@ -628,7 +629,23 @@ sub upgrade_stratos {
 	my ( $self, %options ) = @_;
 	my $info = $self->{info};
 
-	info("Upgrading Stratos application bits (org/space/services untouched)...");
+	# Announce the target version and where it comes from
+	my $target_version = $options{version};
+	if ( $options{file} ) {
+		my $zip = basename( $options{file} );
+		($target_version) = $zip =~ /v?(\d+(?:\.\d+)+)/ unless $target_version;
+		info(
+			"Upgrading Stratos to version %s - extracted from %s (org/space/services untouched)",
+			$target_version // 'unknown', $zip
+		);
+	}
+	else {
+		$target_version //= $info->{version};
+		info(
+			"Upgrading Stratos to version %s - stratos-ui-v%s.zip will be downloaded from GitHub (org/space/services untouched)",
+			$target_version, $target_version
+		);
+	}
 
 	# Check CF CLI is available and authenticated
 	unless ( $options{'skip-cf-check'} ) {
