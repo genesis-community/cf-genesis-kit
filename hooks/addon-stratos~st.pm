@@ -25,6 +25,7 @@ sub init {
 			'force',            # Force redeployment
 			'skip-cf-check',    # Skip CF CLI availability check
 			'file=s',           # Path to Stratos zip file
+			'rolling',          # Rolling deployment strategy on upgrade
 			'version=s',        # Stratos version to deploy
 			'buildpack=s',      # Buildpack to use
 			'stack=s',          # Stack to use
@@ -44,6 +45,8 @@ sub cmd_details {
 	"Manage and display information about Stratos UI deployments. Supports the following commands:\n".
 	"[[  #y{info}                >>Display information about the Stratos deployment\n".
 	"[[  #y{deploy}              >>Deploy Stratos as a CF app\n".
+	"[[  #y{upgrade}             >>Bits-only upgrade: push a new Stratos build to the existing app,\n".
+	"[[                          >>keeping its current config, services and routes (no org/space/CUPS changes)\n".
 	"[[  #y{open}                >>Open the Stratos UI in your br.owser\n\n".
 	"Display Options:\n".
 	"[[  #y{--json}              >>Output information in JSON format\n".
@@ -57,7 +60,9 @@ sub cmd_details {
 	"[[  #y{--skip-cf-check}     >>Skip CF CLI availability check\n".
 	"[[  #y{--stack <name>}      >>Stack to use (default: cflinuxfs4)\n".
 	"[[  #y{--timeout <seconds>} >>Application startup timeout (default: 180)\n".
-	"[[  #y{--version <ver>}     >>Stratos version to deploy (overrides configuration and defaults)\n";
+	"[[  #y{--version <ver>}     >>Stratos version to deploy (overrides configuration and defaults)\n\n".
+	"Upgrade Options (also accepts --file, --version, --skip-cf-check):\n".
+	"[[  #y{--rolling}           >>Use a rolling deployment strategy (no downtime during upgrade)\n";
 }
 
 sub perform {
@@ -75,13 +80,14 @@ sub perform {
 	# Get command (default to 'info')
 	my $command = $self->{args}->[0] || 'info';
 
-	bail("Unknown command: '$command'. Valid commands are 'info', 'deploy', and 'open'")
-	  unless ( $command =~ /^(info|deploy|open)$/ );
+	bail("Unknown command: '$command'. Valid commands are 'info', 'deploy', 'upgrade', and 'open'")
+	  unless ( $command =~ /^(info|deploy|upgrade|open)$/ );
 
 	# Determine the Stratos deployment info
-	return $self->display_info(%options)   if ( $command eq 'info' );
-	return $self->deploy_stratos(%options) if ( $command eq 'deploy' );
-	return $self->open_in_browser()        if ( $command eq 'open' );
+	return $self->display_info(%options)    if ( $command eq 'info' );
+	return $self->deploy_stratos(%options)  if ( $command eq 'deploy' );
+	return $self->upgrade_stratos(%options) if ( $command eq 'upgrade' );
+	return $self->open_in_browser()         if ( $command eq 'open' );
 }
 
 sub _get_stratos_info {
@@ -427,8 +433,6 @@ sub deploy_stratos {
 	my $stratos_version = $options{version} // $info->{version};
 	info( "Using Stratos version: %s%s",
 		$stratos_version, $options{version} ? " (from command line)" : "" );
-	my $stratos_releases_url =
-"https://github.com/cloudfoundry/stratos/releases/download/v${stratos_version}/stratos-ui-v${stratos_version}.zip";
 	my $stratos_sso_options = $env->lookup( 'stratos.sso_options', 'nosplash, logout' );
 
 	# Domain setup - already resolved by _get_stratos_info (console.<apps_domain>
@@ -436,26 +440,8 @@ sub deploy_stratos {
 	my $stratos_domain = $info->{stratos_domain} || "console." . $info->{apps_domain};
 
 	# Get file or download Stratos release
-	my $chdir = $tmp_dir;
-	chdir $chdir or bail("Could not change to temporary directory: $!");
-
-	if ( $options{file} && -f $options{file} ) {
-		info( "Using provided Stratos file: %s", $options{file} );
-		run(
-			{interactive => 0, onfailure => "Failed to unzip Stratos file"}, 'unzip', '-o', $options{file}
-		);
-	}
-	else {
-		info( "Downloading Stratos %s...", $stratos_version );
-		run(
-			{interactive => 0, onfailure => "Failed to download Stratos"}, 'wget', $stratos_releases_url
-		);
-		run(
-			{interactive => 0, onfailure => "Failed to unzip Stratos"},
-			'unzip', '-o', "stratos-ui-${stratos_version}.zip"
-		);
-		unlink("stratos-ui-${stratos_version}.zip");
-	}
+	chdir $tmp_dir or bail("Could not change to temporary directory: $!");
+	$self->_fetch_stratos_bits(%options);
 
 	# Target the correct CF organization and space
 	info("Targeting CF organization 'system' and space 'stratos'...");
@@ -595,6 +581,89 @@ EOF
 	chdir('/');    # Go back to root directory
 
 	$self->display_info(%options);
+
+	return $self->done();
+}
+
+# Fetch (or copy) and unpack the Stratos release zip into the current directory.
+sub _fetch_stratos_bits {
+	my ( $self, %options ) = @_;
+
+	my $stratos_version = $options{version} // $self->{info}{version};
+	if ( $options{file} ) {
+		bail( "Stratos file not found: %s", $options{file} ) unless -f $options{file};
+		info( "Using provided Stratos file: %s", $options{file} );
+		run(
+			{interactive => 0, onfailure => "Failed to unzip Stratos file"},
+			'unzip', '-o', $options{file}
+		);
+	}
+	else {
+		info( "Downloading Stratos %s...", $stratos_version );
+		my $stratos_releases_url =
+"https://github.com/cloudfoundry/stratos/releases/download/v${stratos_version}/stratos-ui-v${stratos_version}.zip";
+		run(
+			{interactive => 0, onfailure => "Failed to download Stratos"},
+			'wget', $stratos_releases_url
+		);
+		run(
+			{interactive => 0, onfailure => "Failed to unzip Stratos"},
+			'unzip', '-o', "stratos-ui-${stratos_version}.zip"
+		);
+		unlink("stratos-ui-${stratos_version}.zip");
+	}
+
+	# A manifest.yml bundled inside the zip would be auto-read by cf push and
+	# override (or rename) the existing app; remove it so the app's current
+	# configuration is what governs.
+	unlink('manifest.yml') if -f 'manifest.yml';
+
+	return 1;
+}
+
+# Bits-only upgrade: push a new Stratos build to the existing CF app. The
+# app's env vars, service bindings and routes are retained by CF on re-push,
+# so nothing outside the application bits is changed.
+sub upgrade_stratos {
+	my ( $self, %options ) = @_;
+	my $info = $self->{info};
+
+	info("Upgrading Stratos application bits (org/space/services untouched)...");
+
+	# Check CF CLI is available and authenticated
+	unless ( $options{'skip-cf-check'} ) {
+		bail(
+"CF CLI not found. Please install it or use --skip-cf-check if you're sure it's available."
+		) unless run( {interactive => 0, passfail => 1}, 'cf', '--version' );
+	}
+	bail("Not logged in to CF. Please log in first with 'cf login'")
+	  unless run( {interactive => 0, passfail => 1}, 'cf', 'target' );
+
+	# Target the existing org/space - upgrade never creates anything
+	run(
+		{interactive => 0, onfailure => "Failed to target CF org/space"},
+		'cf', 'target', '-o', $info->{cf_org}, '-s', $info->{cf_space}
+	);
+
+	# The app must already exist; first-time installs go through 'deploy'
+	bail(
+		"CF app '%s' not found in org '%s' / space '%s' - nothing to upgrade. ".
+		"Use the 'deploy' command for a first-time installation.",
+		$info->{cf_app_name}, $info->{cf_org}, $info->{cf_space}
+	) unless run( {interactive => 0, passfail => 1}, 'cf', 'app', $info->{cf_app_name} );
+
+	# Fetch and unpack the new bits, then push them to the existing app
+	my $tmp_dir = $self->tempdir('stratos-upgrade');
+	chdir $tmp_dir or bail("Could not change to temporary directory: $!");
+	$self->_fetch_stratos_bits(%options);
+
+	my @push_cmd = ( 'cf', 'push', $info->{cf_app_name} );
+	push @push_cmd, '--strategy', 'rolling' if $options{rolling};
+	my ( $out, $rc, $err ) = run( { stderr => 0 }, @push_cmd );
+	bail( "Failed to upgrade Stratos: %s", $err || $out ) unless $rc == 0;
+
+	info("\nStratos upgrade completed successfully!");
+	chdir('/');
 
 	return $self->done();
 }
