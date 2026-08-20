@@ -522,6 +522,12 @@ sub _pve_cpi_setting {
 	my $value = scalar($self->env->lookup("bosh-configs.cpi.$env_key", undef));
 	$value //= scalar($self->env->ocfp_config_lookup("cpi.pve.$vault_key", undef));
 	$value //= $default;
+
+	# The per-IaaS property maps build their pve branch eagerly even when the
+	# environment is on another IaaS and the branch will never be selected -
+	# a missing value is only a fatal config error on an actual PVE environment.
+	return $value unless $self->iaas eq 'pve';
+
 	bail(
 		"No PVE %s configured for %s: set #c{bosh-configs.cpi.%s} in the ".
 		"environment file, or run #g{ocfp vault populate} so the OCFP config ".
