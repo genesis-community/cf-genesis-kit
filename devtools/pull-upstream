@@ -56,6 +56,20 @@ for f in "${files[@]}" ; do
   cp -R "$src/$f" "${upstream_dir}/$f"
 done
 
+# Replace symlinks with their target's content: genesis >= 3.1 extracts
+# compiled kits with Archive::Tar in secure mode, which refuses symlink
+# targets containing '..' ("attempts traversal"), so upstream's promotion
+# symlinks (e.g. operations/experimental/add-metric-store.yml ->
+# ../use-metric-store.yml) would silently go missing from deployed kits.
+find "$upstream_dir" -type l | while read -r link ; do
+  rel="$(readlink "$link")"
+  target="$(dirname "$link")/$rel"
+  [[ -f "$target" ]] || error "Symlink $link points to missing target $rel"
+  rm "$link"
+  cp "$target" "$link"
+  echo "Materialized symlink $link (was -> $rel)"
+done
+
 ts="$(date -u +"%Y-%b-%d %H:%M:%S %Z")"
 cat > overlay/upstream_version.yml <<EOF
 exodus:

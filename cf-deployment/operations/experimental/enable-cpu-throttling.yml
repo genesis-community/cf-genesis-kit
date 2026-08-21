@@ -1,1 +1,5 @@
-../enable-cpu-throttling.yml
+---
+# Enabling this feature only makes sense if `set-cpu-weight` is enabled as well
+- type: replace
+  path: /instance_groups/name=diego-cell/jobs/name=garden/properties/garden/cpu_throttling?
+  value: true
