@@ -5,6 +5,7 @@ use warnings;    # Genesis min perl version is 5.20
 use Genesis       qw/bail info warning run/;
 use Genesis::Term qw/terminal_width/;
 use Genesis::UI   qw/prompt_for_boolean/;
+use Socket        qw/inet_ntoa/;
 
 # Only needed for development
 BEGIN { push @INC, $ENV{GENESIS_LIB} ? $ENV{GENESIS_LIB} : $ENV{HOME} . './.genesis/lib'; }
@@ -467,6 +468,10 @@ sub deploy_stratos {
 		'cf', 'target', '-o', 'system', '-s', 'stratos'
 	);
 
+	# The console's SSH terminal dials the platform's app SSH proxy from inside
+	# its own container, so the space needs an egress rule allowing it.
+	$self->_ensure_app_ssh_security_group($tmp_dir);
+
 	# Configure database via CUPS
 	info("Configuring Stratos Database Connection via CUPS Services");
 	my $svc_name = "console_db_tls_verify_ca";
@@ -620,6 +625,79 @@ EOF
 	$self->display_info(%options);
 
 	return $self->done();
+}
+
+sub _ensure_app_ssh_security_group {
+	my ( $self, $tmp_dir ) = @_;
+
+	my $sg_name = 'stratos-app-ssh';
+
+	my ( $info_json, $rc ) =
+	  run( {interactive => 0, stderr => 0 }, 'cf', 'curl', '/v2/info' );
+	if ( $rc != 0 ) {
+		warning("Could not read /v2/info; skipping %s security group setup", $sg_name);
+		return;
+	}
+
+	my ($endpoint) = $info_json =~ /"app_ssh_endpoint":\s*"([^"]+)"/;
+	unless ($endpoint) {
+		warning("No app_ssh_endpoint advertised; skipping %s security group setup", $sg_name);
+		return;
+	}
+
+	my ( $host, $port ) = $endpoint =~ /^(.*?):(\d+)$/;
+	( $host, $port ) = ( $endpoint, 2222 ) unless $host;
+
+	my @addrs = gethostbyname($host);
+	@addrs = map { inet_ntoa($_) } @addrs[ 4 .. $#addrs ];
+	unless (@addrs) {
+		warning( "Could not resolve app SSH host '%s'; skipping %s security group setup",
+			$host, $sg_name );
+		return;
+	}
+
+	my $rules = '[' . join(
+		',',
+		map {
+			sprintf(
+				'{"protocol":"tcp","destination":"%s","ports":"%s",'
+				  . '"description":"console access to the app SSH proxy"}',
+				$_, $port
+			)
+		} @addrs
+	) . ']';
+
+	my $sg_file = "$tmp_dir/$sg_name.json";
+	open my $sg_fh, '>', $sg_file
+	  or bail("Cannot write to $sg_file: $!");
+	print $sg_fh $rules;
+	close $sg_fh;
+
+	if ( run( {interactive => 0, passfail => 1, stderr => 0 }, 'cf', 'security-group', $sg_name ) ) {
+		run(
+			{interactive => 0},
+			{ onfailure => "Failed to update security group $sg_name" },
+			'cf', 'update-security-group', $sg_name, $sg_file
+		);
+	}
+	else {
+		run(
+			{interactive => 0},
+			{ onfailure => "Failed to create security group $sg_name" },
+			'cf', 'create-security-group', $sg_name, $sg_file
+		);
+	}
+
+	run(
+		{interactive => 0},
+		{ onfailure => "Failed to bind security group $sg_name" },
+		'cf', 'bind-security-group', $sg_name, 'system',
+		'--space', 'stratos', '--lifecycle', 'running'
+	);
+	unlink $sg_file;
+
+	info( "Security group %s bound to system/stratos for app SSH proxy %s",
+		$sg_name, $endpoint );
 }
 
 sub _generate_password {
