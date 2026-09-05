@@ -5,15 +5,34 @@ meta:
     # *deploying* director's env (e.g. ocfp-lab-wayne-ocf-z1), not this CF
     # env. Default to genesis.env for self-deployed cases; override via
     # params.cf_az when bosh_env differs (cross-deploy onto env-BOSH).
-    azs:
+    #
+    # Multi-AZ is opt-in. Most PVE blocs are a single node and only ever
+    # render one cloud-config AZ, so spreading instance groups over z2 and z3
+    # by default would fail every one of them with "instance group references
+    # an unknown az". A bloc whose director really does publish three AZs sets
+    # params.cf_azs to the full list in its environment file, and everything
+    # that spreads picks the list up from here.
+    azs: (( grab params.cf_azs || meta.ocfp.default_azs ))
+    default_azs:
       - (( grab params.cf_az || params.default_cf_az ))
-  azs: (( grab meta.ocfp.azs ))  # haproxy overlay reads meta.azs (not meta.ocfp.azs)
+
+    # Singletons stay in one AZ no matter how many the bloc has. The database
+    # and singleton-blobstore groups each run a single instance with a
+    # persistent disk, and haproxy runs a single instance holding the one
+    # reserved static IP, so spreading any of them buys nothing and makes
+    # placement vary between deploys.
+    singleton_azs:
+      - (( grab params.cf_singleton_az || params.cf_az || params.default_cf_az ))
+
+  # The base routing overlay reads meta.azs (not meta.ocfp.azs) for the
+  # haproxy instance group, so it gets the singleton list.
+  azs: (( grab meta.ocfp.singleton_azs ))
 params:
   default_cf_az: (( concat genesis.env "-z1" ))
 ---
-# Single PVE node — all instance groups run in one AZ alias.
-# The AZ name matches the BOSH cloud-config AZ defined by the
-# ocfp-pve BOSH director (e.g. ocfp-pve-wayne-z1).
+# Instance groups that spread over every AZ the bloc publishes. On a
+# single-AZ bloc meta.ocfp.azs is one entry and this is the old behavior
+# unchanged; on a multi-AZ bloc it is the full list from params.cf_azs.
 - type: replace
   path: /instance_groups/name=nats/azs
   value: (( grab meta.ocfp.azs ))
@@ -62,14 +81,16 @@ params:
 # Internal-feature instance groups: on PVE the internal DB (database) and
 # internal blobstore (singleton-blobstore) are always deployed, and haproxy is
 # present with the haproxy feature. cf-deployment assigns them z1/z2, which do
-# not exist on the single-AZ PVE network. Optional (?) so the op is skipped when
-# a given IG is absent (e.g. haproxy feature off).
+# not exist on the PVE network, so they are remapped here. All three are
+# single-instance, so they take the singleton AZ rather than the spread list.
+# Optional (?) so the op is skipped when a given IG is absent (e.g. haproxy
+# feature off).
 - type: replace
   path: /instance_groups/name=database?/azs
-  value: (( grab meta.ocfp.azs ))
+  value: (( grab meta.ocfp.singleton_azs ))
 - type: replace
   path: /instance_groups/name=singleton-blobstore?/azs
-  value: (( grab meta.ocfp.azs ))
+  value: (( grab meta.ocfp.singleton_azs ))
 - type: replace
   path: /instance_groups/name=haproxy?/azs
-  value: (( grab meta.ocfp.azs ))
+  value: (( grab meta.ocfp.singleton_azs ))

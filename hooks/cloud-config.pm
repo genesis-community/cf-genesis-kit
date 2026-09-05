@@ -8,9 +8,17 @@ BEGIN { push @INC, $ENV{GENESIS_LIB} ? $ENV{GENESIS_LIB} : $ENV{HOME} . '/.genes
 
 use parent qw(Genesis::Hook::CloudConfig);
 
-use Genesis qw/bail/;
+use Genesis qw/bail warning/;
 use Genesis::Hook::CloudConfig::Helpers qw/gigabytes megabytes/;
 use JSON::PP;
+
+# The BOSH director pins its compilation network to one subnet and claims a
+# fixed number of addresses there; both values live in the bosh kit, in
+# hooks/cloud-config-director.pm. They are mirrored here so this hook can warn
+# when the CF workload network is configured to share that subnet. Keep them in
+# step with the bosh kit if it ever changes them.
+my $COMPILATION_SUBNET           = 'ocfp-2';
+my $COMPILATION_ALLOCATION_SIZE  = 4;
 
 sub init {
 	my $class = shift;
@@ -163,12 +171,65 @@ sub perform {
 
 		# On PVE the SDN vnet is a flat net — all three ocfp-* subnets share the
 		# same CIDR, so genesis IPAM tracks claims by (network, subnet-name) only.
-		# The BOSH director compilation network is pinned to ocfp-2; restricting
-		# the CF workload network to ocfp-0/1 prevents net-compilation IP
-		# exhaustion ("no more available") on the shared address space.
+		# The BOSH director compilation network is pinned to ocfp-2 (see the bosh
+		# kit's hooks/cloud-config-director.pm), and by default the CF workload
+		# network is restricted to ocfp-0/1 so the two never compete for the same
+		# band and net-compilation cannot be starved into "no more available".
 		# AWS/STACKIT/OpenStack/vSphere use physically distinct CIDRs per subnet
-		# so they are unaffected and must continue spanning all subnets.
+		# so they are unaffected and continue spanning all subnets.
+		#
+		# A bloc that runs CF across three AZs needs the third subnet, so the list
+		# is overridable per environment:
+		#
+		#   bosh-configs:
+		#     cloud:
+		#       networks:
+		#         ocf:
+		#           subnets: [ocfp-0, ocfp-1, ocfp-2]
+		#
+		# Overriding it is safe, but it is not free: see the sizing warning below.
 		my @ocf_subnets = $self->iaas eq 'pve' ? ('ocfp-0', 'ocfp-1') : ();
+
+		my $ocf_subnet_override = $self->get_config_override('networks.ocf.subnets');
+		if (defined $ocf_subnet_override) {
+			bail(
+				"bosh-configs.cloud.networks.ocf.subnets must be a non-empty list of ".
+				"ocfp-* subnet names (got %s)",
+				ref($ocf_subnet_override) ? ref($ocf_subnet_override)." reference" : "'$ocf_subnet_override'"
+			) unless ref($ocf_subnet_override) eq 'ARRAY' && @$ocf_subnet_override;
+
+			my @bad = grep {!/^ocfp-\d+$/} @$ocf_subnet_override;
+			bail(
+				"bosh-configs.cloud.networks.ocf.subnets contains %s, which %s not an ".
+				"ocfp-* subnet name",
+				join(', ', map {"'$_'"} @bad),
+				(@bad == 1 ? 'is' : 'are')
+			) if @bad;
+
+			@ocf_subnets = @$ocf_subnet_override;
+		}
+
+		# The compilation network claims a handful of addresses out of its own
+		# subnet's available band. Genesis IPAM subtracts another network's claims
+		# before allocating this one, so the addresses never collide; what does
+		# happen is that the shared subnet has that many fewer addresses left for
+		# CF. allocation.size is a PER-SUBNET count, so the operator has to size it
+		# against the SMALLEST band rather than against the sum of all of them. Say
+		# so at render time rather than letting it surface as a "no more available"
+		# failure partway through a deploy.
+		if ($self->iaas eq 'pve' && grep {$_ eq $COMPILATION_SUBNET} @ocf_subnets) {
+			warning(
+				"#Y{CF network spans %s, which the BOSH director also uses for its ".
+				"compilation network.} The compilation network claims %d addresses ".
+				"there, so %s has that many fewer available for CF than the other ".
+				"subnets do. bosh-configs.cloud.networks.ocf.allocation.size is a ".
+				"per-subnet count and must fit inside the reduced band; use ".
+				"allocation.total_size instead to spread a total across the subnets. ".
+				"Read the rendered cloud-config for both the 'ocf' and ".
+				"'net-compilation' networks before deploying.",
+				$COMPILATION_SUBNET, $COMPILATION_ALLOCATION_SIZE, $COMPILATION_SUBNET
+			);
+		}
 
 		@networks = $self->network_definition(
 			'ocf',
