@@ -1863,7 +1863,7 @@ sub _instance_group_translations {
 sub _is_instance_group {
 	return {map {($_,1)} qw{
 		api cc-worker credhub database diego-api diego-cell doppler errand haproxy
-		log-api log-cache nats rotate-cc-database-key tcp-router scheduler
+		log-api log-cache nats rotate-cc-database-key router tcp-router scheduler
 		singleton-blobstore smoke-tests uaa windows2019-cell
 	}};
 }
