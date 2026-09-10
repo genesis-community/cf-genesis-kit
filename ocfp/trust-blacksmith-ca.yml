@@ -6,3 +6,17 @@ meta:
         - (( append ))
         - (( vault $GENESIS_EXODUS_MOUNT genesis.env "/blacksmith:blacksmith_ca" ))
 
+# The Blacksmith broker registers its route with a tls_port, so gorouter
+# terminates a TLS backend connection to it and validates the broker's
+# certificate against router.ca_certs. Without the broker CA here gorouter
+# answers 526 for the broker hostname and Cloud Controller cannot fetch the
+# catalog during create-service-broker.
+instance_groups:
+- name: router
+  jobs:
+  - name: gorouter
+    properties:
+      router:
+        ca_certs:
+        - (( append ))
+        - (( vault $GENESIS_EXODUS_MOUNT genesis.env "/blacksmith:blacksmith_ca" ))
