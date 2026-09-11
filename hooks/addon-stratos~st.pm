@@ -2,13 +2,14 @@ package Genesis::Hook::Addon::CF::Stratos v3.1.0;
 
 use v5.20;
 use warnings;    # Genesis min perl version is 5.20
+
+# Only needed for development
+BEGIN { push @INC, $ENV{GENESIS_LIB} ? $ENV{GENESIS_LIB} : $ENV{HOME} . '/.genesis/lib'; }
+
 use Genesis       qw/bail info warning run/;
 use Genesis::Term qw/terminal_width/;
 use Genesis::UI   qw/prompt_for_boolean/;
 use Socket        qw/inet_ntoa/;
-
-# Only needed for development
-BEGIN { push @INC, $ENV{GENESIS_LIB} ? $ENV{GENESIS_LIB} : $ENV{HOME} . './.genesis/lib'; }
 
 use parent qw(Genesis::Hook::Addon);
 
