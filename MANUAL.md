@@ -105,6 +105,7 @@ Choose one of the following database options:
 - `aws-blobstore` - Use AWS S3 storage as external blobstore, via credentials.
 - `aws-blobstore-iam` - Use AWS S3 storage as external blobstore, via IAM configuration.
 - `minio-blobstore` - Use Minio S3-compatible storage as external blobstore.
+- `stackit-blobstore` - Use STACKIT Object Storage as external blobstore.
 - `azure-blobstore` - Use Azure blob storage as external blobstore.
 - `gcp-blobstore` - Use GCS as external blobstore.
 - `gcp-use-access-key` - **Removed.** This used to select Google storage access key and secret in place of service account credentials. cf-deployment dropped `use-gcs-blobstore-access-key.yml` in v59.0.0, when the external blobstore moved off the fog library onto storage-cli, whose GCS provider accepts only a service account JSON key. An environment still carrying the feature fails to render with an explanation. Use `gcp-blobstore` on its own and populate the `gcs_service_account_json_key` credential.
@@ -325,6 +326,23 @@ These params need to be set when using external databases:
 | `blobstore_minio_ssl_verify_peer` | Verify the endpoint certificate against the VM's system trust store. storage-cli has no CA parameter, so a private CA has to arrive through the os-conf `ca_certs` runtime config. | `true` |
 | `blobstore_minio_host_style` | Address buckets in virtual-host style rather than path style | `false` |
 | `blobstore_minio_region` | The region used to sign requests. Minio ignores it, but the signing algorithm does not. | `us-east-1` |
+| `blobstore_bucket_prefix` | Prefix for the path where blobs are stored in the bucket | `"$GENESIS_ENVIRONMENT-$GENESIS_TYPE"` |
+| `blobstore_bucket_suffix` | Suffix for the path where blobs are stored in the bucket | `"((cc_director_key))"` |
+| `blobstore_app_packages_directory` | Directory for the app packages | `blobstore_bucket_prefix` + `"-app-packages-"` + `blobstore_bucket_suffix` |
+| `blobstore_buildpacks_directory` | Directory for the app packages | `blobstore_bucket_prefix` + `"-buildpacks-"` + `blobstore_bucket_suffix` |
+| `blobstore_droplets_directory` | Directory for the app packages | `blobstore_bucket_prefix` + `"-droplets-"` + `blobstore_bucket_suffix` |
+| `blobstore_resources_directory` | Directory for the app packages | `blobstore_bucket_prefix` + `"-resources-"` + `blobstore_bucket_suffix` |
+
+#### `stackit-blobstore` - STACKIT Blobstore Parameters
+
+| param | description | default |
+| --- | --- | --- |
+| `blobstore_s3_host` | The hostname of the STACKIT Object Storage endpoint, on its own and without a protocol. This replaces `blobstore_s3_endpoint`, which storage-cli has no way to accept. An OCFP bloc derives it from the region and needs no value here. | |
+| `blobstore_s3_region` | The region of the blobstore | |
+| `blobstore_s3_port` | The port the endpoint listens on | `443` |
+| `blobstore_s3_use_ssl` | Reach the endpoint over https | `true` |
+| `blobstore_s3_ssl_verify_peer` | Verify the endpoint certificate against the VM's system trust store. storage-cli has no CA parameter, so a private CA has to arrive through the os-conf `ca_certs` runtime config. | `true` |
+| `blobstore_s3_host_style` | Address buckets in virtual-host style rather than path style. This replaces `blobstore_s3_path_style`, which is the same setting read the other way round. | `false` |
 | `blobstore_bucket_prefix` | Prefix for the path where blobs are stored in the bucket | `"$GENESIS_ENVIRONMENT-$GENESIS_TYPE"` |
 | `blobstore_bucket_suffix` | Suffix for the path where blobs are stored in the bucket | `"((cc_director_key))"` |
 | `blobstore_app_packages_directory` | Directory for the app packages | `blobstore_bucket_prefix` + `"-app-packages-"` + `blobstore_bucket_suffix` |

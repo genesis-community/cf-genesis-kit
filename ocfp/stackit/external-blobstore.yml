@@ -1,15 +1,34 @@
 ---
+# OCFP layer for the STACKIT external blobstore.
+#
+# The storage-cli wiring itself lives in overlay/blobstore/stackit.yml, which
+# reads params.blobstore_s3_host, params.blobstore_s3_region,
+# params.blobstore_s3_access_key, and params.blobstore_s3_secret_key.
+# ocfp/external-blobstore.yml already fills the region and both credentials
+# from the bloc's vault tree and merges after that overlay, so the only thing
+# left for this file to supply is the host.
+#
+# The host is rebuilt from the region rather than read from vault, because the
+# two host-shaped keys in the blobstore tree name different endpoints. ocfp's
+# STACKIT vault writer, in createBlobstoreConfig, sets host to
+# s3.<region>.stackit.cloud and url_path_style to
+# https://object.storage.<region>.onstackit.cloud/<bucket>. The fog path read
+# url_path_style, so that second hostname is the one CF has actually been
+# talking to, and the host key is not it. storage-cli takes a bare hostname and
+# builds the endpoint itself from host, port, and use_ssl, and spruce cannot
+# strip a scheme and a bucket off a URL, so the hostname is assembled here from
+# the same formula the writer uses for url_path_style.
+#
+# An environment file can override blobstore_s3_host outright, because
+# environment files merge after every kit file. A bloc on a different object
+# storage domain should do that rather than change this line.
+#
+# The pathstyle key is no longer read. storage-cli names the same setting the
+# other way round as host_style, and the overlay defaults it to path style, so
+# a bloc that had pathstyle true needs nothing here.
+#
+# Port and TLS take the overlay defaults, 443 and https, which is what
+# url_path_style has always described.
+
 params:
-  blobstore_s3_endpoint:   (( vault meta.ocfp.vault.config "/cf/blobstores/buildpacks:url_path_style" )) # :endpoint
-  blobstore_s3_path_style: (( vault meta.ocfp.vault.config "/cf/blobstores/buildpacks:pathstyle" ))
-
-bosh-variables:
-  fog_connection:
-    provider: AWS
-    aws_access_key_id:     (( grab params.blobstore_s3_access_key ))
-    aws_secret_access_key: (( grab params.blobstore_s3_secret_key ))
-    region:                (( grab params.blobstore_s3_region ))
-    endpoint:              (( grab params.blobstore_s3_endpoint ))
-    path_style:            (( grab params.blobstore_s3_path_style ))
-    aws_signature_version: '2'
-
+  blobstore_s3_host: (( concat "object.storage." params.blobstore_s3_region ".onstackit.cloud" ))
