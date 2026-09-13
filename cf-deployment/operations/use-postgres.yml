@@ -2,9 +2,11 @@
   path: /releases/-
   value:
     name: postgres
-    sha1: e5655af2b766900cd65f859703d7fdce44805a9b
-    url: https://bosh.io/d/github.com/cloudfoundry/postgres-release?v=53.0.3
-    version: 53.0.3
+    sha1: sha256:76108c0d3f52a7b40c8582514198e5f2c12f4aa20f7e6d3029b2cc1f5720bc78
+    url: https://bosh.io/d/github.com/cloudfoundry/postgres-release?v=56.0.4
+    version: 56.0.4
+- type: remove
+  path: /releases/name=pxc
 - type: remove
   path: /instance_groups/name=database/jobs/name=route_registrar
 - type: remove
@@ -82,6 +84,7 @@
         - name: credhub
           password: ((credhub_database_password))
           tag: admin
+        version: 17
     release: postgres
 - type: replace
   path: /instance_groups/name=api/jobs/name=cloud_controller_ng/properties/ccdb

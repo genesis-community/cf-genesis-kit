@@ -8,6 +8,7 @@
     include:
       stemcell:
       - os: ubuntu-jammy
+      - os: ubuntu-noble
     jobs:
     - name: otel-collector
       properties:
@@ -38,6 +39,6 @@
   path: /releases/name=otel-collector?
   value:
     name: otel-collector
-    sha1: 0bbf396808f9bbc9e27b78d8f775cbd2485edb0a
-    url: https://bosh.io/d/github.com/cloudfoundry/otel-collector-release?v=0.11.4
-    version: 0.11.4
+    sha1: sha256:c9e7526e53aeadd6605fca9a0f98ab68cf8631c4058c4ad36cfdad803c3c1d73
+    url: https://bosh.io/d/github.com/cloudfoundry/otel-collector-release?v=0.11.10
+    version: 0.11.10
