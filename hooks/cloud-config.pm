@@ -27,6 +27,25 @@ sub init {
 	return $obj;
 }
 
+# ocfp_reserved_ip_target_aliases - point CF's network targets at the carve's
+# haproxy_ip keys.
+#
+# The ocf reserved-ips carve names the ingress address haproxy_ip, padded by
+# haproxy_ip_a and haproxy_ip_b on either side, but the network target this hook
+# asks for is 'ocf', or 'ocf-edge' under the partitioned topology. With no alias
+# in place, _get_reserved_allocation looks for ocf_a and ocf_ip, finds neither,
+# and returns an empty allocation, so the ingress address is never lifted out of
+# the reserved range and never pinned into the static list. It appeared to work
+# only because the allocated band happened to open on haproxy_ip_a, which is
+# exactly the coincidence that ended when the exodus claim table was lost and
+# another deployment took those addresses first.
+sub ocfp_reserved_ip_target_aliases {
+	my ($self, $target) = @_;
+	return unless $self->want_feature('haproxy');
+	return ['haproxy'] if $target =~ /^ocf(-edge)?$/;
+	return;
+}
+
 sub perform {
 	my ($self) = @_;
 	return 1 if $self->completed;
