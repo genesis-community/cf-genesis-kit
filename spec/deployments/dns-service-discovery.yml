@@ -4,6 +4,7 @@ kit:
   version: 2.0.0
   features:
     - dns-service-discovery
+    - no-haproxy
 
 genesis:
   env:         dns-service-discovery

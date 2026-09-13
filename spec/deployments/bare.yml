@@ -5,6 +5,7 @@ kit:
   features:
     - partitioned-network
     - bare
+    - no-haproxy
 
 genesis:
   env:         bare

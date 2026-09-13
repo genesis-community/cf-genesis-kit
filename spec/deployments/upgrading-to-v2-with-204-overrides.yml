@@ -6,6 +6,7 @@ kit:
     - ssh-proxy-on-routers
     - local-postgres-db
     - v2-nats-credentials # Use v2 nats name - added in v2.0.4
+    - no-haproxy
 
 genesis:
   env:         upgrading-to-v2-with-204-overrides

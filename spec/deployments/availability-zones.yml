@@ -5,6 +5,7 @@ kit:
   features:
     - postgres-db # to test deleted instance groups
     - ssh-proxy-on-routers
+    - no-haproxy
 
 genesis:
   env:         availability-zones

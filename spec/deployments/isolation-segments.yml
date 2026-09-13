@@ -4,6 +4,7 @@ kit:
   version: 2.1.2
   features:
     - isolation-segments
+    - no-haproxy
 
 genesis:
   env: isolation-segments

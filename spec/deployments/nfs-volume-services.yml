@@ -4,6 +4,7 @@ kit:
   version: 2.0.0
   features:
     - nfs-volume-services
+    - no-haproxy
 
 genesis:
   env:         nfs-volume-services

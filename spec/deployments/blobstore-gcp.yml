@@ -4,6 +4,7 @@ kit:
   version: 2.0.0
   features:
     - gcp-blobstore
+    - no-haproxy
 
 genesis:
   env:         blobstore-gcp

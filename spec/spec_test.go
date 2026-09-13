@@ -59,20 +59,22 @@ var _ = Describe("Interal Kit", func() {
 		Name:          "blobstore-aws",
 		CloudConfig:   "aws",
 		RuntimeConfig: "dns",
-		// CredhubVars:   "aws",
-		CPI: "aws",
+		CredhubVars:   "aws",
+		CPI:           "aws",
 	})
 	Test(Environment{
 		Name:          "blobstore-aws-with-suffix",
 		CloudConfig:   "aws",
 		RuntimeConfig: "dns",
-		CPI: "aws",
+		CredhubVars:   "aws",
+		CPI:           "aws",
 	})
 	Test(Environment{
 		Name:          "blobstore-aws-no-suffix",
 		CloudConfig:   "aws",
 		RuntimeConfig: "dns",
-		CPI: "aws",
+		CredhubVars:   "aws",
+		CPI:           "aws",
 	})
 	Test(Environment{
 		Name:          "blobstore-gcp",
@@ -92,6 +94,7 @@ var _ = Describe("Interal Kit", func() {
 		Name:          "blobstore-minio",
 		CloudConfig:   "aws",
 		RuntimeConfig: "dns",
+		CredhubVars:   "minio",
 		CPI:           "aws",
 	})
 	// FEATURES

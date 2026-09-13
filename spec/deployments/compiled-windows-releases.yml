@@ -6,6 +6,7 @@ kit:
     - compiled-releases
     - windows-diego-cells
     - smb-volume-services
+    - no-haproxy
 
 genesis:
   env: compiled-windows-releases

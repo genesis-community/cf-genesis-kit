@@ -5,6 +5,7 @@ kit:
   features:
     - ssh-proxy-on-routers
     - local-postgres-db
+    - no-haproxy
 
 genesis:
   env:         upgrade-from-v1-with-db-override-names

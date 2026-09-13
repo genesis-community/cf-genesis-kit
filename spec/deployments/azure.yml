@@ -4,6 +4,7 @@ kit:
   version: 2.0.0
   features:
     - azure-blobstore
+    - no-haproxy
 
 genesis:
   env:         azure

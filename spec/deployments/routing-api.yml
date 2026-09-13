@@ -4,6 +4,7 @@ kit:
   version: 2.0.0
   features:
     - routing-api
+    - no-haproxy
 
 genesis:
   env:         routing-api

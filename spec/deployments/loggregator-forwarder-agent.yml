@@ -4,6 +4,7 @@ kit:
   version: 2.0.0
   features:
     - loggregator-forwarder-agent
+    - no-haproxy
 
 genesis:
   env:         loggregator-forwarder-agent

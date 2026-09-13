@@ -7,6 +7,7 @@ kit:
   - nfs-volume-services
   - nfs-ldap
   - cflinuxfs3
+  - no-haproxy
 
 genesis:
   env: isolation-segments-extended

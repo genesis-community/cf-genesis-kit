@@ -5,6 +5,7 @@ kit:
   features:
     - aws-blobstore
     - blobstore-suffix
+    - no-haproxy
 
 genesis:
   env:         blobstore-aws-with-suffix

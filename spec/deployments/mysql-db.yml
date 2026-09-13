@@ -4,6 +4,7 @@ kit:
   version: 2.0.0
   features:
     - mysql-db
+    - no-haproxy
 
 genesis:
   env:         mysql-db

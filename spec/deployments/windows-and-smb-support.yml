@@ -5,6 +5,7 @@ kit:
   features:
     - windows-diego-cells
     - smb-volume-services
+    - no-haproxy
 
 genesis:
   env: windows-and-smb-support
