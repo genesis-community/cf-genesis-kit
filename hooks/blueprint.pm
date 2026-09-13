@@ -362,13 +362,16 @@ sub process_ocfp_features {
 	# Need to add compiled releases here, because external db selection
 	# deletes a path for pxc and upstream will fail to find it.
 	# Gate the vendored upstream file behind an explicit opt-in feature.
-	# The vendored use-compiled-releases.yml targets xenial/jammy stemcells
-	# and is stale for noble. When ocfp supplies its own compiled-release pin
-	# (env-level ops layered after kit ops) this file must not be included, or
-	# its stale URLs and sha1 values conflict. Omit it unless the operator
-	# explicitly requests it via the 'vendored-compiled-releases' feature.
+	# Since cf-deployment v60.5.0 the vendored use-compiled-releases.yml is
+	# noble-compiled throughout, which matches the kit default stemcell, and
+	# _validate_vendored_compiled_releases catches the case where an
+	# environment pins a different lineage. When ocfp supplies its own
+	# compiled-release pin (env-level ops layered after kit ops) this file
+	# must not be included, or its URLs and sha1 values conflict. Omit it
+	# unless the operator explicitly requests it via the
+	# 'vendored-compiled-releases' feature.
 	if (!$self->want_feature('source-releases') && $self->want_feature('vendored-compiled-releases')) {
-		$self->_validate_vendored_compiled_releases($iaas);
+		$self->_validate_vendored_compiled_releases();
 		$self->add_files(
 			"cf-deployment/operations/use-compiled-releases.yml",
 		);
@@ -600,16 +603,16 @@ sub _gopatch_remove {
 # reading the file itself. A mismatch deploys fine and then fails at runtime
 # against the wrong stemcell ABI, so catch it here instead.
 sub _validate_vendored_compiled_releases {
-	my ($self, $iaas) = @_;
+	my ($self) = @_;
 
 	my $ops_path = $self->kit->path("cf-deployment/operations/use-compiled-releases.yml");
 	return unless -f $ops_path;
 
 	# Effective stemcell OS, mirroring overlay merge order: env params override
 	# ocfp/pve/stemcell.yml (noble, PVE invariant), which overrides the
-	# overlay/base.yml default (jammy).
-	my $stemcell_os = $self->env->lookup('params.stemcell_os',
-		$iaas eq 'pve' ? 'ubuntu-noble' : 'ubuntu-jammy');
+	# overlay/base.yml default. Both are noble now that upstream
+	# cf-deployment defaults to noble, so the fallback is the same either way.
+	my $stemcell_os = $self->env->lookup('params.stemcell_os', 'ubuntu-noble');
 
 	my %lineages = map { ($_ => 1) } (slurp($ops_path) =~ /^\s*os:\s*["']?([\w.-]+)/mg);
 	my @foreign = sort grep { $_ ne $stemcell_os } keys %lineages;

@@ -1,11 +1,11 @@
 ---
 # PVE bloc invariant: ubuntu-noble only (the OCFP PVE CPI is built and tested
 # against noble; jammy is unsupported). The kit base overlay (overlay/base.yml)
-# defaults params.stemcell_os to ubuntu-jammy and its stemcells block grabs
-# that param, so the deployment stemcell would be jammy regardless of the
-# cf-deployment default. Force noble here. With a noble-default cf-deployment
-# (>= 56.5.0, selected via the cf-deployment-version-* feature) this also
-# aligns the VM stemcell with the noble-compiled releases.
+# also defaults params.stemcell_os to ubuntu-noble, so this file no longer
+# changes the outcome on its own. It stays because the invariant is a property
+# of PVE rather than of the base default: if the base overlay ever moves off
+# noble, or an environment pins jammy for a non-PVE reason, PVE still has to
+# land on noble to match the noble-compiled releases and the CPI.
 #
 # No version pin: base.yml defaults params.stemcell_version to "latest", which
 # resolves to the newest noble uploaded to the deploying director. The GCS
