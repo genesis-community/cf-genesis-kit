@@ -1,28 +1,37 @@
 ---
-# PVE/RustFS external blobstore — OCFP overlay.
+# OCFP layer for the PVE external blobstore. Sources the endpoint, region, and
+# credentials from the bloc's vault tree, then wires storage-cli onto all three
+# cloud_controller jobs.
 #
-# Loaded after ocfp/external-blobstore.yml and overlay/blobstore/pve.yml.
-# Overrides the upstream params with values from the bloc's vault tree
-# populated by `ocfp bootstrap artifacts`:
+# Why the wiring lives here rather than in cf-deployment's own ops file: as of
+# cf-deployment v59.0.0, operations/use-external-blobstore.yml sets the four
+# directory keys and nothing else, and v60.5.0 ships a use-s3-blobstore.yml
+# that expects variables named blobstore_access_key_id, blobstore_secret_access_key,
+# and aws_region, none of which match the names this kit populates. That ops
+# file also has no way to express a custom host, port, or TLS setting, which an
+# in-bloc RustFS needs and AWS does not. Rather than rename our variables to
+# suit it and then patch the gaps back in, we write the twelve bucket configs
+# directly and keep the whole story in one file.
 #
-#   secret/config/<bloc>/ocf/cf/blobstores/main
-#     :bucket      bucket-name prefix (e.g. <bloc>-ocf-cf)
-#     :endpoint    RustFS URL (e.g. https://<host>:9000)
-#     :region      S3 region label
-#     :ca_cert     optional PEM
+# The four buckets are unchanged from the fog era, so this is a client swap
+# rather than a data migration; droplets and packages already in RustFS stay
+# where they are.
 #
-#   secret/config/<bloc>/ocf/cf/blobstores/main/creds
-#     :access_key
-#     :secret_key
-#
-# meta.ocfp.vault.config resolves to `secret/config/<bloc>/ocf`.
+# Property names come from capi's jobs/cloud_controller_ng/templates/
+# storage_cli_config_*.json.erb, not from storage-cli's own config struct. For
+# provider s3 the template reads bucket_name, aws_access_key_id, and
+# aws_secret_access_key, sets credentials_source itself, and passes host, port,
+# region, use_ssl, ssl_verify_peer, and host_style through when present. Using
+# storage-cli's internal names (access_key_id, secret_access_key) fails at
+# render time with "Can't find property cc.<bucket>.connection_config.
+# aws_access_key_id", because the template never looks at them.
 
 params:
   blobstore_s3_region:              (( vault meta.ocfp.vault.config "/cf/blobstores/main:region" ))
+  blobstore_s3_host:                (( vault meta.ocfp.vault.config "/cf/blobstores/main:host" ))
   blobstore_s3_access_key:          (( vault meta.ocfp.vault.config "/cf/blobstores/main/creds:access_key" ))
   blobstore_s3_secret_key:          (( vault meta.ocfp.vault.config "/cf/blobstores/main/creds:secret_key" ))
   blobstore_s3_endpoint:            (( vault meta.ocfp.vault.config "/cf/blobstores/main:endpoint" ))
-  blobstore_s3_path_style:          true
 
   # Bucket-prefix is sourced from vault (`<bloc>-ocf-cf`). The four CF
   # directory keys derive their bucket names by suffixing this prefix. These
@@ -35,22 +44,179 @@ params:
   blobstore_resources_directory:    (( concat params.blobstore_bucket_prefix "-resource-pool" ))
 
 bosh-variables:
-  # Override the credhub-style vars referenced by overlay/blobstore/pve.yml
-  # with the vault-sourced creds.
+  # Kept for any overlay still reading the credhub-style names.
   blobstore_s3_access_key_id:     (( grab params.blobstore_s3_access_key ))
   blobstore_s3_secret_access_key: (( grab params.blobstore_s3_secret_key ))
 
-  fog_connection:
-    provider:              AWS
-    aws_access_key_id:     (( grab params.blobstore_s3_access_key ))
-    aws_secret_access_key: (( grab params.blobstore_s3_secret_key ))
-    aws_signature_version: 4
-    region:                (( grab params.blobstore_s3_region ))
-    endpoint:              (( grab params.blobstore_s3_endpoint ))
-    path_style:            (( grab params.blobstore_s3_path_style ))
-    # Excon does not consult the OS trust store by default, so a blobstore
-    # cert signed by the bloc's internal CA fails verification even after
-    # that CA is distributed to VMs (os-conf ca_certs). Point Excon at the
-    # system bundle, which the runtime-config addon keeps current.
-    connection_options:
-      ssl_ca_file: /etc/ssl/certs/ca-certificates.crt
+instance_groups:
+- name: api
+  jobs:
+  - name: cloud_controller_ng
+    properties:
+      cc:
+        buildpacks:
+          blobstore_type: storage-cli
+          blobstore_provider: s3
+          connection_config:
+            bucket_name:        (( grab params.blobstore_buildpacks_directory ))
+            host:               (( grab params.blobstore_s3_host ))
+            port:               (( grab params.blobstore_s3_port ))
+            region:             (( grab params.blobstore_s3_region ))
+            use_ssl:            (( grab params.blobstore_s3_use_ssl ))
+            ssl_verify_peer:    (( grab params.blobstore_s3_ssl_verify_peer ))
+            host_style:         (( grab params.blobstore_s3_host_style ))
+            aws_access_key_id:     (( grab params.blobstore_s3_access_key ))
+            aws_secret_access_key: (( grab params.blobstore_s3_secret_key ))
+        droplets:
+          blobstore_type: storage-cli
+          blobstore_provider: s3
+          connection_config:
+            bucket_name:        (( grab params.blobstore_droplets_directory ))
+            host:               (( grab params.blobstore_s3_host ))
+            port:               (( grab params.blobstore_s3_port ))
+            region:             (( grab params.blobstore_s3_region ))
+            use_ssl:            (( grab params.blobstore_s3_use_ssl ))
+            ssl_verify_peer:    (( grab params.blobstore_s3_ssl_verify_peer ))
+            host_style:         (( grab params.blobstore_s3_host_style ))
+            aws_access_key_id:     (( grab params.blobstore_s3_access_key ))
+            aws_secret_access_key: (( grab params.blobstore_s3_secret_key ))
+        packages:
+          blobstore_type: storage-cli
+          blobstore_provider: s3
+          connection_config:
+            bucket_name:        (( grab params.blobstore_app_packages_directory ))
+            host:               (( grab params.blobstore_s3_host ))
+            port:               (( grab params.blobstore_s3_port ))
+            region:             (( grab params.blobstore_s3_region ))
+            use_ssl:            (( grab params.blobstore_s3_use_ssl ))
+            ssl_verify_peer:    (( grab params.blobstore_s3_ssl_verify_peer ))
+            host_style:         (( grab params.blobstore_s3_host_style ))
+            aws_access_key_id:     (( grab params.blobstore_s3_access_key ))
+            aws_secret_access_key: (( grab params.blobstore_s3_secret_key ))
+        resource_pool:
+          blobstore_type: storage-cli
+          blobstore_provider: s3
+          connection_config:
+            bucket_name:        (( grab params.blobstore_resources_directory ))
+            host:               (( grab params.blobstore_s3_host ))
+            port:               (( grab params.blobstore_s3_port ))
+            region:             (( grab params.blobstore_s3_region ))
+            use_ssl:            (( grab params.blobstore_s3_use_ssl ))
+            ssl_verify_peer:    (( grab params.blobstore_s3_ssl_verify_peer ))
+            host_style:         (( grab params.blobstore_s3_host_style ))
+            aws_access_key_id:     (( grab params.blobstore_s3_access_key ))
+            aws_secret_access_key: (( grab params.blobstore_s3_secret_key ))
+- name: cc-worker
+  jobs:
+  - name: cloud_controller_worker
+    properties:
+      cc:
+        buildpacks:
+          blobstore_type: storage-cli
+          blobstore_provider: s3
+          connection_config:
+            bucket_name:        (( grab params.blobstore_buildpacks_directory ))
+            host:               (( grab params.blobstore_s3_host ))
+            port:               (( grab params.blobstore_s3_port ))
+            region:             (( grab params.blobstore_s3_region ))
+            use_ssl:            (( grab params.blobstore_s3_use_ssl ))
+            ssl_verify_peer:    (( grab params.blobstore_s3_ssl_verify_peer ))
+            host_style:         (( grab params.blobstore_s3_host_style ))
+            aws_access_key_id:     (( grab params.blobstore_s3_access_key ))
+            aws_secret_access_key: (( grab params.blobstore_s3_secret_key ))
+        droplets:
+          blobstore_type: storage-cli
+          blobstore_provider: s3
+          connection_config:
+            bucket_name:        (( grab params.blobstore_droplets_directory ))
+            host:               (( grab params.blobstore_s3_host ))
+            port:               (( grab params.blobstore_s3_port ))
+            region:             (( grab params.blobstore_s3_region ))
+            use_ssl:            (( grab params.blobstore_s3_use_ssl ))
+            ssl_verify_peer:    (( grab params.blobstore_s3_ssl_verify_peer ))
+            host_style:         (( grab params.blobstore_s3_host_style ))
+            aws_access_key_id:     (( grab params.blobstore_s3_access_key ))
+            aws_secret_access_key: (( grab params.blobstore_s3_secret_key ))
+        packages:
+          blobstore_type: storage-cli
+          blobstore_provider: s3
+          connection_config:
+            bucket_name:        (( grab params.blobstore_app_packages_directory ))
+            host:               (( grab params.blobstore_s3_host ))
+            port:               (( grab params.blobstore_s3_port ))
+            region:             (( grab params.blobstore_s3_region ))
+            use_ssl:            (( grab params.blobstore_s3_use_ssl ))
+            ssl_verify_peer:    (( grab params.blobstore_s3_ssl_verify_peer ))
+            host_style:         (( grab params.blobstore_s3_host_style ))
+            aws_access_key_id:     (( grab params.blobstore_s3_access_key ))
+            aws_secret_access_key: (( grab params.blobstore_s3_secret_key ))
+        resource_pool:
+          blobstore_type: storage-cli
+          blobstore_provider: s3
+          connection_config:
+            bucket_name:        (( grab params.blobstore_resources_directory ))
+            host:               (( grab params.blobstore_s3_host ))
+            port:               (( grab params.blobstore_s3_port ))
+            region:             (( grab params.blobstore_s3_region ))
+            use_ssl:            (( grab params.blobstore_s3_use_ssl ))
+            ssl_verify_peer:    (( grab params.blobstore_s3_ssl_verify_peer ))
+            host_style:         (( grab params.blobstore_s3_host_style ))
+            aws_access_key_id:     (( grab params.blobstore_s3_access_key ))
+            aws_secret_access_key: (( grab params.blobstore_s3_secret_key ))
+- name: scheduler
+  jobs:
+  - name: cloud_controller_clock
+    properties:
+      cc:
+        buildpacks:
+          blobstore_type: storage-cli
+          blobstore_provider: s3
+          connection_config:
+            bucket_name:        (( grab params.blobstore_buildpacks_directory ))
+            host:               (( grab params.blobstore_s3_host ))
+            port:               (( grab params.blobstore_s3_port ))
+            region:             (( grab params.blobstore_s3_region ))
+            use_ssl:            (( grab params.blobstore_s3_use_ssl ))
+            ssl_verify_peer:    (( grab params.blobstore_s3_ssl_verify_peer ))
+            host_style:         (( grab params.blobstore_s3_host_style ))
+            aws_access_key_id:     (( grab params.blobstore_s3_access_key ))
+            aws_secret_access_key: (( grab params.blobstore_s3_secret_key ))
+        droplets:
+          blobstore_type: storage-cli
+          blobstore_provider: s3
+          connection_config:
+            bucket_name:        (( grab params.blobstore_droplets_directory ))
+            host:               (( grab params.blobstore_s3_host ))
+            port:               (( grab params.blobstore_s3_port ))
+            region:             (( grab params.blobstore_s3_region ))
+            use_ssl:            (( grab params.blobstore_s3_use_ssl ))
+            ssl_verify_peer:    (( grab params.blobstore_s3_ssl_verify_peer ))
+            host_style:         (( grab params.blobstore_s3_host_style ))
+            aws_access_key_id:     (( grab params.blobstore_s3_access_key ))
+            aws_secret_access_key: (( grab params.blobstore_s3_secret_key ))
+        packages:
+          blobstore_type: storage-cli
+          blobstore_provider: s3
+          connection_config:
+            bucket_name:        (( grab params.blobstore_app_packages_directory ))
+            host:               (( grab params.blobstore_s3_host ))
+            port:               (( grab params.blobstore_s3_port ))
+            region:             (( grab params.blobstore_s3_region ))
+            use_ssl:            (( grab params.blobstore_s3_use_ssl ))
+            ssl_verify_peer:    (( grab params.blobstore_s3_ssl_verify_peer ))
+            host_style:         (( grab params.blobstore_s3_host_style ))
+            aws_access_key_id:     (( grab params.blobstore_s3_access_key ))
+            aws_secret_access_key: (( grab params.blobstore_s3_secret_key ))
+        resource_pool:
+          blobstore_type: storage-cli
+          blobstore_provider: s3
+          connection_config:
+            bucket_name:        (( grab params.blobstore_resources_directory ))
+            host:               (( grab params.blobstore_s3_host ))
+            port:               (( grab params.blobstore_s3_port ))
+            region:             (( grab params.blobstore_s3_region ))
+            use_ssl:            (( grab params.blobstore_s3_use_ssl ))
+            ssl_verify_peer:    (( grab params.blobstore_s3_ssl_verify_peer ))
+            host_style:         (( grab params.blobstore_s3_host_style ))
+            aws_access_key_id:     (( grab params.blobstore_s3_access_key ))
+            aws_secret_access_key: (( grab params.blobstore_s3_secret_key ))

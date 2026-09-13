@@ -2,31 +2,34 @@
 # PVE external blobstore overlay — wires CF to an S3-compatible endpoint
 # (RustFS, MinIO, or any other) provisioned outside CF on the same bloc.
 #
-# This file declares the fog_connection skeleton. The actual endpoint URL,
-# region, and creds are sourced by the OCFP-layer overlay at
-# ocfp/pve/external-blobstore.yml from the bloc's vault tree.
+# cf-deployment v59.0.0 moved cloud_controller off the fog gem and onto
+# storage-cli, and it removed the fog_connection wiring from
+# operations/use-external-blobstore.yml at the same time. That ops file now
+# sets only the four directory keys, so everything about how to reach the
+# blobstore has to come from us. This file declares the knobs and their
+# defaults; the OCFP-layer overlay at ocfp/pve/external-blobstore.yml fills in
+# the host, region, and credentials from the bloc's vault tree and does the
+# actual wiring onto the three cloud_controller jobs.
 #
-# Bucket names are derived in ocfp/pve/external-blobstore.yml from the
-# `cf/blobstores/main:bucket` prefix populated by `ocfp bootstrap artifacts`.
+# storage-cli takes a host and a port rather than an endpoint URL, and it has
+# no ssl_ca_file knob, so it verifies against the VM's system trust store. The
+# bloc's internal CA reaches that store through the os-conf ca_certs runtime
+# config, which is what makes ssl_verify_peer usable here.
 
 params:
-  blobstore_s3_endpoint:   (( param "blobstore_s3_endpoint must come from ocfp/pve/external-blobstore.yml — populate secret/config/<bloc>/ocf/cf/blobstores/main:endpoint" ))
-  blobstore_s3_region:     (( param "blobstore_s3_region must come from ocfp/pve/external-blobstore.yml — populate secret/config/<bloc>/ocf/cf/blobstores/main:region" ))
-  blobstore_s3_path_style: true
+  blobstore_s3_host:   (( param "blobstore_s3_host must come from ocfp/pve/external-blobstore.yml — populate secret/config/<bloc>/ocf/cf/blobstores/main:host" ))
+  blobstore_s3_region: (( param "blobstore_s3_region must come from ocfp/pve/external-blobstore.yml — populate secret/config/<bloc>/ocf/cf/blobstores/main:region" ))
 
-bosh-variables:
-  fog_connection:
-    provider:              AWS
-    aws_access_key_id:     ((blobstore_s3_access_key_id))
-    aws_secret_access_key: ((blobstore_s3_secret_access_key))
-    aws_signature_version: 4
-    region:                (( grab params.blobstore_s3_region ))
-    endpoint:              (( grab params.blobstore_s3_endpoint ))
-    path_style:            (( grab params.blobstore_s3_path_style ))
+  # Defaults for the parts of the endpoint that `ocfp bootstrap artifacts` does
+  # not write as discrete vault keys. It writes `endpoint` as a full URL and
+  # `host` on its own, so a bloc whose blobstore listens somewhere other than
+  # https on 9000 has to override these two from its env file.
+  blobstore_s3_port:            9000
+  blobstore_s3_use_ssl:         true
+  blobstore_s3_ssl_verify_peer: true
 
-# Credhub-style vars consumed by `fog_connection` above; the OCFP overlay
-# populates them from vault via `blobstore_s3_access_key`/`blobstore_s3_secret_key`.
-#
-# Credhub secrets (when not using OCFP vault flow):
-#   blobstore_s3_access_key_id
-#   blobstore_s3_secret_access_key
+  # storage-cli names this the other way round from fog. path_style true is the
+  # same thing as host_style false, and every S3-compatible blobstore we run in
+  # a bloc wants path style, because a virtual-host bucket needs wildcard DNS
+  # the lab does not have.
+  blobstore_s3_host_style: false
