@@ -162,11 +162,19 @@ sub process_classic_features {
 	) if $self->want_feature("+migrated-v1-env")
 		|| $blobstore ne "+internal-blobstore";
 
+	# Features already consumed above, so the positional dispatch below must
+	# not see them again. 'bare' and 'partitioned-network' select the base
+	# configuration at the top of this sub and contribute no further merge
+	# file of their own; leaving them off this list drops them into the
+	# dispatch chain, where they fall through to its "Unknown feature" bail.
 	my @direct_features = qw{
+		bare partitioned-network
 		compiled-releases
 		small-footprint cf-deployment/operations/scale-to-one-az
 		v1-vm-types v2-nats-credentials
-		aws-blobstore-iam gcp-use-access-key blobstore-suffix
+		aws-blobstore-iam gcp-use-access-key
+		blobstore-suffix no-blobstore-suffix
+		tls self-signed
 		isolation-segments
 		nfs-ldap nfs-ldap-tls
 		vip
@@ -225,7 +233,10 @@ sub process_classic_features {
 		} elsif ( $feature eq "enable-service-discovery" ) {
 			$self->add_files("overlay/enable-service-discovery.yml");
 
-		# TODO: Add windows-diego-cells feature support
+		} elsif ( $feature eq "windows-diego-cells" ) {
+			# Same upstream ops files as the OCFP path; only the OCFP-specific
+			# trusted-cert and IaaS overlays differ, and those do not apply here.
+			$self->enable_windows_diego_cells(!$self->want_feature('source-releases'));
 
 		# Custom ops files from environment
 		} elsif (-f $self->env->path("$ops_dir/${feature}.yml")) {
@@ -457,6 +468,10 @@ sub process_ocfp_features {
 		'ocfp', 'self-signed', 'small-footprint',
 		'source-releases', 'vendored-compiled-releases', 'isolation-segments',
 		'cf-deployment/operations/scale-to-one-az',
+		# The cloud-config hook reads 'partitioned-network' to lay out the
+		# ocf-core/ocf-edge networks; it adds no merge file here, so name it
+		# handled rather than letting the dispatch chain reject it.
+		'partitioned-network',
 		$blobstore, '+internal-db', 'local-postgres-db',
 		'local-mysql-db', 'mysql-db', 'postgres-db',
 		'nfs-ldap', 'nfs-ldap-tls', 'vip'
@@ -771,6 +786,11 @@ sub _dynamic_isolation_segments {
 
 	if ($self->want_feature("ocfp")) {
 		push @iso_seg_merges, "ocfp/meta.yml";
+	} else {
+		# Supply the empty meta.ocfp.certs.trusted the per-segment
+		# additional-trusted-certs fragment defers a grab against. See the
+		# comment in that overlay for why the fragment cannot default it itself.
+		push @isolation_files, "overlay/isolation-segments-trusted-certs.yml";
 	}
 
 	foreach my $group (@isolation_groups) {
@@ -968,6 +988,12 @@ sub _instance_count_overrides {
 
 		# Handle translations
 		next if ($inst_grp eq 'errand' || $inst_grp eq 'haproxy'); # dealt with elsewhere
+
+		# The count ops merge after overlay/addons/no-tcp-routers.yml has deleted
+		# the instance group, and a count for a group that is not there merges it
+		# straight back in. small-footprint sets a default count for every group,
+		# so this fires without the operator asking for it.
+		next if ($inst_grp eq 'tcp-router' && $self->want_feature('no-tcp-routers'));
 
 		if (exists $trans_map->{$inst_grp}) {
 			push @warnings, "Translated: params.$inst_grp_orig => params.$trans_map->{$inst_grp}";
@@ -1264,13 +1290,13 @@ sub _generate_service_routes_ops {
 			$content .= "  value: $san\n";
 		}
 	} elsif (@sans) {
-		warn(sprintf(
+		warning(
 			"#Y{params.ocfp_haproxy_service_routes} is routing %d hostname%s through ".
 			"haproxy, but this environment brings its own certificate, so the kit ".
 			"cannot add them as SANs. Make sure the certificate you provide covers ".
 			"%s -- a wildcard over the system domain does.",
 			scalar(@sans), (@sans == 1 ? '' : 's'), join(', ', @sans)
-		));
+		);
 	}
 
 	mkfile_or_fail($self->kit->path($file), 0644, $content);
@@ -1310,6 +1336,8 @@ sub validate_classic_features {
 		'no-haproxy', 'external-lb', # opt out of default-on haproxy
 		'tls',
 		'self-signed',
+		'small-footprint',
+		'compiled-releases',
 		'cflinuxfs3', 'cflinuxfs4',
 		'isolation-segments',
 		'ssh-proxy-on-routers',
@@ -1340,7 +1368,7 @@ sub validate_classic_features {
 		'minio-blobstore', 'stackit-blobstore', 'pve-blobstore',
 
 		# Blobstore support:
-		'blobstore-suffix',
+		'blobstore-suffix', 'no-blobstore-suffix',
 
 		# Databases:
 		'local-postgres-db', 'local-mysql-db', 'postgres-db', 'mysql-db',
@@ -1398,7 +1426,11 @@ sub validate_classic_features {
 		'local-ha-db' => {msg => "Consider using external High Availability databases instead"},
 		'autoscaler' => {msg => "Use the 'cf-app-autoscaler' genesis kit"},
 		'autoscaler-postgres' => {msg => "Use the 'cf-app-autoscaler' genesis kit"},
-		'native-garden-runc' => ['cf-deployment/operations/native-garden-runc-runner'],
+		'native-garden-runc' => {
+			msg => "- garden-runc is the only runner cf-deployment ships, and the ".
+			"native-garden-runc-runner ops file it used to select is gone",
+			replace => []
+		},
 
 		# Service Discovery redundant features
 		'app-bosh-dns' => $enable_service_discovery_resolution,
@@ -1455,7 +1487,7 @@ sub validate_ocfp_features {
 		'+internal-blobstore', 'pve-blobstore',
 
 		# Blobstore support:
-		'blobstore-suffix',
+		'blobstore-suffix', 'no-blobstore-suffix',
 
 		# Databases:
 		'+internal-db', # FIXME: Maybe allow mysql-db in the future?
