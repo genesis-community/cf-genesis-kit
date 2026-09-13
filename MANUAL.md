@@ -319,7 +319,12 @@ These params need to be set when using external databases:
 
 | param | description | default |
 | --- | --- | --- |
-| `blobstore_minio_endpoint` | The URL (including protocol and option port) of the Minio endpoint of the blobstore | |
+| `blobstore_minio_host` | The hostname of the Minio endpoint of the blobstore, on its own and without a protocol. This replaces `blobstore_minio_endpoint`, which storage-cli has no way to accept. | |
+| `blobstore_minio_port` | The port the Minio endpoint listens on | `9000` |
+| `blobstore_minio_use_ssl` | Reach the endpoint over https | `true` |
+| `blobstore_minio_ssl_verify_peer` | Verify the endpoint certificate against the VM's system trust store. storage-cli has no CA parameter, so a private CA has to arrive through the os-conf `ca_certs` runtime config. | `true` |
+| `blobstore_minio_host_style` | Address buckets in virtual-host style rather than path style | `false` |
+| `blobstore_minio_region` | The region used to sign requests. Minio ignores it, but the signing algorithm does not. | `us-east-1` |
 | `blobstore_bucket_prefix` | Prefix for the path where blobs are stored in the bucket | `"$GENESIS_ENVIRONMENT-$GENESIS_TYPE"` |
 | `blobstore_bucket_suffix` | Suffix for the path where blobs are stored in the bucket | `"((cc_director_key))"` |
 | `blobstore_app_packages_directory` | Directory for the app packages | `blobstore_bucket_prefix` + `"-app-packages-"` + `blobstore_bucket_suffix` |
