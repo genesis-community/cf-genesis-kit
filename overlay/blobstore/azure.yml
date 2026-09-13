@@ -1,3 +1,25 @@
+---
+# Azure blob storage as the external blobstore.
+#
+# Azure needs no conversion of its own, and this overlay stays deliberately
+# thin. cf-deployment's operations/use-azure-storage-blobstore.yml already does
+# the whole job in v60.5.0. It sets blobstore_type to storage-cli and
+# blobstore_provider to azurebs on all twelve buckets, and it writes a
+# connection_config of environment, azure_storage_account_name,
+# azure_storage_access_key, and container_name. The blueprint hook adds that
+# ops file after operations/use-external-blobstore.yml, so the wiring lands on
+# the bucket hashes the removes leave behind.
+#
+# Azure is not S3, and none of the S3 reasoning applies to it. capi's
+# jobs/cloud_controller_ng/templates/storage_cli_config_<bucket>.json.erb takes
+# a separate azurebs branch that reads account_name, container_name, and
+# account_key, with no bucket_name, no credentials_source, and no host or port.
+# There is nothing here to translate into the aws_ property names the S3
+# provider needs.
+#
+# What this overlay still owns is the environment variable that the ops file
+# reads, and the bucket-name restriction. Azure container names cannot contain
+# upper case, so cc_directory_key is regenerated without it.
 
 bosh-variables:
   environment: (( grab params.blobstore_environment || params.azure_environment || "AzureCloud" ))
@@ -13,4 +35,3 @@ variables:
 # Credhub Secrets
 #   blobstore_storage_account_name
 #   blobstore_storage_access_key
-
