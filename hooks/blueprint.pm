@@ -1614,10 +1614,30 @@ sub enable_external_blobstore {
 		$self->add_files('overlay/blobstore/aws-iam.yml')
 
 	} elsif ($type eq 'gcp') {
-		$self->add_files($self->want_feature('gcp-use-access-key')
-			? 'cf-deployment/operations/use-gcs-blobstore-access-key.yml'
-			: 'cf-deployment/operations/use-gcs-blobstore-service-account.yml'
-		);
+		# cf-deployment removed use-gcs-blobstore-access-key.yml in v59.0.0,
+		# when the external blobstore moved off the fog library onto
+		# storage-cli. The upstream commit calls the access-key file
+		# unsupported, and the GCS storage-cli provider takes only a service
+		# account JSON key, so there is no ops file left to point this feature
+		# at. Fail here rather than add_files() a path that is not on disk,
+		# which would surface later as an opaque merge error.
+		bail(
+			"Environment #C{%s} requests the #c{gcp-use-access-key} feature, ".
+			"which no longer\nhas an ops file behind it. cf-deployment removed ".
+			"#c{operations/use-gcs-blobstore-access-key.yml}\nin #Y{v59.0.0}, ".
+			"when the external blobstore moved off the deprecated fog\nlibrary ".
+			"onto storage-cli. The GCS storage-cli provider authenticates with ".
+			"a\nservice account JSON key, and does not accept Google Cloud ".
+			"Storage HMAC access\nkeys at all.\n\n".
+			"Remove #c{gcp-use-access-key} from the environment. #c{gcp-blobstore} ".
+			"on its own\nthen takes the service account path, which reads the ".
+			"#c{gcs_service_account_json_key}\ncredential. Populate that with the ".
+			"JSON key of a service account holding object\nadmin on the four ".
+			"blobstore buckets.",
+			$self->env->name
+		) if $self->want_feature('gcp-use-access-key');
+
+		$self->add_files('cf-deployment/operations/use-gcs-blobstore-service-account.yml');
 	}
 
 	$self->add_files_if_wants('blobstore-suffix',

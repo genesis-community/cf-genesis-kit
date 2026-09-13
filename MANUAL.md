@@ -107,7 +107,7 @@ Choose one of the following database options:
 - `minio-blobstore` - Use Minio S3-compatible storage as external blobstore.
 - `azure-blobstore` - Use Azure blob storage as external blobstore.
 - `gcp-blobstore` - Use GCS as external blobstore.
-- `gcp-use-access-key` - Use Google storage access key/secret to access the external GCS blobstore (instead of service account credentials which is the default).
+- `gcp-use-access-key` - **Removed.** This used to select Google storage access key and secret in place of service account credentials. cf-deployment dropped `use-gcs-blobstore-access-key.yml` in v59.0.0, when the external blobstore moved off the fog library onto storage-cli, whose GCS provider accepts only a service account JSON key. An environment still carrying the feature fails to render with an explanation. Use `gcp-blobstore` on its own and populate the `gcs_service_account_json_key` credential.
 - `blobstore-suffix` - Include the blobstore bucket suffix with a dash separator (e.g., `prefix-app-packages-suffix`).
 - `no-blobstore-suffix` - Remove the blobstore bucket suffix entirely (e.g., `prefix-app-packages` instead of `prefix-app-packages-suffix`). This is the default.
 
