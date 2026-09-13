@@ -10,11 +10,21 @@
 # build, for instance -- and the targets below link it into .genesis-bin/ and
 # run against it. Left unset, they use whichever genesis is already on PATH.
 #
+# A packed genesis is a self-extracting wrapper: on every run it compares a
+# checksum and, when it differs, deletes and rewrites lib/, genesis, checksum
+# and version under $HOME/.genesis. That directory is the runtime cache of the
+# genesis the operator has installed, so running a different build against a
+# real HOME silently replaces it. Every target here therefore runs genesis
+# with HOME pointed at .genesis-bin/home, and the Ginkgo harness already gives
+# each spec a HOME of its own temporary work directory.
+#
 # The Perl tests under t/ load the Genesis library directly rather than the
-# binary, so they take GENESIS_LIB instead.
+# binary, so they take GENESIS_LIB. Point it at the lib/ of a genesis source
+# tree to test against an unreleased Genesis.
 GENESIS_BIN ?= $(shell command -v genesis 2>/dev/null)
 GENESIS_LIB ?= $(HOME)/.genesis/lib
 GENESIS_PATH := $(CURDIR)/.genesis-bin
+GENESIS_HOME := $(GENESIS_PATH)/home
 
 # Default target - show available tasks
 help:
@@ -34,7 +44,8 @@ $(GENESIS_PATH)/genesis:
 	@ln -sf "$(realpath $(GENESIS_BIN))" $(GENESIS_PATH)/genesis
 
 genesis-version: $(GENESIS_PATH)/genesis
-	@PATH="$(GENESIS_PATH):$$PATH" genesis version
+	@mkdir -p $(GENESIS_HOME)
+	@HOME="$(GENESIS_HOME)" PATH="$(GENESIS_PATH):$$PATH" genesis version
 
 test: t spec
 
