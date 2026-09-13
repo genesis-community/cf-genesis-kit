@@ -1603,8 +1603,19 @@ sub enable_external_blobstore {
 		'overlay/blobstore/meta.yml',
 		'overlay/blobstore/external.yml'
 	);
-	$self->add_files_if_exists("overlay/blobstore/${type}.yml");
 	$self->add_files('cf-deployment/operations/use-external-blobstore.yml');
+
+	# The per-IaaS overlay merges after use-external-blobstore.yml, not before
+	# it. Genesis builds the manifest with a single
+	# `spruce merge --multi-doc --go-patch` over the file list in order, so a
+	# go-patch document takes effect at its position rather than at the end.
+	# use-external-blobstore.yml opens with a `remove` of cc/buildpacks,
+	# cc/droplets, cc/packages, and cc/resource_pool on all three
+	# cloud_controller jobs, which means anything an earlier overlay wired onto
+	# those four hashes is deleted again before the manifest is finished. The
+	# overlays carry the storage-cli connection_config now, so they have to come
+	# after the removes to survive them.
+	$self->add_files_if_exists("overlay/blobstore/${type}.yml");
 
 	# Add specific operations for each blobstore type
 	if ($type eq 'azure') {
