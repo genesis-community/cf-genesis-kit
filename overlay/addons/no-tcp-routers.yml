@@ -1,3 +1,10 @@
 instance_groups:
 - name: tcp-router
 - (( delete "tcp-router" ))
+
+# operations/rename-network-and-deployment.yml declares cf_tcp_edge_network and
+# uses it on the tcp-router instance group alone. Deleting that group leaves the
+# variable defined and referenced by nothing, which a strict interpolation
+# rejects, so drop it here as well.
+bosh-variables:
+  cf_tcp_edge_network: (( prune ))

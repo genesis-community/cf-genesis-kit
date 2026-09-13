@@ -1,0 +1,13 @@
+---
+# The per-segment additional-trusted-certs fragment defers
+# `grab meta.ocfp.certs.trusted` into the deployment manifest, but the inner
+# spruce merge that builds that fragment runs with `--prune meta`, so the
+# fragment's own default for the path never reaches this merge. An OCFP
+# environment gets the list from ocfp/trust-org-ca.yml and its siblings; a
+# classic one has nothing defining it, and the deferred grab then fails the
+# merge. Declare it empty here so the grab resolves to the segment's own
+# base and additional certificates.
+meta:
+  ocfp:
+    certs:
+      trusted: []

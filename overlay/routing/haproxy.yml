@@ -9,7 +9,11 @@ params:
   haproxy_instances: 2
   haproxy_vm_type:   haproxy
 
-  cf_lb_network: (( grab params.cf_edge_network || default))
+  # Mirror the cf_edge_network fallback in operations/rename-network-and-deployment.yml.
+  # The bare word `default` here was a path reference to $.default, which does
+  # not exist, so the merge failed for every environment that did not set
+  # params.cf_edge_network.
+  cf_lb_network: (( grab params.cf_edge_network || params.network || "cf-edge" ))
   haproxy_ips:   (( param "Please specify the IP addresses for your load balancer instances" ))
 
 instance_groups:

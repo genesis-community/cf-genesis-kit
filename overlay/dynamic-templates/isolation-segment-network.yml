@@ -3,7 +3,7 @@ instance_groups:
 - name: (( grab meta.name ))
   networks:
   - (( replace ))
-  - name: (( grab meta.network_name || "(( grab params.cf_runtime_network ))" ))
+  - name: (( grab meta.network_name || "(( grab params.cf_runtime_network || params.network || \"cf-runtime\" ))" ))
 
 addons:
 - name: bosh-dns-aliases
@@ -18,6 +18,6 @@ addons:
         - deployment: ((deployment_name))
           domain: bosh
           instance_group: (( grab meta.name ))
-          network: (( grab meta.network_name || "(( grab params.cf_runtime_network ))" ))
+          network: (( grab meta.network_name || "(( grab params.cf_runtime_network || params.network || \"cf-runtime\" ))" ))
           query: _
 
