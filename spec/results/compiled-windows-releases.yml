@@ -7,6 +7,7 @@ addons:
     stemcell:
     - os: ubuntu-bionic
     - os: ubuntu-jammy
+    - os: ubuntu-noble
   jobs:
   - name: loggregator_agent
     properties:
@@ -29,6 +30,7 @@ addons:
     stemcell:
     - os: ubuntu-bionic
     - os: ubuntu-jammy
+    - os: ubuntu-noble
   jobs:
   - name: loggr-forwarder-agent
     properties:
@@ -51,6 +53,7 @@ addons:
     stemcell:
     - os: ubuntu-bionic
     - os: ubuntu-jammy
+    - os: ubuntu-noble
   jobs:
   - name: loggr-syslog-agent
     properties:
@@ -80,6 +83,7 @@ addons:
     stemcell:
     - os: ubuntu-bionic
     - os: ubuntu-jammy
+    - os: ubuntu-noble
   jobs:
   - name: prom_scraper
     properties:
@@ -100,6 +104,7 @@ addons:
     stemcell:
     - os: ubuntu-bionic
     - os: ubuntu-jammy
+    - os: ubuntu-noble
   jobs:
   - name: bpm
     release: bpm
@@ -113,176 +118,176 @@ addons:
         - deployment: compiled-windows-releases-cf
           domain: bosh
           instance_group: diego-cell
-          network: cf-runtime
+          network: default
           query: _
         - deployment: compiled-windows-releases-cf
           domain: bosh
           instance_group: windows2012R2-cell
-          network: cf-runtime
+          network: default
           query: _
         - deployment: compiled-windows-releases-cf
           domain: bosh
           instance_group: windows2016-cell
-          network: cf-runtime
+          network: default
           query: _
         - deployment: compiled-windows-releases-cf
           domain: bosh
           instance_group: isolated-diego-cell
-          network: cf-runtime
+          network: default
           query: _
       - domain: auctioneer.service.cf.internal
         targets:
         - deployment: compiled-windows-releases-cf
           domain: bosh
           instance_group: scheduler
-          network: cf-core
+          network: default
           query: q-s4
       - domain: bbs.service.cf.internal
         targets:
         - deployment: compiled-windows-releases-cf
           domain: bosh
           instance_group: diego-api
-          network: cf-core
+          network: default
           query: q-s4
       - domain: blobstore.service.cf.internal
         targets:
         - deployment: compiled-windows-releases-cf
           domain: bosh
           instance_group: singleton-blobstore
-          network: cf-core
+          network: default
           query: '*'
       - domain: cc-uploader.service.cf.internal
         targets:
         - deployment: compiled-windows-releases-cf
           domain: bosh
           instance_group: api
-          network: cf-core
+          network: default
           query: '*'
       - domain: cloud-controller-ng.service.cf.internal
         targets:
         - deployment: compiled-windows-releases-cf
           domain: bosh
           instance_group: api
-          network: cf-core
+          network: default
           query: '*'
       - domain: credhub.service.cf.internal
         targets:
         - deployment: compiled-windows-releases-cf
           domain: bosh
           instance_group: credhub
-          network: cf-core
+          network: default
           query: '*'
       - domain: doppler.service.cf.internal
         targets:
         - deployment: compiled-windows-releases-cf
           domain: bosh
           instance_group: doppler
-          network: cf-core
+          network: default
           query: '*'
       - domain: log-cache.service.cf.internal
         targets:
         - deployment: compiled-windows-releases-cf
           domain: bosh
           instance_group: log-cache
-          network: cf-core
+          network: default
           query: '*'
       - domain: file-server.service.cf.internal
         targets:
         - deployment: compiled-windows-releases-cf
           domain: bosh
           instance_group: api
-          network: cf-core
+          network: default
           query: '*'
       - domain: gorouter.service.cf.internal
         targets:
         - deployment: compiled-windows-releases-cf
           domain: bosh
           instance_group: router
-          network: cf-edge
+          network: default
           query: '*'
       - domain: locket.service.cf.internal
         targets:
         - deployment: compiled-windows-releases-cf
           domain: bosh
           instance_group: diego-api
-          network: cf-core
+          network: default
           query: '*'
       - domain: loggregator-trafficcontroller.service.cf.internal
         targets:
         - deployment: compiled-windows-releases-cf
           domain: bosh
           instance_group: log-api
-          network: cf-core
+          network: default
           query: '*'
       - domain: nats.service.cf.internal
         targets:
         - deployment: compiled-windows-releases-cf
           domain: bosh
           instance_group: nats
-          network: cf-core
+          network: default
           query: '*'
       - domain: _.nats.service.cf.internal
         targets:
         - deployment: compiled-windows-releases-cf
           domain: bosh
           instance_group: nats
-          network: cf-core
+          network: default
           query: _
       - domain: policy-server.service.cf.internal
         targets:
         - deployment: compiled-windows-releases-cf
           domain: bosh
           instance_group: api
-          network: cf-core
+          network: default
           query: '*'
       - domain: reverse-log-proxy.service.cf.internal
         targets:
         - deployment: compiled-windows-releases-cf
           domain: bosh
           instance_group: log-api
-          network: cf-core
+          network: default
           query: '*'
       - domain: routing-api.service.cf.internal
         targets:
         - deployment: compiled-windows-releases-cf
           domain: bosh
           instance_group: api
-          network: cf-core
+          network: default
           query: '*'
       - domain: silk-controller.service.cf.internal
         targets:
         - deployment: compiled-windows-releases-cf
           domain: bosh
           instance_group: diego-api
-          network: cf-core
+          network: default
           query: '*'
       - domain: sql-db.service.cf.internal
         targets:
         - deployment: compiled-windows-releases-cf
           domain: bosh
           instance_group: database
-          network: cf-core
+          network: default
           query: '*'
       - domain: ssh-proxy.service.cf.internal
         targets:
         - deployment: compiled-windows-releases-cf
           domain: bosh
           instance_group: scheduler
-          network: cf-core
+          network: default
           query: '*'
       - domain: tps.service.cf.internal
         targets:
         - deployment: compiled-windows-releases-cf
           domain: bosh
           instance_group: scheduler
-          network: cf-core
+          network: default
           query: '*'
       - domain: uaa.service.cf.internal
         targets:
         - deployment: compiled-windows-releases-cf
           domain: bosh
           instance_group: uaa
-          network: cf-core
+          network: default
           query: '*'
     release: bosh-dns-aliases
   name: bosh-dns-aliases
@@ -295,18 +300,22 @@ exodus:
   apps_domain: run.cf.testing.examle
   base_domain: cf.testing.examle
   bosh: compiled-windows-releases
-  cf-deployment-date: 2024-Nov-11 15:24:29 UTC
-  cf-deployment-url: https://github.com/cloudfoundry/cf-deployment/releases/tag/v44.4.0
-  cf-deployment-version: 44.4.0
-  core_network: cf-core
-  db_network: cf-core
-  edge_network: cf-edge
-  features: compiled-releases,windows-diego-cells,smb-volume-services
+  cf-deployment-date: 2026-Sep-13 10:42:06 UTC
+  cf-deployment-url: https://github.com/cloudfoundry/cf-deployment/releases/tag/v60.5.0
+  cf-deployment-version: 60.5.0
+  core_network: default
+  db_network: default
+  edge_network: default
+  features: compiled-releases,windows-diego-cells,smb-volume-services,no-haproxy
+  iaas: null
   is_director: false
-  runtime_network: cf-runtime
+  runtime_network: default
+  scale: null
+  services: null
   system_domain: system.cf.testing.examle
   system_org: system
   system_space: system
+  tcp_edge_network: default
   use_create_env: false
   vaulted_uaa_clients: /secret/compiled/windows/releases/cf/uaa/client_secrets:firehose
 features:
@@ -328,7 +337,6 @@ instance_groups:
         client: cf_smoke_tests
         client_secret: <!{credhub}:uaa_clients_cf_smoke_tests_secret!>
         org: cf_smoke_tests_org
-        skip_ssl_validation: true
         space: cf_smoke_tests_space
     release: cf-smoke-tests
   - name: cf-cli-8-linux
@@ -336,7 +344,7 @@ instance_groups:
   lifecycle: errand
   name: smoke-tests
   networks:
-  - name: cf-runtime
+  - name: default
   stemcell: default
   vm_type: minimal
 - azs:
@@ -374,75 +382,104 @@ instance_groups:
     release: nats
   name: nats
   networks:
-  - name: cf-core
+  - name: default
   stemcell: default
   vm_type: medium
 - azs:
   - z1
   instances: 1
   jobs:
-  - name: postgres
+  - name: pxc-mysql
     properties:
-      databases:
-        databases:
-        - citext: true
-          name: cloud_controller
-          tag: cc
-        - citext: true
-          name: uaa
-          tag: uaa
-        - citext: true
-          name: diego
-          tag: diego
-        - citext: true
-          name: routing-api
-          tag: routing-api
-        - citext: false
-          name: network_policy
-          tag: networkpolicy
-        - citext: false
-          name: network_connectivity
-          tag: networkconnectivity
-        - citext: true
-          name: locket
-          tag: locket
-        - citext: true
-          name: credhub
-          tag: credhub
-        db_scheme: postgres
-        port: 5524
-        roles:
-        - name: cloud_controller
-          password: <!{credhub}:cc_database_password!>
-          tag: admin
-        - name: uaa
-          password: <!{credhub}:uaa_database_password!>
-          tag: admin
-        - name: diego
-          password: <!{credhub}:diego_database_password!>
-          tag: admin
-        - name: routing-api
-          password: <!{credhub}:routing_api_database_password!>
-          tag: admin
-        - name: network_policy
-          password: <!{credhub}:network_policy_database_password!>
-          tag: admin
-        - name: network_connectivity
-          password: <!{credhub}:network_connectivity_database_password!>
-          tag: admin
-        - name: locket
-          password: <!{credhub}:locket_database_password!>
-          tag: locket
-        - name: credhub
-          password: <!{credhub}:credhub_database_password!>
-          tag: admin
-    release: postgres
+      admin_password: <!{credhub}:cf_mysql_mysql_admin_password!>
+      engine_config:
+        binlog:
+          enabled: false
+        galera:
+          enabled: true
+      mysql_version: "8.4"
+      port: 13306
+      seeded_databases:
+      - name: cloud_controller
+        password: <!{credhub}:cc_database_password!>
+        username: cloud_controller
+      - name: diego
+        password: <!{credhub}:diego_database_password!>
+        username: diego
+      - name: network_connectivity
+        password: <!{credhub}:network_connectivity_database_password!>
+        username: network_connectivity
+      - name: network_policy
+        password: <!{credhub}:network_policy_database_password!>
+        username: network_policy
+      - name: routing-api
+        password: <!{credhub}:routing_api_database_password!>
+        username: routing-api
+      - name: uaa
+        password: <!{credhub}:uaa_database_password!>
+        username: uaa
+      - name: locket
+        password: <!{credhub}:locket_database_password!>
+        username: locket
+      - name: credhub
+        password: <!{credhub}:credhub_database_password!>
+        username: credhub
+      tls:
+        galera:
+          ca: <!{credhub}:galera_server_certificate.ca!>
+          certificate: <!{credhub}:galera_server_certificate.certificate!>
+          private_key: <!{credhub}:galera_server_certificate.private_key!>
+        server:
+          ca: <!{credhub}:mysql_server_certificate.ca!>
+          certificate: <!{credhub}:mysql_server_certificate.certificate!>
+          private_key: <!{credhub}:mysql_server_certificate.private_key!>
+    release: pxc
+  - name: proxy
+    properties:
+      api_password: <!{credhub}:cf_mysql_proxy_api_password!>
+      api_port: 8083
+      api_uri: proxy.system.cf.testing.examle
+    release: pxc
+  - name: galera-agent
+    properties:
+      db_password: <!{credhub}:cf_mysql_mysql_galera_healthcheck_password!>
+      endpoint_password: <!{credhub}:cf_mysql_mysql_galera_healthcheck_endpoint_password!>
+    release: pxc
+  - name: gra-log-purger
+    release: pxc
+  - name: cluster-health-logger
+    properties:
+      db_password: <!{credhub}:cf_mysql_mysql_cluster_health_password!>
+    release: pxc
+  - name: route_registrar
+    properties:
+      nats:
+        tls:
+          client_cert: <!{credhub}:nats_client_cert.certificate!>
+          client_key: <!{credhub}:nats_client_cert.private_key!>
+          enabled: true
+      route_registrar:
+        routes:
+        - name: cf-mysql-proxy
+          port: 8083
+          prepend_instance_index: true
+          registration_interval: 10s
+          uris:
+          - proxy.system.cf.testing.examle
+        - name: cf-mysql-proxy-aggregator
+          port: 8082
+          registration_interval: 10s
+          uris:
+          - proxy.system.cf.testing.examle
+    release: routing
+  - name: bootstrap
+    release: pxc
   migrated_from:
-  - name: postgres
+  - name: mysql
   - name: singleton-database
   name: database
   networks:
-  - name: cf-core
+  - name: default
   persistent_disk_type: 10GB
   stemcell: default
   update:
@@ -472,7 +509,6 @@ instance_groups:
             client_cert: <!{credhub}:diego_auctioneer_client.certificate!>
             client_key: <!{credhub}:diego_auctioneer_client.private_key!>
           ca_cert: <!{credhub}:diego_bbs_server.ca!>
-          detect_consul_cell_registrations: false
           encryption_keys:
           - label: key-2016-06
             passphrase: <!{credhub}:diego_bbs_encryption_keys_passphrase!>
@@ -480,21 +516,17 @@ instance_groups:
             ca_cert: <!{credhub}:diego_rep_client.ca!>
             client_cert: <!{credhub}:diego_rep_client.certificate!>
             client_key: <!{credhub}:diego_rep_client.private_key!>
-            require_tls: true
           server_cert: <!{credhub}:diego_bbs_server.certificate!>
           server_key: <!{credhub}:diego_bbs_server.private_key!>
-          skip_consul_lock: true
           sql:
-            db_driver: postgres
+            ca_cert: <!{credhub}:mysql_server_certificate.ca!>
+            db_driver: mysql
             db_host: sql-db.service.cf.internal
             db_password: <!{credhub}:diego_database_password!>
-            db_port: 5524
+            db_port: 3306
             db_schema: diego
             db_username: diego
-      enable_consul_service_registration: false
-      logging:
-        format:
-          timestamp: rfc3339
+            require_ssl: true
       loggregator:
         app_metric_exclusion_filter:
         - absolute_entitlement
@@ -508,11 +540,13 @@ instance_groups:
     properties:
       ca_cert: <!{credhub}:silk_controller.ca!>
       database:
+        ca_cert: <!{credhub}:mysql_server_certificate.ca!>
         host: sql-db.service.cf.internal
         name: network_connectivity
         password: <!{credhub}:network_connectivity_database_password!>
-        port: 5524
-        type: postgres
+        port: 3306
+        require_ssl: true
+        type: mysql
         username: network_connectivity
       server_cert: <!{credhub}:silk_controller.certificate!>
       server_key: <!{credhub}:silk_controller.private_key!>
@@ -528,16 +562,14 @@ instance_groups:
       diego:
         locket:
           sql:
-            db_driver: postgres
+            ca_cert: <!{credhub}:mysql_server_certificate.ca!>
+            db_driver: mysql
             db_host: sql-db.service.cf.internal
             db_password: <!{credhub}:locket_database_password!>
-            db_port: 5524
+            db_port: 3306
             db_schema: locket
             db_username: locket
-      enable_consul_service_registration: false
-      logging:
-        format:
-          timestamp: rfc3339
+            require_ssl: true
       loggregator:
         ca_cert: <!{credhub}:loggregator_tls_agent.ca!>
         cert: <!{credhub}:loggregator_tls_agent.certificate!>
@@ -565,7 +597,7 @@ instance_groups:
   - name: diego-bbs
   name: diego-api
   networks:
-  - name: cf-core
+  - name: default
   stemcell: default
   vm_type: small
 - azs:
@@ -599,6 +631,8 @@ instance_groups:
       uaa:
         admin:
           client_secret: <!{credhub}:uaa_admin_client_secret!>
+        ca_certs:
+        - <!{credhub}:mysql_server_certificate.ca!>
         clients:
           cc-service-dashboards:
             authorities: clients.read,clients.write,clients.admin
@@ -618,7 +652,7 @@ instance_groups:
           cf:
             access-token-validity: 1200
             authorities: uaa.none
-            authorized-grant-types: password,refresh_token
+            authorized-grant-types: password,refresh_token,urn:ietf:params:oauth:grant-type:jwt-bearer
             override: true
             refresh-token-validity: 2592000
             scopes:
@@ -730,16 +764,16 @@ instance_groups:
             hostnames:
             - uaa.service.cf.internal
       uaadb:
+        address: sql-db.service.cf.internal
         databases:
         - name: uaa
           tag: uaa
-        db_scheme: postgresql
-        port: 5524
+        db_scheme: mysql
+        port: 3306
         roles:
         - name: uaa
           password: <!{credhub}:uaa_database_password!>
           tag: admin
-        tls: disabled
     release: uaa
   - name: route_registrar
     properties:
@@ -776,7 +810,7 @@ instance_groups:
     release: statsd-injector
   name: uaa
   networks:
-  - name: cf-core
+  - name: default
   stemcell: default
   vm_type: small
 - azs:
@@ -825,7 +859,7 @@ instance_groups:
   - name: blobstore
   name: singleton-blobstore
   networks:
-  - name: cf-core
+  - name: default
   persistent_disk_type: 100GB
   stemcell: default
   update:
@@ -847,13 +881,14 @@ instance_groups:
       build: cf-genesis-kit v2.0.0
       cc:
         buildpacks:
-          blobstore_type: webdav
-          webdav_config:
-            blobstore_timeout: 5
+          blobstore_provider: dav
+          blobstore_type: storage-cli
+          connection_config:
             ca_cert: <!{credhub}:blobstore_tls.ca!>
             password: <!{credhub}:blobstore_admin_users_password!>
             private_endpoint: https://blobstore.service.cf.internal:4443
             public_endpoint: https://blobstore.system.cf.testing.examle
+            secret: <!{credhub}:blobstore_secure_link_secret!>
             username: blobstore-user
         database_encryption:
           current_key_label: encryption_key_0
@@ -871,20 +906,24 @@ instance_groups:
           docker_staging_stack: cflinuxfs4
           droplet_destinations:
             cflinuxfs4: /home/vcap
+            cflinuxfs5: /home/vcap
             windows: /Users/vcap
           lifecycle_bundles:
             buildpack/cflinuxfs4: buildpack_app_lifecycle/buildpack_app_lifecycle.tgz
+            buildpack/cflinuxfs5: buildpack_app_lifecycle/buildpack_app_lifecycle.tgz
             buildpack/windows: buildpack_app_lifecycle/buildpack_app_lifecycle.tgz
             cnb/cflinuxfs4: cnb_app_lifecycle/cnb_app_lifecycle.tgz
+            cnb/cflinuxfs5: cnb_app_lifecycle/cnb_app_lifecycle.tgz
             docker: docker_app_lifecycle/docker_app_lifecycle.tgz
         droplets:
-          blobstore_type: webdav
-          webdav_config:
-            blobstore_timeout: 5
+          blobstore_provider: dav
+          blobstore_type: storage-cli
+          connection_config:
             ca_cert: <!{credhub}:blobstore_tls.ca!>
             password: <!{credhub}:blobstore_admin_users_password!>
             private_endpoint: https://blobstore.service.cf.internal:4443
             public_endpoint: https://blobstore.system.cf.testing.examle
+            secret: <!{credhub}:blobstore_secure_link_secret!>
             username: blobstore-user
         install_buildpacks:
         - name: staticfile_buildpack
@@ -909,6 +948,28 @@ instance_groups:
           package: r-buildpack-cflinuxfs4
         - name: binary_buildpack
           package: binary-buildpack-cflinuxfs4
+        - name: staticfile_buildpack
+          package: staticfile-buildpack-cflinuxfs5
+        - name: java_buildpack
+          package: java-buildpack-cflinuxfs5
+        - name: ruby_buildpack
+          package: ruby-buildpack-cflinuxfs5
+        - name: dotnet_core_buildpack
+          package: dotnet-core-buildpack-cflinuxfs5
+        - name: nodejs_buildpack
+          package: nodejs-buildpack-cflinuxfs5
+        - name: go_buildpack
+          package: go-buildpack-cflinuxfs5
+        - name: python_buildpack
+          package: python-buildpack-cflinuxfs5
+        - name: php_buildpack
+          package: php-buildpack-cflinuxfs5
+        - name: nginx_buildpack
+          package: nginx-buildpack-cflinuxfs5
+        - name: r_buildpack
+          package: r-buildpack-cflinuxfs5
+        - name: binary_buildpack
+          package: binary-buildpack-cflinuxfs5
         - name: hwc_buildpack
           package: hwc-buildpack-windows
         - name: binary_buildpack
@@ -918,6 +979,10 @@ instance_groups:
         logcache_tls:
           certificate: <!{credhub}:cc_logcache_tls.certificate!>
           private_key: <!{credhub}:cc_logcache_tls.private_key!>
+        loggregator_tls:
+          ca_cert: <!{credhub}:loggregator_tls_agent.ca!>
+          certificate: <!{credhub}:loggregator_tls_agent.certificate!>
+          private_key: <!{credhub}:loggregator_tls_agent.private_key!>
         min_cli_version: 6.23.0
         min_recommended_cli_version: 6.23.0
         mutual_tls:
@@ -925,13 +990,14 @@ instance_groups:
           private_key: <!{credhub}:cc_tls.private_key!>
           public_cert: <!{credhub}:cc_tls.certificate!>
         packages:
-          blobstore_type: webdav
-          webdav_config:
-            blobstore_timeout: 5
+          blobstore_provider: dav
+          blobstore_type: storage-cli
+          connection_config:
             ca_cert: <!{credhub}:blobstore_tls.ca!>
             password: <!{credhub}:blobstore_admin_users_password!>
             private_endpoint: https://blobstore.service.cf.internal:4443
             public_endpoint: https://blobstore.system.cf.testing.examle
+            secret: <!{credhub}:blobstore_secure_link_secret!>
             username: blobstore-user
         prom_scraper_tls:
           ca_cert: <!{credhub}:cc_prom_scraper_scrape_tls.ca!>
@@ -942,13 +1008,14 @@ instance_groups:
           certificate: <!{credhub}:cc_public_tls.certificate!>
           private_key: <!{credhub}:cc_public_tls.private_key!>
         resource_pool:
-          blobstore_type: webdav
-          webdav_config:
-            blobstore_timeout: 5
+          blobstore_provider: dav
+          blobstore_type: storage-cli
+          connection_config:
             ca_cert: <!{credhub}:blobstore_tls.ca!>
             password: <!{credhub}:blobstore_admin_users_password!>
             private_endpoint: https://blobstore.service.cf.internal:4443
             public_endpoint: https://blobstore.system.cf.testing.examle
+            secret: <!{credhub}:blobstore_secure_link_secret!>
             username: blobstore-user
         security_group_definitions:
         - name: public_networks
@@ -976,6 +1043,8 @@ instance_groups:
         stacks:
         - description: Cloud Foundry Linux-based filesystem (Ubuntu 22.04)
           name: cflinuxfs4
+        - description: Cloud Foundry Linux-based filesystem (Ubuntu 24.04)
+          name: cflinuxfs5
         - description: Windows Server
           name: windows
         staging_upload_password: <!{credhub}:cc_staging_upload_password!>
@@ -983,11 +1052,13 @@ instance_groups:
         temporary_use_logcache: true
         volume_services_enabled: true
       ccdb:
+        address: sql-db.service.cf.internal
+        ca_cert: <!{credhub}:mysql_server_certificate.ca!>
         databases:
         - name: cloud_controller
           tag: cc
-        db_scheme: postgres
-        port: 5524
+        db_scheme: mysql
+        port: 3306
         roles:
         - name: cloud_controller
           password: <!{credhub}:cc_database_password!>
@@ -1000,8 +1071,7 @@ instance_groups:
         route_services_secret: <!{credhub}:router_route_services_secret!>
       routing_api:
         enabled: true
-      ssl:
-        skip_cert_verify: true
+      ssl: {}
       support_address: https://github.com/genesis-community/cf-genesis-kit
       system_domain: system.cf.testing.examle
       uaa:
@@ -1016,7 +1086,7 @@ instance_groups:
           cloud_controller_username_lookup:
             secret: <!{credhub}:uaa_clients_cloud_controller_username_lookup_secret!>
         url: https://uaa.system.cf.testing.examle
-      version: 44
+      version: 60
     provides:
       cloud_controller:
         as: cloud_controller
@@ -1097,9 +1167,7 @@ instance_groups:
       bpm:
         enabled: true
       enable_consul_service_registration: false
-      logging:
-        format:
-          timestamp: rfc3339
+      https_server_enabled: true
       loggregator:
         app_metric_exclusion_filter:
         - absolute_entitlement
@@ -1108,6 +1176,10 @@ instance_groups:
         cert: <!{credhub}:loggregator_tls_agent.certificate!>
         key: <!{credhub}:loggregator_tls_agent.private_key!>
         use_v2_api: true
+      tls:
+        cert: <!{credhub}:file_server_cert.certificate!>
+        client_ca_cert: <!{credhub}:file_server_cert.ca!>
+        key: <!{credhub}:file_server_cert.private_key!>
     release: diego
   - name: routing-api
     properties:
@@ -1127,13 +1199,13 @@ instance_groups:
         - name: default-tcp
           reservable_ports: 1024-1033
           type: tcp
-        skip_consul_lock: true
         sqldb:
+          ca_cert: <!{credhub}:mysql_server_certificate.ca!>
           host: sql-db.service.cf.internal
           password: <!{credhub}:routing_api_database_password!>
-          port: 5524
+          port: 3306
           schema: routing-api
-          type: postgres
+          type: mysql
           username: routing-api
         system_domain: system.cf.testing.examle
       uaa:
@@ -1143,11 +1215,13 @@ instance_groups:
   - name: policy-server
     properties:
       database:
+        ca_cert: <!{credhub}:mysql_server_certificate.ca!>
         host: sql-db.service.cf.internal
         name: network_policy
         password: <!{credhub}:network_policy_database_password!>
-        port: 5524
-        type: postgres
+        port: 3306
+        require_ssl: true
+        type: mysql
         username: network_policy
       enable_space_developer_self_service: true
       enable_tls: true
@@ -1205,7 +1279,7 @@ instance_groups:
     release: hwc-buildpack
   name: api
   networks:
-  - name: cf-core
+  - name: default
   stemcell: default
   vm_extensions:
   - 50GB_ephemeral_disk
@@ -1219,13 +1293,14 @@ instance_groups:
     properties:
       cc:
         buildpacks:
-          blobstore_type: webdav
-          webdav_config:
-            blobstore_timeout: 5
+          blobstore_provider: dav
+          blobstore_type: storage-cli
+          connection_config:
             ca_cert: <!{credhub}:blobstore_tls.ca!>
             password: <!{credhub}:blobstore_admin_users_password!>
             private_endpoint: https://blobstore.service.cf.internal:4443
             public_endpoint: https://blobstore.system.cf.testing.examle
+            secret: <!{credhub}:blobstore_secure_link_secret!>
             username: blobstore-user
         database_encryption:
           current_key_label: encryption_key_0
@@ -1235,60 +1310,71 @@ instance_groups:
         diego:
           droplet_destinations:
             cflinuxfs4: /home/vcap
+            cflinuxfs5: /home/vcap
             windows: /Users/vcap
           lifecycle_bundles:
             buildpack/cflinuxfs4: buildpack_app_lifecycle/buildpack_app_lifecycle.tgz
+            buildpack/cflinuxfs5: buildpack_app_lifecycle/buildpack_app_lifecycle.tgz
             buildpack/windows: buildpack_app_lifecycle/buildpack_app_lifecycle.tgz
             cnb/cflinuxfs4: cnb_app_lifecycle/cnb_app_lifecycle.tgz
+            cnb/cflinuxfs5: cnb_app_lifecycle/cnb_app_lifecycle.tgz
             docker: docker_app_lifecycle/docker_app_lifecycle.tgz
         droplets:
-          blobstore_type: webdav
-          webdav_config:
-            blobstore_timeout: 5
+          blobstore_provider: dav
+          blobstore_type: storage-cli
+          connection_config:
             ca_cert: <!{credhub}:blobstore_tls.ca!>
             password: <!{credhub}:blobstore_admin_users_password!>
             private_endpoint: https://blobstore.service.cf.internal:4443
             public_endpoint: https://blobstore.system.cf.testing.examle
+            secret: <!{credhub}:blobstore_secure_link_secret!>
             username: blobstore-user
+        loggregator_tls:
+          ca_cert: <!{credhub}:loggregator_tls_agent.ca!>
+          certificate: <!{credhub}:loggregator_tls_agent.certificate!>
+          private_key: <!{credhub}:loggregator_tls_agent.private_key!>
         mutual_tls:
           ca_cert: <!{credhub}:cc_tls.ca!>
           private_key: <!{credhub}:cc_tls.private_key!>
           public_cert: <!{credhub}:cc_tls.certificate!>
         packages:
-          blobstore_type: webdav
-          webdav_config:
-            blobstore_timeout: 5
+          blobstore_provider: dav
+          blobstore_type: storage-cli
+          connection_config:
             ca_cert: <!{credhub}:blobstore_tls.ca!>
             password: <!{credhub}:blobstore_admin_users_password!>
             private_endpoint: https://blobstore.service.cf.internal:4443
             public_endpoint: https://blobstore.system.cf.testing.examle
+            secret: <!{credhub}:blobstore_secure_link_secret!>
             username: blobstore-user
         resource_pool:
-          blobstore_type: webdav
-          webdav_config:
-            blobstore_timeout: 5
+          blobstore_provider: dav
+          blobstore_type: storage-cli
+          connection_config:
             ca_cert: <!{credhub}:blobstore_tls.ca!>
             password: <!{credhub}:blobstore_admin_users_password!>
             private_endpoint: https://blobstore.service.cf.internal:4443
             public_endpoint: https://blobstore.system.cf.testing.examle
+            secret: <!{credhub}:blobstore_secure_link_secret!>
             username: blobstore-user
         staging_upload_password: <!{credhub}:cc_staging_upload_password!>
         staging_upload_user: staging_user
         volume_services_enabled: true
       ccdb:
+        address: sql-db.service.cf.internal
+        ca_cert: <!{credhub}:mysql_server_certificate.ca!>
         databases:
         - name: cloud_controller
           tag: cc
-        db_scheme: postgres
-        port: 5524
+        db_scheme: mysql
+        port: 3306
         roles:
         - name: cloud_controller
           password: <!{credhub}:cc_database_password!>
           tag: admin
       routing_api:
         enabled: true
-      ssl:
-        skip_cert_verify: true
+      ssl: {}
       system_domain: system.cf.testing.examle
       uaa:
         ca_cert: <!{credhub}:uaa_ssl.ca!>
@@ -1313,7 +1399,7 @@ instance_groups:
     release: loggregator-agent
   name: cc-worker
   networks:
-  - name: cf-core
+  - name: default
   stemcell: default
   vm_type: minimal
 - azs:
@@ -1343,14 +1429,8 @@ instance_groups:
             ca_cert: <!{credhub}:diego_rep_client.ca!>
             client_cert: <!{credhub}:diego_rep_client.certificate!>
             client_key: <!{credhub}:diego_rep_client.private_key!>
-            require_tls: true
           server_cert: <!{credhub}:diego_auctioneer_server.certificate!>
           server_key: <!{credhub}:diego_auctioneer_server.private_key!>
-          skip_consul_lock: true
-      enable_consul_service_registration: false
-      logging:
-        format:
-          timestamp: rfc3339
       loggregator:
         app_metric_exclusion_filter:
         - absolute_entitlement
@@ -1364,13 +1444,14 @@ instance_groups:
     properties:
       cc:
         buildpacks:
-          blobstore_type: webdav
-          webdav_config:
-            blobstore_timeout: 5
+          blobstore_provider: dav
+          blobstore_type: storage-cli
+          connection_config:
             ca_cert: <!{credhub}:blobstore_tls.ca!>
             password: <!{credhub}:blobstore_admin_users_password!>
             private_endpoint: https://blobstore.service.cf.internal:4443
             public_endpoint: https://blobstore.system.cf.testing.examle
+            secret: <!{credhub}:blobstore_secure_link_secret!>
             username: blobstore-user
         database_encryption:
           current_key_label: encryption_key_0
@@ -1380,60 +1461,67 @@ instance_groups:
         diego:
           droplet_destinations:
             cflinuxfs4: /home/vcap
+            cflinuxfs5: /home/vcap
             windows: /Users/vcap
           lifecycle_bundles:
             buildpack/cflinuxfs4: buildpack_app_lifecycle/buildpack_app_lifecycle.tgz
+            buildpack/cflinuxfs5: buildpack_app_lifecycle/buildpack_app_lifecycle.tgz
             buildpack/windows: buildpack_app_lifecycle/buildpack_app_lifecycle.tgz
             cnb/cflinuxfs4: cnb_app_lifecycle/cnb_app_lifecycle.tgz
+            cnb/cflinuxfs5: cnb_app_lifecycle/cnb_app_lifecycle.tgz
             docker: docker_app_lifecycle/docker_app_lifecycle.tgz
         droplets:
-          blobstore_type: webdav
-          webdav_config:
-            blobstore_timeout: 5
+          blobstore_provider: dav
+          blobstore_type: storage-cli
+          connection_config:
             ca_cert: <!{credhub}:blobstore_tls.ca!>
             password: <!{credhub}:blobstore_admin_users_password!>
             private_endpoint: https://blobstore.service.cf.internal:4443
             public_endpoint: https://blobstore.system.cf.testing.examle
+            secret: <!{credhub}:blobstore_secure_link_secret!>
             username: blobstore-user
         mutual_tls:
           ca_cert: <!{credhub}:cc_tls.ca!>
           private_key: <!{credhub}:cc_tls.private_key!>
           public_cert: <!{credhub}:cc_tls.certificate!>
         packages:
-          blobstore_type: webdav
-          webdav_config:
-            blobstore_timeout: 5
+          blobstore_provider: dav
+          blobstore_type: storage-cli
+          connection_config:
             ca_cert: <!{credhub}:blobstore_tls.ca!>
             password: <!{credhub}:blobstore_admin_users_password!>
             private_endpoint: https://blobstore.service.cf.internal:4443
             public_endpoint: https://blobstore.system.cf.testing.examle
+            secret: <!{credhub}:blobstore_secure_link_secret!>
             username: blobstore-user
         resource_pool:
-          blobstore_type: webdav
-          webdav_config:
-            blobstore_timeout: 5
+          blobstore_provider: dav
+          blobstore_type: storage-cli
+          connection_config:
             ca_cert: <!{credhub}:blobstore_tls.ca!>
             password: <!{credhub}:blobstore_admin_users_password!>
             private_endpoint: https://blobstore.service.cf.internal:4443
             public_endpoint: https://blobstore.system.cf.testing.examle
+            secret: <!{credhub}:blobstore_secure_link_secret!>
             username: blobstore-user
         staging_upload_password: <!{credhub}:cc_staging_upload_password!>
         staging_upload_user: staging_user
         volume_services_enabled: true
       ccdb:
+        address: sql-db.service.cf.internal
+        ca_cert: <!{credhub}:mysql_server_certificate.ca!>
         databases:
         - name: cloud_controller
           tag: cc
-        db_scheme: postgres
-        port: 5524
+        db_scheme: mysql
+        port: 3306
         roles:
         - name: cloud_controller
           password: <!{credhub}:cc_database_password!>
           tag: admin
       routing_api:
         enabled: true
-      ssl:
-        skip_cert_verify: true
+      ssl: {}
       system_domain: system.cf.testing.examle
       uaa:
         ca_cert: <!{credhub}:uaa_ssl.ca!>
@@ -1456,22 +1544,27 @@ instance_groups:
         diego:
           droplet_destinations:
             cflinuxfs4: /home/vcap
+            cflinuxfs5: /home/vcap
             windows: /Users/vcap
           lifecycle_bundles:
             buildpack/cflinuxfs4: buildpack_app_lifecycle/buildpack_app_lifecycle.tgz
+            buildpack/cflinuxfs5: buildpack_app_lifecycle/buildpack_app_lifecycle.tgz
             buildpack/windows: buildpack_app_lifecycle/buildpack_app_lifecycle.tgz
             cnb/cflinuxfs4: cnb_app_lifecycle/cnb_app_lifecycle.tgz
+            cnb/cflinuxfs5: cnb_app_lifecycle/cnb_app_lifecycle.tgz
             docker: docker_app_lifecycle/docker_app_lifecycle.tgz
         mutual_tls:
           ca_cert: <!{credhub}:cc_tls.ca!>
           private_key: <!{credhub}:cc_tls.private_key!>
           public_cert: <!{credhub}:cc_tls.certificate!>
       ccdb:
+        address: sql-db.service.cf.internal
+        ca_cert: <!{credhub}:mysql_server_certificate.ca!>
         databases:
         - name: cloud_controller
           tag: cc
-        db_scheme: postgres
-        port: 5524
+        db_scheme: mysql
+        port: 3306
         roles:
         - name: cloud_controller
           password: <!{credhub}:cc_database_password!>
@@ -1516,7 +1609,6 @@ instance_groups:
           watcher:
             locket:
               api_location: locket.service.cf.internal:8891
-            skip_consul_lock: true
     release: capi
   - name: ssh_proxy
     properties:
@@ -1541,10 +1633,6 @@ instance_groups:
           uaa:
             ca_cert: <!{credhub}:uaa_ssl.ca!>
           uaa_secret: <!{credhub}:uaa_clients_ssh-proxy_secret!>
-      enable_consul_service_registration: false
-      logging:
-        format:
-          timestamp: rfc3339
       loggregator:
         app_metric_exclusion_filter:
         - absolute_entitlement
@@ -1568,6 +1656,11 @@ instance_groups:
           cn: cloud-controller-ng.service.cf.internal
           key: <!{credhub}:binding_cache_api_tls.private_key!>
       external_port: 9000
+      loggregator:
+        tls:
+          ca_cert: <!{credhub}:loggregator_tls_agent.ca!>
+          cert: <!{credhub}:loggregator_tls_agent.certificate!>
+          key: <!{credhub}:loggregator_tls_agent.private_key!>
       metrics:
         ca_cert: <!{credhub}:loggr_syslog_binding_cache_metrics_tls.ca!>
         cert: <!{credhub}:loggr_syslog_binding_cache_metrics_tls.certificate!>
@@ -1598,7 +1691,7 @@ instance_groups:
   - name: diego-brain
   name: scheduler
   networks:
-  - name: cf-core
+  - name: default
   stemcell: default
   vm_extensions:
   - diego-ssh-proxy-network-properties
@@ -1664,7 +1757,7 @@ instance_groups:
     release: loggregator-agent
   name: router
   networks:
-  - name: cf-edge
+  - name: default
   stemcell: default
   update:
     serial: true
@@ -1707,7 +1800,7 @@ instance_groups:
     release: loggregator-agent
   name: tcp-router
   networks:
-  - name: cf-edge
+  - name: default
   stemcell: default
   update:
     serial: true
@@ -1774,7 +1867,6 @@ instance_groups:
           tls_port: 8083
           uris:
           - log-cache.system.cf.testing.examle
-          - '*.log-cache.system.cf.testing.examle'
     release: routing
   - name: log-cache-cf-auth-proxy
     properties:
@@ -1798,7 +1890,7 @@ instance_groups:
     release: log-cache
   name: log-cache
   networks:
-  - name: cf-core
+  - name: default
   stemcell: default
   vm_type: small-highmem
 - azs:
@@ -1821,7 +1913,7 @@ instance_groups:
     release: loggregator
   name: doppler
   networks:
-  - name: cf-core
+  - name: default
   stemcell: default
   vm_type: minimal
 - azs:
@@ -1850,6 +1942,14 @@ instance_groups:
         - <!{credhub}:credhub_tls.ca!>
         - <!{credhub}:uaa_ssl.ca!>
     release: cflinuxfs4
+  - name: cflinuxfs5-rootfs-setup
+    properties:
+      cflinuxfs5-rootfs:
+        trusted_certs:
+        - <!{credhub}:diego_instance_identity_ca.ca!>
+        - <!{credhub}:credhub_tls.ca!>
+        - <!{credhub}:uaa_ssl.ca!>
+    release: cflinuxfs5
   - name: garden
     properties:
       garden:
@@ -1859,13 +1959,9 @@ instance_groups:
         default_container_grace_time: 0
         deny_networks:
         - 0.0.0.0/0
-        destroy_containers_on_start: true
         network_plugin: /var/vcap/packages/runc-cni/bin/garden-external-networker
         network_plugin_extra_args:
         - --configFile=/var/vcap/jobs/garden-cni/config/adapter.json
-      logging:
-        format:
-          timestamp: rfc3339
     release: garden-runc
   - name: rep
     properties:
@@ -1895,11 +1991,7 @@ instance_groups:
         rep:
           preloaded_rootfses:
           - cflinuxfs4:/var/vcap/packages/cflinuxfs4/rootfs.tar
-      enable_consul_service_registration: false
-      enable_declarative_healthcheck: true
-      logging:
-        format:
-          timestamp: rfc3339
+          - cflinuxfs5:/var/vcap/packages/cflinuxfs5/rootfs.tar
       loggregator:
         app_metric_exclusion_filter:
         - absolute_entitlement
@@ -1938,9 +2030,6 @@ instance_groups:
               enabled: true
       internal_routes:
         enabled: true
-      logging:
-        format:
-          timestamp: rfc3339
       loggregator:
         app_metric_exclusion_filter:
         - absolute_entitlement
@@ -1986,7 +2075,7 @@ instance_groups:
   - name: silk-cni
     properties:
       dns_servers:
-      - 169.254.0.2
+      - 169.254.0.53
     release: silk
   - name: silk-datastore-syncer
     release: silk
@@ -2014,7 +2103,7 @@ instance_groups:
     release: smb-volume
   name: diego-cell
   networks:
-  - name: cf-runtime
+  - name: default
   stemcell: default
   vm_extensions:
   - 100GB_ephemeral_disk
@@ -2047,8 +2136,7 @@ instance_groups:
             key: <!{credhub}:loggregator_tls_tc.private_key!>
         uaa:
           client_secret: <!{credhub}:uaa_clients_doppler_secret!>
-      ssl:
-        skip_cert_verify: true
+      ssl: {}
       system_domain: system.cf.testing.examle
       uaa:
         ca_cert: <!{credhub}:uaa_ssl.ca!>
@@ -2109,18 +2197,16 @@ instance_groups:
           tls_port: 8081
           uris:
           - doppler.system.cf.testing.examle
-          - '*.doppler.system.cf.testing.examle'
         - name: rlp-gateway
           registration_interval: 20s
           server_cert_domain_san: log-stream.system.cf.testing.examle
           tls_port: 8088
           uris:
           - log-stream.system.cf.testing.examle
-          - '*.log-stream.system.cf.testing.examle'
     release: routing
   name: log-api
   networks:
-  - name: cf-core
+  - name: default
   stemcell: default
   vm_type: minimal
 - azs:
@@ -2172,9 +2258,9 @@ instance_groups:
           database: credhub
           host: sql-db.service.cf.internal
           password: <!{credhub}:credhub_database_password!>
-          port: 5524
-          require_tls: false
-          type: postgres
+          port: 3306
+          tls_ca: <!{credhub}:mysql_server_certificate.ca!>
+          type: mysql
           username: credhub
         encryption:
           keys:
@@ -2193,7 +2279,7 @@ instance_groups:
     release: credhub
   name: credhub
   networks:
-  - name: cf-core
+  - name: default
   stemcell: default
   vm_type: minimal
 - azs:
@@ -2207,7 +2293,7 @@ instance_groups:
   lifecycle: errand
   name: rotate-cc-database-key
   networks:
-  - name: cf-core
+  - name: default
   stemcell: default
   vm_type: minimal
 - azs:
@@ -2233,7 +2319,6 @@ instance_groups:
   - name: garden-windows
     properties:
       garden:
-        destroy_containers_on_start: true
         image_plugin: /var/vcap/packages/groot/groot.exe
         image_plugin_extra_args:
         - --driver-store=/var/vcap/data/groot
@@ -2249,6 +2334,17 @@ instance_groups:
   - name: rep_windows
     properties:
       containers:
+        proxy:
+          enable_unproxied_port_mappings: false
+          require_and_verify_client_certificates: true
+          trusted_ca_certificates:
+          - <!{credhub}:gorouter_backend_tls.ca!>
+          - <!{credhub}:ssh_proxy_backends_tls.ca!>
+          - <!{credhub}:tcp_router_backend_tls.ca!>
+          verify_subject_alt_name:
+          - gorouter.service.cf.internal
+          - ssh-proxy.service.cf.internal
+          - tcp-router.service.cf.internal
         trusted_ca_certificates:
         - <!{credhub}:diego_instance_identity_ca.ca!>
         - <!{credhub}:credhub_tls.ca!>
@@ -2262,11 +2358,6 @@ instance_groups:
           open_bindmounts_acl: true
           preloaded_rootfses:
           - windows:oci:///C:/var/vcap/packages/windows2019fs
-      enable_consul_service_registration: false
-      enable_declarative_healthcheck: true
-      logging:
-        format:
-          timestamp: rfc3339
       loggregator:
         app_metric_exclusion_filter:
         - absolute_entitlement
@@ -2298,15 +2389,13 @@ instance_groups:
               enabled: true
       internal_routes:
         enabled: true
-      logging:
-        format:
-          timestamp: rfc3339
       loggregator:
         ca_cert: <!{credhub}:loggregator_tls_agent.ca!>
         cert: <!{credhub}:loggregator_tls_agent.certificate!>
         key: <!{credhub}:loggregator_tls_agent.private_key!>
         use_v2_api: true
       tcp:
+        enable_tls: true
         enabled: true
       uaa:
         ca_cert: <!{credhub}:uaa_ssl.ca!>
@@ -2380,6 +2469,8 @@ instance_groups:
     release: loggregator-agent
   - name: enable_ssh
     release: windows-utilities
+  - name: envoy_windows
+    release: envoy-nginx
   - name: windows2019fs
     properties:
       windows-rootfs:
@@ -2393,7 +2484,7 @@ instance_groups:
     release: windows-resize-root-disk
   name: windows2019-cell
   networks:
-  - name: cf-runtime
+  - name: default
   stemcell: windows2019
   vm_extensions:
   - 100GB_ephemeral_disk
@@ -2427,244 +2518,260 @@ instance_groups:
   lifecycle: errand
   name: smb-broker-push
   networks:
-  - name: cf-runtime
+  - name: default
   stemcell: default
   vm_type: minimal
-manifest_version: v44.4.0
+manifest_version: v60.5.0
 name: compiled-windows-releases-cf
 releases:
 - name: binary-buildpack
-  sha1: 1557903df162610192c8ee0a4f5b3f9a1e7040b7
+  sha1: sha256:108f1153f197d1810813bbf4539066a7bc95669908d14c1259a6d6df670636e6
   stemcell:
-    os: ubuntu-jammy
-    version: "1.423"
-  url: https://storage.googleapis.com/cf-deployment-compiled-releases/binary-buildpack-1.1.14-ubuntu-jammy-1.423-20240924-143448-104461011.tgz
-  version: 1.1.14
+    os: ubuntu-noble
+    version: "1.333"
+  url: https://storage.googleapis.com/cf-deployment-compiled-releases/binary-buildpack-2.0.0-ubuntu-noble-1.333-20260618-153429-750368822.tgz
+  version: 2.0.0
 - name: bpm
-  sha1: 6f08e0c196357f586c7470e226850da5b5ab2b60
+  sha1: sha256:07897b7dfc5e0534690f289285b9bd100cfedff3472e12c7a00cbef065e78e7d
   stemcell:
-    os: ubuntu-jammy
-    version: "1.423"
-  url: https://storage.googleapis.com/cf-deployment-compiled-releases/bpm-1.4.1-ubuntu-jammy-1.423-20241011-205840-081445412.tgz
-  version: 1.4.1
+    os: ubuntu-noble
+    version: "1.333"
+  url: https://storage.googleapis.com/cf-deployment-compiled-releases/bpm-1.4.39-ubuntu-noble-1.333-20260902-002434-208183186.tgz
+  version: 1.4.39
 - name: capi
-  sha1: bbd9fa3c438e74dc68fc6f78c269d5f04c9a0cc2
+  sha1: sha256:6d9ef9a2297a98926daa5ede15f4a57583933c73cb96eed290b9e13e71977a2b
   stemcell:
-    os: ubuntu-jammy
-    version: "1.423"
-  url: https://storage.googleapis.com/cf-deployment-compiled-releases/capi-1.195.0-ubuntu-jammy-1.423-20241017-164419-782544834.tgz
-  version: 1.195.0
+    os: ubuntu-noble
+    version: "1.333"
+  url: https://storage.googleapis.com/cf-deployment-compiled-releases/capi-1.244.0-ubuntu-noble-1.333-20260903-130507-333648562.tgz
+  version: 1.244.0
 - name: cf-networking
-  sha1: 2e3edeb586d9e3ff6cff69329ee143cbbd40b5e5
+  sha1: sha256:0aa97c88f7bb18241881601c2e8b8f90acd60b7f8b0f701c53cbfbd48233c424
   stemcell:
-    os: ubuntu-jammy
-    version: "1.423"
-  url: https://storage.googleapis.com/cf-deployment-compiled-releases/cf-networking-3.52.0-ubuntu-jammy-1.423-20241003-142956-103077961.tgz
-  version: 3.52.0
+    os: ubuntu-noble
+    version: "1.333"
+  url: https://storage.googleapis.com/cf-deployment-compiled-releases/cf-networking-3.122.0-ubuntu-noble-1.333-20260814-204759-525769695.tgz
+  version: 3.122.0
 - name: cf-smoke-tests
-  sha1: 23dae4f8923aaa916c9e278867649d3fd4d67145
+  sha1: sha256:6bb8bb8c55d2356424eae683aabe5d4516863f414f2010178c98840ce0044395
   stemcell:
-    os: ubuntu-jammy
-    version: "1.423"
-  url: https://storage.googleapis.com/cf-deployment-compiled-releases/cf-smoke-tests-42.0.171-ubuntu-jammy-1.423-20241007-204123-263207866.tgz
-  version: 42.0.171
+    os: ubuntu-noble
+    version: "1.333"
+  url: https://storage.googleapis.com/cf-deployment-compiled-releases/cf-smoke-tests-42.0.273-ubuntu-noble-1.333-20260902-144340-212484593.tgz
+  version: 42.0.273
 - name: cflinuxfs4
-  sha1: 46455ce0e19bfd86ec8b4ce3f5695c796954bb97
+  sha1: sha256:571946f474ffc5b72bd6a7b57b8531a168eff0f15868bdf70ac89014b79e796c
   stemcell:
-    os: ubuntu-jammy
-    version: "1.423"
-  url: https://storage.googleapis.com/cf-deployment-compiled-releases/cflinuxfs4-1.174.0-ubuntu-jammy-1.423-20241018-173154-598225814.tgz
-  version: 1.174.0
+    os: ubuntu-noble
+    version: "1.333"
+  url: https://storage.googleapis.com/cf-deployment-compiled-releases/cflinuxfs4-1.324.0-ubuntu-noble-1.333-20260725-170313-2843013.tgz
+  version: 1.324.0
+- name: cflinuxfs5
+  sha1: sha256:767e6334ac4c8f9765c131b8ef7d93c168d476cc227c03884119fa242a4b9c35
+  stemcell:
+    os: ubuntu-noble
+    version: "1.333"
+  url: https://storage.googleapis.com/cf-deployment-compiled-releases/cflinuxfs5-0.53.0-ubuntu-noble-1.333-20260812-185726-362743149.tgz
+  version: 0.53.0
 - name: credhub
-  sha1: 6db4a1a3ca7709da6b52fc35f3138572d77206b1
+  sha1: sha256:9e023433b8674d45a80c026ceda2c0f2a4fb6363ac34c4a21a3aff38bda9aeb2
   stemcell:
-    os: ubuntu-jammy
-    version: "1.423"
-  url: https://storage.googleapis.com/cf-deployment-compiled-releases/credhub-2.12.93-ubuntu-jammy-1.423-20241003-210254-935829183.tgz
-  version: 2.12.93
+    os: ubuntu-noble
+    version: "1.333"
+  url: https://storage.googleapis.com/cf-deployment-compiled-releases/credhub-2.15.21-ubuntu-noble-1.333-20260903-200755-077710036.tgz
+  version: 2.15.21
 - name: diego
-  sha1: 2b859378fc80cc983fbc875ebf934d7a3eab66f1
-  url: https://bosh.io/d/github.com/cloudfoundry/diego-release?v=2.105.0
-  version: 2.105.0
+  sha1: sha256:8de8b6b915e626189cb52bd9379463380dd261b24b3d4839ef4c480216a92b58
+  stemcell:
+    os: ubuntu-noble
+    version: "1.333"
+  url: https://storage.googleapis.com/cf-deployment-compiled-releases/diego-2.149.0-ubuntu-noble-1.333-20260826-163755-995780225.tgz
+  version: 2.149.0
 - name: dotnet-core-buildpack
-  sha1: 19fbb9d702fa2b4923300d0a0861777e8fdf0489
+  sha1: sha256:c91f57747a2a77d5f19a0772d436717fcf386416426b5ff2a924696022521a06
   stemcell:
-    os: ubuntu-jammy
-    version: "1.423"
-  url: https://storage.googleapis.com/cf-deployment-compiled-releases/dotnet-core-buildpack-2.4.33-ubuntu-jammy-1.423-20240923-160912-844487009.tgz
-  version: 2.4.33
+    os: ubuntu-noble
+    version: "1.333"
+  url: https://storage.googleapis.com/cf-deployment-compiled-releases/dotnet-core-buildpack-2.4.52-ubuntu-noble-1.333-20260824-135148-627457228.tgz
+  version: 2.4.52
 - name: garden-runc
-  sha1: 56cb4687e28cfbb6ed90e0b5afe28c118b7e9c6e
-  url: https://bosh.io/d/github.com/cloudfoundry/garden-runc-release?v=1.57.0
-  version: 1.57.0
+  sha1: sha256:f2beedd66807becf33ca8c6f90ea5faea849cfe40b2275be91bc4837fbdf20b0
+  stemcell:
+    os: ubuntu-noble
+    version: "1.333"
+  url: https://storage.googleapis.com/cf-deployment-compiled-releases/garden-runc-1.96.0-ubuntu-noble-1.333-20260903-213722-630467399.tgz
+  version: 1.96.0
 - name: go-buildpack
-  sha1: ca06297dd7314ebcd23d3cca1a7aae0335873a91
+  sha1: sha256:a23b7adc5d999ae1f7304dc087d1547ebd16e544b476127a8cdb41cc5f9c1418
   stemcell:
-    os: ubuntu-jammy
-    version: "1.423"
-  url: https://storage.googleapis.com/cf-deployment-compiled-releases/go-buildpack-1.10.23-ubuntu-jammy-1.423-20240923-160953-24373462.tgz
-  version: 1.10.23
+    os: ubuntu-noble
+    version: "1.333"
+  url: https://storage.googleapis.com/cf-deployment-compiled-releases/go-buildpack-1.11.0-ubuntu-noble-1.333-20260817-115009-900900093.tgz
+  version: 1.11.0
 - name: java-buildpack
-  sha1: 2220207615b4815f5df9da0511f28f064b29b9d3
+  sha1: sha256:75a1cc5e361dc4ba8befc8377670034cf79cac8d5a59b6ffaeb52825f73c4296
   stemcell:
-    os: ubuntu-jammy
-    version: "1.423"
-  url: https://storage.googleapis.com/cf-deployment-compiled-releases/java-buildpack-4.71.0-ubuntu-jammy-1.423-20240722-175326-038686651.tgz
-  version: 4.71.0
+    os: ubuntu-noble
+    version: "1.333"
+  url: https://storage.googleapis.com/cf-deployment-compiled-releases/java-buildpack-5.0.7-ubuntu-noble-1.333-20260831-143118-175043217.tgz
+  version: 5.0.7
 - name: loggregator
-  sha1: 610be8e033174ed032424fd97a112a3886b795c5
+  sha1: sha256:2805c3456f9d5f3d7a6e9ac5fb03fd8e517dbc24ce6b80bea9bbb34acb710aaf
   stemcell:
-    os: ubuntu-jammy
-    version: "1.423"
-  url: https://storage.googleapis.com/cf-deployment-compiled-releases/loggregator-107.0.17-ubuntu-jammy-1.423-20240917-043855-457394598.tgz
-  version: 107.0.17
+    os: ubuntu-noble
+    version: "1.333"
+  url: https://storage.googleapis.com/cf-deployment-compiled-releases/loggregator-107.0.34-ubuntu-noble-1.333-20260806-021233-529038908.tgz
+  version: 107.0.34
 - name: nats
-  sha1: a5ac49d0ab500280f2c39f2880f6ca3dc7a4bf43
+  sha1: sha256:5b8875e6915a8757b2bd3f05c2a016069cb258bd3e372e8b49f80f9ae4cb2b14
   stemcell:
-    os: ubuntu-jammy
-    version: "1.423"
-  url: https://storage.googleapis.com/cf-deployment-compiled-releases/nats-56.25.0-ubuntu-jammy-1.423-20240925-182032-04386671.tgz
-  version: 56.25.0
+    os: ubuntu-noble
+    version: "1.333"
+  url: https://storage.googleapis.com/cf-deployment-compiled-releases/nats-57.19.0-ubuntu-noble-1.333-20260902-220541-312414009.tgz
+  version: 57.19.0
 - name: nginx-buildpack
-  sha1: 3ac9d7c95db26fdccdc624a325064651e16d422e
+  sha1: sha256:7610b863d9333c3e0aa9cfb3354b38518bd6cc0e87d899c8d5ad26a6d469d4ea
   stemcell:
-    os: ubuntu-jammy
-    version: "1.423"
-  url: https://storage.googleapis.com/cf-deployment-compiled-releases/nginx-buildpack-1.2.19-ubuntu-jammy-1.423-20240918-160436-455322642.tgz
-  version: 1.2.19
+    os: ubuntu-noble
+    version: "1.333"
+  url: https://storage.googleapis.com/cf-deployment-compiled-releases/nginx-buildpack-1.2.39-ubuntu-noble-1.333-20260701-141539-044323855.tgz
+  version: 1.2.39
 - name: r-buildpack
-  sha1: 6149e871037c02c553ca783e5ddc4ff509cd5a7e
+  sha1: sha256:bbbb2207c40de88ad47d156d6a0546c116acaef33af48b89cfb2ccb00b9642cf
   stemcell:
-    os: ubuntu-jammy
-    version: "1.423"
-  url: https://storage.googleapis.com/cf-deployment-compiled-releases/r-buildpack-1.2.15-ubuntu-jammy-1.423-20240924-143308-784463763.tgz
-  version: 1.2.15
+    os: ubuntu-noble
+    version: "1.333"
+  url: https://storage.googleapis.com/cf-deployment-compiled-releases/r-buildpack-1.2.28-ubuntu-noble-1.333-20260602-124113-914430938.tgz
+  version: 1.2.28
 - name: nodejs-buildpack
-  sha1: 31676aa8b256a5b77a4cf98b0b9cdcc6e9a20f18
+  sha1: sha256:e27bfc6c2beed7eb013a1a31fec53461e495967e066a39c814a9158c3c73627b
   stemcell:
-    os: ubuntu-jammy
-    version: "1.423"
-  url: https://storage.googleapis.com/cf-deployment-compiled-releases/nodejs-buildpack-1.8.29-ubuntu-jammy-1.423-20240923-160937-328963388.tgz
-  version: 1.8.29
+    os: ubuntu-noble
+    version: "1.333"
+  url: https://storage.googleapis.com/cf-deployment-compiled-releases/nodejs-buildpack-1.9.4-ubuntu-noble-1.333-20260817-132049-825282452.tgz
+  version: 1.9.4
 - name: php-buildpack
-  sha1: 72896ebe202025c308a3f1363c877ea696ec04ba
+  sha1: sha256:1f40a0df4937ed278442411ce85ee8c4030fbfb43be688778d41c6b51b561f21
   stemcell:
-    os: ubuntu-jammy
-    version: "1.423"
-  url: https://storage.googleapis.com/cf-deployment-compiled-releases/php-buildpack-4.6.23-ubuntu-jammy-1.423-20240826-193918-66216562.tgz
-  version: 4.6.23
+    os: ubuntu-noble
+    version: "1.333"
+  url: https://storage.googleapis.com/cf-deployment-compiled-releases/php-buildpack-5.1.2-ubuntu-noble-1.333-20260828-104311-545633097.tgz
+  version: 5.1.2
 - name: pxc
-  sha1: 18724fe0553e107829ee71008bdbb2ae1808ccf1
+  sha1: sha256:137359deee0d82d03a8aa4e5a498d76434b679fd07cd65fbe2f29384b833f5b0
   stemcell:
-    os: ubuntu-jammy
-    version: "1.423"
-  url: https://storage.googleapis.com/cf-deployment-compiled-releases/pxc-1.0.31-ubuntu-jammy-1.423-20240828-192151-386084543.tgz
-  version: 1.0.31
+    os: ubuntu-noble
+    version: "1.333"
+  url: https://storage.googleapis.com/cf-deployment-compiled-releases/pxc-2.0.9-ubuntu-noble-1.333-20260831-010105-196918276.tgz
+  version: 2.0.9
 - name: python-buildpack
-  sha1: cb6434a245db0ddf00f48fa7d840a063e844725a
+  sha1: sha256:919994c1795e7e3e0e4087ac959a4f25a0d82a369919511ccca91539011cfa1f
   stemcell:
-    os: ubuntu-jammy
-    version: "1.423"
-  url: https://storage.googleapis.com/cf-deployment-compiled-releases/python-buildpack-1.8.29-ubuntu-jammy-1.423-20240918-155451-195922855.tgz
-  version: 1.8.29
+    os: ubuntu-noble
+    version: "1.333"
+  url: https://storage.googleapis.com/cf-deployment-compiled-releases/python-buildpack-1.9.4-ubuntu-noble-1.333-20260824-134631-822359128.tgz
+  version: 1.9.4
 - name: routing
-  sha1: b043f098ddc59b6dc295b0a09e8deb450afa761e
+  sha1: sha256:47e5776d9f868a9081b600ee0aacf9089ec5d92c59a2df40cbf57c47c6a3a36a
   stemcell:
-    os: ubuntu-jammy
-    version: "1.423"
-  url: https://storage.googleapis.com/cf-deployment-compiled-releases/routing-0.316.0-ubuntu-jammy-1.423-20241017-230129-488485005.tgz
-  version: 0.316.0
+    os: ubuntu-noble
+    version: "1.333"
+  url: https://storage.googleapis.com/cf-deployment-compiled-releases/routing-0.393.0-ubuntu-noble-1.333-20260902-222034-062341074.tgz
+  version: 0.393.0
 - name: ruby-buildpack
-  sha1: b69df4e4505bdc8cd64c1696f5e6e5e1dfdb5e03
+  sha1: sha256:e83a8c0fc14797d5955cbdcd9871f66643d19c685ac925b565dc15a3686a0f7d
   stemcell:
-    os: ubuntu-jammy
-    version: "1.423"
-  url: https://storage.googleapis.com/cf-deployment-compiled-releases/ruby-buildpack-1.10.18-ubuntu-jammy-1.423-20240923-160526-983584244.tgz
-  version: 1.10.18
+    os: ubuntu-noble
+    version: "1.333"
+  url: https://storage.googleapis.com/cf-deployment-compiled-releases/ruby-buildpack-1.11.1-ubuntu-noble-1.333-20260602-150430-021593027.tgz
+  version: 1.11.1
 - name: silk
-  sha1: 586491e770b988e238346d3753a45f7ec71bcf28
+  sha1: sha256:ed745429d8cef5bc889724fde11558eaabcc46ab252a65175b0f6c64d2b51b74
   stemcell:
-    os: ubuntu-jammy
-    version: "1.423"
-  url: https://storage.googleapis.com/cf-deployment-compiled-releases/silk-3.52.0-ubuntu-jammy-1.423-20241003-144125-184557844.tgz
-  version: 3.52.0
+    os: ubuntu-noble
+    version: "1.333"
+  url: https://storage.googleapis.com/cf-deployment-compiled-releases/silk-3.122.0-ubuntu-noble-1.333-20260814-203347-08538077.tgz
+  version: 3.122.0
 - name: staticfile-buildpack
-  sha1: 93b7a09c72dfb39303d6061d1f28d7802f987359
+  sha1: sha256:86d624d0c8b7e602410f6854cdaa569c01ab7d40bd7552c29a862033bc26fc72
   stemcell:
-    os: ubuntu-jammy
-    version: "1.423"
-  url: https://storage.googleapis.com/cf-deployment-compiled-releases/staticfile-buildpack-1.6.17-ubuntu-jammy-1.423-20240924-143646-814724586.tgz
-  version: 1.6.17
+    os: ubuntu-noble
+    version: "1.333"
+  url: https://storage.googleapis.com/cf-deployment-compiled-releases/staticfile-buildpack-1.6.39-ubuntu-noble-1.333-20260701-141227-9340519.tgz
+  version: 1.6.39
 - name: statsd-injector
-  sha1: 938cb03d7116e2e671718c87051e8d830d1dbc08
+  sha1: sha256:0b4ca2d5a8c76f073818b8e681a6e8b3cc14d7adb07c3e8647e9ce50345107af
   stemcell:
-    os: ubuntu-jammy
-    version: "1.423"
-  url: https://storage.googleapis.com/cf-deployment-compiled-releases/statsd-injector-1.11.43-ubuntu-jammy-1.423-20240918-185740-680612392.tgz
-  version: 1.11.43
+    os: ubuntu-noble
+    version: "1.333"
+  url: https://storage.googleapis.com/cf-deployment-compiled-releases/statsd-injector-1.11.59-ubuntu-noble-1.333-20260805-235719-137546361.tgz
+  version: 1.11.59
 - name: uaa
-  sha1: 3740c997dc67cadba828d788c1146db30c708292
+  sha1: sha256:08e9348aadb9f80d9ed20c655f67a4a0216d56abcfd8c7bee04ecbf5912e2376
   stemcell:
-    os: ubuntu-jammy
-    version: "1.423"
-  url: https://storage.googleapis.com/cf-deployment-compiled-releases/uaa-77.17.0-ubuntu-jammy-1.423-20241008-154204-261373459.tgz
-  version: 77.17.0
+    os: ubuntu-noble
+    version: "1.333"
+  url: https://storage.googleapis.com/cf-deployment-compiled-releases/uaa-79.7.0-ubuntu-noble-1.333-20260827-222836-960254037.tgz
+  version: 79.7.0
 - name: loggregator-agent
-  sha1: a425e43b561f9df3fed255786424885ae12a5f80
-  url: https://bosh.io/d/github.com/cloudfoundry/loggregator-agent-release?v=8.3.0
-  version: 8.3.0
+  sha1: sha256:e73775a3c9454002d08954bd8d862a1dc37ab74edc15d91586738c4cc03bd0be
+  stemcell:
+    os: ubuntu-noble
+    version: "1.333"
+  url: https://storage.googleapis.com/cf-deployment-compiled-releases/loggregator-agent-8.3.27-ubuntu-noble-1.333-20260815-203937-58720085.tgz
+  version: 8.3.27
 - name: log-cache
-  sha1: 7046402ad120b1d9ab10289ff98d5d67f94e1f0d
+  sha1: sha256:656a180673c4809fb34a929e065cb5047d9417885ab37fed03a01493c9eeb21f
   stemcell:
-    os: ubuntu-jammy
-    version: "1.423"
-  url: https://storage.googleapis.com/cf-deployment-compiled-releases/log-cache-3.1.5-ubuntu-jammy-1.423-20240918-013021-94116952.tgz
-  version: 3.1.5
+    os: ubuntu-noble
+    version: "1.333"
+  url: https://storage.googleapis.com/cf-deployment-compiled-releases/log-cache-3.2.13-ubuntu-noble-1.333-20260805-235844-240294536.tgz
+  version: 3.2.13
 - name: bosh-dns-aliases
-  sha1: 2d2094d0e9c715a6dffd5ade6e6ccd2ce99e9aac
+  sha1: 69e1fc576e0864ed6d333d814ba91a7520ba5ad1
   stemcell:
-    os: ubuntu-jammy
-    version: "1.423"
-  url: https://storage.googleapis.com/cf-deployment-compiled-releases/bosh-dns-aliases-0.0.4-ubuntu-jammy-1.423-20240411-190445-186803779.tgz
+    os: ubuntu-noble
+    version: "1.333"
+  url: https://storage.googleapis.com/cf-deployment-compiled-releases/bosh-dns-aliases-0.0.4-ubuntu-noble-1.333-20260601-093311-023702461.tgz
   version: 0.0.4
 - name: cf-cli
-  sha1: 22f5d44f38adba3e88d13a02364fe273963882db
+  sha1: sha256:39e2425799a409f6f02b76fb5f7e19f817eb07a669445d59f535c1cc15726a95
   stemcell:
-    os: ubuntu-jammy
-    version: "1.423"
-  url: https://storage.googleapis.com/cf-deployment-compiled-releases/cf-cli-1.67.0-ubuntu-jammy-1.423-20240920-173853-266809208.tgz
-  version: 1.67.0
+    os: ubuntu-noble
+    version: "1.333"
+  url: https://storage.googleapis.com/cf-deployment-compiled-releases/cf-cli-2.10.0-ubuntu-noble-1.333-20260828-215851-713508891.tgz
+  version: 2.10.0
 - name: hwc-buildpack
-  sha1: f8c9ada22af7f5b0f22f4315fd90ac3fea6dbf92
-  url: https://bosh.io/d/github.com/cloudfoundry-incubator/hwc-buildpack-release?v=3.1.38
-  version: 3.1.38
+  sha1: sha256:25f3e5aeac9bd043e55eb891ec2b3d0039da104c52d174290b6b040cb4f6e56f
+  url: https://bosh.io/d/github.com/cloudfoundry-incubator/hwc-buildpack-release?v=3.1.48
+  version: 3.1.48
 - name: winc
-  sha1: 0b217a694f1b8b39112b14442befe20d17afad6c
-  url: https://bosh.io/d/github.com/cloudfoundry-incubator/winc-release?v=2.29.0
-  version: 2.29.0
+  sha1: sha256:bd20a1a95af32b8df2f525684c8e5465c90f85b3b9723f30068df2a5d1fff23d
+  url: https://bosh.io/d/github.com/cloudfoundry-incubator/winc-release?v=2.75.0
+  version: 2.75.0
 - name: windows-utilities
-  sha1: 52f489fe0806ee8915f5613f79c9173773871e8b
-  url: https://bosh.io/d/github.com/cloudfoundry-incubator/windows-utilities-release?v=0.20.0
-  version: 0.20.0
+  sha1: sha256:3ce4c1822f9fe5865cf2178f45c8a454c56670c8314f5e873162ff4921bf58e6
+  url: https://bosh.io/d/github.com/cloudfoundry-incubator/windows-utilities-release?v=0.23.0
+  version: 0.23.0
+- name: envoy-nginx
+  sha1: sha256:7087c5f925eaaede981c9a33f19771a25ba6ee330ad37192c8ee5771089c13ee
+  url: https://bosh.io/d/github.com/cloudfoundry-incubator/envoy-nginx-release?v=0.78.0
+  version: 0.78.0
 - name: windowsfs
-  sha1: 71e1dc4dcd1427a9d422f41b4f9f220d5f685fbe
-  url: https://bosh.io/d/github.com/cloudfoundry/windowsfs-online-release?v=2.73.0
-  version: 2.73.0
+  sha1: sha256:267ccfb6e2cdcd85728990e2c654ca2508f221bc88fa2a90e48d25ab22bd0f2d
+  url: https://bosh.io/d/github.com/cloudfoundry/windowsfs-online-release?v=2.98.0
+  version: 2.98.0
 - name: windows-resize-root-disk
   sha1: 8fe1adc3b6b6b68d8a370c576f649929f5452c6a
   url: https://github.com/starkandwayne/windows-resize-root-disk/releases/download/v1.0/windows-resize-root-disk-release-1.0.tgz
   version: "1.0"
 - name: smb-volume
-  sha1: a9401517310a73f5a4aec4839d31749ae5eccbd9
-  url: https://bosh.io/d/github.com/cloudfoundry/smb-volume-release?v=3.5.0
-  version: 3.5.0
-- name: postgres
-  sha1: c00282991b51ca0b3a7399c1c96fb18eff907659
-  url: https://bosh.io/d/github.com/cloudfoundry/postgres-release?v=52
-  version: "52"
+  sha1: sha256:e52c36b8b60cd261e08b22ed7fe9147161ec296f629c7b0b622a89115f76e63b
+  url: https://bosh.io/d/github.com/cloudfoundry/smb-volume-release?v=3.72.0
+  version: 3.72.0
 stemcells:
 - alias: default
-  os: ubuntu-jammy
+  os: ubuntu-noble
   version: latest
 - alias: windows2019
   os: windows2019

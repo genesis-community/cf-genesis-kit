@@ -7,6 +7,7 @@ addons:
     stemcell:
     - os: ubuntu-bionic
     - os: ubuntu-jammy
+    - os: ubuntu-noble
   jobs:
   - name: loggregator_agent
     properties:
@@ -29,6 +30,7 @@ addons:
     stemcell:
     - os: ubuntu-bionic
     - os: ubuntu-jammy
+    - os: ubuntu-noble
   jobs:
   - name: loggr-forwarder-agent
     properties:
@@ -51,6 +53,7 @@ addons:
     stemcell:
     - os: ubuntu-bionic
     - os: ubuntu-jammy
+    - os: ubuntu-noble
   jobs:
   - name: loggr-syslog-agent
     properties:
@@ -80,6 +83,7 @@ addons:
     stemcell:
     - os: ubuntu-bionic
     - os: ubuntu-jammy
+    - os: ubuntu-noble
   jobs:
   - name: prom_scraper
     properties:
@@ -100,6 +104,7 @@ addons:
     stemcell:
     - os: ubuntu-bionic
     - os: ubuntu-jammy
+    - os: ubuntu-noble
   jobs:
   - name: bpm
     release: bpm
@@ -113,176 +118,176 @@ addons:
         - deployment: blobstore-minio-cf
           domain: bosh
           instance_group: diego-cell
-          network: cf-runtime
+          network: default
           query: _
         - deployment: blobstore-minio-cf
           domain: bosh
           instance_group: windows2012R2-cell
-          network: cf-runtime
+          network: default
           query: _
         - deployment: blobstore-minio-cf
           domain: bosh
           instance_group: windows2016-cell
-          network: cf-runtime
+          network: default
           query: _
         - deployment: blobstore-minio-cf
           domain: bosh
           instance_group: isolated-diego-cell
-          network: cf-runtime
+          network: default
           query: _
       - domain: auctioneer.service.cf.internal
         targets:
         - deployment: blobstore-minio-cf
           domain: bosh
           instance_group: scheduler
-          network: cf-core
+          network: default
           query: q-s4
       - domain: bbs.service.cf.internal
         targets:
         - deployment: blobstore-minio-cf
           domain: bosh
           instance_group: diego-api
-          network: cf-core
+          network: default
           query: q-s4
       - domain: blobstore.service.cf.internal
         targets:
         - deployment: blobstore-minio-cf
           domain: bosh
           instance_group: singleton-blobstore
-          network: cf-core
+          network: default
           query: '*'
       - domain: cc-uploader.service.cf.internal
         targets:
         - deployment: blobstore-minio-cf
           domain: bosh
           instance_group: api
-          network: cf-core
+          network: default
           query: '*'
       - domain: cloud-controller-ng.service.cf.internal
         targets:
         - deployment: blobstore-minio-cf
           domain: bosh
           instance_group: api
-          network: cf-core
+          network: default
           query: '*'
       - domain: credhub.service.cf.internal
         targets:
         - deployment: blobstore-minio-cf
           domain: bosh
           instance_group: credhub
-          network: cf-core
+          network: default
           query: '*'
       - domain: doppler.service.cf.internal
         targets:
         - deployment: blobstore-minio-cf
           domain: bosh
           instance_group: doppler
-          network: cf-core
+          network: default
           query: '*'
       - domain: log-cache.service.cf.internal
         targets:
         - deployment: blobstore-minio-cf
           domain: bosh
           instance_group: log-cache
-          network: cf-core
+          network: default
           query: '*'
       - domain: file-server.service.cf.internal
         targets:
         - deployment: blobstore-minio-cf
           domain: bosh
           instance_group: api
-          network: cf-core
+          network: default
           query: '*'
       - domain: gorouter.service.cf.internal
         targets:
         - deployment: blobstore-minio-cf
           domain: bosh
           instance_group: router
-          network: cf-edge
+          network: default
           query: '*'
       - domain: locket.service.cf.internal
         targets:
         - deployment: blobstore-minio-cf
           domain: bosh
           instance_group: diego-api
-          network: cf-core
+          network: default
           query: '*'
       - domain: loggregator-trafficcontroller.service.cf.internal
         targets:
         - deployment: blobstore-minio-cf
           domain: bosh
           instance_group: log-api
-          network: cf-core
+          network: default
           query: '*'
       - domain: nats.service.cf.internal
         targets:
         - deployment: blobstore-minio-cf
           domain: bosh
           instance_group: nats
-          network: cf-core
+          network: default
           query: '*'
       - domain: _.nats.service.cf.internal
         targets:
         - deployment: blobstore-minio-cf
           domain: bosh
           instance_group: nats
-          network: cf-core
+          network: default
           query: _
       - domain: policy-server.service.cf.internal
         targets:
         - deployment: blobstore-minio-cf
           domain: bosh
           instance_group: api
-          network: cf-core
+          network: default
           query: '*'
       - domain: reverse-log-proxy.service.cf.internal
         targets:
         - deployment: blobstore-minio-cf
           domain: bosh
           instance_group: log-api
-          network: cf-core
+          network: default
           query: '*'
       - domain: routing-api.service.cf.internal
         targets:
         - deployment: blobstore-minio-cf
           domain: bosh
           instance_group: api
-          network: cf-core
+          network: default
           query: '*'
       - domain: silk-controller.service.cf.internal
         targets:
         - deployment: blobstore-minio-cf
           domain: bosh
           instance_group: diego-api
-          network: cf-core
+          network: default
           query: '*'
       - domain: sql-db.service.cf.internal
         targets:
         - deployment: blobstore-minio-cf
           domain: bosh
           instance_group: database
-          network: cf-core
+          network: default
           query: '*'
       - domain: ssh-proxy.service.cf.internal
         targets:
         - deployment: blobstore-minio-cf
           domain: bosh
           instance_group: scheduler
-          network: cf-core
+          network: default
           query: '*'
       - domain: tps.service.cf.internal
         targets:
         - deployment: blobstore-minio-cf
           domain: bosh
           instance_group: scheduler
-          network: cf-core
+          network: default
           query: '*'
       - domain: uaa.service.cf.internal
         targets:
         - deployment: blobstore-minio-cf
           domain: bosh
           instance_group: uaa
-          network: cf-core
+          network: default
           query: '*'
     release: bosh-dns-aliases
   name: bosh-dns-aliases
@@ -295,18 +300,22 @@ exodus:
   apps_domain: run.cf.testing.examle
   base_domain: cf.testing.examle
   bosh: blobstore-minio
-  cf-deployment-date: 2024-Nov-11 15:24:29 UTC
-  cf-deployment-url: https://github.com/cloudfoundry/cf-deployment/releases/tag/v44.4.0
-  cf-deployment-version: 44.4.0
-  core_network: cf-core
-  db_network: cf-core
-  edge_network: cf-edge
-  features: minio-blobstore
+  cf-deployment-date: 2026-Sep-13 10:42:06 UTC
+  cf-deployment-url: https://github.com/cloudfoundry/cf-deployment/releases/tag/v60.5.0
+  cf-deployment-version: 60.5.0
+  core_network: default
+  db_network: default
+  edge_network: default
+  features: minio-blobstore,no-haproxy
+  iaas: null
   is_director: false
-  runtime_network: cf-runtime
+  runtime_network: default
+  scale: null
+  services: null
   system_domain: system.cf.testing.examle
   system_org: system
   system_space: system
+  tcp_edge_network: default
   use_create_env: false
   vaulted_uaa_clients: /secret/blobstore/minio/cf/uaa/client_secrets:firehose
 features:
@@ -328,7 +337,6 @@ instance_groups:
         client: cf_smoke_tests
         client_secret: <!{credhub}:uaa_clients_cf_smoke_tests_secret!>
         org: cf_smoke_tests_org
-        skip_ssl_validation: true
         space: cf_smoke_tests_space
     release: cf-smoke-tests
   - name: cf-cli-8-linux
@@ -336,7 +344,7 @@ instance_groups:
   lifecycle: errand
   name: smoke-tests
   networks:
-  - name: cf-runtime
+  - name: default
   stemcell: default
   vm_type: minimal
 - azs:
@@ -374,75 +382,104 @@ instance_groups:
     release: nats
   name: nats
   networks:
-  - name: cf-core
+  - name: default
   stemcell: default
   vm_type: medium
 - azs:
   - z1
   instances: 1
   jobs:
-  - name: postgres
+  - name: pxc-mysql
     properties:
-      databases:
-        databases:
-        - citext: true
-          name: cloud_controller
-          tag: cc
-        - citext: true
-          name: uaa
-          tag: uaa
-        - citext: true
-          name: diego
-          tag: diego
-        - citext: true
-          name: routing-api
-          tag: routing-api
-        - citext: false
-          name: network_policy
-          tag: networkpolicy
-        - citext: false
-          name: network_connectivity
-          tag: networkconnectivity
-        - citext: true
-          name: locket
-          tag: locket
-        - citext: true
-          name: credhub
-          tag: credhub
-        db_scheme: postgres
-        port: 5524
-        roles:
-        - name: cloud_controller
-          password: <!{credhub}:cc_database_password!>
-          tag: admin
-        - name: uaa
-          password: <!{credhub}:uaa_database_password!>
-          tag: admin
-        - name: diego
-          password: <!{credhub}:diego_database_password!>
-          tag: admin
-        - name: routing-api
-          password: <!{credhub}:routing_api_database_password!>
-          tag: admin
-        - name: network_policy
-          password: <!{credhub}:network_policy_database_password!>
-          tag: admin
-        - name: network_connectivity
-          password: <!{credhub}:network_connectivity_database_password!>
-          tag: admin
-        - name: locket
-          password: <!{credhub}:locket_database_password!>
-          tag: locket
-        - name: credhub
-          password: <!{credhub}:credhub_database_password!>
-          tag: admin
-    release: postgres
+      admin_password: <!{credhub}:cf_mysql_mysql_admin_password!>
+      engine_config:
+        binlog:
+          enabled: false
+        galera:
+          enabled: true
+      mysql_version: "8.4"
+      port: 13306
+      seeded_databases:
+      - name: cloud_controller
+        password: <!{credhub}:cc_database_password!>
+        username: cloud_controller
+      - name: diego
+        password: <!{credhub}:diego_database_password!>
+        username: diego
+      - name: network_connectivity
+        password: <!{credhub}:network_connectivity_database_password!>
+        username: network_connectivity
+      - name: network_policy
+        password: <!{credhub}:network_policy_database_password!>
+        username: network_policy
+      - name: routing-api
+        password: <!{credhub}:routing_api_database_password!>
+        username: routing-api
+      - name: uaa
+        password: <!{credhub}:uaa_database_password!>
+        username: uaa
+      - name: locket
+        password: <!{credhub}:locket_database_password!>
+        username: locket
+      - name: credhub
+        password: <!{credhub}:credhub_database_password!>
+        username: credhub
+      tls:
+        galera:
+          ca: <!{credhub}:galera_server_certificate.ca!>
+          certificate: <!{credhub}:galera_server_certificate.certificate!>
+          private_key: <!{credhub}:galera_server_certificate.private_key!>
+        server:
+          ca: <!{credhub}:mysql_server_certificate.ca!>
+          certificate: <!{credhub}:mysql_server_certificate.certificate!>
+          private_key: <!{credhub}:mysql_server_certificate.private_key!>
+    release: pxc
+  - name: proxy
+    properties:
+      api_password: <!{credhub}:cf_mysql_proxy_api_password!>
+      api_port: 8083
+      api_uri: proxy.system.cf.testing.examle
+    release: pxc
+  - name: galera-agent
+    properties:
+      db_password: <!{credhub}:cf_mysql_mysql_galera_healthcheck_password!>
+      endpoint_password: <!{credhub}:cf_mysql_mysql_galera_healthcheck_endpoint_password!>
+    release: pxc
+  - name: gra-log-purger
+    release: pxc
+  - name: cluster-health-logger
+    properties:
+      db_password: <!{credhub}:cf_mysql_mysql_cluster_health_password!>
+    release: pxc
+  - name: route_registrar
+    properties:
+      nats:
+        tls:
+          client_cert: <!{credhub}:nats_client_cert.certificate!>
+          client_key: <!{credhub}:nats_client_cert.private_key!>
+          enabled: true
+      route_registrar:
+        routes:
+        - name: cf-mysql-proxy
+          port: 8083
+          prepend_instance_index: true
+          registration_interval: 10s
+          uris:
+          - proxy.system.cf.testing.examle
+        - name: cf-mysql-proxy-aggregator
+          port: 8082
+          registration_interval: 10s
+          uris:
+          - proxy.system.cf.testing.examle
+    release: routing
+  - name: bootstrap
+    release: pxc
   migrated_from:
-  - name: postgres
+  - name: mysql
   - name: singleton-database
   name: database
   networks:
-  - name: cf-core
+  - name: default
   persistent_disk_type: 10GB
   stemcell: default
   update:
@@ -472,7 +509,6 @@ instance_groups:
             client_cert: <!{credhub}:diego_auctioneer_client.certificate!>
             client_key: <!{credhub}:diego_auctioneer_client.private_key!>
           ca_cert: <!{credhub}:diego_bbs_server.ca!>
-          detect_consul_cell_registrations: false
           encryption_keys:
           - label: key-2016-06
             passphrase: <!{credhub}:diego_bbs_encryption_keys_passphrase!>
@@ -480,21 +516,17 @@ instance_groups:
             ca_cert: <!{credhub}:diego_rep_client.ca!>
             client_cert: <!{credhub}:diego_rep_client.certificate!>
             client_key: <!{credhub}:diego_rep_client.private_key!>
-            require_tls: true
           server_cert: <!{credhub}:diego_bbs_server.certificate!>
           server_key: <!{credhub}:diego_bbs_server.private_key!>
-          skip_consul_lock: true
           sql:
-            db_driver: postgres
+            ca_cert: <!{credhub}:mysql_server_certificate.ca!>
+            db_driver: mysql
             db_host: sql-db.service.cf.internal
             db_password: <!{credhub}:diego_database_password!>
-            db_port: 5524
+            db_port: 3306
             db_schema: diego
             db_username: diego
-      enable_consul_service_registration: false
-      logging:
-        format:
-          timestamp: rfc3339
+            require_ssl: true
       loggregator:
         app_metric_exclusion_filter:
         - absolute_entitlement
@@ -508,11 +540,13 @@ instance_groups:
     properties:
       ca_cert: <!{credhub}:silk_controller.ca!>
       database:
+        ca_cert: <!{credhub}:mysql_server_certificate.ca!>
         host: sql-db.service.cf.internal
         name: network_connectivity
         password: <!{credhub}:network_connectivity_database_password!>
-        port: 5524
-        type: postgres
+        port: 3306
+        require_ssl: true
+        type: mysql
         username: network_connectivity
       server_cert: <!{credhub}:silk_controller.certificate!>
       server_key: <!{credhub}:silk_controller.private_key!>
@@ -528,16 +562,14 @@ instance_groups:
       diego:
         locket:
           sql:
-            db_driver: postgres
+            ca_cert: <!{credhub}:mysql_server_certificate.ca!>
+            db_driver: mysql
             db_host: sql-db.service.cf.internal
             db_password: <!{credhub}:locket_database_password!>
-            db_port: 5524
+            db_port: 3306
             db_schema: locket
             db_username: locket
-      enable_consul_service_registration: false
-      logging:
-        format:
-          timestamp: rfc3339
+            require_ssl: true
       loggregator:
         ca_cert: <!{credhub}:loggregator_tls_agent.ca!>
         cert: <!{credhub}:loggregator_tls_agent.certificate!>
@@ -565,7 +597,7 @@ instance_groups:
   - name: diego-bbs
   name: diego-api
   networks:
-  - name: cf-core
+  - name: default
   stemcell: default
   vm_type: small
 - azs:
@@ -599,6 +631,8 @@ instance_groups:
       uaa:
         admin:
           client_secret: <!{credhub}:uaa_admin_client_secret!>
+        ca_certs:
+        - <!{credhub}:mysql_server_certificate.ca!>
         clients:
           cc-service-dashboards:
             authorities: clients.read,clients.write,clients.admin
@@ -618,7 +652,7 @@ instance_groups:
           cf:
             access-token-validity: 1200
             authorities: uaa.none
-            authorized-grant-types: password,refresh_token
+            authorized-grant-types: password,refresh_token,urn:ietf:params:oauth:grant-type:jwt-bearer
             override: true
             refresh-token-validity: 2592000
             scopes:
@@ -722,16 +756,16 @@ instance_groups:
             hostnames:
             - uaa.service.cf.internal
       uaadb:
+        address: sql-db.service.cf.internal
         databases:
         - name: uaa
           tag: uaa
-        db_scheme: postgresql
-        port: 5524
+        db_scheme: mysql
+        port: 3306
         roles:
         - name: uaa
           password: <!{credhub}:uaa_database_password!>
           tag: admin
-        tls: disabled
     release: uaa
   - name: route_registrar
     properties:
@@ -768,7 +802,7 @@ instance_groups:
     release: statsd-injector
   name: uaa
   networks:
-  - name: cf-core
+  - name: default
   stemcell: default
   vm_type: small
 - azs:
@@ -787,15 +821,19 @@ instance_groups:
       build: cf-genesis-kit v2.0.0
       cc:
         buildpacks:
-          buildpack_directory_key: blobstore-minio-cf-buildpacks-((cc_directory_key))
-          fog_connection:
-            aws_access_key_id: ((blobstore_access_key_id))
-            aws_secret_access_key: ((blobstore_secret_access_key))
-            aws_signature_version: "2"
-            endpoint: test-minio-endpoint
-            path_style: true
-            provider: AWS
-            region: ''''''
+          blobstore_provider: s3
+          blobstore_type: storage-cli
+          buildpack_directory_key: blobstore-minio-cf/cf-buildpacks
+          connection_config:
+            aws_access_key_id: test-access-key
+            aws_secret_access_key: test-secret-access-key
+            bucket_name: blobstore-minio-cf/cf-buildpacks
+            host: test-minio-host
+            host_style: false
+            port: 9000
+            region: us-east-1
+            ssl_verify_peer: true
+            use_ssl: true
         database_encryption:
           current_key_label: encryption_key_0
           keys:
@@ -812,22 +850,29 @@ instance_groups:
           docker_staging_stack: cflinuxfs4
           droplet_destinations:
             cflinuxfs4: /home/vcap
+            cflinuxfs5: /home/vcap
             windows: /Users/vcap
           lifecycle_bundles:
             buildpack/cflinuxfs4: buildpack_app_lifecycle/buildpack_app_lifecycle.tgz
+            buildpack/cflinuxfs5: buildpack_app_lifecycle/buildpack_app_lifecycle.tgz
             buildpack/windows: buildpack_app_lifecycle/buildpack_app_lifecycle.tgz
             cnb/cflinuxfs4: cnb_app_lifecycle/cnb_app_lifecycle.tgz
+            cnb/cflinuxfs5: cnb_app_lifecycle/cnb_app_lifecycle.tgz
             docker: docker_app_lifecycle/docker_app_lifecycle.tgz
         droplets:
-          droplet_directory_key: blobstore-minio-cf-droplets-((cc_directory_key))
-          fog_connection:
-            aws_access_key_id: ((blobstore_access_key_id))
-            aws_secret_access_key: ((blobstore_secret_access_key))
-            aws_signature_version: "2"
-            endpoint: test-minio-endpoint
-            path_style: true
-            provider: AWS
-            region: ''''''
+          blobstore_provider: s3
+          blobstore_type: storage-cli
+          connection_config:
+            aws_access_key_id: test-access-key
+            aws_secret_access_key: test-secret-access-key
+            bucket_name: blobstore-minio-cf/cf-droplets
+            host: test-minio-host
+            host_style: false
+            port: 9000
+            region: us-east-1
+            ssl_verify_peer: true
+            use_ssl: true
+          droplet_directory_key: blobstore-minio-cf/cf-droplets
         install_buildpacks:
         - name: staticfile_buildpack
           package: staticfile-buildpack-cflinuxfs4
@@ -851,11 +896,37 @@ instance_groups:
           package: r-buildpack-cflinuxfs4
         - name: binary_buildpack
           package: binary-buildpack-cflinuxfs4
+        - name: staticfile_buildpack
+          package: staticfile-buildpack-cflinuxfs5
+        - name: java_buildpack
+          package: java-buildpack-cflinuxfs5
+        - name: ruby_buildpack
+          package: ruby-buildpack-cflinuxfs5
+        - name: dotnet_core_buildpack
+          package: dotnet-core-buildpack-cflinuxfs5
+        - name: nodejs_buildpack
+          package: nodejs-buildpack-cflinuxfs5
+        - name: go_buildpack
+          package: go-buildpack-cflinuxfs5
+        - name: python_buildpack
+          package: python-buildpack-cflinuxfs5
+        - name: php_buildpack
+          package: php-buildpack-cflinuxfs5
+        - name: nginx_buildpack
+          package: nginx-buildpack-cflinuxfs5
+        - name: r_buildpack
+          package: r-buildpack-cflinuxfs5
+        - name: binary_buildpack
+          package: binary-buildpack-cflinuxfs5
         logcache:
           host: log-cache.service.cf.internal
         logcache_tls:
           certificate: <!{credhub}:cc_logcache_tls.certificate!>
           private_key: <!{credhub}:cc_logcache_tls.private_key!>
+        loggregator_tls:
+          ca_cert: <!{credhub}:loggregator_tls_agent.ca!>
+          certificate: <!{credhub}:loggregator_tls_agent.certificate!>
+          private_key: <!{credhub}:loggregator_tls_agent.private_key!>
         min_cli_version: 6.23.0
         min_recommended_cli_version: 6.23.0
         mutual_tls:
@@ -863,15 +934,19 @@ instance_groups:
           private_key: <!{credhub}:cc_tls.private_key!>
           public_cert: <!{credhub}:cc_tls.certificate!>
         packages:
-          app_package_directory_key: blobstore-minio-cf-app-packages-((cc_directory_key))
-          fog_connection:
-            aws_access_key_id: ((blobstore_access_key_id))
-            aws_secret_access_key: ((blobstore_secret_access_key))
-            aws_signature_version: "2"
-            endpoint: test-minio-endpoint
-            path_style: true
-            provider: AWS
-            region: ''''''
+          app_package_directory_key: blobstore-minio-cf/cf-app-packages
+          blobstore_provider: s3
+          blobstore_type: storage-cli
+          connection_config:
+            aws_access_key_id: test-access-key
+            aws_secret_access_key: test-secret-access-key
+            bucket_name: blobstore-minio-cf/cf-app-packages
+            host: test-minio-host
+            host_style: false
+            port: 9000
+            region: us-east-1
+            ssl_verify_peer: true
+            use_ssl: true
         prom_scraper_tls:
           ca_cert: <!{credhub}:cc_prom_scraper_scrape_tls.ca!>
           private_key: <!{credhub}:cc_prom_scraper_scrape_tls.private_key!>
@@ -881,15 +956,19 @@ instance_groups:
           certificate: <!{credhub}:cc_public_tls.certificate!>
           private_key: <!{credhub}:cc_public_tls.private_key!>
         resource_pool:
-          fog_connection:
-            aws_access_key_id: ((blobstore_access_key_id))
-            aws_secret_access_key: ((blobstore_secret_access_key))
-            aws_signature_version: "2"
-            endpoint: test-minio-endpoint
-            path_style: true
-            provider: AWS
-            region: ''''''
-          resource_directory_key: blobstore-minio-cf-resources-((cc_directory_key))
+          blobstore_provider: s3
+          blobstore_type: storage-cli
+          connection_config:
+            aws_access_key_id: test-access-key
+            aws_secret_access_key: test-secret-access-key
+            bucket_name: blobstore-minio-cf/cf-resources
+            host: test-minio-host
+            host_style: false
+            port: 9000
+            region: us-east-1
+            ssl_verify_peer: true
+            use_ssl: true
+          resource_directory_key: blobstore-minio-cf/cf-resources
         security_group_definitions:
         - name: public_networks
           rules:
@@ -916,15 +995,19 @@ instance_groups:
         stacks:
         - description: Cloud Foundry Linux-based filesystem (Ubuntu 22.04)
           name: cflinuxfs4
+        - description: Cloud Foundry Linux-based filesystem (Ubuntu 24.04)
+          name: cflinuxfs5
         staging_upload_password: <!{credhub}:cc_staging_upload_password!>
         staging_upload_user: staging_user
         temporary_use_logcache: true
       ccdb:
+        address: sql-db.service.cf.internal
+        ca_cert: <!{credhub}:mysql_server_certificate.ca!>
         databases:
         - name: cloud_controller
           tag: cc
-        db_scheme: postgres
-        port: 5524
+        db_scheme: mysql
+        port: 3306
         roles:
         - name: cloud_controller
           password: <!{credhub}:cc_database_password!>
@@ -937,8 +1020,7 @@ instance_groups:
         route_services_secret: <!{credhub}:router_route_services_secret!>
       routing_api:
         enabled: true
-      ssl:
-        skip_cert_verify: true
+      ssl: {}
       support_address: https://github.com/genesis-community/cf-genesis-kit
       system_domain: system.cf.testing.examle
       uaa:
@@ -953,7 +1035,7 @@ instance_groups:
           cloud_controller_username_lookup:
             secret: <!{credhub}:uaa_clients_cloud_controller_username_lookup_secret!>
         url: https://uaa.system.cf.testing.examle
-      version: 44
+      version: 60
     provides:
       cloud_controller:
         as: cloud_controller
@@ -1034,9 +1116,7 @@ instance_groups:
       bpm:
         enabled: true
       enable_consul_service_registration: false
-      logging:
-        format:
-          timestamp: rfc3339
+      https_server_enabled: true
       loggregator:
         app_metric_exclusion_filter:
         - absolute_entitlement
@@ -1045,6 +1125,10 @@ instance_groups:
         cert: <!{credhub}:loggregator_tls_agent.certificate!>
         key: <!{credhub}:loggregator_tls_agent.private_key!>
         use_v2_api: true
+      tls:
+        cert: <!{credhub}:file_server_cert.certificate!>
+        client_ca_cert: <!{credhub}:file_server_cert.ca!>
+        key: <!{credhub}:file_server_cert.private_key!>
     release: diego
   - name: routing-api
     properties:
@@ -1064,13 +1148,13 @@ instance_groups:
         - name: default-tcp
           reservable_ports: 1024-1033
           type: tcp
-        skip_consul_lock: true
         sqldb:
+          ca_cert: <!{credhub}:mysql_server_certificate.ca!>
           host: sql-db.service.cf.internal
           password: <!{credhub}:routing_api_database_password!>
-          port: 5524
+          port: 3306
           schema: routing-api
-          type: postgres
+          type: mysql
           username: routing-api
         system_domain: system.cf.testing.examle
       uaa:
@@ -1080,11 +1164,13 @@ instance_groups:
   - name: policy-server
     properties:
       database:
+        ca_cert: <!{credhub}:mysql_server_certificate.ca!>
         host: sql-db.service.cf.internal
         name: network_policy
         password: <!{credhub}:network_policy_database_password!>
-        port: 5524
-        type: postgres
+        port: 3306
+        require_ssl: true
+        type: mysql
         username: network_policy
       enable_space_developer_self_service: true
       enable_tls: true
@@ -1140,7 +1226,7 @@ instance_groups:
     release: loggregator-agent
   name: api
   networks:
-  - name: cf-core
+  - name: default
   stemcell: default
   vm_extensions:
   - 50GB_ephemeral_disk
@@ -1154,15 +1240,19 @@ instance_groups:
     properties:
       cc:
         buildpacks:
-          buildpack_directory_key: blobstore-minio-cf-buildpacks-((cc_directory_key))
-          fog_connection:
-            aws_access_key_id: ((blobstore_access_key_id))
-            aws_secret_access_key: ((blobstore_secret_access_key))
-            aws_signature_version: "2"
-            endpoint: test-minio-endpoint
-            path_style: true
-            provider: AWS
-            region: ''''''
+          blobstore_provider: s3
+          blobstore_type: storage-cli
+          buildpack_directory_key: blobstore-minio-cf/cf-buildpacks
+          connection_config:
+            aws_access_key_id: test-access-key
+            aws_secret_access_key: test-secret-access-key
+            bucket_name: blobstore-minio-cf/cf-buildpacks
+            host: test-minio-host
+            host_style: false
+            port: 9000
+            region: us-east-1
+            ssl_verify_peer: true
+            use_ssl: true
         database_encryption:
           current_key_label: encryption_key_0
           keys:
@@ -1171,62 +1261,82 @@ instance_groups:
         diego:
           droplet_destinations:
             cflinuxfs4: /home/vcap
+            cflinuxfs5: /home/vcap
             windows: /Users/vcap
           lifecycle_bundles:
             buildpack/cflinuxfs4: buildpack_app_lifecycle/buildpack_app_lifecycle.tgz
+            buildpack/cflinuxfs5: buildpack_app_lifecycle/buildpack_app_lifecycle.tgz
             buildpack/windows: buildpack_app_lifecycle/buildpack_app_lifecycle.tgz
             cnb/cflinuxfs4: cnb_app_lifecycle/cnb_app_lifecycle.tgz
+            cnb/cflinuxfs5: cnb_app_lifecycle/cnb_app_lifecycle.tgz
             docker: docker_app_lifecycle/docker_app_lifecycle.tgz
         droplets:
-          droplet_directory_key: blobstore-minio-cf-droplets-((cc_directory_key))
-          fog_connection:
-            aws_access_key_id: ((blobstore_access_key_id))
-            aws_secret_access_key: ((blobstore_secret_access_key))
-            aws_signature_version: "2"
-            endpoint: test-minio-endpoint
-            path_style: true
-            provider: AWS
-            region: ''''''
+          blobstore_provider: s3
+          blobstore_type: storage-cli
+          connection_config:
+            aws_access_key_id: test-access-key
+            aws_secret_access_key: test-secret-access-key
+            bucket_name: blobstore-minio-cf/cf-droplets
+            host: test-minio-host
+            host_style: false
+            port: 9000
+            region: us-east-1
+            ssl_verify_peer: true
+            use_ssl: true
+          droplet_directory_key: blobstore-minio-cf/cf-droplets
+        loggregator_tls:
+          ca_cert: <!{credhub}:loggregator_tls_agent.ca!>
+          certificate: <!{credhub}:loggregator_tls_agent.certificate!>
+          private_key: <!{credhub}:loggregator_tls_agent.private_key!>
         mutual_tls:
           ca_cert: <!{credhub}:cc_tls.ca!>
           private_key: <!{credhub}:cc_tls.private_key!>
           public_cert: <!{credhub}:cc_tls.certificate!>
         packages:
-          app_package_directory_key: blobstore-minio-cf-app-packages-((cc_directory_key))
-          fog_connection:
-            aws_access_key_id: ((blobstore_access_key_id))
-            aws_secret_access_key: ((blobstore_secret_access_key))
-            aws_signature_version: "2"
-            endpoint: test-minio-endpoint
-            path_style: true
-            provider: AWS
-            region: ''''''
+          app_package_directory_key: blobstore-minio-cf/cf-app-packages
+          blobstore_provider: s3
+          blobstore_type: storage-cli
+          connection_config:
+            aws_access_key_id: test-access-key
+            aws_secret_access_key: test-secret-access-key
+            bucket_name: blobstore-minio-cf/cf-app-packages
+            host: test-minio-host
+            host_style: false
+            port: 9000
+            region: us-east-1
+            ssl_verify_peer: true
+            use_ssl: true
         resource_pool:
-          fog_connection:
-            aws_access_key_id: ((blobstore_access_key_id))
-            aws_secret_access_key: ((blobstore_secret_access_key))
-            aws_signature_version: "2"
-            endpoint: test-minio-endpoint
-            path_style: true
-            provider: AWS
-            region: ''''''
-          resource_directory_key: blobstore-minio-cf-resources-((cc_directory_key))
+          blobstore_provider: s3
+          blobstore_type: storage-cli
+          connection_config:
+            aws_access_key_id: test-access-key
+            aws_secret_access_key: test-secret-access-key
+            bucket_name: blobstore-minio-cf/cf-resources
+            host: test-minio-host
+            host_style: false
+            port: 9000
+            region: us-east-1
+            ssl_verify_peer: true
+            use_ssl: true
+          resource_directory_key: blobstore-minio-cf/cf-resources
         staging_upload_password: <!{credhub}:cc_staging_upload_password!>
         staging_upload_user: staging_user
       ccdb:
+        address: sql-db.service.cf.internal
+        ca_cert: <!{credhub}:mysql_server_certificate.ca!>
         databases:
         - name: cloud_controller
           tag: cc
-        db_scheme: postgres
-        port: 5524
+        db_scheme: mysql
+        port: 3306
         roles:
         - name: cloud_controller
           password: <!{credhub}:cc_database_password!>
           tag: admin
       routing_api:
         enabled: true
-      ssl:
-        skip_cert_verify: true
+      ssl: {}
       system_domain: system.cf.testing.examle
       uaa:
         ca_cert: <!{credhub}:uaa_ssl.ca!>
@@ -1251,7 +1361,7 @@ instance_groups:
     release: loggregator-agent
   name: cc-worker
   networks:
-  - name: cf-core
+  - name: default
   stemcell: default
   vm_type: minimal
 - azs:
@@ -1281,14 +1391,8 @@ instance_groups:
             ca_cert: <!{credhub}:diego_rep_client.ca!>
             client_cert: <!{credhub}:diego_rep_client.certificate!>
             client_key: <!{credhub}:diego_rep_client.private_key!>
-            require_tls: true
           server_cert: <!{credhub}:diego_auctioneer_server.certificate!>
           server_key: <!{credhub}:diego_auctioneer_server.private_key!>
-          skip_consul_lock: true
-      enable_consul_service_registration: false
-      logging:
-        format:
-          timestamp: rfc3339
       loggregator:
         app_metric_exclusion_filter:
         - absolute_entitlement
@@ -1302,15 +1406,19 @@ instance_groups:
     properties:
       cc:
         buildpacks:
-          buildpack_directory_key: blobstore-minio-cf-buildpacks-((cc_directory_key))
-          fog_connection:
-            aws_access_key_id: ((blobstore_access_key_id))
-            aws_secret_access_key: ((blobstore_secret_access_key))
-            aws_signature_version: "2"
-            endpoint: test-minio-endpoint
-            path_style: true
-            provider: AWS
-            region: ''''''
+          blobstore_provider: s3
+          blobstore_type: storage-cli
+          buildpack_directory_key: blobstore-minio-cf/cf-buildpacks
+          connection_config:
+            aws_access_key_id: test-access-key
+            aws_secret_access_key: test-secret-access-key
+            bucket_name: blobstore-minio-cf/cf-buildpacks
+            host: test-minio-host
+            host_style: false
+            port: 9000
+            region: us-east-1
+            ssl_verify_peer: true
+            use_ssl: true
         database_encryption:
           current_key_label: encryption_key_0
           keys:
@@ -1319,62 +1427,78 @@ instance_groups:
         diego:
           droplet_destinations:
             cflinuxfs4: /home/vcap
+            cflinuxfs5: /home/vcap
             windows: /Users/vcap
           lifecycle_bundles:
             buildpack/cflinuxfs4: buildpack_app_lifecycle/buildpack_app_lifecycle.tgz
+            buildpack/cflinuxfs5: buildpack_app_lifecycle/buildpack_app_lifecycle.tgz
             buildpack/windows: buildpack_app_lifecycle/buildpack_app_lifecycle.tgz
             cnb/cflinuxfs4: cnb_app_lifecycle/cnb_app_lifecycle.tgz
+            cnb/cflinuxfs5: cnb_app_lifecycle/cnb_app_lifecycle.tgz
             docker: docker_app_lifecycle/docker_app_lifecycle.tgz
         droplets:
-          droplet_directory_key: blobstore-minio-cf-droplets-((cc_directory_key))
-          fog_connection:
-            aws_access_key_id: ((blobstore_access_key_id))
-            aws_secret_access_key: ((blobstore_secret_access_key))
-            aws_signature_version: "2"
-            endpoint: test-minio-endpoint
-            path_style: true
-            provider: AWS
-            region: ''''''
+          blobstore_provider: s3
+          blobstore_type: storage-cli
+          connection_config:
+            aws_access_key_id: test-access-key
+            aws_secret_access_key: test-secret-access-key
+            bucket_name: blobstore-minio-cf/cf-droplets
+            host: test-minio-host
+            host_style: false
+            port: 9000
+            region: us-east-1
+            ssl_verify_peer: true
+            use_ssl: true
+          droplet_directory_key: blobstore-minio-cf/cf-droplets
         mutual_tls:
           ca_cert: <!{credhub}:cc_tls.ca!>
           private_key: <!{credhub}:cc_tls.private_key!>
           public_cert: <!{credhub}:cc_tls.certificate!>
         packages:
-          app_package_directory_key: blobstore-minio-cf-app-packages-((cc_directory_key))
-          fog_connection:
-            aws_access_key_id: ((blobstore_access_key_id))
-            aws_secret_access_key: ((blobstore_secret_access_key))
-            aws_signature_version: "2"
-            endpoint: test-minio-endpoint
-            path_style: true
-            provider: AWS
-            region: ''''''
+          app_package_directory_key: blobstore-minio-cf/cf-app-packages
+          blobstore_provider: s3
+          blobstore_type: storage-cli
+          connection_config:
+            aws_access_key_id: test-access-key
+            aws_secret_access_key: test-secret-access-key
+            bucket_name: blobstore-minio-cf/cf-app-packages
+            host: test-minio-host
+            host_style: false
+            port: 9000
+            region: us-east-1
+            ssl_verify_peer: true
+            use_ssl: true
         resource_pool:
-          fog_connection:
-            aws_access_key_id: ((blobstore_access_key_id))
-            aws_secret_access_key: ((blobstore_secret_access_key))
-            aws_signature_version: "2"
-            endpoint: test-minio-endpoint
-            path_style: true
-            provider: AWS
-            region: ''''''
-          resource_directory_key: blobstore-minio-cf-resources-((cc_directory_key))
+          blobstore_provider: s3
+          blobstore_type: storage-cli
+          connection_config:
+            aws_access_key_id: test-access-key
+            aws_secret_access_key: test-secret-access-key
+            bucket_name: blobstore-minio-cf/cf-resources
+            host: test-minio-host
+            host_style: false
+            port: 9000
+            region: us-east-1
+            ssl_verify_peer: true
+            use_ssl: true
+          resource_directory_key: blobstore-minio-cf/cf-resources
         staging_upload_password: <!{credhub}:cc_staging_upload_password!>
         staging_upload_user: staging_user
       ccdb:
+        address: sql-db.service.cf.internal
+        ca_cert: <!{credhub}:mysql_server_certificate.ca!>
         databases:
         - name: cloud_controller
           tag: cc
-        db_scheme: postgres
-        port: 5524
+        db_scheme: mysql
+        port: 3306
         roles:
         - name: cloud_controller
           password: <!{credhub}:cc_database_password!>
           tag: admin
       routing_api:
         enabled: true
-      ssl:
-        skip_cert_verify: true
+      ssl: {}
       system_domain: system.cf.testing.examle
       uaa:
         ca_cert: <!{credhub}:uaa_ssl.ca!>
@@ -1397,22 +1521,27 @@ instance_groups:
         diego:
           droplet_destinations:
             cflinuxfs4: /home/vcap
+            cflinuxfs5: /home/vcap
             windows: /Users/vcap
           lifecycle_bundles:
             buildpack/cflinuxfs4: buildpack_app_lifecycle/buildpack_app_lifecycle.tgz
+            buildpack/cflinuxfs5: buildpack_app_lifecycle/buildpack_app_lifecycle.tgz
             buildpack/windows: buildpack_app_lifecycle/buildpack_app_lifecycle.tgz
             cnb/cflinuxfs4: cnb_app_lifecycle/cnb_app_lifecycle.tgz
+            cnb/cflinuxfs5: cnb_app_lifecycle/cnb_app_lifecycle.tgz
             docker: docker_app_lifecycle/docker_app_lifecycle.tgz
         mutual_tls:
           ca_cert: <!{credhub}:cc_tls.ca!>
           private_key: <!{credhub}:cc_tls.private_key!>
           public_cert: <!{credhub}:cc_tls.certificate!>
       ccdb:
+        address: sql-db.service.cf.internal
+        ca_cert: <!{credhub}:mysql_server_certificate.ca!>
         databases:
         - name: cloud_controller
           tag: cc
-        db_scheme: postgres
-        port: 5524
+        db_scheme: mysql
+        port: 3306
         roles:
         - name: cloud_controller
           password: <!{credhub}:cc_database_password!>
@@ -1457,7 +1586,6 @@ instance_groups:
           watcher:
             locket:
               api_location: locket.service.cf.internal:8891
-            skip_consul_lock: true
     release: capi
   - name: ssh_proxy
     properties:
@@ -1482,10 +1610,6 @@ instance_groups:
           uaa:
             ca_cert: <!{credhub}:uaa_ssl.ca!>
           uaa_secret: <!{credhub}:uaa_clients_ssh-proxy_secret!>
-      enable_consul_service_registration: false
-      logging:
-        format:
-          timestamp: rfc3339
       loggregator:
         app_metric_exclusion_filter:
         - absolute_entitlement
@@ -1509,6 +1633,11 @@ instance_groups:
           cn: cloud-controller-ng.service.cf.internal
           key: <!{credhub}:binding_cache_api_tls.private_key!>
       external_port: 9000
+      loggregator:
+        tls:
+          ca_cert: <!{credhub}:loggregator_tls_agent.ca!>
+          cert: <!{credhub}:loggregator_tls_agent.certificate!>
+          key: <!{credhub}:loggregator_tls_agent.private_key!>
       metrics:
         ca_cert: <!{credhub}:loggr_syslog_binding_cache_metrics_tls.ca!>
         cert: <!{credhub}:loggr_syslog_binding_cache_metrics_tls.certificate!>
@@ -1539,7 +1668,7 @@ instance_groups:
   - name: diego-brain
   name: scheduler
   networks:
-  - name: cf-core
+  - name: default
   stemcell: default
   vm_extensions:
   - diego-ssh-proxy-network-properties
@@ -1605,7 +1734,7 @@ instance_groups:
     release: loggregator-agent
   name: router
   networks:
-  - name: cf-edge
+  - name: default
   stemcell: default
   update:
     serial: true
@@ -1648,7 +1777,7 @@ instance_groups:
     release: loggregator-agent
   name: tcp-router
   networks:
-  - name: cf-edge
+  - name: default
   stemcell: default
   update:
     serial: true
@@ -1715,7 +1844,6 @@ instance_groups:
           tls_port: 8083
           uris:
           - log-cache.system.cf.testing.examle
-          - '*.log-cache.system.cf.testing.examle'
     release: routing
   - name: log-cache-cf-auth-proxy
     properties:
@@ -1739,7 +1867,7 @@ instance_groups:
     release: log-cache
   name: log-cache
   networks:
-  - name: cf-core
+  - name: default
   stemcell: default
   vm_type: small-highmem
 - azs:
@@ -1762,7 +1890,7 @@ instance_groups:
     release: loggregator
   name: doppler
   networks:
-  - name: cf-core
+  - name: default
   stemcell: default
   vm_type: minimal
 - azs:
@@ -1791,6 +1919,14 @@ instance_groups:
         - <!{credhub}:credhub_tls.ca!>
         - <!{credhub}:uaa_ssl.ca!>
     release: cflinuxfs4
+  - name: cflinuxfs5-rootfs-setup
+    properties:
+      cflinuxfs5-rootfs:
+        trusted_certs:
+        - <!{credhub}:diego_instance_identity_ca.ca!>
+        - <!{credhub}:credhub_tls.ca!>
+        - <!{credhub}:uaa_ssl.ca!>
+    release: cflinuxfs5
   - name: garden
     properties:
       garden:
@@ -1800,13 +1936,9 @@ instance_groups:
         default_container_grace_time: 0
         deny_networks:
         - 0.0.0.0/0
-        destroy_containers_on_start: true
         network_plugin: /var/vcap/packages/runc-cni/bin/garden-external-networker
         network_plugin_extra_args:
         - --configFile=/var/vcap/jobs/garden-cni/config/adapter.json
-      logging:
-        format:
-          timestamp: rfc3339
     release: garden-runc
   - name: rep
     properties:
@@ -1836,11 +1968,7 @@ instance_groups:
         rep:
           preloaded_rootfses:
           - cflinuxfs4:/var/vcap/packages/cflinuxfs4/rootfs.tar
-      enable_consul_service_registration: false
-      enable_declarative_healthcheck: true
-      logging:
-        format:
-          timestamp: rfc3339
+          - cflinuxfs5:/var/vcap/packages/cflinuxfs5/rootfs.tar
       loggregator:
         app_metric_exclusion_filter:
         - absolute_entitlement
@@ -1879,9 +2007,6 @@ instance_groups:
               enabled: true
       internal_routes:
         enabled: true
-      logging:
-        format:
-          timestamp: rfc3339
       loggregator:
         app_metric_exclusion_filter:
         - absolute_entitlement
@@ -1927,7 +2052,7 @@ instance_groups:
   - name: silk-cni
     properties:
       dns_servers:
-      - 169.254.0.2
+      - 169.254.0.53
     release: silk
   - name: silk-datastore-syncer
     release: silk
@@ -1946,7 +2071,7 @@ instance_groups:
     release: loggregator-agent
   name: diego-cell
   networks:
-  - name: cf-runtime
+  - name: default
   stemcell: default
   vm_extensions:
   - 100GB_ephemeral_disk
@@ -1979,8 +2104,7 @@ instance_groups:
             key: <!{credhub}:loggregator_tls_tc.private_key!>
         uaa:
           client_secret: <!{credhub}:uaa_clients_doppler_secret!>
-      ssl:
-        skip_cert_verify: true
+      ssl: {}
       system_domain: system.cf.testing.examle
       uaa:
         ca_cert: <!{credhub}:uaa_ssl.ca!>
@@ -2041,18 +2165,16 @@ instance_groups:
           tls_port: 8081
           uris:
           - doppler.system.cf.testing.examle
-          - '*.doppler.system.cf.testing.examle'
         - name: rlp-gateway
           registration_interval: 20s
           server_cert_domain_san: log-stream.system.cf.testing.examle
           tls_port: 8088
           uris:
           - log-stream.system.cf.testing.examle
-          - '*.log-stream.system.cf.testing.examle'
     release: routing
   name: log-api
   networks:
-  - name: cf-core
+  - name: default
   stemcell: default
   vm_type: minimal
 - azs:
@@ -2095,9 +2217,9 @@ instance_groups:
           database: credhub
           host: sql-db.service.cf.internal
           password: <!{credhub}:credhub_database_password!>
-          port: 5524
-          require_tls: false
-          type: postgres
+          port: 3306
+          tls_ca: <!{credhub}:mysql_server_certificate.ca!>
+          type: mysql
           username: credhub
         encryption:
           keys:
@@ -2116,7 +2238,7 @@ instance_groups:
     release: credhub
   name: credhub
   networks:
-  - name: cf-core
+  - name: default
   stemcell: default
   vm_type: minimal
 - azs:
@@ -2130,139 +2252,139 @@ instance_groups:
   lifecycle: errand
   name: rotate-cc-database-key
   networks:
-  - name: cf-core
+  - name: default
   stemcell: default
   vm_type: minimal
-manifest_version: v44.4.0
+manifest_version: v60.5.0
 name: blobstore-minio-cf
 releases:
 - name: binary-buildpack
-  sha1: f9e6145b2b9e2c71a59cbf0572fcb25a99b98c59
-  url: https://bosh.io/d/github.com/cloudfoundry/binary-buildpack-release?v=1.1.14
-  version: 1.1.14
+  sha1: sha256:908059161309fa69a7132f9d25dc6e95eae1fa9770e593fb55d5afc1a8c99f48
+  url: https://bosh.io/d/github.com/cloudfoundry/binary-buildpack-release?v=2.0.0
+  version: 2.0.0
 - name: bpm
-  sha1: 1d2f22a5d024cb34f6d7d2da3f1ee95e4a8cdd61
-  url: https://bosh.io/d/github.com/cloudfoundry/bpm-release?v=1.4.1
-  version: 1.4.1
+  sha1: sha256:5ef81ad0e092e9bc5a3f1407ac8a31a7bbbc007e91c19336a21da747ab21e12a
+  url: https://bosh.io/d/github.com/cloudfoundry/bpm-release?v=1.4.39
+  version: 1.4.39
 - name: capi
-  sha1: 92baa45ee839bf5a5a763c54696b841ef8024528
-  url: https://bosh.io/d/github.com/cloudfoundry/capi-release?v=1.195.0
-  version: 1.195.0
+  sha1: sha256:99abd6aa08c94d252a026052b9c809808765621606427854feb6fd0446ed9ba2
+  url: https://bosh.io/d/github.com/cloudfoundry/capi-release?v=1.244.0
+  version: 1.244.0
 - name: cf-networking
-  sha1: b67b8673e687d4dc1b00b098192d5b5c14ae681a
-  url: https://bosh.io/d/github.com/cloudfoundry/cf-networking-release?v=3.52.0
-  version: 3.52.0
+  sha1: sha256:89df08e880ad69eb63060eb8d591fad5d6dbabaf4d98c8f560f6f572dd9291a9
+  url: https://bosh.io/d/github.com/cloudfoundry/cf-networking-release?v=3.122.0
+  version: 3.122.0
 - name: cf-smoke-tests
-  sha1: dcc2c329ccd5cd3c1ae7e5ff06a6704c3de70603
-  url: https://bosh.io/d/github.com/cloudfoundry/cf-smoke-tests-release?v=42.0.171
-  version: 42.0.171
+  sha1: sha256:739ecc6e3e0061f34007bb3d1691d884bcc8aaec93b6fe48a73bed8cc0e347b0
+  url: https://bosh.io/d/github.com/cloudfoundry/cf-smoke-tests-release?v=42.0.273
+  version: 42.0.273
 - name: cflinuxfs4
-  sha1: 0034c23d813f0f433c3296c6f2a89a96d4c422c3
-  url: https://bosh.io/d/github.com/cloudfoundry/cflinuxfs4-release?v=1.174.0
-  version: 1.174.0
+  sha1: sha256:d9a945e963c513e0424d926729e3ce7be3e5d10a0a0268150a20f88df7fa47a9
+  url: https://bosh.io/d/github.com/cloudfoundry/cflinuxfs4-release?v=1.324.0
+  version: 1.324.0
+- name: cflinuxfs5
+  sha1: sha256:07d2a52d30622274ca87bcb3a8b052b7dbb4ebaf5452873a65cbafbd0bb1037d
+  url: https://bosh.io/d/github.com/cloudfoundry/cflinuxfs5-release?v=0.53.0
+  version: 0.53.0
 - name: credhub
-  sha1: 839113e27736a71972f8c44362ed3f1cbc0f5720
-  url: https://bosh.io/d/github.com/pivotal-cf/credhub-release?v=2.12.93
-  version: 2.12.93
+  sha1: sha256:751a12579f385cd070ff52f37dc5bac88e32a8d23e8823d7a75bac7dcae47ae1
+  url: https://bosh.io/d/github.com/pivotal-cf/credhub-release?v=2.15.21
+  version: 2.15.21
 - name: diego
-  sha1: 2b859378fc80cc983fbc875ebf934d7a3eab66f1
-  url: https://bosh.io/d/github.com/cloudfoundry/diego-release?v=2.105.0
-  version: 2.105.0
+  sha1: sha256:cac5a29c42641b347efd50e61bbc8f9481b217e00ba0b6c30ba8f6b6c851e358
+  url: https://bosh.io/d/github.com/cloudfoundry/diego-release?v=2.149.0
+  version: 2.149.0
 - name: dotnet-core-buildpack
-  sha1: 2b0f1b44aecdf1fad688329b8e1ffdcc451b8991
-  url: https://bosh.io/d/github.com/cloudfoundry/dotnet-core-buildpack-release?v=2.4.33
-  version: 2.4.33
+  sha1: sha256:07ff6ffd6b46eb6326b6c5297053f400bebee9286446cc1dbfb2efc0522afeca
+  url: https://bosh.io/d/github.com/cloudfoundry/dotnet-core-buildpack-release?v=2.4.52
+  version: 2.4.52
 - name: garden-runc
-  sha1: 56cb4687e28cfbb6ed90e0b5afe28c118b7e9c6e
-  url: https://bosh.io/d/github.com/cloudfoundry/garden-runc-release?v=1.57.0
-  version: 1.57.0
+  sha1: sha256:1db475b2c0f42cf3ff40e0af573cc024177ab4d1e372cd366a112c9b0017451d
+  url: https://bosh.io/d/github.com/cloudfoundry/garden-runc-release?v=1.96.0
+  version: 1.96.0
 - name: go-buildpack
-  sha1: c6dbd9573fc51ab92cb2f631e9b848e5bb990eec
-  url: https://bosh.io/d/github.com/cloudfoundry/go-buildpack-release?v=1.10.23
-  version: 1.10.23
+  sha1: sha256:6bbdcceda1d6e2f70a9be038c0de0784d7ba2bff88a5155dfc5a6c5a7775fedc
+  url: https://bosh.io/d/github.com/cloudfoundry/go-buildpack-release?v=1.11.0
+  version: 1.11.0
 - name: java-buildpack
-  sha1: 82356fa16049c360e9287adbe1c82098264dc1fe
-  url: https://bosh.io/d/github.com/cloudfoundry/java-buildpack-release?v=4.71.0
-  version: 4.71.0
+  sha1: sha256:d16b84179abe496b41767c45e792fc62779104dd155315665f55e7f53d05e907
+  url: https://bosh.io/d/github.com/cloudfoundry/java-buildpack-release?v=5.0.7
+  version: 5.0.7
 - name: loggregator
-  sha1: bba6ece58f146d822a37894c1bdc14b601964ba6
-  url: https://bosh.io/d/github.com/cloudfoundry/loggregator-release?v=107.0.17
-  version: 107.0.17
+  sha1: sha256:9b0f36133f001b64aa9dfdccbe86f13eea09adb1cdb8b2a666438d1580eb49cb
+  url: https://bosh.io/d/github.com/cloudfoundry/loggregator-release?v=107.0.34
+  version: 107.0.34
 - name: nats
-  sha1: 2702d51f44e6798191d916e801cbccfbecafde83
-  url: https://bosh.io/d/github.com/cloudfoundry/nats-release?v=56.25.0
-  version: 56.25.0
+  sha1: sha256:153316c9c7182129e4501334deab3bfb66f73e8556caef420bbddf7720654522
+  url: https://bosh.io/d/github.com/cloudfoundry/nats-release?v=57.19.0
+  version: 57.19.0
 - name: nginx-buildpack
-  sha1: f9c83865ba934c4f232cd97e234dd07577b5b26e
-  url: https://bosh.io/d/github.com/cloudfoundry/nginx-buildpack-release?v=1.2.19
-  version: 1.2.19
+  sha1: sha256:fbc3138a4d25dc0a35764522b37f590a10223967d14e6ec179057403f8977e65
+  url: https://bosh.io/d/github.com/cloudfoundry/nginx-buildpack-release?v=1.2.39
+  version: 1.2.39
 - name: r-buildpack
-  sha1: eb7862d246dd85e9d9027d5d3f9e90fe1664345c
-  url: https://bosh.io/d/github.com/cloudfoundry/r-buildpack-release?v=1.2.15
-  version: 1.2.15
+  sha1: sha256:3181b16176be9dfde054c7bb2d83943393399e666f4d5fba5d40bf05d3506266
+  url: https://bosh.io/d/github.com/cloudfoundry/r-buildpack-release?v=1.2.28
+  version: 1.2.28
 - name: nodejs-buildpack
-  sha1: b9da829e7ee0ac1210c70860a6f17ebed172afd9
-  url: https://bosh.io/d/github.com/cloudfoundry/nodejs-buildpack-release?v=1.8.29
-  version: 1.8.29
+  sha1: sha256:06ffa599f3a07dca4ff7180792b9a04414689a2dfebc844f4ad8192a3f6462a1
+  url: https://bosh.io/d/github.com/cloudfoundry/nodejs-buildpack-release?v=1.9.4
+  version: 1.9.4
 - name: php-buildpack
-  sha1: f8b0b367923a23225dd318b0c405ac264d782b89
-  url: https://bosh.io/d/github.com/cloudfoundry/php-buildpack-release?v=4.6.23
-  version: 4.6.23
+  sha1: sha256:2197b783ea4eaa7019d2068d144146c949de4ac9c8defb89f0627166e3b9bbef
+  url: https://bosh.io/d/github.com/cloudfoundry/php-buildpack-release?v=5.1.2
+  version: 5.1.2
 - name: pxc
-  sha1: e2e951dfe9e374d3715d3156bf1132a4e0ffb2a5
-  url: https://bosh.io/d/github.com/cloudfoundry/pxc-release?v=1.0.31
-  version: 1.0.31
+  sha1: sha256:69b20914fb49c28a313f2f65458a2d0c67765dfc44cdd6da3e0127dc03f0f490
+  url: https://bosh.io/d/github.com/cloudfoundry/pxc-release?v=2.0.9
+  version: 2.0.9
 - name: python-buildpack
-  sha1: e9bf6abc64e54ab9143861ab5f8798680389e062
-  url: https://bosh.io/d/github.com/cloudfoundry/python-buildpack-release?v=1.8.29
-  version: 1.8.29
+  sha1: sha256:4a9d4355248cfbdde1cfbeca8ddfb58cb099a9ecc32e1fc939fd5faca274855f
+  url: https://bosh.io/d/github.com/cloudfoundry/python-buildpack-release?v=1.9.4
+  version: 1.9.4
 - name: routing
-  sha1: 506465f7f457312a074ac127466e21a2268a7019
-  url: https://bosh.io/d/github.com/cloudfoundry/routing-release?v=0.316.0
-  version: 0.316.0
+  sha1: sha256:3ad1de12eb4e5863ce2ff1d490a93ab83cc663c9a7941bec60a27731f88bb26c
+  url: https://bosh.io/d/github.com/cloudfoundry/routing-release?v=0.393.0
+  version: 0.393.0
 - name: ruby-buildpack
-  sha1: 6bbe14f8f374a42e2220ddc49957b213d1d3d1db
-  url: https://bosh.io/d/github.com/cloudfoundry/ruby-buildpack-release?v=1.10.18
-  version: 1.10.18
+  sha1: sha256:021c9fe0dc231bbb96a1d646f962b75f34f22bd3866d4e7278527c6f6574c9e9
+  url: https://bosh.io/d/github.com/cloudfoundry/ruby-buildpack-release?v=1.11.1
+  version: 1.11.1
 - name: silk
-  sha1: e5e2aa65a28a4f9d9db1539e7cb533c34d0f7684
-  url: https://bosh.io/d/github.com/cloudfoundry/silk-release?v=3.52.0
-  version: 3.52.0
+  sha1: sha256:28d637485456ac8f6bddff59f1e147f214c46607bba8d650e73fae85da8cc56f
+  url: https://bosh.io/d/github.com/cloudfoundry/silk-release?v=3.122.0
+  version: 3.122.0
 - name: staticfile-buildpack
-  sha1: 9e9f49090ee388e9ad34246c82b80ad412280937
-  url: https://bosh.io/d/github.com/cloudfoundry/staticfile-buildpack-release?v=1.6.17
-  version: 1.6.17
+  sha1: sha256:a0137305940e70c62e11fc378afd500a0162591c98df0733fb8236012a08b615
+  url: https://bosh.io/d/github.com/cloudfoundry/staticfile-buildpack-release?v=1.6.39
+  version: 1.6.39
 - name: statsd-injector
-  sha1: 351aedae5cd3a2279428e1429388f8ad415f99ba
-  url: https://bosh.io/d/github.com/cloudfoundry/statsd-injector-release?v=1.11.43
-  version: 1.11.43
+  sha1: sha256:3864e3dfc2f0199ff6fb60bf6092b7c189485f370e676a983250a17c93797598
+  url: https://bosh.io/d/github.com/cloudfoundry/statsd-injector-release?v=1.11.59
+  version: 1.11.59
 - name: uaa
-  sha1: b617ba847bbe05c5c3e31f3f3a5cb50e732992c7
-  url: https://bosh.io/d/github.com/cloudfoundry/uaa-release?v=77.17.0
-  version: 77.17.0
+  sha1: sha256:b2fb7762df32a61df0690c0dbaeed7ab323b2e0d0e0a94f26457446e55ee86fd
+  url: https://bosh.io/d/github.com/cloudfoundry/uaa-release?v=79.7.0
+  version: 79.7.0
 - name: loggregator-agent
-  sha1: a425e43b561f9df3fed255786424885ae12a5f80
-  url: https://bosh.io/d/github.com/cloudfoundry/loggregator-agent-release?v=8.3.0
-  version: 8.3.0
+  sha1: sha256:3d178d28404f6b6e51b1239511f217ee9c3b1e03f0fc1985bbeb5d093007cff7
+  url: https://bosh.io/d/github.com/cloudfoundry/loggregator-agent-release?v=8.3.27
+  version: 8.3.27
 - name: log-cache
-  sha1: d095f5965f5dda9e80d9ea6feba39e51a93e7dcf
-  url: https://bosh.io/d/github.com/cloudfoundry/log-cache-release?v=3.1.5
-  version: 3.1.5
+  sha1: sha256:3b40a0b89b9e73f387c20fdebcce59382e7e26bd5519cfdd0d36955d11ad7304
+  url: https://bosh.io/d/github.com/cloudfoundry/log-cache-release?v=3.2.13
+  version: 3.2.13
 - name: bosh-dns-aliases
   sha1: 55b3dced813ff9ed92a05cda02156e4b5604b273
   url: https://bosh.io/d/github.com/cloudfoundry/bosh-dns-aliases-release?v=0.0.4
   version: 0.0.4
 - name: cf-cli
-  sha1: 1cb37275a9ee65f69521fc889d5c561ff878a0b4
-  url: https://bosh.io/d/github.com/bosh-packages/cf-cli-release?v=1.67.0
-  version: 1.67.0
-- name: postgres
-  sha1: c00282991b51ca0b3a7399c1c96fb18eff907659
-  url: https://bosh.io/d/github.com/cloudfoundry/postgres-release?v=52
-  version: "52"
+  sha1: sha256:0ba9269dcdcec2925b6d37c014e53fe8e59d8e9d93f3a8785fbeb2481a3f5350
+  url: https://bosh.io/d/github.com/bosh-packages/cf-cli-release?v=2.10.0
+  version: 2.10.0
 stemcells:
 - alias: default
-  os: ubuntu-jammy
+  os: ubuntu-noble
   version: latest
 update:
   canaries: 1

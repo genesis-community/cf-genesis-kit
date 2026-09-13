@@ -115,176 +115,176 @@ addons:
       aliases:
       - domain: _.cell.service.cf.internal
         targets:
-        - deployment: loggregator-forwarder-agent-cf
+        - deployment: blobstore-aws-no-suffix-cf
           domain: bosh
           instance_group: diego-cell
           network: default
           query: _
-        - deployment: loggregator-forwarder-agent-cf
+        - deployment: blobstore-aws-no-suffix-cf
           domain: bosh
           instance_group: windows2012R2-cell
           network: default
           query: _
-        - deployment: loggregator-forwarder-agent-cf
+        - deployment: blobstore-aws-no-suffix-cf
           domain: bosh
           instance_group: windows2016-cell
           network: default
           query: _
-        - deployment: loggregator-forwarder-agent-cf
+        - deployment: blobstore-aws-no-suffix-cf
           domain: bosh
           instance_group: isolated-diego-cell
           network: default
           query: _
       - domain: auctioneer.service.cf.internal
         targets:
-        - deployment: loggregator-forwarder-agent-cf
+        - deployment: blobstore-aws-no-suffix-cf
           domain: bosh
           instance_group: scheduler
           network: default
           query: q-s4
       - domain: bbs.service.cf.internal
         targets:
-        - deployment: loggregator-forwarder-agent-cf
+        - deployment: blobstore-aws-no-suffix-cf
           domain: bosh
           instance_group: diego-api
           network: default
           query: q-s4
       - domain: blobstore.service.cf.internal
         targets:
-        - deployment: loggregator-forwarder-agent-cf
+        - deployment: blobstore-aws-no-suffix-cf
           domain: bosh
           instance_group: singleton-blobstore
           network: default
           query: '*'
       - domain: cc-uploader.service.cf.internal
         targets:
-        - deployment: loggregator-forwarder-agent-cf
+        - deployment: blobstore-aws-no-suffix-cf
           domain: bosh
           instance_group: api
           network: default
           query: '*'
       - domain: cloud-controller-ng.service.cf.internal
         targets:
-        - deployment: loggregator-forwarder-agent-cf
+        - deployment: blobstore-aws-no-suffix-cf
           domain: bosh
           instance_group: api
           network: default
           query: '*'
       - domain: credhub.service.cf.internal
         targets:
-        - deployment: loggregator-forwarder-agent-cf
+        - deployment: blobstore-aws-no-suffix-cf
           domain: bosh
           instance_group: credhub
           network: default
           query: '*'
       - domain: doppler.service.cf.internal
         targets:
-        - deployment: loggregator-forwarder-agent-cf
+        - deployment: blobstore-aws-no-suffix-cf
           domain: bosh
           instance_group: doppler
           network: default
           query: '*'
       - domain: log-cache.service.cf.internal
         targets:
-        - deployment: loggregator-forwarder-agent-cf
+        - deployment: blobstore-aws-no-suffix-cf
           domain: bosh
           instance_group: log-cache
           network: default
           query: '*'
       - domain: file-server.service.cf.internal
         targets:
-        - deployment: loggregator-forwarder-agent-cf
+        - deployment: blobstore-aws-no-suffix-cf
           domain: bosh
           instance_group: api
           network: default
           query: '*'
       - domain: gorouter.service.cf.internal
         targets:
-        - deployment: loggregator-forwarder-agent-cf
+        - deployment: blobstore-aws-no-suffix-cf
           domain: bosh
           instance_group: router
           network: default
           query: '*'
       - domain: locket.service.cf.internal
         targets:
-        - deployment: loggregator-forwarder-agent-cf
+        - deployment: blobstore-aws-no-suffix-cf
           domain: bosh
           instance_group: diego-api
           network: default
           query: '*'
       - domain: loggregator-trafficcontroller.service.cf.internal
         targets:
-        - deployment: loggregator-forwarder-agent-cf
+        - deployment: blobstore-aws-no-suffix-cf
           domain: bosh
           instance_group: log-api
           network: default
           query: '*'
       - domain: nats.service.cf.internal
         targets:
-        - deployment: loggregator-forwarder-agent-cf
+        - deployment: blobstore-aws-no-suffix-cf
           domain: bosh
           instance_group: nats
           network: default
           query: '*'
       - domain: _.nats.service.cf.internal
         targets:
-        - deployment: loggregator-forwarder-agent-cf
+        - deployment: blobstore-aws-no-suffix-cf
           domain: bosh
           instance_group: nats
           network: default
           query: _
       - domain: policy-server.service.cf.internal
         targets:
-        - deployment: loggregator-forwarder-agent-cf
+        - deployment: blobstore-aws-no-suffix-cf
           domain: bosh
           instance_group: api
           network: default
           query: '*'
       - domain: reverse-log-proxy.service.cf.internal
         targets:
-        - deployment: loggregator-forwarder-agent-cf
+        - deployment: blobstore-aws-no-suffix-cf
           domain: bosh
           instance_group: log-api
           network: default
           query: '*'
       - domain: routing-api.service.cf.internal
         targets:
-        - deployment: loggregator-forwarder-agent-cf
+        - deployment: blobstore-aws-no-suffix-cf
           domain: bosh
           instance_group: api
           network: default
           query: '*'
       - domain: silk-controller.service.cf.internal
         targets:
-        - deployment: loggregator-forwarder-agent-cf
+        - deployment: blobstore-aws-no-suffix-cf
           domain: bosh
           instance_group: diego-api
           network: default
           query: '*'
       - domain: sql-db.service.cf.internal
         targets:
-        - deployment: loggregator-forwarder-agent-cf
+        - deployment: blobstore-aws-no-suffix-cf
           domain: bosh
           instance_group: database
           network: default
           query: '*'
       - domain: ssh-proxy.service.cf.internal
         targets:
-        - deployment: loggregator-forwarder-agent-cf
+        - deployment: blobstore-aws-no-suffix-cf
           domain: bosh
           instance_group: scheduler
           network: default
           query: '*'
       - domain: tps.service.cf.internal
         targets:
-        - deployment: loggregator-forwarder-agent-cf
+        - deployment: blobstore-aws-no-suffix-cf
           domain: bosh
           instance_group: scheduler
           network: default
           query: '*'
       - domain: uaa.service.cf.internal
         targets:
-        - deployment: loggregator-forwarder-agent-cf
+        - deployment: blobstore-aws-no-suffix-cf
           domain: bosh
           instance_group: uaa
           network: default
@@ -294,30 +294,30 @@ addons:
 exodus:
   admin_password: <!{credhub}:cf_admin_password!>
   admin_username: admin
-  api_domain: api.system.cf.testing.examle
+  api_domain: api.system.cf.testing.example
   app_domains:
-  - run.cf.testing.examle
-  apps_domain: run.cf.testing.examle
-  base_domain: cf.testing.examle
-  bosh: loggregator-forwarder-agent
+  - run.cf.testing.example
+  apps_domain: run.cf.testing.example
+  base_domain: cf.testing.example
+  bosh: blobstore-aws-no-suffix
   cf-deployment-date: 2026-Sep-13 10:42:06 UTC
   cf-deployment-url: https://github.com/cloudfoundry/cf-deployment/releases/tag/v60.5.0
   cf-deployment-version: 60.5.0
   core_network: default
   db_network: default
   edge_network: default
-  features: loggregator-forwarder-agent,no-haproxy
+  features: aws-blobstore,no-blobstore-suffix,no-haproxy
   iaas: null
   is_director: false
   runtime_network: default
   scale: null
   services: null
-  system_domain: system.cf.testing.examle
+  system_domain: system.cf.testing.example
   system_org: system
   system_space: system
   tcp_edge_network: default
   use_create_env: false
-  vaulted_uaa_clients: /secret/loggregator/forwarder/agent/cf/uaa/client_secrets:firehose
+  vaulted_uaa_clients: /secret/blobstore/aws/no/suffix/cf/uaa/client_secrets:firehose
 features:
   randomize_az_placement: true
 instance_groups:
@@ -331,8 +331,8 @@ instance_groups:
       bpm:
         enabled: true
       smoke_tests:
-        api: https://api.system.cf.testing.examle
-        apps_domain: run.cf.testing.examle
+        api: https://api.system.cf.testing.example
+        apps_domain: run.cf.testing.example
         cf_dial_timeout_in_seconds: 300
         client: cf_smoke_tests
         client_secret: <!{credhub}:uaa_clients_cf_smoke_tests_secret!>
@@ -438,7 +438,7 @@ instance_groups:
     properties:
       api_password: <!{credhub}:cf_mysql_proxy_api_password!>
       api_port: 8083
-      api_uri: proxy.system.cf.testing.examle
+      api_uri: proxy.system.cf.testing.example
     release: pxc
   - name: galera-agent
     properties:
@@ -465,12 +465,12 @@ instance_groups:
           prepend_instance_index: true
           registration_interval: 10s
           uris:
-          - proxy.system.cf.testing.examle
+          - proxy.system.cf.testing.example
         - name: cf-mysql-proxy-aggregator
           port: 8082
           registration_interval: 10s
           uris:
-          - proxy.system.cf.testing.examle
+          - proxy.system.cf.testing.example
     release: routing
   - name: bootstrap
     release: pxc
@@ -619,8 +619,8 @@ instance_groups:
           product_logo: null
           square_logo: null
         links:
-          passwd: https://login.system.cf.testing.examle/forgot_password
-          signup: https://login.system.cf.testing.examle/create_account
+          passwd: https://login.system.cf.testing.example/forgot_password
+          signup: https://login.system.cf.testing.example/create_account
         saml:
           activeKeyId: key-1
           keys:
@@ -708,7 +708,7 @@ instance_groups:
             authorized-grant-types: authorization_code
             autoapprove: true
             override: true
-            redirect-uri: https://uaa.system.cf.testing.examle/login
+            redirect-uri: https://uaa.system.cf.testing.example/login
             scopes:
             - openid
             - cloud_controller.read
@@ -750,7 +750,7 @@ instance_groups:
             password: <!{credhub}:cf_admin_password!>
         sslCertificate: <!{credhub}:uaa_ssl.certificate!>
         sslPrivateKey: <!{credhub}:uaa_ssl.private_key!>
-        url: https://uaa.system.cf.testing.examle
+        url: https://uaa.system.cf.testing.example
         zones:
           internal:
             hostnames:
@@ -786,10 +786,10 @@ instance_groups:
             component: uaa
           tls_port: 8443
           uris:
-          - uaa.system.cf.testing.examle
-          - '*.uaa.system.cf.testing.examle'
-          - login.system.cf.testing.examle
-          - '*.login.system.cf.testing.examle'
+          - uaa.system.cf.testing.example
+          - '*.uaa.system.cf.testing.example'
+          - login.system.cf.testing.example
+          - '*.login.system.cf.testing.example'
     release: routing
   - name: statsd_injector
     properties:
@@ -807,58 +807,6 @@ instance_groups:
   vm_type: small
 - azs:
   - z1
-  instances: 1
-  jobs:
-  - name: blobstore
-    properties:
-      blobstore:
-        admin_users:
-        - password: <!{credhub}:blobstore_admin_users_password!>
-          username: blobstore-user
-        public_tls:
-          cert: <!{credhub}:blobstore_public.certificate!>
-          private_key: <!{credhub}:blobstore_public.private_key!>
-        secure_link:
-          secret: <!{credhub}:blobstore_secure_link_secret!>
-        tls:
-          cert: <!{credhub}:blobstore_tls.certificate!>
-          private_key: <!{credhub}:blobstore_tls.private_key!>
-      select_directories_to_backup:
-      - buildpacks
-      - packages
-      - droplets
-      system_domain: system.cf.testing.examle
-    release: capi
-  - name: route_registrar
-    properties:
-      nats:
-        tls:
-          client_cert: <!{credhub}:nats_client_cert.certificate!>
-          client_key: <!{credhub}:nats_client_cert.private_key!>
-          enabled: true
-      route_registrar:
-        routes:
-        - name: blobstore
-          registration_interval: 20s
-          server_cert_domain_san: blobstore.system.cf.testing.examle
-          tags:
-            component: blobstore
-          tls_port: 8081
-          uris:
-          - blobstore.system.cf.testing.examle
-    release: routing
-  migrated_from:
-  - name: blobstore
-  name: singleton-blobstore
-  networks:
-  - name: default
-  persistent_disk_type: 100GB
-  stemcell: default
-  update:
-    serial: true
-  vm_type: small
-- azs:
-  - z1
   - z2
   instances: 2
   jobs:
@@ -867,21 +815,21 @@ instance_groups:
   - name: cloud_controller_ng
     properties:
       app_domains:
-      - run.cf.testing.examle
+      - run.cf.testing.example
       app_ssh:
         host_key_fingerprint: <!{credhub}:diego_ssh_proxy_host_key.public_key_fingerprint!>
       build: cf-genesis-kit v2.0.0
       cc:
         buildpacks:
-          blobstore_provider: dav
+          blobstore_provider: s3
           blobstore_type: storage-cli
+          buildpack_directory_key: blobstore-aws-no-suffix-cf/cf-buildpacks
           connection_config:
-            ca_cert: <!{credhub}:blobstore_tls.ca!>
-            password: <!{credhub}:blobstore_admin_users_password!>
-            private_endpoint: https://blobstore.service.cf.internal:4443
-            public_endpoint: https://blobstore.system.cf.testing.examle
-            secret: <!{credhub}:blobstore_secure_link_secret!>
-            username: blobstore-user
+            aws_access_key_id: test-access-key
+            aws_secret_access_key: test-secret-access-key
+            bucket_name: blobstore-aws-no-suffix-cf/cf-buildpacks
+            host_style: false
+            region: blobstore-s3-region
         database_encryption:
           current_key_label: encryption_key_0
           keys:
@@ -908,15 +856,15 @@ instance_groups:
             cnb/cflinuxfs5: cnb_app_lifecycle/cnb_app_lifecycle.tgz
             docker: docker_app_lifecycle/docker_app_lifecycle.tgz
         droplets:
-          blobstore_provider: dav
+          blobstore_provider: s3
           blobstore_type: storage-cli
           connection_config:
-            ca_cert: <!{credhub}:blobstore_tls.ca!>
-            password: <!{credhub}:blobstore_admin_users_password!>
-            private_endpoint: https://blobstore.service.cf.internal:4443
-            public_endpoint: https://blobstore.system.cf.testing.examle
-            secret: <!{credhub}:blobstore_secure_link_secret!>
-            username: blobstore-user
+            aws_access_key_id: test-access-key
+            aws_secret_access_key: test-secret-access-key
+            bucket_name: blobstore-aws-no-suffix-cf/cf-droplets
+            host_style: false
+            region: blobstore-s3-region
+          droplet_directory_key: blobstore-aws-no-suffix-cf/cf-droplets
         install_buildpacks:
         - name: staticfile_buildpack
           package: staticfile-buildpack-cflinuxfs4
@@ -978,15 +926,15 @@ instance_groups:
           private_key: <!{credhub}:cc_tls.private_key!>
           public_cert: <!{credhub}:cc_tls.certificate!>
         packages:
-          blobstore_provider: dav
+          app_package_directory_key: blobstore-aws-no-suffix-cf/cf-app-packages
+          blobstore_provider: s3
           blobstore_type: storage-cli
           connection_config:
-            ca_cert: <!{credhub}:blobstore_tls.ca!>
-            password: <!{credhub}:blobstore_admin_users_password!>
-            private_endpoint: https://blobstore.service.cf.internal:4443
-            public_endpoint: https://blobstore.system.cf.testing.examle
-            secret: <!{credhub}:blobstore_secure_link_secret!>
-            username: blobstore-user
+            aws_access_key_id: test-access-key
+            aws_secret_access_key: test-secret-access-key
+            bucket_name: blobstore-aws-no-suffix-cf/cf-app-packages
+            host_style: false
+            region: blobstore-s3-region
         prom_scraper_tls:
           ca_cert: <!{credhub}:cc_prom_scraper_scrape_tls.ca!>
           private_key: <!{credhub}:cc_prom_scraper_scrape_tls.private_key!>
@@ -996,15 +944,15 @@ instance_groups:
           certificate: <!{credhub}:cc_public_tls.certificate!>
           private_key: <!{credhub}:cc_public_tls.private_key!>
         resource_pool:
-          blobstore_provider: dav
+          blobstore_provider: s3
           blobstore_type: storage-cli
           connection_config:
-            ca_cert: <!{credhub}:blobstore_tls.ca!>
-            password: <!{credhub}:blobstore_admin_users_password!>
-            private_endpoint: https://blobstore.service.cf.internal:4443
-            public_endpoint: https://blobstore.system.cf.testing.examle
-            secret: <!{credhub}:blobstore_secure_link_secret!>
-            username: blobstore-user
+            aws_access_key_id: test-access-key
+            aws_secret_access_key: test-secret-access-key
+            bucket_name: blobstore-aws-no-suffix-cf/cf-resources
+            host_style: false
+            region: blobstore-s3-region
+          resource_directory_key: blobstore-aws-no-suffix-cf/cf-resources
         security_group_definitions:
         - name: public_networks
           rules:
@@ -1051,14 +999,14 @@ instance_groups:
       credhub_api:
         ca_cert: <!{credhub}:credhub_tls.ca!>
       description: Use `genesis info` on environment file for more details
-      name: Cloud Foundry (loggregator-forwarder-agent)
+      name: Cloud Foundry (blobstore-aws-no-suffix)
       router:
         route_services_secret: <!{credhub}:router_route_services_secret!>
       routing_api:
         enabled: true
       ssl: {}
       support_address: https://github.com/genesis-community/cf-genesis-kit
-      system_domain: system.cf.testing.examle
+      system_domain: system.cf.testing.example
       uaa:
         ca_cert: <!{credhub}:uaa_ssl.ca!>
         clients:
@@ -1070,7 +1018,7 @@ instance_groups:
             secret: <!{credhub}:uaa_clients_cc_service_key_client_secret!>
           cloud_controller_username_lookup:
             secret: <!{credhub}:uaa_clients_cloud_controller_username_lookup_secret!>
-        url: https://uaa.system.cf.testing.examle
+        url: https://uaa.system.cf.testing.example
       version: 60
     provides:
       cloud_controller:
@@ -1115,18 +1063,18 @@ instance_groups:
           name: api
           port: 9022
           registration_interval: 10s
-          server_cert_domain_san: api.system.cf.testing.examle
+          server_cert_domain_san: api.system.cf.testing.example
           tags:
             component: CloudController
           tls_port: 9024
           uris:
-          - api.system.cf.testing.examle
+          - api.system.cf.testing.example
         - name: policy-server
           registration_interval: 20s
-          server_cert_domain_san: api.system.cf.testing.examle
+          server_cert_domain_san: api.system.cf.testing.example
           tls_port: 4002
           uris:
-          - api.system.cf.testing.examle/networking
+          - api.system.cf.testing.example/networking
         - health_check:
             name: routing-api-health-check
             script_path: /var/vcap/jobs/routing-api/bin/routing_api_health_check
@@ -1136,7 +1084,7 @@ instance_groups:
           server_cert_domain_san: routing-api.service.cf.internal
           tls_port: 3001
           uris:
-          - api.system.cf.testing.examle/routing
+          - api.system.cf.testing.example/routing
     release: routing
   - name: statsd_injector
     properties:
@@ -1192,7 +1140,7 @@ instance_groups:
           schema: routing-api
           type: mysql
           username: routing-api
-        system_domain: system.cf.testing.examle
+        system_domain: system.cf.testing.example
       uaa:
         ca_cert: <!{credhub}:uaa_ssl.ca!>
         tls_port: 8443
@@ -1276,15 +1224,15 @@ instance_groups:
     properties:
       cc:
         buildpacks:
-          blobstore_provider: dav
+          blobstore_provider: s3
           blobstore_type: storage-cli
+          buildpack_directory_key: blobstore-aws-no-suffix-cf/cf-buildpacks
           connection_config:
-            ca_cert: <!{credhub}:blobstore_tls.ca!>
-            password: <!{credhub}:blobstore_admin_users_password!>
-            private_endpoint: https://blobstore.service.cf.internal:4443
-            public_endpoint: https://blobstore.system.cf.testing.examle
-            secret: <!{credhub}:blobstore_secure_link_secret!>
-            username: blobstore-user
+            aws_access_key_id: test-access-key
+            aws_secret_access_key: test-secret-access-key
+            bucket_name: blobstore-aws-no-suffix-cf/cf-buildpacks
+            host_style: false
+            region: blobstore-s3-region
         database_encryption:
           current_key_label: encryption_key_0
           keys:
@@ -1303,15 +1251,15 @@ instance_groups:
             cnb/cflinuxfs5: cnb_app_lifecycle/cnb_app_lifecycle.tgz
             docker: docker_app_lifecycle/docker_app_lifecycle.tgz
         droplets:
-          blobstore_provider: dav
+          blobstore_provider: s3
           blobstore_type: storage-cli
           connection_config:
-            ca_cert: <!{credhub}:blobstore_tls.ca!>
-            password: <!{credhub}:blobstore_admin_users_password!>
-            private_endpoint: https://blobstore.service.cf.internal:4443
-            public_endpoint: https://blobstore.system.cf.testing.examle
-            secret: <!{credhub}:blobstore_secure_link_secret!>
-            username: blobstore-user
+            aws_access_key_id: test-access-key
+            aws_secret_access_key: test-secret-access-key
+            bucket_name: blobstore-aws-no-suffix-cf/cf-droplets
+            host_style: false
+            region: blobstore-s3-region
+          droplet_directory_key: blobstore-aws-no-suffix-cf/cf-droplets
         loggregator_tls:
           ca_cert: <!{credhub}:loggregator_tls_agent.ca!>
           certificate: <!{credhub}:loggregator_tls_agent.certificate!>
@@ -1321,25 +1269,25 @@ instance_groups:
           private_key: <!{credhub}:cc_tls.private_key!>
           public_cert: <!{credhub}:cc_tls.certificate!>
         packages:
-          blobstore_provider: dav
+          app_package_directory_key: blobstore-aws-no-suffix-cf/cf-app-packages
+          blobstore_provider: s3
           blobstore_type: storage-cli
           connection_config:
-            ca_cert: <!{credhub}:blobstore_tls.ca!>
-            password: <!{credhub}:blobstore_admin_users_password!>
-            private_endpoint: https://blobstore.service.cf.internal:4443
-            public_endpoint: https://blobstore.system.cf.testing.examle
-            secret: <!{credhub}:blobstore_secure_link_secret!>
-            username: blobstore-user
+            aws_access_key_id: test-access-key
+            aws_secret_access_key: test-secret-access-key
+            bucket_name: blobstore-aws-no-suffix-cf/cf-app-packages
+            host_style: false
+            region: blobstore-s3-region
         resource_pool:
-          blobstore_provider: dav
+          blobstore_provider: s3
           blobstore_type: storage-cli
           connection_config:
-            ca_cert: <!{credhub}:blobstore_tls.ca!>
-            password: <!{credhub}:blobstore_admin_users_password!>
-            private_endpoint: https://blobstore.service.cf.internal:4443
-            public_endpoint: https://blobstore.system.cf.testing.examle
-            secret: <!{credhub}:blobstore_secure_link_secret!>
-            username: blobstore-user
+            aws_access_key_id: test-access-key
+            aws_secret_access_key: test-secret-access-key
+            bucket_name: blobstore-aws-no-suffix-cf/cf-resources
+            host_style: false
+            region: blobstore-s3-region
+          resource_directory_key: blobstore-aws-no-suffix-cf/cf-resources
         staging_upload_password: <!{credhub}:cc_staging_upload_password!>
         staging_upload_user: staging_user
       ccdb:
@@ -1357,7 +1305,7 @@ instance_groups:
       routing_api:
         enabled: true
       ssl: {}
-      system_domain: system.cf.testing.examle
+      system_domain: system.cf.testing.example
       uaa:
         ca_cert: <!{credhub}:uaa_ssl.ca!>
         clients:
@@ -1426,15 +1374,15 @@ instance_groups:
     properties:
       cc:
         buildpacks:
-          blobstore_provider: dav
+          blobstore_provider: s3
           blobstore_type: storage-cli
+          buildpack_directory_key: blobstore-aws-no-suffix-cf/cf-buildpacks
           connection_config:
-            ca_cert: <!{credhub}:blobstore_tls.ca!>
-            password: <!{credhub}:blobstore_admin_users_password!>
-            private_endpoint: https://blobstore.service.cf.internal:4443
-            public_endpoint: https://blobstore.system.cf.testing.examle
-            secret: <!{credhub}:blobstore_secure_link_secret!>
-            username: blobstore-user
+            aws_access_key_id: test-access-key
+            aws_secret_access_key: test-secret-access-key
+            bucket_name: blobstore-aws-no-suffix-cf/cf-buildpacks
+            host_style: false
+            region: blobstore-s3-region
         database_encryption:
           current_key_label: encryption_key_0
           keys:
@@ -1453,39 +1401,39 @@ instance_groups:
             cnb/cflinuxfs5: cnb_app_lifecycle/cnb_app_lifecycle.tgz
             docker: docker_app_lifecycle/docker_app_lifecycle.tgz
         droplets:
-          blobstore_provider: dav
+          blobstore_provider: s3
           blobstore_type: storage-cli
           connection_config:
-            ca_cert: <!{credhub}:blobstore_tls.ca!>
-            password: <!{credhub}:blobstore_admin_users_password!>
-            private_endpoint: https://blobstore.service.cf.internal:4443
-            public_endpoint: https://blobstore.system.cf.testing.examle
-            secret: <!{credhub}:blobstore_secure_link_secret!>
-            username: blobstore-user
+            aws_access_key_id: test-access-key
+            aws_secret_access_key: test-secret-access-key
+            bucket_name: blobstore-aws-no-suffix-cf/cf-droplets
+            host_style: false
+            region: blobstore-s3-region
+          droplet_directory_key: blobstore-aws-no-suffix-cf/cf-droplets
         mutual_tls:
           ca_cert: <!{credhub}:cc_tls.ca!>
           private_key: <!{credhub}:cc_tls.private_key!>
           public_cert: <!{credhub}:cc_tls.certificate!>
         packages:
-          blobstore_provider: dav
+          app_package_directory_key: blobstore-aws-no-suffix-cf/cf-app-packages
+          blobstore_provider: s3
           blobstore_type: storage-cli
           connection_config:
-            ca_cert: <!{credhub}:blobstore_tls.ca!>
-            password: <!{credhub}:blobstore_admin_users_password!>
-            private_endpoint: https://blobstore.service.cf.internal:4443
-            public_endpoint: https://blobstore.system.cf.testing.examle
-            secret: <!{credhub}:blobstore_secure_link_secret!>
-            username: blobstore-user
+            aws_access_key_id: test-access-key
+            aws_secret_access_key: test-secret-access-key
+            bucket_name: blobstore-aws-no-suffix-cf/cf-app-packages
+            host_style: false
+            region: blobstore-s3-region
         resource_pool:
-          blobstore_provider: dav
+          blobstore_provider: s3
           blobstore_type: storage-cli
           connection_config:
-            ca_cert: <!{credhub}:blobstore_tls.ca!>
-            password: <!{credhub}:blobstore_admin_users_password!>
-            private_endpoint: https://blobstore.service.cf.internal:4443
-            public_endpoint: https://blobstore.system.cf.testing.examle
-            secret: <!{credhub}:blobstore_secure_link_secret!>
-            username: blobstore-user
+            aws_access_key_id: test-access-key
+            aws_secret_access_key: test-secret-access-key
+            bucket_name: blobstore-aws-no-suffix-cf/cf-resources
+            host_style: false
+            region: blobstore-s3-region
+          resource_directory_key: blobstore-aws-no-suffix-cf/cf-resources
         staging_upload_password: <!{credhub}:cc_staging_upload_password!>
         staging_upload_user: staging_user
       ccdb:
@@ -1503,7 +1451,7 @@ instance_groups:
       routing_api:
         enabled: true
       ssl: {}
-      system_domain: system.cf.testing.examle
+      system_domain: system.cf.testing.example
       uaa:
         ca_cert: <!{credhub}:uaa_ssl.ca!>
         clients:
@@ -1844,10 +1792,10 @@ instance_groups:
         - name: log-cache-reverse-proxy
           port: 8083
           registration_interval: 20s
-          server_cert_domain_san: log-cache.system.cf.testing.examle
+          server_cert_domain_san: log-cache.system.cf.testing.example
           tls_port: 8083
           uris:
-          - log-cache.system.cf.testing.examle
+          - log-cache.system.cf.testing.example
     release: routing
   - name: log-cache-cf-auth-proxy
     properties:
@@ -2109,7 +2057,7 @@ instance_groups:
         uaa:
           client_secret: <!{credhub}:uaa_clients_doppler_secret!>
       ssl: {}
-      system_domain: system.cf.testing.examle
+      system_domain: system.cf.testing.example
       uaa:
         ca_cert: <!{credhub}:uaa_ssl.ca!>
         internal_url: https://uaa.service.cf.internal:8443
@@ -2165,16 +2113,16 @@ instance_groups:
         routes:
         - name: doppler
           registration_interval: 20s
-          server_cert_domain_san: doppler.system.cf.testing.examle
+          server_cert_domain_san: doppler.system.cf.testing.example
           tls_port: 8081
           uris:
-          - doppler.system.cf.testing.examle
+          - doppler.system.cf.testing.example
         - name: rlp-gateway
           registration_interval: 20s
-          server_cert_domain_san: log-stream.system.cf.testing.examle
+          server_cert_domain_san: log-stream.system.cf.testing.example
           tls_port: 8088
           uris:
-          - log-stream.system.cf.testing.examle
+          - log-stream.system.cf.testing.example
     release: routing
   name: log-api
   networks:
@@ -2260,7 +2208,7 @@ instance_groups:
   stemcell: default
   vm_type: minimal
 manifest_version: v60.5.0
-name: loggregator-forwarder-agent-cf
+name: blobstore-aws-no-suffix-cf
 releases:
 - name: binary-buildpack
   sha1: sha256:908059161309fa69a7132f9d25dc6e95eae1fa9770e593fb55d5afc1a8c99f48
