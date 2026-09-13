@@ -1,5 +1,92 @@
-bosh-variables:
-  fog_connection:
-    use_iam_profile: true
-    aws_access_key_id: (( prune ))
-    aws_secret_access_key: (( prune ))
+---
+# AWS S3 blobstore reached through an instance profile rather than a key pair.
+#
+# capi's storage_cli_config_<bucket>.json.erb reads use_iam_profile first, and
+# when it is true the template writes credentials_source env_or_profile and
+# never looks at aws_access_key_id or aws_secret_access_key. storage-cli then
+# refuses the config outright if either key is present alongside that source,
+# so both are pruned here rather than left to resolve.
+#
+# Pruning also keeps the manifest free of ((blobstore_access_key_id)) and
+# ((blobstore_secret_access_key)), which a foundation running on an instance
+# profile has no reason to have populated in credhub.
+#
+# This merges after overlay/blobstore/aws.yml, so it edits the connection_config
+# that file wrote.
+
+instance_groups:
+- name: api
+  jobs:
+  - name: cloud_controller_ng
+    properties:
+      cc:
+        buildpacks:
+          connection_config:
+            use_iam_profile:       true
+            aws_access_key_id:     (( prune ))
+            aws_secret_access_key: (( prune ))
+        droplets:
+          connection_config:
+            use_iam_profile:       true
+            aws_access_key_id:     (( prune ))
+            aws_secret_access_key: (( prune ))
+        packages:
+          connection_config:
+            use_iam_profile:       true
+            aws_access_key_id:     (( prune ))
+            aws_secret_access_key: (( prune ))
+        resource_pool:
+          connection_config:
+            use_iam_profile:       true
+            aws_access_key_id:     (( prune ))
+            aws_secret_access_key: (( prune ))
+- name: cc-worker
+  jobs:
+  - name: cloud_controller_worker
+    properties:
+      cc:
+        buildpacks:
+          connection_config:
+            use_iam_profile:       true
+            aws_access_key_id:     (( prune ))
+            aws_secret_access_key: (( prune ))
+        droplets:
+          connection_config:
+            use_iam_profile:       true
+            aws_access_key_id:     (( prune ))
+            aws_secret_access_key: (( prune ))
+        packages:
+          connection_config:
+            use_iam_profile:       true
+            aws_access_key_id:     (( prune ))
+            aws_secret_access_key: (( prune ))
+        resource_pool:
+          connection_config:
+            use_iam_profile:       true
+            aws_access_key_id:     (( prune ))
+            aws_secret_access_key: (( prune ))
+- name: scheduler
+  jobs:
+  - name: cloud_controller_clock
+    properties:
+      cc:
+        buildpacks:
+          connection_config:
+            use_iam_profile:       true
+            aws_access_key_id:     (( prune ))
+            aws_secret_access_key: (( prune ))
+        droplets:
+          connection_config:
+            use_iam_profile:       true
+            aws_access_key_id:     (( prune ))
+            aws_secret_access_key: (( prune ))
+        packages:
+          connection_config:
+            use_iam_profile:       true
+            aws_access_key_id:     (( prune ))
+            aws_secret_access_key: (( prune ))
+        resource_pool:
+          connection_config:
+            use_iam_profile:       true
+            aws_access_key_id:     (( prune ))
+            aws_secret_access_key: (( prune ))

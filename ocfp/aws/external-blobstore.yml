@@ -1,10 +1,17 @@
 ---
-bosh-variables:
-  fog_connection:
-    provider: AWS
-    aws_access_key_id:     (( grab params.blobstore_s3_access_key ))
-    aws_secret_access_key: (( grab params.blobstore_s3_secret_key ))
-    region:                (( grab params.blobstore_s3_region ))
+# OCFP layer for the AWS external blobstore.
+#
+# The storage-cli wiring itself lives in overlay/blobstore/aws.yml, which reads
+# params.blobstore_s3_region, params.blobstore_s3_access_key, and
+# params.blobstore_s3_secret_key. ocfp/external-blobstore.yml already fills all
+# three from the bloc's vault tree and merges after that overlay, so the vault
+# values win and there is nothing left for this file to wire.
+#
+# What used to be here was a bosh-variables fog_connection block. Nothing reads
+# it any more, because cf-deployment v59.0.0 moved cloud_controller onto
+# storage-cli and removed the fog_connection wiring from
+# operations/use-external-blobstore.yml, which left the block rendering cleanly
+# and configuring nothing.
 
 # Per https://docs.aws.amazon.com/AmazonS3/latest/userguide/bucketnamingrules.html a key cannot
 # contain upper case so override here to exclude upper case
@@ -13,4 +20,3 @@ variables:
   type: password
   options:
     exclude_upper: true
-

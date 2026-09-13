@@ -307,6 +307,7 @@ These params need to be set when using external databases:
 | param | description | default |
 | --- | --- | --- |
 | `blobstore_s3_region` | The S3 region of the blobstore | |
+| `blobstore_s3_host_style` | Address buckets in virtual-host style rather than path style. The fog client this replaced always used virtual-host style, and storage-cli defaults to path style. | `false` |
 | `blobstore_bucket_prefix` | Prefix for the path where blobs are stored in the bucket | `"$GENESIS_ENVIRONMENT-$GENESIS_TYPE"` |
 | `blobstore_bucket_suffix` | Suffix for the path where blobs are stored in the bucket | `"((cc_director_key))"` |
 | `blobstore_app_packages_directory` | Directory for the app packages | `blobstore_bucket_prefix` + `"-app-packages-"` + `blobstore_bucket_suffix` |

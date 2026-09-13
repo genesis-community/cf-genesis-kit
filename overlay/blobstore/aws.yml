@@ -1,12 +1,42 @@
+---
+# AWS S3 external blobstore.
+#
+# cf-deployment v59.0.0 moved cloud_controller off the fog gem onto
+# storage-cli, and it stripped the fog_connection wiring out of
+# operations/use-external-blobstore.yml in the same change. That ops file now
+# sets the four directory keys and nothing else, so a bosh-variables
+# fog_connection is read by no one. Everything about how to reach the bucket
+# has to be declared here instead, on each of the three cloud_controller jobs.
+#
+# Property names come from capi's jobs/cloud_controller_ng/templates/
+# storage_cli_config_<bucket>.json.erb, not from storage-cli's own config
+# struct. For provider s3 the template reads bucket_name, aws_access_key_id,
+# and aws_secret_access_key, and it sets credentials_source itself. Writing
+# storage-cli's internal names, access_key_id and secret_access_key, renders
+# nothing and fails the deploy on a missing property.
+#
+# One behaviour changes with the client swap. fog addressed buckets in
+# virtual-host style, and storage-cli defaults to path style, which is what
+# host_style false means. Path-style requests still reach S3, so the default
+# below matches both storage-cli and cf-deployment's own use-s3-blobstore.yml.
+# An operator who needs the old addressing can set blobstore_s3_host_style to
+# true from the environment file.
+#
+# No host or port is set, so storage-cli talks to AWS itself. An empty host
+# matches its aws provider pattern, and the region below is what signs the
+# request.
+
 params:
   blobstore_s3_region: (( param "Specify the AWS region for your Cloud Controller blobstore" ))
 
-bosh-variables:
-  fog_connection:
-    provider: AWS
-    aws_access_key_id: ((blobstore_access_key_id))
-    aws_secret_access_key: ((blobstore_secret_access_key))
-    region: (( grab params.blobstore_s3_region ))
+  # storage-cli names bucket addressing the opposite way round from fog.
+  # host_style false is path style; true is the virtual-host style fog used.
+  blobstore_s3_host_style: false
+
+  # Default to the credhub credentials this overlay has always documented. The
+  # OCFP layer overrides both from the bloc's vault tree, and it merges later.
+  blobstore_s3_access_key: "((blobstore_access_key_id))"
+  blobstore_s3_secret_key: "((blobstore_secret_access_key))"
 
 # Per https://docs.aws.amazon.com/AmazonS3/latest/userguide/bucketnamingrules.html a key cannot
 # contain upper case so override here to exclude upper case
@@ -19,3 +49,128 @@ variables:
 # Credhub Secrets
 #   blobstore_access_key_id
 #   blobstore_secret_access_key
+
+instance_groups:
+- name: api
+  jobs:
+  - name: cloud_controller_ng
+    properties:
+      cc:
+        buildpacks:
+          blobstore_type: storage-cli
+          blobstore_provider: s3
+          connection_config:
+            bucket_name:           ((buildpack_directory_key))
+            region:                (( grab params.blobstore_s3_region ))
+            host_style:            (( grab params.blobstore_s3_host_style ))
+            aws_access_key_id:     (( grab params.blobstore_s3_access_key ))
+            aws_secret_access_key: (( grab params.blobstore_s3_secret_key ))
+        droplets:
+          blobstore_type: storage-cli
+          blobstore_provider: s3
+          connection_config:
+            bucket_name:           ((droplet_directory_key))
+            region:                (( grab params.blobstore_s3_region ))
+            host_style:            (( grab params.blobstore_s3_host_style ))
+            aws_access_key_id:     (( grab params.blobstore_s3_access_key ))
+            aws_secret_access_key: (( grab params.blobstore_s3_secret_key ))
+        packages:
+          blobstore_type: storage-cli
+          blobstore_provider: s3
+          connection_config:
+            bucket_name:           ((app_package_directory_key))
+            region:                (( grab params.blobstore_s3_region ))
+            host_style:            (( grab params.blobstore_s3_host_style ))
+            aws_access_key_id:     (( grab params.blobstore_s3_access_key ))
+            aws_secret_access_key: (( grab params.blobstore_s3_secret_key ))
+        resource_pool:
+          blobstore_type: storage-cli
+          blobstore_provider: s3
+          connection_config:
+            bucket_name:           ((resource_directory_key))
+            region:                (( grab params.blobstore_s3_region ))
+            host_style:            (( grab params.blobstore_s3_host_style ))
+            aws_access_key_id:     (( grab params.blobstore_s3_access_key ))
+            aws_secret_access_key: (( grab params.blobstore_s3_secret_key ))
+- name: cc-worker
+  jobs:
+  - name: cloud_controller_worker
+    properties:
+      cc:
+        buildpacks:
+          blobstore_type: storage-cli
+          blobstore_provider: s3
+          connection_config:
+            bucket_name:           ((buildpack_directory_key))
+            region:                (( grab params.blobstore_s3_region ))
+            host_style:            (( grab params.blobstore_s3_host_style ))
+            aws_access_key_id:     (( grab params.blobstore_s3_access_key ))
+            aws_secret_access_key: (( grab params.blobstore_s3_secret_key ))
+        droplets:
+          blobstore_type: storage-cli
+          blobstore_provider: s3
+          connection_config:
+            bucket_name:           ((droplet_directory_key))
+            region:                (( grab params.blobstore_s3_region ))
+            host_style:            (( grab params.blobstore_s3_host_style ))
+            aws_access_key_id:     (( grab params.blobstore_s3_access_key ))
+            aws_secret_access_key: (( grab params.blobstore_s3_secret_key ))
+        packages:
+          blobstore_type: storage-cli
+          blobstore_provider: s3
+          connection_config:
+            bucket_name:           ((app_package_directory_key))
+            region:                (( grab params.blobstore_s3_region ))
+            host_style:            (( grab params.blobstore_s3_host_style ))
+            aws_access_key_id:     (( grab params.blobstore_s3_access_key ))
+            aws_secret_access_key: (( grab params.blobstore_s3_secret_key ))
+        resource_pool:
+          blobstore_type: storage-cli
+          blobstore_provider: s3
+          connection_config:
+            bucket_name:           ((resource_directory_key))
+            region:                (( grab params.blobstore_s3_region ))
+            host_style:            (( grab params.blobstore_s3_host_style ))
+            aws_access_key_id:     (( grab params.blobstore_s3_access_key ))
+            aws_secret_access_key: (( grab params.blobstore_s3_secret_key ))
+- name: scheduler
+  jobs:
+  - name: cloud_controller_clock
+    properties:
+      cc:
+        buildpacks:
+          blobstore_type: storage-cli
+          blobstore_provider: s3
+          connection_config:
+            bucket_name:           ((buildpack_directory_key))
+            region:                (( grab params.blobstore_s3_region ))
+            host_style:            (( grab params.blobstore_s3_host_style ))
+            aws_access_key_id:     (( grab params.blobstore_s3_access_key ))
+            aws_secret_access_key: (( grab params.blobstore_s3_secret_key ))
+        droplets:
+          blobstore_type: storage-cli
+          blobstore_provider: s3
+          connection_config:
+            bucket_name:           ((droplet_directory_key))
+            region:                (( grab params.blobstore_s3_region ))
+            host_style:            (( grab params.blobstore_s3_host_style ))
+            aws_access_key_id:     (( grab params.blobstore_s3_access_key ))
+            aws_secret_access_key: (( grab params.blobstore_s3_secret_key ))
+        packages:
+          blobstore_type: storage-cli
+          blobstore_provider: s3
+          connection_config:
+            bucket_name:           ((app_package_directory_key))
+            region:                (( grab params.blobstore_s3_region ))
+            host_style:            (( grab params.blobstore_s3_host_style ))
+            aws_access_key_id:     (( grab params.blobstore_s3_access_key ))
+            aws_secret_access_key: (( grab params.blobstore_s3_secret_key ))
+        resource_pool:
+          blobstore_type: storage-cli
+          blobstore_provider: s3
+          connection_config:
+            bucket_name:           ((resource_directory_key))
+            region:                (( grab params.blobstore_s3_region ))
+            host_style:            (( grab params.blobstore_s3_host_style ))
+            aws_access_key_id:     (( grab params.blobstore_s3_access_key ))
+            aws_secret_access_key: (( grab params.blobstore_s3_secret_key ))
