@@ -154,7 +154,7 @@ sub _get_stratos_info {
 
 	# Get Stratos specific configuration
 	# Command line version takes precedence over environment config
-	my $stratos_version = $self->{options}->{version} // $env->lookup( 'stratos.version', '4.9.2' );
+	my $stratos_version = $self->{options}->{version} // $env->lookup( 'stratos.version', '5.5.3' );
 	my $stratos_admin   = $env->lookup( 'stratos.admin_user', 'admin' );
 
 	# Get database connection information
@@ -465,8 +465,16 @@ sub deploy_stratos {
 	my $stratos_version = $options{version} // $info->{version};
 	info( "Using Stratos version: %s%s",
 		$stratos_version, $options{version} ? " (from command line)" : "" );
+	# Stratos renamed its CF bundle at v5.0.0, from stratos-ui- to stratos-cf-,
+	# so the asset name depends on the major version we are asking for.
+	my ($stratos_major) = $stratos_version =~ /^(\d+)/;
+	$stratos_major //= 0;
+	my $stratos_asset =
+	  ( $stratos_major >= 5 )
+	  ? "stratos-cf-v${stratos_version}.zip"
+	  : "stratos-ui-v${stratos_version}.zip";
 	my $stratos_releases_url =
-"https://github.com/cloudfoundry/stratos/releases/download/v${stratos_version}/stratos-ui-v${stratos_version}.zip";
+	  "https://github.com/cloudfoundry/stratos/releases/download/v${stratos_version}/${stratos_asset}";
 	my $stratos_sso_options = $env->lookup( 'stratos.sso_options', 'nosplash, logout' );
 
 	# Domain setup
@@ -496,15 +504,19 @@ sub deploy_stratos {
 	}
 	else {
 		info( "Downloading Stratos %s...", $stratos_version );
+
+		# Download to a name we choose rather than the one wget derives from the
+		# URL. The two used to disagree over the version's leading "v", so the
+		# unzip that followed asked for a file that was never written.
 		run(
 			{ interactive => 0, onfailure => "Failed to download Stratos" },
-			'wget', $stratos_releases_url
+			'wget', '-O', 'stratos.zip', $stratos_releases_url
 		);
 		run(
 			{ interactive => 0, onfailure => "Failed to unzip Stratos" },
-			'unzip', '-o', "stratos-ui-${stratos_version}.zip"
+			'unzip', '-o', 'stratos.zip'
 		);
-		unlink("stratos-ui-${stratos_version}.zip");
+		unlink('stratos.zip');
 	}
 
 	# Target the correct CF organization and space
