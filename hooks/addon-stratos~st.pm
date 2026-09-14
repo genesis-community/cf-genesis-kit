@@ -573,6 +573,7 @@ sub deploy_stratos {
 	# The console's SSH terminal dials the platform's app SSH proxy from inside
 	# its own container, so the space needs an egress rule allowing it.
 	$self->_ensure_app_ssh_security_group($tmp_dir);
+	$self->_ensure_api_security_group( $tmp_dir, $endpoints->{api_url} );
 	$self->_ensure_db_security_group( $tmp_dir, $db );
 
 	# Configure database via CUPS
@@ -730,117 +731,32 @@ EOF
 	return $self->done();
 }
 
-sub _ensure_app_ssh_security_group {
-	my ( $self, $tmp_dir ) = @_;
-
-	my $sg_name = 'stratos-app-ssh';
-
-	my ( $info_json, $rc ) =
-	  run( {interactive => 0, stderr => 0 }, 'cf', 'curl', '/v2/info' );
-	if ( $rc != 0 ) {
-		warning("Could not read /v2/info; skipping %s security group setup", $sg_name);
-		return;
-	}
-
-	my ($endpoint) = $info_json =~ /"app_ssh_endpoint":\s*"([^"]+)"/;
-	unless ($endpoint) {
-		warning("No app_ssh_endpoint advertised; skipping %s security group setup", $sg_name);
-		return;
-	}
-
-	my ( $host, $port ) = $endpoint =~ /^(.*?):(\d+)$/;
-	( $host, $port ) = ( $endpoint, 2222 ) unless $host;
-
-	my @addrs = gethostbyname($host);
-	@addrs = map { inet_ntoa($_) } @addrs[ 4 .. $#addrs ];
-	unless (@addrs) {
-		warning( "Could not resolve app SSH host '%s'; skipping %s security group setup",
-			$host, $sg_name );
-		return;
-	}
-
-	my $rules = '[' . join(
-		',',
-		map {
-			sprintf(
-				'{"protocol":"tcp","destination":"%s","ports":"%s",'
-				  . '"description":"console access to the app SSH proxy"}',
-				$_, $port
-			)
-		} @addrs
-	) . ']';
-
-	my $sg_file = "$tmp_dir/$sg_name.json";
-	open my $sg_fh, '>', $sg_file
-	  or bail("Cannot write to $sg_file: $!");
-	print $sg_fh $rules;
-	close $sg_fh;
-
-	if ( run( {interactive => 0, passfail => 1, stderr => 0 }, 'cf', 'security-group', $sg_name ) ) {
-		run(
-			{ interactive => 0, onfailure => "Failed to update security group $sg_name" },
-			'cf', 'update-security-group', $sg_name, $sg_file
-		);
-	}
-	else {
-		run(
-			{ interactive => 0, onfailure => "Failed to create security group $sg_name" },
-			'cf', 'create-security-group', $sg_name, $sg_file
-		);
-	}
-
-	run(
-		{ interactive => 0, onfailure => "Failed to bind security group $sg_name" },
-		'cf', 'bind-security-group', $sg_name, 'system',
-		'--space', 'stratos', '--lifecycle', 'running'
-	);
-	unlink $sg_file;
-
-	info( "Security group %s bound to system/stratos for app SSH proxy %s",
-		$sg_name, $endpoint );
+# Resolve a host to its IPv4 addresses, passing a literal address through
+# untouched rather than asking a resolver about it.
+sub _resolve_addrs {
+	my ( $self, $host ) = @_;
+	return ($host) if $host =~ /^\d+\.\d+\.\d+\.\d+$/;
+	my @entry = gethostbyname($host);
+	return map { inet_ntoa($_) } @entry[ 4 .. $#entry ];
 }
 
-# Open egress from the console's space to its database.
+# Create or update a security group and bind it to the console's space.
 #
 # An app container gets no egress to the BOSH network under the default
-# security groups, so jetstream's connection to a colocated Postgres is
-# refused outright. The rule is needed during staging as well as at runtime,
-# because the buildpack's own start-up check dials the database.
-sub _ensure_db_security_group {
-	my ( $self, $tmp_dir, $db ) = @_;
-
-	my $sg_name = 'stratos-db';
-	my $host    = $db->{hostname};
-	my $port    = $db->{port};
-
-	unless ( $host && $port ) {
-		warning( "No database host or port known; skipping %s security group setup", $sg_name );
-		return;
-	}
-
-	my @addrs;
-	if ( $host =~ /^\d+\.\d+\.\d+\.\d+$/ ) {
-		@addrs = ($host);
-	}
-	else {
-		my @entry = gethostbyname($host);
-		@addrs = map { inet_ntoa($_) } @entry[ 4 .. $#entry ];
-	}
-	unless (@addrs) {
-		warning( "Could not resolve database host '%s'; skipping %s security group setup",
-			$host, $sg_name );
-		return;
-	}
+# security groups, so anything the console has to reach on an internal address
+# needs a rule of its own.
+sub _apply_security_group {
+	my ( $self, $tmp_dir, $sg_name, $description, $addrs, $port, @lifecycles ) = @_;
 
 	my $rules = '[' . join(
 		',',
 		map {
 			sprintf(
 				'{"protocol":"tcp","destination":"%s","ports":"%s",'
-				  . '"description":"console access to its database"}',
-				$_, $port
+				  . '"description":"%s"}',
+				$_, $port, $description
 			)
-		} @addrs
+		} @$addrs
 	) . ']';
 
 	my $sg_file = "$tmp_dir/$sg_name.json";
@@ -863,7 +779,7 @@ sub _ensure_db_security_group {
 		);
 	}
 
-	for my $lifecycle (qw/running staging/) {
+	for my $lifecycle (@lifecycles) {
 		run(
 			{ interactive => 0, onfailure => "Failed to bind security group $sg_name" },
 			'cf', 'bind-security-group', $sg_name, 'system',
@@ -871,6 +787,110 @@ sub _ensure_db_security_group {
 		);
 	}
 	unlink $sg_file;
+}
+
+sub _ensure_app_ssh_security_group {
+	my ( $self, $tmp_dir ) = @_;
+
+	my $sg_name = 'stratos-app-ssh';
+
+	my ( $info_json, $rc ) =
+	  run( { interactive => 0, stderr => 0 }, 'cf', 'curl', '/v2/info' );
+	if ( $rc != 0 ) {
+		warning( "Could not read /v2/info; skipping %s security group setup", $sg_name );
+		return;
+	}
+
+	my ($endpoint) = $info_json =~ /"app_ssh_endpoint":\s*"([^"]+)"/;
+	unless ($endpoint) {
+		warning( "No app_ssh_endpoint advertised; skipping %s security group setup", $sg_name );
+		return;
+	}
+
+	my ( $host, $port ) = $endpoint =~ /^(.*?):(\d+)$/;
+	( $host, $port ) = ( $endpoint, 2222 ) unless $host;
+
+	my @addrs = $self->_resolve_addrs($host);
+	unless (@addrs) {
+		warning( "Could not resolve app SSH host '%s'; skipping %s security group setup",
+			$host, $sg_name );
+		return;
+	}
+
+	$self->_apply_security_group( $tmp_dir, $sg_name,
+		'console access to the app SSH proxy',
+		\@addrs, $port, 'running' );
+
+	info( "Security group %s bound to system/stratos for app SSH proxy %s",
+		$sg_name, $endpoint );
+}
+
+# Open egress from the console's space to its database.
+#
+# An app container gets no egress to the BOSH network under the default
+# security groups, so jetstream's connection to a colocated Postgres is
+# refused outright. The rule is needed during staging as well as at runtime,
+# because the buildpack's own start-up check dials the database.
+# Open egress from the console's space to the Cloud Foundry API.
+#
+# The console talks to CF over the same public API route an operator uses, and
+# on a foundation whose ingress sits on an internal address that route resolves
+# to a destination the default security groups do not cover: public_networks
+# deliberately excludes the private ranges, and the load balancer is normally
+# in one. Diego rejects the blocked connection rather than dropping it, so the
+# symptom is jetstream exiting at start-up with "could not get the info for
+# Cloud Foundry ... connection refused", which reads like an API outage rather
+# than a policy decision.
+sub _ensure_api_security_group {
+	my ( $self, $tmp_dir, $api_url ) = @_;
+
+	my $sg_name = 'stratos-api';
+
+	my ( $scheme, $host, $port ) = $api_url =~ m{^(https?)://([^/:]+)(?::(\d+))?};
+	unless ($host) {
+		warning( "Could not parse the CF API URL '%s'; skipping %s security group setup",
+			$api_url, $sg_name );
+		return;
+	}
+	$port ||= ( $scheme eq 'http' ) ? 80 : 443;
+
+	my @addrs = $self->_resolve_addrs($host);
+	unless (@addrs) {
+		warning( "Could not resolve the CF API host '%s'; skipping %s security group setup",
+			$host, $sg_name );
+		return;
+	}
+
+	$self->_apply_security_group( $tmp_dir, $sg_name,
+		'console access to the Cloud Foundry API',
+		\@addrs, $port, 'running', 'staging' );
+
+	info( "Security group %s bound to system/stratos for the CF API %s:%s",
+		$sg_name, $host, $port );
+}
+
+sub _ensure_db_security_group {
+	my ( $self, $tmp_dir, $db ) = @_;
+
+	my $sg_name = 'stratos-db';
+	my $host    = $db->{hostname};
+	my $port    = $db->{port};
+
+	unless ( $host && $port ) {
+		warning( "No database host or port known; skipping %s security group setup", $sg_name );
+		return;
+	}
+
+	my @addrs = $self->_resolve_addrs($host);
+	unless (@addrs) {
+		warning( "Could not resolve database host '%s'; skipping %s security group setup",
+			$host, $sg_name );
+		return;
+	}
+
+	$self->_apply_security_group( $tmp_dir, $sg_name,
+		'console access to its database',
+		\@addrs, $port, 'running', 'staging' );
 
 	info( "Security group %s bound to system/stratos for database %s:%s",
 		$sg_name, $host, $port );
