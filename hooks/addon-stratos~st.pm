@@ -127,10 +127,10 @@ sub _cf_endpoints {
 
 # Read a secret from the vault, generating and storing one the first time.
 #
-# The generator is Perl's Bytes::Random::Secure where it is available and
-# /dev/urandom otherwise. The previous implementation hashed rand(10000), which
-# yields at most about fourteen bits of entropy however long the hex string it
-# produces happens to look.
+# The value is 32 bytes read from /dev/urandom and rendered as hex. The
+# previous implementation hashed rand(10000), which yields at most about
+# fourteen bits of entropy however long the hex string it produces happens to
+# look.
 sub _persistent_secret {
 	my ( $self, $path, $description ) = @_;
 	my $env = $self->env;
@@ -260,8 +260,10 @@ sub _get_stratos_info {
 	}
 
 	# FIXME: Should we bail or generate instead of "" if not set?
-	my $admin_password = $env->vault->get( $env->secrets_base . "stratos:admin_password" ) || "";
-	my $session_secret = $env->vault->get( $env->secrets_base . "stratos:session_secret" ) || "";
+	# Read the session secret from the path the deploy writes. It used to be
+	# read from stratos:session_secret and written to stratos/session_secret,
+	# so info reported an empty secret even right after a successful deploy.
+	my $session_secret = $env->vault->get( $env->secrets_base . "stratos/session_secret" ) || "";
 	my $data           = $self->exodus_data;
 
 	# FIXME: Should we bail if not set?
@@ -279,8 +281,6 @@ sub _get_stratos_info {
 		url                => $stratos_url,
 		version            => $stratos_version,
 		admin_user         => $stratos_admin,
-		admin_password     => $admin_password ? $admin_password : "",
-		has_admin_password => $admin_password ? 1               : 0,
 		session_secret     => $session_secret ? $session_secret : "",
 		cf_api             => $cf_api,
 		cf_org             => $cf_org,
@@ -354,7 +354,6 @@ sub display_info {
 		  "\nVersion: %s" .
 		  "\n\nAuthentication:" .
 		  "\n  Admin User: %s" .
-		  "\n  Admin Password: %s" .
 		  "\nUAA Client Details:" .
 		  "\n  Client ID: %s" .
 		  "\n  Client Secret: %s",
@@ -363,9 +362,6 @@ sub display_info {
 		$info->{url} ? $info->{url} : "Not configured",
 		$info->{version},
 		$info->{admin_user},
-		$info->{has_admin_password}
-		? $info->{admin_password}
-		: "Not found in vault",
 		$info->{client}->{id},
 		$info->{client}->{secret}
 	);
@@ -404,9 +400,9 @@ sub display_info {
 
 	# Show helpful commands
 	info("\nHelpful Commands:");
-	info( "  Open in browser: %s %s stratos open", $self->env->get_call_path_with_env() )
+	info( "  Open in browser: %s %s do stratos open", $self->env->get_call_path_with_env() )
 	  ;    # returns two strings
-	info( "  Deploy Stratos: %s %s stratos deploy", $self->env->get_call_path_with_env() )
+	info( "  Deploy Stratos: %s %s do stratos deploy", $self->env->get_call_path_with_env() )
 	  ;    # returns two strings
 
 	if ( $info->{is_cf_app_deployed} ) {
@@ -873,17 +869,6 @@ sub _ensure_db_security_group {
 		$sg_name, $host, $port );
 }
 
-sub _generate_password {
-	my ( $self, $length ) = @_;
-	$length ||= 16;
-
-	my @chars =
-	  ( 'a' .. 'z', 'A' .. 'Z', '0' .. '9', '_', '-', '!', '@', '#', '$', '%', '^', '&', '*' );
-	my $password = '';
-	$password .= $chars[ int( rand( scalar @chars ) ) ] for ( 1 .. $length );
-
-	return $password;
-}
 
 sub _to_yaml {
 	my ( $data, $indent ) = @_;
