@@ -685,6 +685,7 @@ applications:
   buildpacks:
   - $options{buildpack}
   stack: $options{stack}
+  command: ./jetstream
   routes:
   - route: $stratos_domain
   env:
