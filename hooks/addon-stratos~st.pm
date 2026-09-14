@@ -125,6 +125,35 @@ sub _cf_endpoints {
 	};
 }
 
+# Read a secret from the vault, generating and storing one the first time.
+#
+# The generator is Perl's Bytes::Random::Secure where it is available and
+# /dev/urandom otherwise. The previous implementation hashed rand(10000), which
+# yields at most about fourteen bits of entropy however long the hex string it
+# produces happens to look.
+sub _persistent_secret {
+	my ( $self, $path, $description ) = @_;
+	my $env = $self->env;
+
+	my $existing = $env->vault->get( $env->secrets_base . $path );
+	return $existing if defined($existing) && $existing ne '';
+
+	my $bytes;
+	if ( open my $urandom, '<:raw', '/dev/urandom' ) {
+		read $urandom, $bytes, 32;
+		close $urandom;
+	}
+	bail( "Could not read /dev/urandom to generate the Stratos %s", $description )
+	  unless defined($bytes) && length($bytes) == 32;
+
+	my $secret = unpack( 'H*', $bytes );
+	info( "Generating a new Stratos %s and storing it in the vault.", $description );
+	$env->vault->set( $env->secrets_base . $path, $secret )
+	  or bail( "Failed to store the Stratos %s in the vault", $description );
+
+	return $secret;
+}
+
 # Resolve the console's database coordinates.
 #
 # The info path used to read these from the vault while the deploy path read
@@ -449,18 +478,16 @@ sub deploy_stratos {
 
 	# Get or generate session store secret
 	my $stratos_session_store_sekret =
-	  $env->vault->get( $env->secrets_base . "stratos/session_secret" );
-	unless ($stratos_session_store_sekret) {
+	  $self->_persistent_secret( "stratos/session_secret", 'session store secret' );
 
-		# Generate session secret using Perl instead of shell command
-		my $random = rand(10000);
-		use Digest::SHA qw(sha256_hex);
-		$stratos_session_store_sekret = sha256_hex($random);
-
-		# FIXME: Should we bail if set fails?
-		$env->vault->set( $env->secrets_base . "stratos/session_secret",
-			$stratos_session_store_sekret );
-	}
+	# Jetstream encrypts the OAuth tokens it stores for each registered
+	# endpoint, and since 5.x the binary buildpack no longer defaults the key
+	# the way the old source buildpack did. It has to be stable across pushes:
+	# a new key makes every token already in the database undecryptable, which
+	# presents to the operator as a console that has silently forgotten its
+	# endpoints.
+	my $stratos_encryption_key =
+	  $self->_persistent_secret( "stratos/encryption_key", 'encryption key' );
 
 	# FIXME: Should we bail if not set?
 	my $stratos_client        = $data->{"stratos_client"} || "";
@@ -654,7 +681,6 @@ EOF
 ---
 applications:
 - name: apps
-  host: console
   health-check-type: port
   memory: $options{memory}
   disk_quota: $options{disk}
@@ -662,6 +688,8 @@ applications:
   buildpacks:
   - $options{buildpack}
   stack: $options{stack}
+  routes:
+  - route: $stratos_domain
   env:
     CF_API_URL: https://$system_api_domain
     CF_CLIENT: $stratos_client
@@ -670,6 +698,8 @@ applications:
     SSO_OPTIONS: $stratos_sso_options
     SSO_WHITELIST: https://$stratos_domain/*
     SSO_LOGIN: "true"
+    DATABASE_PROVIDER: pgsql
+    ENCRYPTION_KEY: $stratos_encryption_key
     DB_SSL_MODE: $stratos_db_sslmode
   services:
   - console_db_tls_verify_ca
