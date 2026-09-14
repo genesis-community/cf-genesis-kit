@@ -298,6 +298,11 @@ sub perform {
 				# Sanitize vm_type name to a valid config-key segment:
 				# lowercase, non-alnum runs collapsed to '_'.
 				my $vmk = do { (my $k = lc($_)) =~ s/[^a-z0-9]+/_/g; $k };
+				# Every IaaS branch below is evaluated before vm_type_definition
+				# picks the one for the active IaaS, so a branch reading a matrix
+				# key that another IaaS does not define warns on undef for every
+				# vm_type. The pve matrix carries disk_dev/disk_prod rather than
+				# disk_size, so guard the openstack and stackit root_disk reads.
 				$self->vm_type_definition(
 					$_,
 					cloud_properties_for_iaas => {
@@ -310,7 +315,7 @@ sub perform {
 							),
 							'ephemeral_disk'   => { encrypted => $self->TRUE },
 							'boot_from_volume' => $self->TRUE,
-							'root_disk' => { size => $vm_matrix->{$_}{disk_size} + 0 }
+							'root_disk' => { size => ($vm_matrix->{$_}{disk_size} // 0) + 0 }
 							,    # Force conversion to integer
 						},
 						stackit => {
@@ -322,7 +327,7 @@ sub perform {
 							),
 							'ephemeral_disk'   => { encrypted => $self->TRUE },
 							'boot_from_volume' => $self->TRUE,
-							'root_disk' => { size => $vm_matrix->{$_}{disk_size} + 0 },
+							'root_disk' => { size => ($vm_matrix->{$_}{disk_size} // 0) + 0 },
 						},
 						aws => {
 							'instance_type' => $self->for_scale(
