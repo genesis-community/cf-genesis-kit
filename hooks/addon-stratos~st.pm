@@ -125,6 +125,41 @@ sub _cf_endpoints {
 	};
 }
 
+# Resolve the console's database coordinates.
+#
+# The info path used to read these from the vault while the deploy path read
+# them from an exodus key that nothing in the kit ever writes, so the service
+# the deploy actually created was always built from the fallback defaults and
+# pointed at an empty hostname. Resolve them once, here, and let both paths
+# call it.
+#
+# Note that sslmode must be a value libpq accepts. The old deploy-path default
+# was "disabled", which Postgres rejects; the correct spelling is "disable".
+sub _stratos_db {
+	my ($self) = @_;
+	my $env = $self->env;
+
+	my %db = (
+		scheme   => $env->params->{db_scheme}   || 'postgres',
+		hostname => $env->params->{db_hostname} || '',
+		username => $env->params->{db_username} || 'stratos',
+		password => $env->params->{db_password} || 'stratos',
+		port     => $env->params->{db_port}     || 5432,
+		database => $env->params->{db_database} || 'stratos',
+		sslmode  => $env->params->{db_sslmode}  || 'disable',
+	);
+
+	return \%db unless $env->has_feature('ocfp');
+
+	my $base = $env->secrets_base . "stratos/db/stratos";
+	for my $field (qw/scheme hostname username password port database sslmode/) {
+		my $value = $env->vault->get("$base:$field");
+		$db{$field} = $value if defined($value) && $value ne '';
+	}
+
+	return \%db;
+}
+
 sub _get_stratos_info {
 	my ($self) = @_;
 	my $env = $self->env;
@@ -162,38 +197,15 @@ sub _get_stratos_info {
 	# Default configuration
 	$stratos_domain = "console.${apps_domain}";
 	$stratos_url    = "https://${stratos_domain}";
-	my $stratos_db_scheme   = $env->params->{db_scheme}   || 'postgres';
-	my $stratos_db_hostname = $env->params->{db_hostname} || '';
-	my $stratos_db_username = $env->params->{db_username} || 'stratos';
-	my $stratos_db_password = $env->params->{db_password} || 'stratos';
-	my $stratos_db_port     = $env->params->{db_port}     || 5432;
-	my $stratos_db_database = $env->params->{db_database} || 'stratos';
-	my $stratos_db_sslmode  = $env->params->{db_sslmode}  || 'disabled';    # verify-ca
+	my $db = $self->_stratos_db;
 
 	# Check for OCFP requested feature
 	if ( $self->env->has_feature('ocfp') ) {
 
 		# Get Stratos configuration from vault.
 		# FIXME: Should we bail if not set?
-		$stratos_domain    = $env->ocfp_config_lookup("fqdns")->{stratos} || '';
-		$stratos_url       = "https://${stratos_domain}";
-		$stratos_db_scheme = $env->vault->get( $env->secrets_base . "stratos/db/stratos:scheme" )
-		  || 'postgres';
-		$stratos_db_hostname =
-		  $env->vault->get( $env->secrets_base . "stratos/db/stratos:hostname" )
-		  || '';
-		$stratos_db_username =
-		  $env->vault->get( $env->secrets_base . "stratos/db/stratos:username" )
-		  || 'stratos';
-		$stratos_db_password =
-		  $env->vault->get( $env->secrets_base . "stratos/db/stratos:password" )
-		  || 'stratos';
-		$stratos_db_port = $env->vault->get( $env->secrets_base . "stratos/db/stratos:port" )
-		  || 5432;
-		$stratos_db_database =
-		  $env->vault->get( $env->secrets_base . "stratos/db/stratos:database" )
-		  || 'stratos';
-		$stratos_db_sslmode = "disable";    # or "verify-ca"
+		$stratos_domain = $env->ocfp_config_lookup("fqdns")->{stratos} || '';
+		$stratos_url    = "https://${stratos_domain}";
 	}
 
 	# Determine if Stratos is deployed as a CF app
@@ -251,15 +263,7 @@ sub _get_stratos_info {
 		stratos_domain     => $stratos_domain,
 
 		# Database configuration
-		db => {
-			scheme   => $stratos_db_scheme,
-			hostname => $stratos_db_hostname,
-			username => $stratos_db_username,
-			password => $stratos_db_password,
-			port     => $stratos_db_port,
-			database => $stratos_db_database,
-			sslmode  => $stratos_db_sslmode,
-		},
+		db => $db,
 
 		# UAA client information
 		client => {
@@ -428,13 +432,20 @@ sub deploy_stratos {
 	$system_api_domain =~ s/^https?:\/\///;    # Remove protocol
 
 	# Get database connection information
-	my $stratos_db_scheme   = $data->{stratos}{db}{scheme}   || 'postgres';
-	my $stratos_db_hostname = $data->{stratos}{db}{hostname} || '';
-	my $stratos_db_username = $data->{stratos}{db}{username} || 'stratos';
-	my $stratos_db_password = $data->{stratos}{db}{password} || 'stratos';
-	my $stratos_db_port     = $data->{stratos}{db}{port}     || 5432;
-	my $stratos_db_database = $data->{stratos}{db}{database} || 'stratos';
-	my $stratos_db_sslmode  = $data->{stratos}{db}{sslmode}  || 'disabled';
+	my $db                  = $self->_stratos_db;
+	my $stratos_db_scheme   = $db->{scheme};
+	my $stratos_db_hostname = $db->{hostname};
+	my $stratos_db_username = $db->{username};
+	my $stratos_db_password = $db->{password};
+	my $stratos_db_port     = $db->{port};
+	my $stratos_db_database = $db->{database};
+	my $stratos_db_sslmode  = $db->{sslmode};
+
+	bail(
+		    "No database hostname configured for Stratos. Write the console's "
+		  . "database coordinates to %sstratos/db/stratos before deploying.",
+		$env->secrets_base
+	) unless $stratos_db_hostname;
 
 	# Get or generate session store secret
 	my $stratos_session_store_sekret =
@@ -592,7 +603,7 @@ sub deploy_stratos {
 	open my $db_fh, '>', "$tmp_dir/db.yml"
 	  or bail("Could not create database config file: $!");
 	print $db_fh <<EOF;
-uri: "$stratos_db_scheme://"
+uri: "$stratos_db_scheme://$stratos_db_username:$stratos_db_password\@$stratos_db_hostname:$stratos_db_port/$stratos_db_database?sslmode=$stratos_db_sslmode"
 username: "$stratos_db_username"
 password: "$stratos_db_password"
 hostname: "$stratos_db_hostname"
