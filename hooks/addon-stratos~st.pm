@@ -85,6 +85,46 @@ sub perform {
 	return $self->open_in_browser()        if ( $command eq 'open' );
 }
 
+# Resolve the CF API URL and the two domains the console needs.
+#
+# This addon is the only hook in the kit that reads a top-level `cf:` key, and
+# no OCFP environment file defines one -- those set `params.system_domain` and
+# `params.apps_domain`, which is the convention the rest of the kit follows. Read
+# `cf.*` first so an environment that does define it keeps working, then fall
+# back to `params.*`, and finally to the exodus data a successful CF deploy
+# writes. The api_domain exodus key already carries the full hostname, so the
+# system domain comes from stripping its leading `api.` label.
+sub _cf_endpoints {
+	my ($self) = @_;
+	my $env = $self->env;
+	my $data = eval { $self->exodus_data } || {};
+
+	my $system_domain =
+	     $env->lookup( 'cf.system_domain',     '' )
+	  || $env->lookup( 'params.system_domain', '' );
+	my $apps_domain =
+	     $env->lookup( 'cf.apps_domain',     '' )
+	  || $env->lookup( 'params.apps_domain', '' )
+	  || $data->{apps_domain}
+	  || '';
+
+	my $api_domain = $data->{api_domain} || '';
+	unless ($system_domain) {
+		( $system_domain = $api_domain ) =~ s/^api\.//;
+	}
+
+	my $api_url =
+	     $env->lookup( 'cf.api_url', '' )
+	  || ( $api_domain    ? "https://$api_domain"        : '' )
+	  || ( $system_domain ? "https://api.$system_domain" : '' );
+
+	return {
+		api_url       => $api_url,
+		system_domain => $system_domain,
+		apps_domain   => $apps_domain,
+	};
+}
+
 sub _get_stratos_info {
 	my ($self) = @_;
 	my $env = $self->env;
@@ -100,13 +140,14 @@ sub _get_stratos_info {
 	#$deployment_exists = grep { $_ eq $deployment_name } @deployments;
 
 	# Get Stratos information from environment
-	my $system_domain  = $env->lookup( 'cf.system_domain', '' );
-	my $apps_domain    = $env->lookup( 'cf.apps_domain',   '' );
+	my $endpoints      = $self->_cf_endpoints;
+	my $system_domain  = $endpoints->{system_domain};
+	my $apps_domain    = $endpoints->{apps_domain};
 	my $stratos_domain = '';
 	my $stratos_url    = '';
 
 	# Get CF configuration
-	my $cf_api      = $env->lookup( 'cf.api_url',          '' );
+	my $cf_api      = $endpoints->{api_url};
 	my $cf_org      = $env->lookup( 'stratos.cf_org',      'system' );
 	my $cf_space    = $env->lookup( 'stratos.cf_space',    'stratos' );
 	my $cf_app_name = $env->lookup( 'stratos.cf_app_name', 'apps' );
@@ -382,7 +423,8 @@ sub deploy_stratos {
 
 	# Get environment config and exodus data
 	my $data              = $self->exodus_data;
-	my $system_api_domain = $data->{cf}{api_url} || '';
+	my $endpoints = $self->_cf_endpoints;
+	my $system_api_domain = $endpoints->{api_url};
 	$system_api_domain =~ s/^https?:\/\///;    # Remove protocol
 
 	# Get database connection information
@@ -428,7 +470,7 @@ sub deploy_stratos {
 	my $stratos_sso_options = $env->lookup( 'stratos.sso_options', 'nosplash, logout' );
 
 	# Domain setup
-	my $apps_domain    = $env->lookup( 'cf.apps_domain', '' );
+	my $apps_domain    = $endpoints->{apps_domain};
 	my $stratos_domain = "console.${apps_domain}";
 
 	# Get file or download Stratos release
