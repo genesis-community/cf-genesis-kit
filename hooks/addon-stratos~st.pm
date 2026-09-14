@@ -132,10 +132,14 @@ sub _cf_endpoints {
 # fourteen bits of entropy however long the hex string it produces happens to
 # look.
 sub _persistent_secret {
-	my ( $self, $path, $description ) = @_;
+	my ( $self, $path, $key, $description ) = @_;
 	my $env = $self->env;
 
-	my $existing = $env->vault->get( $env->secrets_base . $path );
+	# Ask for the key by name.  Service::Vault::get returns a hashref of every
+	# key at the path when no key is named, and an unreadable path comes back
+	# as an empty hashref rather than undef, so a pathwise read looks like a
+	# perfectly good secret and stringifies into the manifest as HASH(0x...).
+	my $existing = $env->vault->get( $env->secrets_base . $path, $key );
 	return $existing if defined($existing) && $existing ne '';
 
 	my $bytes;
@@ -148,7 +152,9 @@ sub _persistent_secret {
 
 	my $secret = unpack( 'H*', $bytes );
 	info( "Generating a new Stratos %s and storing it in the vault.", $description );
-	$env->vault->set( $env->secrets_base . $path, $secret )
+	# set() takes key/value pairs; a lone value would be read as a bare key
+	# and send it looking for a controlling terminal to prompt on.
+	$env->vault->set( $env->secrets_base . $path, $key, $secret )
 	  or bail( "Failed to store the Stratos %s in the vault", $description );
 
 	return $secret;
@@ -474,7 +480,7 @@ sub deploy_stratos {
 
 	# Get or generate session store secret
 	my $stratos_session_store_sekret =
-	  $self->_persistent_secret( "stratos/session_secret", 'session store secret' );
+	  $self->_persistent_secret( "stratos", "session_store", 'session store secret' );
 
 	# Jetstream encrypts the OAuth tokens it stores for each registered
 	# endpoint, and since 5.x the binary buildpack no longer defaults the key
@@ -483,7 +489,7 @@ sub deploy_stratos {
 	# presents to the operator as a console that has silently forgotten its
 	# endpoints.
 	my $stratos_encryption_key =
-	  $self->_persistent_secret( "stratos/encryption_key", 'encryption key' );
+	  $self->_persistent_secret( "stratos", "encryption_key", 'encryption key' );
 
 	# FIXME: Should we bail if not set?
 	my $stratos_client        = $data->{"stratos_client"} || "";
