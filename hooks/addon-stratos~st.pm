@@ -531,6 +531,15 @@ sub deploy_stratos {
 		$stratos_domain = $mapped if $mapped;
 	}
 
+	# The console answers on the system domain as well as on its app route,
+	# because an operator looking for a foundation's service interfaces looks
+	# for them under system.<foundation>, next to shield, concourse, and the
+	# rest.  Stratos is an ordinary CF app rather than a BOSH deployment behind
+	# the ingress, so that second name is a second route on the app.
+	my $stratos_alt_domain = "console." . $endpoints->{system_domain};
+	$stratos_alt_domain = ''
+	  if !$endpoints->{system_domain} || $stratos_alt_domain eq $stratos_domain;
+
 	# Get file or download Stratos release
 	my $chdir = $tmp_dir;
 	chdir $chdir or bail("Could not change to temporary directory: $!");
@@ -679,6 +688,9 @@ EOF
 
 	# Create application manifest
 	info("Creating application manifest...");
+	my $sso_whitelist = join( ',',
+		"https://$stratos_domain/*",
+		$stratos_alt_domain ? "https://$stratos_alt_domain/*" : () );
 	open my $manifest, '>', "$tmp_dir/manifest.yml"
 	  or bail("Could not create manifest file: $!");
 	print $manifest <<EOF;
@@ -701,7 +713,7 @@ applications:
     CF_CLIENT_SECRET: $stratos_client_secret
     SESSION_STORE_SECRET: $stratos_session_store_sekret
     SSO_OPTIONS: $stratos_sso_options
-    SSO_WHITELIST: https://$stratos_domain/*
+    SSO_WHITELIST: $sso_whitelist
     SSO_LOGIN: "true"
     DATABASE_PROVIDER: pgsql
     ENCRYPTION_KEY: $stratos_encryption_key
@@ -716,6 +728,23 @@ EOF
 	my ( $out, $rc, $err ) =
 	  run( { stderr => 0 }, 'cf', 'push', '-f', "$tmp_dir/manifest.yml" );
 	bail( "Failed to deploy Stratos: %s", $err || $out ) unless $rc == 0;
+
+	# Map the system-domain name after the push rather than listing it in the
+	# manifest, so that a foundation whose system domain is not available to
+	# the console's organization still ends up with a working app route
+	# instead of a push that fails outright.
+	if ($stratos_alt_domain) {
+		info( "Mapping the console onto %s...", $stratos_alt_domain );
+		my ( $map_out, $map_rc, $map_err ) = run(
+			{ stderr => 0 },   'cf',
+			'map-route',       $info->{cf_app_name},
+			$endpoints->{system_domain}, '--hostname', 'console'
+		);
+		warning(
+			"Could not map %s onto the console, which will answer on %s only: %s",
+			$stratos_alt_domain, $stratos_domain, $map_err || $map_out
+		) unless $map_rc == 0;
+	}
 
 	# Update the status in the info object
 	$info->{is_cf_app_deployed} = 1;
