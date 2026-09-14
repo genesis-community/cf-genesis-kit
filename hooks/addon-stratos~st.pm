@@ -473,6 +473,16 @@ sub deploy_stratos {
 	my $apps_domain    = $endpoints->{apps_domain};
 	my $stratos_domain = "console.${apps_domain}";
 
+	# On an OCFP environment the console hostname comes from the bloc's FQDN
+	# map in the vault, and ocfp/stratos.yml has already registered that exact
+	# hostname as the UAA client's redirect URI. The info path honours the map
+	# and this path did not, so a bloc whose map differs from console.<apps
+	# domain> would push a route that SSO refuses to redirect back to.
+	if ( $env->has_feature('ocfp') ) {
+		my $mapped = $env->ocfp_config_lookup("fqdns")->{stratos};
+		$stratos_domain = $mapped if $mapped;
+	}
+
 	# Get file or download Stratos release
 	my $chdir = $tmp_dir;
 	chdir $chdir or bail("Could not change to temporary directory: $!");
