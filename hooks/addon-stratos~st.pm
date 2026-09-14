@@ -571,6 +571,7 @@ sub deploy_stratos {
 	# The console's SSH terminal dials the platform's app SSH proxy from inside
 	# its own container, so the space needs an egress rule allowing it.
 	$self->_ensure_app_ssh_security_group($tmp_dir);
+	$self->_ensure_db_security_group( $tmp_dir, $db );
 
 	# Configure database via CUPS
 	info("Configuring Stratos Database Connection via CUPS Services");
@@ -794,6 +795,82 @@ sub _ensure_app_ssh_security_group {
 
 	info( "Security group %s bound to system/stratos for app SSH proxy %s",
 		$sg_name, $endpoint );
+}
+
+# Open egress from the console's space to its database.
+#
+# An app container gets no egress to the BOSH network under the default
+# security groups, so jetstream's connection to a colocated Postgres is
+# refused outright. The rule is needed during staging as well as at runtime,
+# because the buildpack's own start-up check dials the database.
+sub _ensure_db_security_group {
+	my ( $self, $tmp_dir, $db ) = @_;
+
+	my $sg_name = 'stratos-db';
+	my $host    = $db->{hostname};
+	my $port    = $db->{port};
+
+	unless ( $host && $port ) {
+		warning( "No database host or port known; skipping %s security group setup", $sg_name );
+		return;
+	}
+
+	my @addrs;
+	if ( $host =~ /^\d+\.\d+\.\d+\.\d+$/ ) {
+		@addrs = ($host);
+	}
+	else {
+		my @entry = gethostbyname($host);
+		@addrs = map { inet_ntoa($_) } @entry[ 4 .. $#entry ];
+	}
+	unless (@addrs) {
+		warning( "Could not resolve database host '%s'; skipping %s security group setup",
+			$host, $sg_name );
+		return;
+	}
+
+	my $rules = '[' . join(
+		',',
+		map {
+			sprintf(
+				'{"protocol":"tcp","destination":"%s","ports":"%s",'
+				  . '"description":"console access to its database"}',
+				$_, $port
+			)
+		} @addrs
+	) . ']';
+
+	my $sg_file = "$tmp_dir/$sg_name.json";
+	open my $sg_fh, '>', $sg_file
+	  or bail("Cannot write to $sg_file: $!");
+	print $sg_fh $rules;
+	close $sg_fh;
+
+	if ( run( { interactive => 0, passfail => 1, stderr => 0 }, 'cf', 'security-group', $sg_name ) )
+	{
+		run(
+			{ interactive => 0, onfailure => "Failed to update security group $sg_name" },
+			'cf', 'update-security-group', $sg_name, $sg_file
+		);
+	}
+	else {
+		run(
+			{ interactive => 0, onfailure => "Failed to create security group $sg_name" },
+			'cf', 'create-security-group', $sg_name, $sg_file
+		);
+	}
+
+	for my $lifecycle (qw/running staging/) {
+		run(
+			{ interactive => 0, onfailure => "Failed to bind security group $sg_name" },
+			'cf', 'bind-security-group', $sg_name, 'system',
+			'--space', 'stratos', '--lifecycle', $lifecycle
+		);
+	}
+	unlink $sg_file;
+
+	info( "Security group %s bound to system/stratos for database %s:%s",
+		$sg_name, $host, $port );
 }
 
 sub _generate_password {
