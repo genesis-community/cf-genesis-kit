@@ -1,0 +1,13 @@
+---
+- type: replace
+  path: /instance_groups/name=nfs-broker-push/networks
+  value:
+    - name: (( grab params.cf_core_network ))
+
+- type: replace
+  path: /instance_groups/name=nfs-broker-push/azs
+  value: (( grab meta.ocfp.azs ))
+
+- type: replace
+  path: /instance_groups/name=nfs-broker-push/vm_type
+  value: (( grab params.errand_vm_type ))

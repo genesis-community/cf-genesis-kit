@@ -494,8 +494,15 @@ sub process_ocfp_features {
 		# Other OCFP features
 		} elsif ($feature eq 'nfs-volume-services') {
 			$self->enable_nfs_volume_services();
-			$self->add_files(
-				'overlay/addons/nfs-ldap-config.yml', # Why isn't this under ocfp?
+			# Always: the upstream ops file hardcodes vm_type 'minimal' and the
+			# base overlay leaves networks as the unresolvable ((cf_runtime_network))
+			# BOSH variable, neither of which exists on an OCFP foundation.
+			$self->add_files('ocfp/nfs.yml');
+			# Only with LDAP: these pull /nfs/ldap:* from vault and set
+			# nfsbrokerpush.ldap_enabled, which removes uid/gid from the
+			# broker's allowed options.
+			$self->add_files_if_wants(qr/^nfs-ldap(-tls)?$/,
+				'overlay/addons/nfs-ldap-config.yml',
 				'ocfp/nfs-ldap.yml',
 				'ocfp/nfs-ldap-data.yml'
 			);
