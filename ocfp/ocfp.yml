@@ -28,6 +28,14 @@ params:
   uaa_vm_type:         (( concat meta.ocfp.env.cloud "vm-uaa" ))
   windows_diego_cell_vm_type: (( concat meta.ocfp.env.cloud "vm-windows-cell" )) # Not in use
 
+  # bosh-disk-volume-services placement. Both disk types resolve to the
+  # smallest generated type, because the provide job reads only its
+  # cloud_properties and the services VM's own state disk is tiny.
+  bosh_disk_services_vm_type:              (( grab params.errand_vm_type ))
+  bosh_disk_services_persistent_disk_type: (( concat meta.ocfp.env.cloud "disk-database" ))
+  bosh_disk_pool_name:                     (( concat meta.ocfp.env.cloud "disk-database" ))
+  bosh_disk_services_release_version:      latest
+
 instance_groups:
 - name: diego-cell
   vm_type: (( grab params.diego_cell_vm_type ))

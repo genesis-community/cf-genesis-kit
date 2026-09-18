@@ -226,6 +226,9 @@ sub process_classic_features {
 		} elsif ($feature eq "nfs-volume-services") {
 			$self->enable_nfs_volume_services();
 
+		} elsif ($feature eq "bosh-disk-volume-services") {
+			$self->enable_bosh_disk_volume_services();
+
 		} elsif ( $feature eq "smb-volume-services" ) {
 			$self->add_files("cf-deployment/operations/enable-smb-volume-service.yml");
 			$self->add_files("overlay/addons/smb-volume-service.yml") unless $is_bare;
@@ -506,6 +509,14 @@ sub process_ocfp_features {
 				'ocfp/nfs-ldap.yml',
 				'ocfp/nfs-ldap-data.yml'
 			);
+
+		} elsif ($feature eq 'bosh-disk-volume-services') {
+			$self->enable_bosh_disk_volume_services();
+			# Always: the base overlay leaves placement to the foundation, and
+			# an OCFP foundation names its network, azs, vm types, and disk
+			# types from generated metadata rather than from the cf-deployment
+			# defaults of 'default', [z1], and 'minimal'.
+			$self->add_files('ocfp/bosh-disk.yml');
 
 		} elsif ($feature eq 'smb-volume-services') {
 			$self->add_files(
@@ -1361,6 +1372,7 @@ sub validate_classic_features {
 		'vip',
 
 		'nfs-volume-services', 'nfs-ldap', 'nfs-ldap-tls',
+		'bosh-disk-volume-services',
 		'smb-volume-services',
 
 		# Migration from v1
@@ -1488,6 +1500,7 @@ sub validate_ocfp_features {
 		'vip',
 
 		'nfs-volume-services', 'nfs-ldap', 'nfs-ldap-tls',
+		'bosh-disk-volume-services',
 		'smb-volume-services',
 
 		# Blobstores:
@@ -1757,6 +1770,14 @@ sub enable_nfs_volume_services {
 			$self->add_files($remove_ops_file);
 		}
 	}
+	return 1;
+}
+
+sub enable_bosh_disk_volume_services {
+	my ($self) = @_;
+	$self->add_files(
+		"overlay/addons/bosh-disk-volume-service.yml"
+	);
 	return 1;
 }
 

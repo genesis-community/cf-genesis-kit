@@ -1,0 +1,17 @@
+---
+- type: replace
+  path: /instance_groups/name=bosh-disk-services/networks
+  value:
+  - name: (( grab params.cf_core_network ))
+
+- type: replace
+  path: /instance_groups/name=bosh-disk-services/azs
+  value: (( grab meta.ocfp.azs ))
+
+- type: replace
+  path: /instance_groups/name=bosh-disk-services/vm_type
+  value: (( grab params.bosh_disk_services_vm_type ))
+
+- type: replace
+  path: /instance_groups/name=bosh-disk-services/persistent_disk_type
+  value: (( grab params.bosh_disk_services_persistent_disk_type ))

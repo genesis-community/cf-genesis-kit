@@ -1,0 +1,96 @@
+# Add the release. The version is a kit parameter so the environment can pin
+# the exact timestamp version it uploaded, which keeps the rendered manifest
+# reproducible. It defaults to latest for a foundation that does not care.
+- type: replace
+  path: /releases/-
+  value:
+    name: bosh-disk-services
+    version: (( grab params.bosh_disk_services_release_version || "latest" ))
+
+# Cloud Controller has to be told that volume services exist before it will
+# publish an offering whose requires array holds volume_mount. The nfs feature
+# already sets all three on this foundation; the ? makes setting them again a
+# no-op, and makes this feature stand on its own if nfs is ever removed.
+- type: replace
+  path: /instance_groups/name=api/jobs/name=cloud_controller_ng/properties/cc/volume_services_enabled?
+  value: true
+- type: replace
+  path: /instance_groups/name=cc-worker/jobs/name=cloud_controller_worker/properties/cc/volume_services_enabled?
+  value: true
+- type: replace
+  path: /instance_groups/name=scheduler/jobs/name=cloud_controller_clock/properties/cc/volume_services_enabled?
+  value: true
+
+# The driver on every Diego cell. listen_port is 7591 because nfsv3driver
+# already holds both 7589 and 7590 on this cell's loopback interface.
+- type: replace
+  path: /instance_groups/name=diego-cell/jobs/-
+  value:
+    name: bosh-disk-driver
+    release: bosh-disk-services
+    properties:
+      driver_path: /var/vcap/data/voldrivers
+      cell_mount_path: /var/vcap/data/volumes/bosh-disk
+      data_dir: /var/vcap/data/bosh-disk-driver
+      listen_port: 7591
+      mount_timeout: 180
+      log_level: info
+
+# The provisioner and the broker, on one VM.
+- type: replace
+  path: /instance_groups/-
+  value:
+    name: bosh-disk-services
+    instances: 1
+    stemcell: default
+    azs: [z1]
+    vm_type: minimal
+    networks:
+    - name: default
+    # A Genesis param grab, never a bare ((name)). ocfp/bosh-disk.yml re-grabs the
+    # same parameter on an OCFP foundation and ocfp/ocfp.yml gives it its default.
+    persistent_disk_type: (( grab params.bosh_disk_services_persistent_disk_type ))
+    jobs:
+    - name: bosh-disk-provisioner
+      release: bosh-disk-services
+      properties:
+        bbs:
+          api_location: https://bbs.service.cf.internal:8889
+          ca_cert: ((diego_bbs_client.ca))
+          client_cert: ((diego_bbs_client.certificate))
+          client_key: ((diego_bbs_client.private_key))
+        director:
+          url: (( grab params.bosh_director_url ))
+          uaa_url: (( grab params.bosh_director_uaa_url ))
+          client_id: (( grab params.bosh_disk_client_id ))
+          client_secret: (( grab params.bosh_disk_client_secret ))
+          ca_cert: (( grab params.bosh_director_ca ))
+        deployment_name: ((deployment_name))
+        reconciliation_interval: 30
+        log_level: info
+    - name: bosh-disk-broker
+      release: bosh-disk-services
+      properties:
+        broker:
+          port: 8999
+          username: bosh-disk-broker
+          password: (( vault meta.vault "/bosh-disk/broker:password" ))
+        director:
+          url: (( grab params.bosh_director_url ))
+          uaa_url: (( grab params.bosh_director_uaa_url ))
+          client_id: (( grab params.bosh_disk_client_id ))
+          client_secret: (( grab params.bosh_disk_client_secret ))
+          ca_cert: (( grab params.bosh_director_ca ))
+        default_disk_type: (( grab params.bosh_disk_pool_name ))
+        # Only the plans a lab should offer. The job default also carries a
+        # 100 GB `large`, and two of those would fill local-lvm-data.
+        plans:
+        - id: bosh-disk-small
+          name: small
+          description: "2GB block disk"
+          size_mb: 2048
+        - id: bosh-disk-default
+          name: default
+          description: "10GB block disk"
+          size_mb: 10240
+        log_level: info
