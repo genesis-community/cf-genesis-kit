@@ -165,6 +165,8 @@ kit:
 
 Caveat: Not all features are compatible with this kit, and features are applied in order, so ordering may matter.
 
+The `cf-deployment-version-<version>` feature renders against a different upstream cf-deployment than the one this kit vendors. The kit fetches that release from GitHub at render time and swaps it in for its own `cf-deployment/` tree. Every external blobstore feature in this kit configures Cloud Controller for storage-cli, which cf-deployment adopted in v59.0.0, so an environment with an external blobstore can only name v59.0.0 or later. An older tree still wires `fog_connection` onto every bucket, and the kit refuses to render it rather than hand BOSH a manifest with a `((fog_connection))` variable that nothing defines.
+
 ## Feature Parameters
 
 ### General Parameters

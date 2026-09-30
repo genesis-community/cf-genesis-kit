@@ -1626,6 +1626,51 @@ sub requested_database {
 	return ($requested_databases[0] =~ s/^(?:local-)?(.*?)-db$/$1/r, $is_local);
 }
 
+# _refuse_fog_external_blobstore - Bail when the cf-deployment tree in use
+# still wires the external blobstore through the fog library. Before v59.0.0,
+# upstream's use-external-blobstore.yml set `fog_connection:
+# ((fog_connection))` on all twelve Cloud Controller buckets. Every blobstore
+# overlay in this kit configures storage-cli instead and never defines that
+# variable, so pairing the two renders a manifest that BOSH rejects with a
+# config-server 404 for fog_connection on api, cc-worker, and scheduler. The
+# tree is whichever one is on disk at render time (vendored, or swapped in by
+# a cf-deployment-version-* feature), so read the ops file rather than trust a
+# version number.
+sub _refuse_fog_external_blobstore {
+	my ($self, $feature) = @_;
+
+	my $ops_path = $self->kit->path("cf-deployment/operations/use-external-blobstore.yml");
+	return unless -f $ops_path;
+	return unless slurp($ops_path) =~ /^[^#\n]*\bfog_connection\b/m;
+
+	my ($custom_cf_version) = map {
+		$_ =~ /^cf-deployment-version-(.*)$/ ? $1 : ()
+	} @{$self->{raw_features} // []};
+	my $tree = defined($custom_cf_version)
+		? sprintf("cf-deployment #Y{v%s}, selected by the #c{cf-deployment-version-%s} feature,",
+			$custom_cf_version, $custom_cf_version)
+		: "cf-deployment tree vendored in this kit";
+	my $remedy = defined($custom_cf_version)
+		? sprintf("Remove #c{cf-deployment-version-%s} to render against the cf-deployment ".
+			"this kit vendors, or name #Y{v59.0.0} or later in its place.",
+			$custom_cf_version)
+		: "The kit itself has to vendor cf-deployment #Y{v59.0.0} or later.";
+
+	bail(
+		"Environment #C{%s} requests the #c{%s} feature, but the %s ".
+		"still wires the external blobstore through the deprecated fog library. ".
+		"Its #c{operations/use-external-blobstore.yml} sets ".
+		"#c{fog_connection: ((fog_connection))} on every Cloud Controller ".
+		"bucket, while this kit configures those buckets for storage-cli and ".
+		"never defines #c{fog_connection}. BOSH would refuse to render the ".
+		"api, cc-worker, and scheduler instance groups, because the config ".
+		"server has no #c{fog_connection} credential to hand them.\n\n".
+		"cf-deployment moved the external blobstore from fog to storage-cli in ".
+		"#Y{v59.0.0}. %s",
+		$self->env->name, $feature, $tree, $remedy
+	);
+}
+
 sub enable_external_blobstore {
 	my ($self, $feature) = @_;
 
@@ -1635,6 +1680,7 @@ sub enable_external_blobstore {
 		'overlay/blobstore/meta.yml',
 		'overlay/blobstore/external.yml'
 	);
+	$self->_refuse_fog_external_blobstore($feature);
 	$self->add_files('cf-deployment/operations/use-external-blobstore.yml');
 
 	# The per-IaaS overlay merges after use-external-blobstore.yml, not before
