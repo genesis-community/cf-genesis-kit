@@ -50,9 +50,9 @@ sub perform {
 		# TODO: Check now in 2025 if the NOTE below is still accurate.
 		info(
 			"#Y{The cf-targets plugin does not seem to be installed}\n" .
-			"It is recommended you install it first, via #G{%s do setup-cli}'\n\n" .
+			"It is recommended you install it first, via #G{%s do setup-cli}\n\n" .
 			"[[NOTE: >>It is not currently compatible with Apple M1 (arm) architecture",
-			$env->get_call_path_with_env
+			scalar($env->get_call_path_with_env)
 		);
 
 		# Skip confirmation if in non-interactive mode
