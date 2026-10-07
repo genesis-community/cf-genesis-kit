@@ -1,0 +1,13 @@
+---
+kit:
+  name:    dev
+  version: 2.0.0
+  features:
+    - no-haproxy
+
+genesis:
+  env: resolute-stemcell-without-feature
+
+params:
+  base_domain: cf.testing.examle
+  stemcell_os: ubuntu-resolute

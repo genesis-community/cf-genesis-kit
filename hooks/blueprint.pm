@@ -624,7 +624,15 @@ sub _gopatch_remove {
 # that pins noble-compiled tarballs.
 sub _enable_resolute {
 	my ($self) = @_;
-	return unless $self->want_feature('resolute');
+	unless ($self->want_feature('resolute')) {
+		# Without the feature, cf-deployment's addons would skip resolute VMs.
+		bail(
+			"The environment sets #c{params.stemcell_os} to ubuntu-resolute " .
+			"without the #c{resolute} feature.  Enable the feature and remove " .
+			"that parameter."
+		) if $self->env->lookup('params.stemcell_os', 'ubuntu-noble') eq 'ubuntu-resolute';
+		return;
+	}
 
 	for my $feature (qw(compiled-releases vendored-compiled-releases)) {
 		bail(

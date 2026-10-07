@@ -245,6 +245,17 @@ var _ = Describe("Interal Kit", func() {
 		},
 	})
 	Test(Environment{
+		Name:          "resolute-stemcell-without-feature",
+		CloudConfig:   "aws",
+		RuntimeConfig: "dns",
+		CPI:           "aws",
+		OutputMatchers: OutputMatchers{
+			GenesisAddSecrets: ContainSubstring("Enable the feature and remove that parameter"),
+			GenesisCheck:      ContainSubstring("Enable the feature and remove that parameter"),
+			GenesisManifest:   ContainSubstring("Enable the feature and remove that parameter"),
+		},
+	})
+	Test(Environment{
 		Name:          "compiled-windows-releases",
 		CloudConfig:   "aws", //"azure",
 		RuntimeConfig: "dns",
