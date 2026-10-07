@@ -300,9 +300,9 @@ exodus:
   apps_domain: run.cf.testing.examle
   base_domain: cf.testing.examle
   bosh: compiled-windows-releases
-  cf-deployment-date: 2026-Sep-30 18:35:25 UTC
-  cf-deployment-url: https://github.com/cloudfoundry/cf-deployment/releases/tag/v60.7.0
-  cf-deployment-version: 60.7.0
+  cf-deployment-date: 2026-Oct-07 15:43:25 UTC
+  cf-deployment-url: https://github.com/cloudfoundry/cf-deployment/releases/tag/v60.9.0
+  cf-deployment-version: 60.9.0
   core_network: default
   db_network: default
   edge_network: default
@@ -2521,7 +2521,7 @@ instance_groups:
   - name: default
   stemcell: default
   vm_type: minimal
-manifest_version: v60.7.0
+manifest_version: v60.9.0
 name: compiled-windows-releases-cf
 releases:
 - name: binary-buildpack
@@ -2539,19 +2539,19 @@ releases:
   url: https://storage.googleapis.com/cf-deployment-compiled-releases/bpm-1.4.41-ubuntu-noble-1.333-20260925-083432-704099304.tgz
   version: 1.4.41
 - name: capi
-  sha1: sha256:5b8f617bedf92dc62268497eae15c46cc7d401713466fb8cdf57d8833e36f979
+  sha1: sha256:d4ada3f662d9a5515d69b10f6d759abb93e0f0a010effdf86466680a3bd7bb8f
   stemcell:
     os: ubuntu-noble
     version: "1.333"
-  url: https://storage.googleapis.com/cf-deployment-compiled-releases/capi-1.247.0-ubuntu-noble-1.333-20260917-141754-089407911.tgz
-  version: 1.247.0
+  url: https://storage.googleapis.com/cf-deployment-compiled-releases/capi-1.248.0-ubuntu-noble-1.333-20261005-081956-742471701.tgz
+  version: 1.248.0
 - name: cf-networking
-  sha1: sha256:7658484cdc5fb1e8c555e3f435d5a604637055bfe3b69384b7f6a4c49cd9148c
+  sha1: sha256:acf4cb13dc267ac17cb813f17c77374e31c4f68d0c8dd6fa335a3b7c86ab3607
   stemcell:
     os: ubuntu-noble
     version: "1.333"
-  url: https://storage.googleapis.com/cf-deployment-compiled-releases/cf-networking-3.124.0-ubuntu-noble-1.333-20260928-161120-255740168.tgz
-  version: 3.124.0
+  url: https://storage.googleapis.com/cf-deployment-compiled-releases/cf-networking-3.125.0-ubuntu-noble-1.333-20261005-161428-465972555.tgz
+  version: 3.125.0
 - name: cf-smoke-tests
   sha1: sha256:1068dba99f23ec84077c5de37c2d781b4f7fa3d005616abe97f2ba982626dbbb
   stemcell:
@@ -2574,12 +2574,12 @@ releases:
   url: https://storage.googleapis.com/cf-deployment-compiled-releases/cflinuxfs5-0.53.0-ubuntu-noble-1.333-20260812-185726-362743149.tgz
   version: 0.53.0
 - name: credhub
-  sha1: sha256:351ffd7b72607d91fb316e700a5007d34200ad5f2233e11d06c7088f76be961f
+  sha1: sha256:a1fc3983ff73f6568e2c24a4289c1f42ecf23ee7c9fe3e3e32786902c40520c6
   stemcell:
     os: ubuntu-noble
     version: "1.333"
-  url: https://storage.googleapis.com/cf-deployment-compiled-releases/credhub-2.15.24-ubuntu-noble-1.333-20260928-133936-8538826.tgz
-  version: 2.15.24
+  url: https://storage.googleapis.com/cf-deployment-compiled-releases/credhub-2.15.25-ubuntu-noble-1.333-20261003-014714-033796012.tgz
+  version: 2.15.25
 - name: diego
   sha1: sha256:c3949d6adeb2c724c06e711e5e0a45055a1f2e397ceff2a7cf95863c3e5f33e1
   stemcell:
@@ -2595,12 +2595,12 @@ releases:
   url: https://storage.googleapis.com/cf-deployment-compiled-releases/dotnet-core-buildpack-2.4.52-ubuntu-noble-1.333-20260824-135148-627457228.tgz
   version: 2.4.52
 - name: garden-runc
-  sha1: sha256:cd577b1ecefb2d6d8484d22db7f3e2591f89e67602909a2166df878bbefbf41c
+  sha1: sha256:ced6032c18800df8c08fa627bc920c632420fb197a6ad88a76cc852d7d809590
   stemcell:
     os: ubuntu-noble
     version: "1.333"
-  url: https://storage.googleapis.com/cf-deployment-compiled-releases/garden-runc-1.100.0-ubuntu-noble-1.333-20260928-112521-82235598.tgz
-  version: 1.100.0
+  url: https://storage.googleapis.com/cf-deployment-compiled-releases/garden-runc-1.101.0-ubuntu-noble-1.333-20261005-165843-465106176.tgz
+  version: 1.101.0
 - name: go-buildpack
   sha1: sha256:a23b7adc5d999ae1f7304dc087d1547ebd16e544b476127a8cdb41cc5f9c1418
   stemcell:
@@ -2623,12 +2623,12 @@ releases:
   url: https://storage.googleapis.com/cf-deployment-compiled-releases/loggregator-107.0.35-ubuntu-noble-1.333-20260906-232457-072973082.tgz
   version: 107.0.35
 - name: nats
-  sha1: sha256:9f8c6e9c7357b0d141e13fc3fd0e0c4db4fafbe0b58184612cbc45299f9ea1b3
+  sha1: sha256:772eecc963dcc984119e71e5e959e1a1a4dcf4661793b1d17a34d451997a8500
   stemcell:
     os: ubuntu-noble
     version: "1.333"
-  url: https://storage.googleapis.com/cf-deployment-compiled-releases/nats-57.22.0-ubuntu-noble-1.333-20260928-164733-778355097.tgz
-  version: 57.22.0
+  url: https://storage.googleapis.com/cf-deployment-compiled-releases/nats-57.23.0-ubuntu-noble-1.333-20261005-162229-944368291.tgz
+  version: 57.23.0
 - name: nginx-buildpack
   sha1: sha256:7610b863d9333c3e0aa9cfb3354b38518bd6cc0e87d899c8d5ad26a6d469d4ea
   stemcell:
@@ -2686,12 +2686,12 @@ releases:
   url: https://storage.googleapis.com/cf-deployment-compiled-releases/ruby-buildpack-1.11.1-ubuntu-noble-1.333-20260602-150430-021593027.tgz
   version: 1.11.1
 - name: silk
-  sha1: sha256:faca3e204bb8a9aaecf08c583b0c2acc1f16c52ee278e800336123b80fb2faed
+  sha1: sha256:e5593952b55f59328ce9339b7c5dc59dc193140da195fa462d543803153283a8
   stemcell:
     os: ubuntu-noble
     version: "1.333"
-  url: https://storage.googleapis.com/cf-deployment-compiled-releases/silk-3.124.0-ubuntu-noble-1.333-20260928-161147-132348226.tgz
-  version: 3.124.0
+  url: https://storage.googleapis.com/cf-deployment-compiled-releases/silk-3.125.0-ubuntu-noble-1.333-20261005-174900-487231281.tgz
+  version: 3.125.0
 - name: staticfile-buildpack
   sha1: sha256:86d624d0c8b7e602410f6854cdaa569c01ab7d40bd7552c29a862033bc26fc72
   stemcell:
@@ -2746,29 +2746,29 @@ releases:
   url: https://bosh.io/d/github.com/cloudfoundry-incubator/hwc-buildpack-release?v=3.1.48
   version: 3.1.48
 - name: winc
-  sha1: sha256:2d146dacba15f27983f7350074e63fda28fa7806fc2c9801ddda25087d75e65c
-  url: https://bosh.io/d/github.com/cloudfoundry-incubator/winc-release?v=2.78.0
-  version: 2.78.0
+  sha1: sha256:1e9eca7eb10174fee1b961945182601b77da217e65d58946a08da0dcda528862
+  url: https://bosh.io/d/github.com/cloudfoundry-incubator/winc-release?v=2.79.0
+  version: 2.79.0
 - name: windows-utilities
   sha1: sha256:3ce4c1822f9fe5865cf2178f45c8a454c56670c8314f5e873162ff4921bf58e6
   url: https://bosh.io/d/github.com/cloudfoundry-incubator/windows-utilities-release?v=0.23.0
   version: 0.23.0
 - name: envoy-nginx
-  sha1: sha256:30a3b4738d69c33d885a9ebd3760f6db464c6580354d9267fe08593c49432733
-  url: https://bosh.io/d/github.com/cloudfoundry-incubator/envoy-nginx-release?v=0.80.0
-  version: 0.80.0
+  sha1: sha256:352fe0c78939f1113b4291d22926971efb301e07dd5e43d24225c449a16dd06d
+  url: https://bosh.io/d/github.com/cloudfoundry-incubator/envoy-nginx-release?v=0.81.0
+  version: 0.81.0
 - name: windowsfs
-  sha1: sha256:cbe8ffd084494c37a02367881a472c73767c0546ce390b1a404c59796708a18a
-  url: https://bosh.io/d/github.com/cloudfoundry/windowsfs-online-release?v=2.99.0
-  version: 2.99.0
+  sha1: sha256:b05b6cd9cdbf629bc52b810f4a46689a39bdc04ca4004ebe6be16e0966a62b73
+  url: https://bosh.io/d/github.com/cloudfoundry/windowsfs-online-release?v=2.100.0
+  version: 2.100.0
 - name: windows-resize-root-disk
   sha1: 8fe1adc3b6b6b68d8a370c576f649929f5452c6a
   url: https://github.com/starkandwayne/windows-resize-root-disk/releases/download/v1.0/windows-resize-root-disk-release-1.0.tgz
   version: "1.0"
 - name: smb-volume
-  sha1: sha256:8c274187908692cfc8b64aa32ed8a872e280e0d3f01e9dd8d37f1dceee4d0586
-  url: https://bosh.io/d/github.com/cloudfoundry/smb-volume-release?v=3.73.0
-  version: 3.73.0
+  sha1: sha256:0ad1be264c76a2a6128929d0c89dc41cf53e7b489ef9ab4fd8406557ec64cec2
+  url: https://bosh.io/d/github.com/cloudfoundry/smb-volume-release?v=3.75.0
+  version: 3.75.0
 stemcells:
 - alias: default
   os: ubuntu-noble

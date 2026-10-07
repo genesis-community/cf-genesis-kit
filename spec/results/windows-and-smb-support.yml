@@ -300,9 +300,9 @@ exodus:
   apps_domain: run.cf.testing.examle
   base_domain: cf.testing.examle
   bosh: windows-and-smb-support
-  cf-deployment-date: 2026-Sep-30 18:35:25 UTC
-  cf-deployment-url: https://github.com/cloudfoundry/cf-deployment/releases/tag/v60.7.0
-  cf-deployment-version: 60.7.0
+  cf-deployment-date: 2026-Oct-07 15:43:25 UTC
+  cf-deployment-url: https://github.com/cloudfoundry/cf-deployment/releases/tag/v60.9.0
+  cf-deployment-version: 60.9.0
   core_network: default
   db_network: default
   edge_network: default
@@ -2521,7 +2521,7 @@ instance_groups:
   - name: default
   stemcell: default
   vm_type: minimal
-manifest_version: v60.7.0
+manifest_version: v60.9.0
 name: windows-and-smb-support-cf
 releases:
 - name: binary-buildpack
@@ -2533,13 +2533,13 @@ releases:
   url: https://bosh.io/d/github.com/cloudfoundry/bpm-release?v=1.4.41
   version: 1.4.41
 - name: capi
-  sha1: sha256:324d8e1b4d7d5c7c44a3054fa37744c364309feb5a54c80bcb15b029332f72a5
-  url: https://bosh.io/d/github.com/cloudfoundry/capi-release?v=1.247.0
-  version: 1.247.0
+  sha1: sha256:b782e5759ccb5a4e632e91ef4eb338eee7c24adccbfbeef75bb16be8ff5a17bf
+  url: https://bosh.io/d/github.com/cloudfoundry/capi-release?v=1.248.0
+  version: 1.248.0
 - name: cf-networking
-  sha1: sha256:d2bc4779e3d1e8a668a9ad851b2b5d0b57b96095c04d98fa69bee13d4bf4ea21
-  url: https://bosh.io/d/github.com/cloudfoundry/cf-networking-release?v=3.124.0
-  version: 3.124.0
+  sha1: sha256:4f33645a81d89bd5169c6dd2d234aee24573e0c6967be2498ed98a9d1020b071
+  url: https://bosh.io/d/github.com/cloudfoundry/cf-networking-release?v=3.125.0
+  version: 3.125.0
 - name: cf-smoke-tests
   sha1: sha256:49fa336812bd197d265aff2658753b15f4244a18ca6484e8de12a065790a22e7
   url: https://bosh.io/d/github.com/cloudfoundry/cf-smoke-tests-release?v=42.0.275
@@ -2553,9 +2553,9 @@ releases:
   url: https://bosh.io/d/github.com/cloudfoundry/cflinuxfs5-release?v=0.53.0
   version: 0.53.0
 - name: credhub
-  sha1: sha256:352c027af45bb27bba1443e3d9fe13f08574436b98fe0977c0e86d36dc906deb
-  url: https://bosh.io/d/github.com/pivotal-cf/credhub-release?v=2.15.24
-  version: 2.15.24
+  sha1: sha256:e42b76390ff2570198b4a7d5db6dbc389a9638100619cc5d44ff881ebbba0043
+  url: https://bosh.io/d/github.com/pivotal-cf/credhub-release?v=2.15.25
+  version: 2.15.25
 - name: diego
   sha1: sha256:322cfe8e7bb2c925532ead7d633c1fcf1e9b1a6c655bf9c8590d14a22f445956
   url: https://bosh.io/d/github.com/cloudfoundry/diego-release?v=2.151.0
@@ -2565,9 +2565,9 @@ releases:
   url: https://bosh.io/d/github.com/cloudfoundry/dotnet-core-buildpack-release?v=2.4.52
   version: 2.4.52
 - name: garden-runc
-  sha1: sha256:e4d13c7a3f95a9972ca9d7db83e2bcff07b2e6754a294181933b174f4b46bd5a
-  url: https://bosh.io/d/github.com/cloudfoundry/garden-runc-release?v=1.100.0
-  version: 1.100.0
+  sha1: sha256:c883276ee3f00316f4b73aa85ddcff4abb5ffe315d515dde6a1cb883cae4a5b1
+  url: https://bosh.io/d/github.com/cloudfoundry/garden-runc-release?v=1.101.0
+  version: 1.101.0
 - name: go-buildpack
   sha1: sha256:6bbdcceda1d6e2f70a9be038c0de0784d7ba2bff88a5155dfc5a6c5a7775fedc
   url: https://bosh.io/d/github.com/cloudfoundry/go-buildpack-release?v=1.11.0
@@ -2581,9 +2581,9 @@ releases:
   url: https://bosh.io/d/github.com/cloudfoundry/loggregator-release?v=107.0.35
   version: 107.0.35
 - name: nats
-  sha1: sha256:498fd4f72ee685c80e78b9568ec6a5917bb4ab81d5890bfea899a01ba8708151
-  url: https://bosh.io/d/github.com/cloudfoundry/nats-release?v=57.22.0
-  version: 57.22.0
+  sha1: sha256:5122e5b3185f442471f8614fded08b369e7bd7e026418fa88e54ff611d6712f2
+  url: https://bosh.io/d/github.com/cloudfoundry/nats-release?v=57.23.0
+  version: 57.23.0
 - name: nginx-buildpack
   sha1: sha256:fbc3138a4d25dc0a35764522b37f590a10223967d14e6ec179057403f8977e65
   url: https://bosh.io/d/github.com/cloudfoundry/nginx-buildpack-release?v=1.2.39
@@ -2617,9 +2617,9 @@ releases:
   url: https://bosh.io/d/github.com/cloudfoundry/ruby-buildpack-release?v=1.11.1
   version: 1.11.1
 - name: silk
-  sha1: sha256:e9c0c63e5fd13567beda757b0fd677ff84d83e250b98f53171e811ed2a19e00e
-  url: https://bosh.io/d/github.com/cloudfoundry/silk-release?v=3.124.0
-  version: 3.124.0
+  sha1: sha256:9df905f468af4641ae3b2a2674de242cd5065fc9d2ab3c8fae67209d5b0a34b7
+  url: https://bosh.io/d/github.com/cloudfoundry/silk-release?v=3.125.0
+  version: 3.125.0
 - name: staticfile-buildpack
   sha1: sha256:a0137305940e70c62e11fc378afd500a0162591c98df0733fb8236012a08b615
   url: https://bosh.io/d/github.com/cloudfoundry/staticfile-buildpack-release?v=1.6.39
@@ -2653,29 +2653,29 @@ releases:
   url: https://bosh.io/d/github.com/cloudfoundry-incubator/hwc-buildpack-release?v=3.1.48
   version: 3.1.48
 - name: winc
-  sha1: sha256:2d146dacba15f27983f7350074e63fda28fa7806fc2c9801ddda25087d75e65c
-  url: https://bosh.io/d/github.com/cloudfoundry-incubator/winc-release?v=2.78.0
-  version: 2.78.0
+  sha1: sha256:1e9eca7eb10174fee1b961945182601b77da217e65d58946a08da0dcda528862
+  url: https://bosh.io/d/github.com/cloudfoundry-incubator/winc-release?v=2.79.0
+  version: 2.79.0
 - name: windows-utilities
   sha1: sha256:3ce4c1822f9fe5865cf2178f45c8a454c56670c8314f5e873162ff4921bf58e6
   url: https://bosh.io/d/github.com/cloudfoundry-incubator/windows-utilities-release?v=0.23.0
   version: 0.23.0
 - name: envoy-nginx
-  sha1: sha256:30a3b4738d69c33d885a9ebd3760f6db464c6580354d9267fe08593c49432733
-  url: https://bosh.io/d/github.com/cloudfoundry-incubator/envoy-nginx-release?v=0.80.0
-  version: 0.80.0
+  sha1: sha256:352fe0c78939f1113b4291d22926971efb301e07dd5e43d24225c449a16dd06d
+  url: https://bosh.io/d/github.com/cloudfoundry-incubator/envoy-nginx-release?v=0.81.0
+  version: 0.81.0
 - name: windowsfs
-  sha1: sha256:cbe8ffd084494c37a02367881a472c73767c0546ce390b1a404c59796708a18a
-  url: https://bosh.io/d/github.com/cloudfoundry/windowsfs-online-release?v=2.99.0
-  version: 2.99.0
+  sha1: sha256:b05b6cd9cdbf629bc52b810f4a46689a39bdc04ca4004ebe6be16e0966a62b73
+  url: https://bosh.io/d/github.com/cloudfoundry/windowsfs-online-release?v=2.100.0
+  version: 2.100.0
 - name: windows-resize-root-disk
   sha1: 8fe1adc3b6b6b68d8a370c576f649929f5452c6a
   url: https://github.com/starkandwayne/windows-resize-root-disk/releases/download/v1.0/windows-resize-root-disk-release-1.0.tgz
   version: "1.0"
 - name: smb-volume
-  sha1: sha256:8c274187908692cfc8b64aa32ed8a872e280e0d3f01e9dd8d37f1dceee4d0586
-  url: https://bosh.io/d/github.com/cloudfoundry/smb-volume-release?v=3.73.0
-  version: 3.73.0
+  sha1: sha256:0ad1be264c76a2a6128929d0c89dc41cf53e7b489ef9ab4fd8406557ec64cec2
+  url: https://bosh.io/d/github.com/cloudfoundry/smb-volume-release?v=3.75.0
+  version: 3.75.0
 stemcells:
 - alias: default
   os: ubuntu-noble
