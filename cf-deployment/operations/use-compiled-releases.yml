@@ -32,12 +32,12 @@
   path: /releases/name=capi
   value:
     name: capi
-    sha1: sha256:5b8f617bedf92dc62268497eae15c46cc7d401713466fb8cdf57d8833e36f979
+    sha1: sha256:d4ada3f662d9a5515d69b10f6d759abb93e0f0a010effdf86466680a3bd7bb8f
     stemcell:
       os: ubuntu-noble
       version: "1.333"
-    url: https://storage.googleapis.com/cf-deployment-compiled-releases/capi-1.247.0-ubuntu-noble-1.333-20260917-141754-089407911.tgz
-    version: 1.247.0
+    url: https://storage.googleapis.com/cf-deployment-compiled-releases/capi-1.248.0-ubuntu-noble-1.333-20261005-081956-742471701.tgz
+    version: 1.248.0
 - type: replace
   path: /releases/name=cf-cli
   value:
@@ -52,12 +52,12 @@
   path: /releases/name=cf-networking
   value:
     name: cf-networking
-    sha1: sha256:7658484cdc5fb1e8c555e3f435d5a604637055bfe3b69384b7f6a4c49cd9148c
+    sha1: sha256:acf4cb13dc267ac17cb813f17c77374e31c4f68d0c8dd6fa335a3b7c86ab3607
     stemcell:
       os: ubuntu-noble
       version: "1.333"
-    url: https://storage.googleapis.com/cf-deployment-compiled-releases/cf-networking-3.124.0-ubuntu-noble-1.333-20260928-161120-255740168.tgz
-    version: 3.124.0
+    url: https://storage.googleapis.com/cf-deployment-compiled-releases/cf-networking-3.125.0-ubuntu-noble-1.333-20261005-161428-465972555.tgz
+    version: 3.125.0
 - type: replace
   path: /releases/name=cf-smoke-tests
   value:
@@ -82,12 +82,12 @@
   path: /releases/name=credhub
   value:
     name: credhub
-    sha1: sha256:351ffd7b72607d91fb316e700a5007d34200ad5f2233e11d06c7088f76be961f
+    sha1: sha256:a1fc3983ff73f6568e2c24a4289c1f42ecf23ee7c9fe3e3e32786902c40520c6
     stemcell:
       os: ubuntu-noble
       version: "1.333"
-    url: https://storage.googleapis.com/cf-deployment-compiled-releases/credhub-2.15.24-ubuntu-noble-1.333-20260928-133936-8538826.tgz
-    version: 2.15.24
+    url: https://storage.googleapis.com/cf-deployment-compiled-releases/credhub-2.15.25-ubuntu-noble-1.333-20261003-014714-033796012.tgz
+    version: 2.15.25
 - type: replace
   path: /releases/name=diego
   value:
@@ -112,12 +112,12 @@
   path: /releases/name=garden-runc
   value:
     name: garden-runc
-    sha1: sha256:cd577b1ecefb2d6d8484d22db7f3e2591f89e67602909a2166df878bbefbf41c
+    sha1: sha256:ced6032c18800df8c08fa627bc920c632420fb197a6ad88a76cc852d7d809590
     stemcell:
       os: ubuntu-noble
       version: "1.333"
-    url: https://storage.googleapis.com/cf-deployment-compiled-releases/garden-runc-1.100.0-ubuntu-noble-1.333-20260928-112521-82235598.tgz
-    version: 1.100.0
+    url: https://storage.googleapis.com/cf-deployment-compiled-releases/garden-runc-1.101.0-ubuntu-noble-1.333-20261005-165843-465106176.tgz
+    version: 1.101.0
 - type: replace
   path: /releases/name=go-buildpack
   value:
@@ -172,12 +172,12 @@
   path: /releases/name=nats
   value:
     name: nats
-    sha1: sha256:9f8c6e9c7357b0d141e13fc3fd0e0c4db4fafbe0b58184612cbc45299f9ea1b3
+    sha1: sha256:772eecc963dcc984119e71e5e959e1a1a4dcf4661793b1d17a34d451997a8500
     stemcell:
       os: ubuntu-noble
       version: "1.333"
-    url: https://storage.googleapis.com/cf-deployment-compiled-releases/nats-57.22.0-ubuntu-noble-1.333-20260928-164733-778355097.tgz
-    version: 57.22.0
+    url: https://storage.googleapis.com/cf-deployment-compiled-releases/nats-57.23.0-ubuntu-noble-1.333-20261005-162229-944368291.tgz
+    version: 57.23.0
 - type: replace
   path: /releases/name=nginx-buildpack
   value:
@@ -262,12 +262,12 @@
   path: /releases/name=silk
   value:
     name: silk
-    sha1: sha256:faca3e204bb8a9aaecf08c583b0c2acc1f16c52ee278e800336123b80fb2faed
+    sha1: sha256:e5593952b55f59328ce9339b7c5dc59dc193140da195fa462d543803153283a8
     stemcell:
       os: ubuntu-noble
       version: "1.333"
-    url: https://storage.googleapis.com/cf-deployment-compiled-releases/silk-3.124.0-ubuntu-noble-1.333-20260928-161147-132348226.tgz
-    version: 3.124.0
+    url: https://storage.googleapis.com/cf-deployment-compiled-releases/silk-3.125.0-ubuntu-noble-1.333-20261005-174900-487231281.tgz
+    version: 3.125.0
 - type: replace
   path: /releases/name=staticfile-buildpack
   value:
