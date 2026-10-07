@@ -13,6 +13,7 @@ The **Cloud Foundry Genesis Kit** deploys a single instance of Cloud Foundry. It
   - [Load Balancing Options](#load-balancing-options)
   - [Runtime Stack Options](#runtime-stack-options)
   - [Volume Service Options](#volume-service-options)
+  - [Ubuntu Resolute Stemcells](#ubuntu-resolute-stemcells)
   - [OCFP Deployments](#ocfp-deployments)
   - [Custom and Upstream Features](#custom-and-upstream-features)
 - [Feature Parameters](#feature-parameters)
@@ -89,6 +90,7 @@ Using features is a way to configure the kit to suit the requirements of your sp
 - `no-tcp-routers` - Removes the tcp-router instance group and associated resource allocations for systems that don't need tcp routes.
 - `uaa-admin-client` - Enables a UAA admin client for scripting/automation.
 - `cflinuxfs3` - Restore support for cflinuxfs3 to Diego cells and isolation segments (by default, only cflinuxfs4 is supported).
+- `resolute` - **Experimental.** Deploy on the ubuntu-resolute stemcell instead of ubuntu-noble. See [Ubuntu Resolute Stemcells](#ubuntu-resolute-stemcells).
 
 ### Database Options
 
@@ -144,6 +146,33 @@ HAProxy is deployed by default unless the environment file lists `no-haproxy`
 ### Multi-Tenant Options
 
 - `isolation-segments` - Enables usage of [isolation segments](https://docs.cloudfoundry.org/adminguide/routing-is.html#overview) using minimal configuration. Supports nfs-volume-services, nfs-ldap and smb-volume-services features.
+
+### Ubuntu Resolute Stemcells
+
+The kit deploys Cloud Foundry on ubuntu-noble stemcells unless we ask for something else. Adding the `resolute` feature moves every instance group onto ubuntu-resolute.
+
+```yaml
+kit:
+  features:
+  - resolute
+
+params:
+  stemcell_version: "0.184"
+```
+
+The feature is experimental. cf-deployment has not validated itself on resolute, and its tracking issue ([cloudfoundry/cf-deployment#1374](https://github.com/cloudfoundry/cf-deployment/issues/1374)) shows no CATS run on resolute upstream. We should treat Diego cells in particular as untested until a deployment has passed its smoke tests. We recommend trying it in a canary environment before we point anything real at it.
+
+The feature sets the stemcell `os` to `ubuntu-resolute`, and `stemcell_version` still selects the version, which defaults to `latest`. We pin it to a resolute version such as `"0.184"`, so that a newer noble upload is never picked up by accident. The feature wins over the noble stemcell that the `ocfp` feature forces on PVE, so the same two lines work there. Because the feature owns the stemcell os, an environment that sets `params.stemcell_os` to anything else is refused. The feature also adds `ubuntu-resolute` to the stemcell lists of cf-deployment's `bpm`, `loggregator_agent`, `forwarder_agent`, `loggr-syslog-agent`, and `prom_scraper` addons, which bosh would otherwise skip on resolute VMs.
+
+Almost no release that cf-deployment uses has a resolute-compiled tarball, so a resolute deployment compiles its releases from source on the director. The first deploy takes a long time as a result, because every compilation VM is built from the resolute stemcell and has to compile diego, capi, routing, and the rest from scratch. Later deploys reuse the compiled packages.
+
+Before the first deploy we need to do two things on the director.
+
+- Upload the resolute stemcell to the director that deploys CF, since both the compilation VMs and the instances need it.
+
+- Make sure the director's runtime config carries bosh-dns 1.39.31 or later. Earlier bosh-dns releases do not run on resolute, and every instance would fail to start without it.
+
+The feature refuses to render together with `compiled-releases`, `vendored-compiled-releases`, or `windows-diego-cells`. The compiled-release files pin tarballs built for ubuntu-noble, and there is no resolute stemcell for Windows cells.
 
 ### OCFP Deployments
 

@@ -169,7 +169,7 @@ sub process_classic_features {
 	# dispatch chain, where they fall through to its "Unknown feature" bail.
 	my @direct_features = qw{
 		bare partitioned-network
-		compiled-releases
+		compiled-releases resolute
 		small-footprint cf-deployment/operations/scale-to-one-az
 		v1-vm-types v2-nats-credentials
 		aws-blobstore-iam gcp-use-access-key
@@ -299,6 +299,9 @@ sub process_classic_features {
 			$self->add_files(@vip_ops);
 		}
 	}
+
+	# Ubuntu resolute stemcells - last, so it wins over the stemcell default.
+	$self->_enable_resolute();
 
 	# Exodus migration fragments
 	my $exodus_version = $self->env->exodus_lookup("kit_version", ""); # Use $self->env
@@ -467,7 +470,7 @@ sub process_ocfp_features {
 	my @handled_features = (
 		'ocfp', 'self-signed', 'small-footprint',
 		'source-releases', 'vendored-compiled-releases', 'isolation-segments',
-		'cf-deployment/operations/scale-to-one-az',
+		'resolute', 'cf-deployment/operations/scale-to-one-az',
 		# The cloud-config hook reads 'partitioned-network' to lay out the
 		# ocf-core/ocf-edge networks; it adds no merge file here, so name it
 		# handled rather than letting the dispatch chain reject it.
@@ -586,6 +589,10 @@ sub process_ocfp_features {
 		$self->add_files('overlay/override-releases/compiled.yml');
 	}
 
+	# Ubuntu resolute stemcells - after the PVE stemcell block above, which
+	# forces noble, so that the opt-in wins.
+	$self->_enable_resolute();
+
 	# Add custom ops files collected for OCFP
 	$self->add_files(@ops_files) if @ops_files;
 
@@ -608,6 +615,41 @@ sub _gopatch_replace {
 sub _gopatch_remove {
 	my ($self, $path) = @_;
 	return "  - type: remove\n    path: ${path}\n";
+}
+
+# Ubuntu resolute stemcells (opt-in; the default stays ubuntu-noble).
+#
+# Almost no compiled releases exist for resolute, so a resolute environment
+# compiles its releases from source on the director.  That rules out anything
+# that pins noble-compiled tarballs.
+sub _enable_resolute {
+	my ($self) = @_;
+	return unless $self->want_feature('resolute');
+
+	for my $feature (qw(compiled-releases vendored-compiled-releases)) {
+		bail(
+			"Cannot use both the #c{resolute} and #c{$feature} features: the " .
+			"compiled releases are built for ubuntu-noble, and resolute " .
+			"compiles its releases from source on the director."
+		) if $self->want_feature($feature);
+	}
+	bail(
+		"Cannot use both the #c{resolute} and #c{windows-diego-cells} features: " .
+		"there is no resolute stemcell for the Windows cells."
+	) if $self->want_feature('windows-diego-cells');
+
+	# An environment value for params.stemcell_os would override the overlay.
+	my $stemcell_os = $self->env->lookup('params.stemcell_os', 'ubuntu-resolute');
+	bail(
+		"The #c{resolute} feature sets the stemcell os to ubuntu-resolute, but " .
+		"the environment sets #c{params.stemcell_os} to #R{$stemcell_os}.  " .
+		"Remove that parameter."
+	) if $stemcell_os ne 'ubuntu-resolute';
+
+	$self->add_files(
+		'overlay/addons/resolute.yml',
+		'overlay/addons/resolute-addons.yml',
+	);
 }
 
 # _validate_vendored_compiled_releases - Bail when the vendored
@@ -1338,6 +1380,7 @@ sub validate_classic_features {
 		'self-signed',
 		'small-footprint',
 		'compiled-releases',
+		'resolute',
 		'cflinuxfs3', 'cflinuxfs4',
 		'isolation-segments',
 		'ssh-proxy-on-routers',
@@ -1470,6 +1513,8 @@ sub validate_ocfp_features {
 		# the vendored file matches your stemcell and have not supplied an ocfp
 		# compiled-release pin via env-level ops.
 		'vendored-compiled-releases',
+		# Opt-in: run on the ubuntu-resolute stemcell instead of ubuntu-noble.
+		'resolute',
 		'haproxy',
 		'no-haproxy', 'external-lb', # opt out of default-on haproxy
 		'self-signed',

@@ -1,0 +1,33 @@
+---
+# Apply cf-deployment's stemcell-scoped addons to ubuntu-resolute VMs.
+#
+# Each of these addons carries an include list of the stemcell operating
+# systems cf-deployment has been validated on, and bosh skips an addon on any
+# VM whose stemcell is not listed.  Without this file the resolute VMs would
+# run without bpm, which nearly every job needs, and without the loggregator,
+# syslog, and prometheus scraper agents.
+
+- type: replace
+  path: /addons/name=loggregator_agent/include/stemcell/-
+  value:
+    os: ubuntu-resolute
+
+- type: replace
+  path: /addons/name=forwarder_agent/include/stemcell/-
+  value:
+    os: ubuntu-resolute
+
+- type: replace
+  path: /addons/name=loggr-syslog-agent/include/stemcell/-
+  value:
+    os: ubuntu-resolute
+
+- type: replace
+  path: /addons/name=prom_scraper/include/stemcell/-
+  value:
+    os: ubuntu-resolute
+
+- type: replace
+  path: /addons/name=bpm/include/stemcell/-
+  value:
+    os: ubuntu-resolute

@@ -1,0 +1,10 @@
+---
+# Ubuntu resolute stemcell.
+#
+# Loaded last by the resolute feature, after the PVE stemcell block, so that
+# it wins over the ubuntu-noble default.  overlay/base.yml grabs the stemcell
+# os from params.stemcell_os; the version still comes from
+# params.stemcell_version.
+
+params:
+  stemcell_os: ubuntu-resolute
