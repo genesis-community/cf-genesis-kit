@@ -6,6 +6,7 @@ import (
 
 	. "github.com/genesis-community/testkit/v2/testing"
 	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
 )
 
 var _ = BeforeSuite(func() {
@@ -217,6 +218,31 @@ var _ = Describe("Interal Kit", func() {
 		CloudConfig:   "aws",
 		RuntimeConfig: "dns",
 		CPI:           "aws",
+	})
+	Test(Environment{
+		Name:          "resolute",
+		CloudConfig:   "aws",
+		RuntimeConfig: "dns",
+		CPI:           "aws",
+	})
+	Test(Environment{
+		Name:          "resolute-pve",
+		CloudConfig:   "aws",
+		RuntimeConfig: "dns",
+		CPI:           "aws",
+		CredhubVars:   "haproxy-tls",
+		Exodus:        "ocfp-pve",
+	})
+	Test(Environment{
+		Name:          "resolute-compiled-releases",
+		CloudConfig:   "aws",
+		RuntimeConfig: "dns",
+		CPI:           "aws",
+		OutputMatchers: OutputMatchers{
+			GenesisAddSecrets: ContainSubstring("compiled releases are built for ubuntu-noble"),
+			GenesisCheck:      ContainSubstring("compiled releases are built for ubuntu-noble"),
+			GenesisManifest:   ContainSubstring("compiled releases are built for ubuntu-noble"),
+		},
 	})
 	Test(Environment{
 		Name:          "compiled-windows-releases",
