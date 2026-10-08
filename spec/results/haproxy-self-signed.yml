@@ -2407,9 +2407,9 @@ releases:
   url: https://bosh.io/d/github.com/bosh-packages/cf-cli-release?v=2.10.0
   version: 2.10.0
 - name: haproxy
-  sha1: sha256:0a16acf438f7e10eafc728229b1aeb6342fcca8ade8f1ad42ddb101e7f37fb17
-  url: https://bosh.io/d/github.com/cloudfoundry-incubator/haproxy-boshrelease?v=15.3.0%2B2.8.16
-  version: 15.3.0+2.8.16
+  sha1: sha256:0c0b25fbd6e37bff79aeca0405ab8ea2f0f5aea3b42326d16824957e0a8b9fc9
+  url: https://bosh.io/d/github.com/cloudfoundry-incubator/haproxy-boshrelease?v=16.13.0%2B3.2.25
+  version: 16.13.0+3.2.25
 stemcells:
 - alias: default
   os: ubuntu-noble
