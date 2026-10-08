@@ -550,7 +550,7 @@ sub _get_pve_vm_matrix {
 		} ) } (
 			#     Name         cpu_dev  ram_dev  disk_dev   cpu_prod  ram_prod  disk_prod
 			[qw[  api            1       2048    16384       4         8192     32768  ]],
-			[qw[  cc-worker      1       1024     8192       2         4096     16384  ]],
+			[qw[  cc-worker      1       1024    16384       2         4096     16384  ]],
 			[qw[  credhub        1       2048    16384       2         4096     32768  ]],
 			[qw[  diego-api      1       1024     8192       4         8192     16384  ]],
 			[qw[  diego-cell     2      16384    65536       8        16384    102400  ]],
@@ -560,7 +560,7 @@ sub _get_pve_vm_matrix {
 			[qw[  log-cache      1       2048    16384       4         8192     16384  ]],
 			[qw[  nats           1       1024     8192       2         2048     16384  ]],
 			[qw[  router         1       1024     8192       2         4096     16384  ]],
-			[qw[  scheduler      1       1024     8192       2         4096     16384  ]],
+			[qw[  scheduler      1       1024    16384       2         4096     16384  ]],
 			[qw[  tcp-router     1       1024     8192       2         4096     16384  ]],
 			[qw[  uaa            1       2048    16384       2         4096     32768  ]],
 			[qw[  database       1       2048    16384       4         8192     65536  ]],
