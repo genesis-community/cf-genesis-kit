@@ -174,6 +174,12 @@ Before the first deploy we need to do two things on the director.
 
 The feature refuses to render together with `compiled-releases`, `vendored-compiled-releases`, or `windows-diego-cells`. The compiled-release files pin tarballs built for ubuntu-noble, and there is no resolute stemcell for Windows cells.
 
+Two known issues come with the move to resolute.
+
+- Apps built with bun 1.3.12 or later crash on resolute Diego cells. The resolute stemcell runs Linux kernel 7.0, and those bun releases crash on it when the container runtime starts them with `runc exec` ([oven-sh/bun#31832](https://github.com/oven-sh/bun/issues/31832)). Until bun ships a fix, we pin such apps to bun 1.3.11 or keep them on noble cells.
+
+- Resolute does not ship runit, so the `chpst` command is missing. A job whose start script drops privileges with `chpst` hangs on resolute, and we have to switch it to `setpriv` or bpm before its release can run there.
+
 ### OCFP Deployments
 
 As an alternative to customizable general CF deployments, this kit provides an `ocfp` (Opensource Cloud Foundry Platform) feature, which is a _very opinionated_ specific deployment. It provides a curated deployment experience with sane defaults and optimizations for each IaaS.
