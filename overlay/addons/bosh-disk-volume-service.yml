@@ -23,6 +23,13 @@
 
 # The driver on every Diego cell. listen_port is 7591 because nfsv3driver
 # already holds both 7589 and 7590 on this cell's loopback interface.
+#
+# The driver asks the Director which disk carries each volume's name, so it
+# needs a Director client of its own. That client must carry only the
+# bosh.dynamic-disks.list authority, because every Diego cell holds its
+# secret. It is never the broker's client, which can create, attach, detach,
+# and delete any disk. The environment supplies the secret, which has to match
+# the client the Director's UAA defines.
 - type: replace
   path: /instance_groups/name=diego-cell/jobs/-
   value:
@@ -35,6 +42,12 @@
       listen_port: 7591
       mount_timeout: 180
       log_level: info
+      director:
+        url: (( grab params.bosh_director_url ))
+        uaa_url: (( grab params.bosh_director_uaa_url ))
+        client_id: (( grab params.bosh_disk_driver_client_id || "bosh-disk-driver" ))
+        client_secret: (( grab params.bosh_disk_driver_client_secret ))
+        ca_cert: (( grab params.bosh_director_ca ))
 
 # The provisioner and the broker, on one VM.
 - type: replace
