@@ -239,7 +239,7 @@ sub perform {
 			],
 			java_config => {
 				"JBP_CONFIG_OPEN_JDK_JRE" =>
-				  "{ \"jre\": { \"version\": \"$config{java_version}\" } }"
+				  "{ jre: { version: $config{java_version} } }"
 			}
 		};
 
