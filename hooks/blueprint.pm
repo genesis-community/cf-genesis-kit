@@ -497,11 +497,15 @@ sub process_ocfp_features {
 		# Other OCFP features
 		} elsif ($feature eq 'nfs-volume-services') {
 			$self->enable_nfs_volume_services();
+			$self->add_files('ocfp/nfs-broker.yml');
+
+			# LDAP is opt-in, as it is outside OCFP: only nfs-ldap or
+			# nfs-ldap-tls pulls the LDAP settings from the nfs/ldap secret.
 			$self->add_files(
-				'overlay/addons/nfs-ldap-config.yml', # Why isn't this under ocfp?
+				'overlay/addons/nfs-ldap-config.yml',
 				'ocfp/nfs-ldap.yml',
 				'ocfp/nfs-ldap-data.yml'
-			);
+			) if $self->_wants_nfs_ldap();
 
 		} elsif ($feature eq 'smb-volume-services') {
 			$self->add_files(
@@ -822,7 +826,7 @@ sub _dynamic_isolation_segments {
 
 	if ($self->want_feature("nfs-volume-services")) {
 		push @iso_seg_merges, "overlay/dynamic-templates/isolation-segment-nfs.yml";
-		if ($self->want_feature("nfs-ldap") || $self->want_feature("nfs-ldap-tls")) {
+		if ($self->_wants_nfs_ldap()) {
 			push @iso_seg_merges, "overlay/dynamic-templates/isolation-segment-nfs-ldap.yml";
 			push @iso_seg_merges, "overlay/dynamic-templates/isolation-segment-nfs-ldap-tls.yml"
 				if ($self->want_feature("nfs-ldap-tls"));
@@ -942,7 +946,7 @@ EOF
 		push @isolation_files, $dynamic_segment_fragment_file;
 		push @isolation_files, $self->_dynamic_isolation_template_render("dns-sd", $group);
 		push @isolation_files, $self->_dynamic_isolation_template_render("nfs-ldap-config", $group)
-			if ($self->want_feature("nfs-volume-services") && $self->want_feature("ocfp"));
+			if ($self->want_feature("nfs-volume-services") && $self->want_feature("ocfp") && $self->_wants_nfs_ldap());
 	}
 	return @isolation_files;
 }
@@ -1832,9 +1836,14 @@ sub enable_nfs_volume_services {
 	) unless $self->want_feature("bare");
 
 	$self->add_files_if_wants(qr/^nfs-ldap(-tls)?$/,
-		"cf-deployment/operations/enable-nfs-ldap.yml",
-		"overlay/addons/nfs-ldap.yml"
+		"cf-deployment/operations/enable-nfs-ldap.yml"
 	);
+	# OCFP reads the LDAP settings from Vault (ocfp/nfs-ldap-data.yml) and
+	# writes them straight into the nfsv3driver properties, so the params and
+	# bosh-variables this overlay declares would go unused there.
+	$self->add_files_if_wants(qr/^nfs-ldap(-tls)?$/,
+		"overlay/addons/nfs-ldap.yml"
+	) unless $self->want_feature("ocfp");
 
 	if ($self->want_feature("nfs-ldap-tls")) {
 		$self->add_files("overlay/addons/nfs-ldap-tls.yml");
@@ -1850,6 +1859,13 @@ sub enable_nfs_volume_services {
 		}
 	}
 	return 1;
+}
+
+# _wants_nfs_ldap - True when NFS volume services should authenticate through
+# LDAP.  nfs-ldap-tls is LDAP over TLS, so it counts without nfs-ldap.
+sub _wants_nfs_ldap {
+	my ($self) = @_;
+	return $self->want_feature("nfs-ldap") || $self->want_feature("nfs-ldap-tls");
 }
 
 sub enable_windows_diego_cells {
