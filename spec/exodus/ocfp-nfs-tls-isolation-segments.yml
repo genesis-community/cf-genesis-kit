@@ -1,0 +1,15 @@
+---
+secret/config/ocfp-nfs-tls-isolation-segments/ocf/fqdns:
+  base: cf.testing.example
+  system: system.cf.testing.example
+  apps: apps.cf.testing.example
+
+# Operator-provided LDAP settings that the nfs-ldap-tls feature reads in OCFP mode.
+secret/ocfp/nfs/tls/isolation/segments/cf/nfs/ldap:
+  user: ldap-user
+  pass: ldap-password
+  host: ldap.myhost.com
+  port: "636"
+  proto: tcp
+  fqdn: cn=Users,dc=corp,dc=test,dc=com
+  ca: test-ldap-ca-certificate

@@ -2537,7 +2537,7 @@ instance_groups:
         - <!{credhub}:diego_instance_identity_ca.ca!>
         - <!{credhub}:credhub_tls.ca!>
         - <!{credhub}:uaa_ssl.ca!>
-        - (( vault genesis.secrets_mount "certs/org:ca" ))
+        - test-org-ca-certificate
     release: cflinuxfs4
   - name: garden
     properties:
@@ -2577,7 +2577,7 @@ instance_groups:
         - <!{credhub}:diego_instance_identity_ca.ca!>
         - <!{credhub}:credhub_tls.ca!>
         - <!{credhub}:uaa_ssl.ca!>
-        - (( vault genesis.secrets_mount "certs/org:ca" ))
+        - test-org-ca-certificate
       diego:
         executor:
           instance_identity_ca_cert: <!{credhub}:diego_instance_identity_ca.certificate!>

@@ -1,0 +1,6 @@
+---
+# No org CA, Blacksmith CA, or external database, so OCFP trusts no CA.
+secret/config/ocfp-isolation-segments/ocf/fqdns:
+  base: cf.testing.example
+  system: system.cf.testing.example
+  apps: apps.cf.testing.example

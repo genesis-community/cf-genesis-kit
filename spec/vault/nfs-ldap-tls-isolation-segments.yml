@@ -1,0 +1,513 @@
+secret/nfs/ldap/tls/isolation/segments/cf/application_ca:
+    certificate: <!{meta.vault}/application_ca:certificate!>
+    combined: <!{meta.vault}/application_ca:combined!>
+    crl: <!{meta.vault}/application_ca:crl!>
+    key: <!{meta.vault}/application_ca:key!>
+    serial: <!{meta.vault}/application_ca:serial!>
+secret/nfs/ldap/tls/isolation/segments/cf/asg_syncer_locket_client:
+    certificate: <!{meta.vault}/asg_syncer_locket_client:certificate!>
+    combined: <!{meta.vault}/asg_syncer_locket_client:combined!>
+    key: <!{meta.vault}/asg_syncer_locket_client:key!>
+secret/nfs/ldap/tls/isolation/segments/cf/binding_cache_api_tls:
+    certificate: <!{meta.vault}/binding_cache_api_tls:certificate!>
+    combined: <!{meta.vault}/binding_cache_api_tls:combined!>
+    key: <!{meta.vault}/binding_cache_api_tls:key!>
+secret/nfs/ldap/tls/isolation/segments/cf/binding_cache_tls:
+    certificate: <!{meta.vault}/binding_cache_tls:certificate!>
+    combined: <!{meta.vault}/binding_cache_tls:combined!>
+    key: <!{meta.vault}/binding_cache_tls:key!>
+secret/nfs/ldap/tls/isolation/segments/cf/blobstore_admin_users_password:
+    password: <!{meta.vault}/blobstore_admin_users_password:password!>
+secret/nfs/ldap/tls/isolation/segments/cf/blobstore_public:
+    certificate: <!{meta.vault}/blobstore_public:certificate!>
+    combined: <!{meta.vault}/blobstore_public:combined!>
+    key: <!{meta.vault}/blobstore_public:key!>
+secret/nfs/ldap/tls/isolation/segments/cf/blobstore_secure_link_secret:
+    password: <!{meta.vault}/blobstore_secure_link_secret:password!>
+secret/nfs/ldap/tls/isolation/segments/cf/blobstore_tls:
+    certificate: <!{meta.vault}/blobstore_tls:certificate!>
+    combined: <!{meta.vault}/blobstore_tls:combined!>
+    key: <!{meta.vault}/blobstore_tls:key!>
+secret/nfs/ldap/tls/isolation/segments/cf/cc_bridge_cc_uploader:
+    certificate: <!{meta.vault}/cc_bridge_cc_uploader:certificate!>
+    combined: <!{meta.vault}/cc_bridge_cc_uploader:combined!>
+    key: <!{meta.vault}/cc_bridge_cc_uploader:key!>
+secret/nfs/ldap/tls/isolation/segments/cf/cc_bridge_cc_uploader_server:
+    certificate: <!{meta.vault}/cc_bridge_cc_uploader_server:certificate!>
+    combined: <!{meta.vault}/cc_bridge_cc_uploader_server:combined!>
+    key: <!{meta.vault}/cc_bridge_cc_uploader_server:key!>
+secret/nfs/ldap/tls/isolation/segments/cf/cc_bridge_tps:
+    certificate: <!{meta.vault}/cc_bridge_tps:certificate!>
+    combined: <!{meta.vault}/cc_bridge_tps:combined!>
+    key: <!{meta.vault}/cc_bridge_tps:key!>
+secret/nfs/ldap/tls/isolation/segments/cf/cc_database_password:
+    password: <!{meta.vault}/cc_database_password:password!>
+secret/nfs/ldap/tls/isolation/segments/cf/cc_db_encryption_key:
+    password: <!{meta.vault}/cc_db_encryption_key:password!>
+secret/nfs/ldap/tls/isolation/segments/cf/cc_logcache_tls:
+    certificate: <!{meta.vault}/cc_logcache_tls:certificate!>
+    combined: <!{meta.vault}/cc_logcache_tls:combined!>
+    key: <!{meta.vault}/cc_logcache_tls:key!>
+secret/nfs/ldap/tls/isolation/segments/cf/cc_prom_scraper_scrape_tls:
+    certificate: <!{meta.vault}/cc_prom_scraper_scrape_tls:certificate!>
+    combined: <!{meta.vault}/cc_prom_scraper_scrape_tls:combined!>
+    key: <!{meta.vault}/cc_prom_scraper_scrape_tls:key!>
+secret/nfs/ldap/tls/isolation/segments/cf/cc_public_tls:
+    certificate: <!{meta.vault}/cc_public_tls:certificate!>
+    combined: <!{meta.vault}/cc_public_tls:combined!>
+    key: <!{meta.vault}/cc_public_tls:key!>
+secret/nfs/ldap/tls/isolation/segments/cf/cc_staging_upload_password:
+    password: <!{meta.vault}/cc_staging_upload_password:password!>
+secret/nfs/ldap/tls/isolation/segments/cf/cc_tls:
+    certificate: <!{meta.vault}/cc_tls:certificate!>
+    combined: <!{meta.vault}/cc_tls:combined!>
+    key: <!{meta.vault}/cc_tls:key!>
+secret/nfs/ldap/tls/isolation/segments/cf/cf_admin_password:
+    password: <!{meta.vault}/cf_admin_password:password!>
+secret/nfs/ldap/tls/isolation/segments/cf/cf_app_sd_ca:
+    certificate: <!{meta.vault}/cf_app_sd_ca:certificate!>
+    combined: <!{meta.vault}/cf_app_sd_ca:combined!>
+    crl: <!{meta.vault}/cf_app_sd_ca:crl!>
+    key: <!{meta.vault}/cf_app_sd_ca:key!>
+    serial: <!{meta.vault}/cf_app_sd_ca:serial!>
+secret/nfs/ldap/tls/isolation/segments/cf/cf_app_sd_client_tls:
+    certificate: <!{meta.vault}/cf_app_sd_client_tls:certificate!>
+    combined: <!{meta.vault}/cf_app_sd_client_tls:combined!>
+    key: <!{meta.vault}/cf_app_sd_client_tls:key!>
+secret/nfs/ldap/tls/isolation/segments/cf/cf_app_sd_server_tls:
+    certificate: <!{meta.vault}/cf_app_sd_server_tls:certificate!>
+    combined: <!{meta.vault}/cf_app_sd_server_tls:combined!>
+    key: <!{meta.vault}/cf_app_sd_server_tls:key!>
+secret/nfs/ldap/tls/isolation/segments/cf/cf_mysql_mysql_admin_password:
+    password: <!{meta.vault}/cf_mysql_mysql_admin_password:password!>
+secret/nfs/ldap/tls/isolation/segments/cf/cf_mysql_mysql_cluster_health_password:
+    password: <!{meta.vault}/cf_mysql_mysql_cluster_health_password:password!>
+secret/nfs/ldap/tls/isolation/segments/cf/cf_mysql_mysql_galera_healthcheck_endpoint_password:
+    password: <!{meta.vault}/cf_mysql_mysql_galera_healthcheck_endpoint_password:password!>
+secret/nfs/ldap/tls/isolation/segments/cf/cf_mysql_mysql_galera_healthcheck_password:
+    password: <!{meta.vault}/cf_mysql_mysql_galera_healthcheck_password:password!>
+secret/nfs/ldap/tls/isolation/segments/cf/cf_mysql_proxy_api_password:
+    password: <!{meta.vault}/cf_mysql_proxy_api_password:password!>
+secret/nfs/ldap/tls/isolation/segments/cf/credhub_admin_client_secret:
+    password: <!{meta.vault}/credhub_admin_client_secret:password!>
+secret/nfs/ldap/tls/isolation/segments/cf/credhub_ca:
+    certificate: <!{meta.vault}/credhub_ca:certificate!>
+    combined: <!{meta.vault}/credhub_ca:combined!>
+    crl: <!{meta.vault}/credhub_ca:crl!>
+    key: <!{meta.vault}/credhub_ca:key!>
+    serial: <!{meta.vault}/credhub_ca:serial!>
+secret/nfs/ldap/tls/isolation/segments/cf/credhub_database_password:
+    password: <!{meta.vault}/credhub_database_password:password!>
+secret/nfs/ldap/tls/isolation/segments/cf/credhub_encryption_password:
+    password: <!{meta.vault}/credhub_encryption_password:password!>
+secret/nfs/ldap/tls/isolation/segments/cf/credhub_tls:
+    certificate: <!{meta.vault}/credhub_tls:certificate!>
+    combined: <!{meta.vault}/credhub_tls:combined!>
+    key: <!{meta.vault}/credhub_tls:key!>
+secret/nfs/ldap/tls/isolation/segments/cf/diego_auctioneer_client:
+    certificate: <!{meta.vault}/diego_auctioneer_client:certificate!>
+    combined: <!{meta.vault}/diego_auctioneer_client:combined!>
+    key: <!{meta.vault}/diego_auctioneer_client:key!>
+secret/nfs/ldap/tls/isolation/segments/cf/diego_auctioneer_server:
+    certificate: <!{meta.vault}/diego_auctioneer_server:certificate!>
+    combined: <!{meta.vault}/diego_auctioneer_server:combined!>
+    key: <!{meta.vault}/diego_auctioneer_server:key!>
+secret/nfs/ldap/tls/isolation/segments/cf/diego_bbs_client:
+    certificate: <!{meta.vault}/diego_bbs_client:certificate!>
+    combined: <!{meta.vault}/diego_bbs_client:combined!>
+    key: <!{meta.vault}/diego_bbs_client:key!>
+secret/nfs/ldap/tls/isolation/segments/cf/diego_bbs_encryption_keys_passphrase:
+    password: <!{meta.vault}/diego_bbs_encryption_keys_passphrase:password!>
+secret/nfs/ldap/tls/isolation/segments/cf/diego_bbs_server:
+    certificate: <!{meta.vault}/diego_bbs_server:certificate!>
+    combined: <!{meta.vault}/diego_bbs_server:combined!>
+    key: <!{meta.vault}/diego_bbs_server:key!>
+secret/nfs/ldap/tls/isolation/segments/cf/diego_database_password:
+    password: <!{meta.vault}/diego_database_password:password!>
+secret/nfs/ldap/tls/isolation/segments/cf/diego_instance_identity_ca:
+    certificate: <!{meta.vault}/diego_instance_identity_ca:certificate!>
+    combined: <!{meta.vault}/diego_instance_identity_ca:combined!>
+    crl: <!{meta.vault}/diego_instance_identity_ca:crl!>
+    key: <!{meta.vault}/diego_instance_identity_ca:key!>
+    serial: <!{meta.vault}/diego_instance_identity_ca:serial!>
+secret/nfs/ldap/tls/isolation/segments/cf/diego_locket_client:
+    certificate: <!{meta.vault}/diego_locket_client:certificate!>
+    combined: <!{meta.vault}/diego_locket_client:combined!>
+    key: <!{meta.vault}/diego_locket_client:key!>
+secret/nfs/ldap/tls/isolation/segments/cf/diego_locket_server:
+    certificate: <!{meta.vault}/diego_locket_server:certificate!>
+    combined: <!{meta.vault}/diego_locket_server:combined!>
+    key: <!{meta.vault}/diego_locket_server:key!>
+secret/nfs/ldap/tls/isolation/segments/cf/diego_rep_agent_v2:
+    certificate: <!{meta.vault}/diego_rep_agent_v2:certificate!>
+    combined: <!{meta.vault}/diego_rep_agent_v2:combined!>
+    key: <!{meta.vault}/diego_rep_agent_v2:key!>
+secret/nfs/ldap/tls/isolation/segments/cf/diego_rep_client:
+    certificate: <!{meta.vault}/diego_rep_client:certificate!>
+    combined: <!{meta.vault}/diego_rep_client:combined!>
+    key: <!{meta.vault}/diego_rep_client:key!>
+secret/nfs/ldap/tls/isolation/segments/cf/diego_ssh_proxy_host_key:
+    fingerprint: <!{meta.vault}/diego_ssh_proxy_host_key:fingerprint!>
+    private: <!{meta.vault}/diego_ssh_proxy_host_key:private!>
+    public: <!{meta.vault}/diego_ssh_proxy_host_key:public!>
+secret/nfs/ldap/tls/isolation/segments/cf/file_server_cert:
+    certificate: <!{meta.vault}/file_server_cert:certificate!>
+    combined: <!{meta.vault}/file_server_cert:combined!>
+    key: <!{meta.vault}/file_server_cert:key!>
+secret/nfs/ldap/tls/isolation/segments/cf/forwarder_agent_metrics_tls:
+    certificate: <!{meta.vault}/forwarder_agent_metrics_tls:certificate!>
+    combined: <!{meta.vault}/forwarder_agent_metrics_tls:combined!>
+    key: <!{meta.vault}/forwarder_agent_metrics_tls:key!>
+secret/nfs/ldap/tls/isolation/segments/cf/galera_server_certificate:
+    certificate: <!{meta.vault}/galera_server_certificate:certificate!>
+    combined: <!{meta.vault}/galera_server_certificate:combined!>
+    key: <!{meta.vault}/galera_server_certificate:key!>
+secret/nfs/ldap/tls/isolation/segments/cf/gorouter_backend_tls:
+    certificate: <!{meta.vault}/gorouter_backend_tls:certificate!>
+    combined: <!{meta.vault}/gorouter_backend_tls:combined!>
+    key: <!{meta.vault}/gorouter_backend_tls:key!>
+secret/nfs/ldap/tls/isolation/segments/cf/gorouter_lb_health_tls:
+    certificate: <!{meta.vault}/gorouter_lb_health_tls:certificate!>
+    combined: <!{meta.vault}/gorouter_lb_health_tls:combined!>
+    key: <!{meta.vault}/gorouter_lb_health_tls:key!>
+secret/nfs/ldap/tls/isolation/segments/cf/locket_database_password:
+    password: <!{meta.vault}/locket_database_password:password!>
+secret/nfs/ldap/tls/isolation/segments/cf/log_cache:
+    certificate: <!{meta.vault}/log_cache:certificate!>
+    combined: <!{meta.vault}/log_cache:combined!>
+    key: <!{meta.vault}/log_cache:key!>
+secret/nfs/ldap/tls/isolation/segments/cf/log_cache_ca:
+    certificate: <!{meta.vault}/log_cache_ca:certificate!>
+    combined: <!{meta.vault}/log_cache_ca:combined!>
+    crl: <!{meta.vault}/log_cache_ca:crl!>
+    key: <!{meta.vault}/log_cache_ca:key!>
+    serial: <!{meta.vault}/log_cache_ca:serial!>
+secret/nfs/ldap/tls/isolation/segments/cf/log_cache_cf_auth_proxy_metrics_tls:
+    certificate: <!{meta.vault}/log_cache_cf_auth_proxy_metrics_tls:certificate!>
+    combined: <!{meta.vault}/log_cache_cf_auth_proxy_metrics_tls:combined!>
+    key: <!{meta.vault}/log_cache_cf_auth_proxy_metrics_tls:key!>
+secret/nfs/ldap/tls/isolation/segments/cf/log_cache_gateway_metrics_tls:
+    certificate: <!{meta.vault}/log_cache_gateway_metrics_tls:certificate!>
+    combined: <!{meta.vault}/log_cache_gateway_metrics_tls:combined!>
+    key: <!{meta.vault}/log_cache_gateway_metrics_tls:key!>
+secret/nfs/ldap/tls/isolation/segments/cf/log_cache_metrics_tls:
+    certificate: <!{meta.vault}/log_cache_metrics_tls:certificate!>
+    combined: <!{meta.vault}/log_cache_metrics_tls:combined!>
+    key: <!{meta.vault}/log_cache_metrics_tls:key!>
+secret/nfs/ldap/tls/isolation/segments/cf/log_cache_proxy_tls:
+    certificate: <!{meta.vault}/log_cache_proxy_tls:certificate!>
+    combined: <!{meta.vault}/log_cache_proxy_tls:combined!>
+    key: <!{meta.vault}/log_cache_proxy_tls:key!>
+secret/nfs/ldap/tls/isolation/segments/cf/log_cache_syslog_server_metrics_tls:
+    certificate: <!{meta.vault}/log_cache_syslog_server_metrics_tls:certificate!>
+    combined: <!{meta.vault}/log_cache_syslog_server_metrics_tls:combined!>
+    key: <!{meta.vault}/log_cache_syslog_server_metrics_tls:key!>
+secret/nfs/ldap/tls/isolation/segments/cf/log_cache_syslog_tls:
+    certificate: <!{meta.vault}/log_cache_syslog_tls:certificate!>
+    combined: <!{meta.vault}/log_cache_syslog_tls:combined!>
+    key: <!{meta.vault}/log_cache_syslog_tls:key!>
+secret/nfs/ldap/tls/isolation/segments/cf/log_cache_to_loggregator_agent:
+    certificate: <!{meta.vault}/log_cache_to_loggregator_agent:certificate!>
+    combined: <!{meta.vault}/log_cache_to_loggregator_agent:combined!>
+    key: <!{meta.vault}/log_cache_to_loggregator_agent:key!>
+secret/nfs/ldap/tls/isolation/segments/cf/logcache_ssl:
+    certificate: <!{meta.vault}/logcache_ssl:certificate!>
+    combined: <!{meta.vault}/logcache_ssl:combined!>
+    key: <!{meta.vault}/logcache_ssl:key!>
+secret/nfs/ldap/tls/isolation/segments/cf/loggr_syslog_binding_cache_metrics_tls:
+    certificate: <!{meta.vault}/loggr_syslog_binding_cache_metrics_tls:certificate!>
+    combined: <!{meta.vault}/loggr_syslog_binding_cache_metrics_tls:combined!>
+    key: <!{meta.vault}/loggr_syslog_binding_cache_metrics_tls:key!>
+secret/nfs/ldap/tls/isolation/segments/cf/loggr_udp_forwarder_tls:
+    certificate: <!{meta.vault}/loggr_udp_forwarder_tls:certificate!>
+    combined: <!{meta.vault}/loggr_udp_forwarder_tls:combined!>
+    key: <!{meta.vault}/loggr_udp_forwarder_tls:key!>
+secret/nfs/ldap/tls/isolation/segments/cf/loggregator_agent_metrics_tls:
+    certificate: <!{meta.vault}/loggregator_agent_metrics_tls:certificate!>
+    combined: <!{meta.vault}/loggregator_agent_metrics_tls:combined!>
+    key: <!{meta.vault}/loggregator_agent_metrics_tls:key!>
+secret/nfs/ldap/tls/isolation/segments/cf/loggregator_ca:
+    certificate: <!{meta.vault}/loggregator_ca:certificate!>
+    combined: <!{meta.vault}/loggregator_ca:combined!>
+    crl: <!{meta.vault}/loggregator_ca:crl!>
+    key: <!{meta.vault}/loggregator_ca:key!>
+    serial: <!{meta.vault}/loggregator_ca:serial!>
+secret/nfs/ldap/tls/isolation/segments/cf/loggregator_rlp_gateway:
+    certificate: <!{meta.vault}/loggregator_rlp_gateway:certificate!>
+    combined: <!{meta.vault}/loggregator_rlp_gateway:combined!>
+    key: <!{meta.vault}/loggregator_rlp_gateway:key!>
+secret/nfs/ldap/tls/isolation/segments/cf/loggregator_rlp_gateway_tls:
+    certificate: <!{meta.vault}/loggregator_rlp_gateway_tls:certificate!>
+    combined: <!{meta.vault}/loggregator_rlp_gateway_tls:combined!>
+    key: <!{meta.vault}/loggregator_rlp_gateway_tls:key!>
+secret/nfs/ldap/tls/isolation/segments/cf/loggregator_rlp_gateway_tls_cc:
+    certificate: <!{meta.vault}/loggregator_rlp_gateway_tls_cc:certificate!>
+    combined: <!{meta.vault}/loggregator_rlp_gateway_tls_cc:combined!>
+    key: <!{meta.vault}/loggregator_rlp_gateway_tls_cc:key!>
+secret/nfs/ldap/tls/isolation/segments/cf/loggregator_tls_agent:
+    certificate: <!{meta.vault}/loggregator_tls_agent:certificate!>
+    combined: <!{meta.vault}/loggregator_tls_agent:combined!>
+    key: <!{meta.vault}/loggregator_tls_agent:key!>
+secret/nfs/ldap/tls/isolation/segments/cf/loggregator_tls_cc_tc:
+    certificate: <!{meta.vault}/loggregator_tls_cc_tc:certificate!>
+    combined: <!{meta.vault}/loggregator_tls_cc_tc:combined!>
+    key: <!{meta.vault}/loggregator_tls_cc_tc:key!>
+secret/nfs/ldap/tls/isolation/segments/cf/loggregator_tls_doppler:
+    certificate: <!{meta.vault}/loggregator_tls_doppler:certificate!>
+    combined: <!{meta.vault}/loggregator_tls_doppler:combined!>
+    key: <!{meta.vault}/loggregator_tls_doppler:key!>
+secret/nfs/ldap/tls/isolation/segments/cf/loggregator_tls_rlp:
+    certificate: <!{meta.vault}/loggregator_tls_rlp:certificate!>
+    combined: <!{meta.vault}/loggregator_tls_rlp:combined!>
+    key: <!{meta.vault}/loggregator_tls_rlp:key!>
+secret/nfs/ldap/tls/isolation/segments/cf/loggregator_tls_statsdinjector:
+    certificate: <!{meta.vault}/loggregator_tls_statsdinjector:certificate!>
+    combined: <!{meta.vault}/loggregator_tls_statsdinjector:combined!>
+    key: <!{meta.vault}/loggregator_tls_statsdinjector:key!>
+secret/nfs/ldap/tls/isolation/segments/cf/loggregator_tls_tc:
+    certificate: <!{meta.vault}/loggregator_tls_tc:certificate!>
+    combined: <!{meta.vault}/loggregator_tls_tc:combined!>
+    key: <!{meta.vault}/loggregator_tls_tc:key!>
+secret/nfs/ldap/tls/isolation/segments/cf/loggregator_trafficcontroller_tls:
+    certificate: <!{meta.vault}/loggregator_trafficcontroller_tls:certificate!>
+    combined: <!{meta.vault}/loggregator_trafficcontroller_tls:combined!>
+    key: <!{meta.vault}/loggregator_trafficcontroller_tls:key!>
+secret/nfs/ldap/tls/isolation/segments/cf/metric_scraper_ca:
+    certificate: <!{meta.vault}/metric_scraper_ca:certificate!>
+    combined: <!{meta.vault}/metric_scraper_ca:combined!>
+    crl: <!{meta.vault}/metric_scraper_ca:crl!>
+    key: <!{meta.vault}/metric_scraper_ca:key!>
+    serial: <!{meta.vault}/metric_scraper_ca:serial!>
+secret/nfs/ldap/tls/isolation/segments/cf/mysql_server_certificate:
+    certificate: <!{meta.vault}/mysql_server_certificate:certificate!>
+    combined: <!{meta.vault}/mysql_server_certificate:combined!>
+    key: <!{meta.vault}/mysql_server_certificate:key!>
+secret/nfs/ldap/tls/isolation/segments/cf/nats_ca:
+    certificate: <!{meta.vault}/nats_ca:certificate!>
+    combined: <!{meta.vault}/nats_ca:combined!>
+    crl: <!{meta.vault}/nats_ca:crl!>
+    key: <!{meta.vault}/nats_ca:key!>
+    serial: <!{meta.vault}/nats_ca:serial!>
+secret/nfs/ldap/tls/isolation/segments/cf/nats_client_cert:
+    certificate: <!{meta.vault}/nats_client_cert:certificate!>
+    combined: <!{meta.vault}/nats_client_cert:combined!>
+    key: <!{meta.vault}/nats_client_cert:key!>
+secret/nfs/ldap/tls/isolation/segments/cf/nats_internal_ca:
+    certificate: <!{meta.vault}/nats_internal_ca:certificate!>
+    combined: <!{meta.vault}/nats_internal_ca:combined!>
+    crl: <!{meta.vault}/nats_internal_ca:crl!>
+    key: <!{meta.vault}/nats_internal_ca:key!>
+    serial: <!{meta.vault}/nats_internal_ca:serial!>
+secret/nfs/ldap/tls/isolation/segments/cf/nats_internal_cert:
+    certificate: <!{meta.vault}/nats_internal_cert:certificate!>
+    combined: <!{meta.vault}/nats_internal_cert:combined!>
+    key: <!{meta.vault}/nats_internal_cert:key!>
+secret/nfs/ldap/tls/isolation/segments/cf/nats_password:
+    password: <!{meta.vault}/nats_password:password!>
+secret/nfs/ldap/tls/isolation/segments/cf/nats_server_cert:
+    certificate: <!{meta.vault}/nats_server_cert:certificate!>
+    combined: <!{meta.vault}/nats_server_cert:combined!>
+    key: <!{meta.vault}/nats_server_cert:key!>
+secret/nfs/ldap/tls/isolation/segments/cf/network_connectivity_database_password:
+    password: <!{meta.vault}/network_connectivity_database_password:password!>
+secret/nfs/ldap/tls/isolation/segments/cf/network_policy_ca:
+    certificate: <!{meta.vault}/network_policy_ca:certificate!>
+    combined: <!{meta.vault}/network_policy_ca:combined!>
+    crl: <!{meta.vault}/network_policy_ca:crl!>
+    key: <!{meta.vault}/network_policy_ca:key!>
+    serial: <!{meta.vault}/network_policy_ca:serial!>
+secret/nfs/ldap/tls/isolation/segments/cf/network_policy_client:
+    certificate: <!{meta.vault}/network_policy_client:certificate!>
+    combined: <!{meta.vault}/network_policy_client:combined!>
+    key: <!{meta.vault}/network_policy_client:key!>
+secret/nfs/ldap/tls/isolation/segments/cf/network_policy_database_password:
+    password: <!{meta.vault}/network_policy_database_password:password!>
+secret/nfs/ldap/tls/isolation/segments/cf/network_policy_server:
+    certificate: <!{meta.vault}/network_policy_server:certificate!>
+    combined: <!{meta.vault}/network_policy_server:combined!>
+    key: <!{meta.vault}/network_policy_server:key!>
+secret/nfs/ldap/tls/isolation/segments/cf/network_policy_server_external:
+    certificate: <!{meta.vault}/network_policy_server_external:certificate!>
+    combined: <!{meta.vault}/network_policy_server_external:combined!>
+    key: <!{meta.vault}/network_policy_server_external:key!>
+secret/nfs/ldap/tls/isolation/segments/cf/nfs-broker-credhub-password:
+    password: <!{meta.vault}/nfs-broker-credhub-password:password!>
+secret/nfs/ldap/tls/isolation/segments/cf/nfs-broker-credhub-uaa-client-secret:
+    password: <!{meta.vault}/nfs-broker-credhub-uaa-client-secret:password!>
+secret/nfs/ldap/tls/isolation/segments/cf/nfs-broker-password:
+    password: <!{meta.vault}/nfs-broker-password:password!>
+secret/nfs/ldap/tls/isolation/segments/cf/nfs-broker-push-uaa-client-secret:
+    password: <!{meta.vault}/nfs-broker-push-uaa-client-secret:password!>
+secret/nfs/ldap/tls/isolation/segments/cf/nfs-ldap-ca-cert:
+    certificate: <!{meta.vault}/nfs-ldap-ca-cert:certificate!>
+    combined: <!{meta.vault}/nfs-ldap-ca-cert:combined!>
+    crl: <!{meta.vault}/nfs-ldap-ca-cert:crl!>
+    key: <!{meta.vault}/nfs-ldap-ca-cert:key!>
+    serial: <!{meta.vault}/nfs-ldap-ca-cert:serial!>
+secret/nfs/ldap/tls/isolation/segments/cf/nfs_ca:
+    certificate: <!{meta.vault}/nfs_ca:certificate!>
+    combined: <!{meta.vault}/nfs_ca:combined!>
+    crl: <!{meta.vault}/nfs_ca:crl!>
+    key: <!{meta.vault}/nfs_ca:key!>
+    serial: <!{meta.vault}/nfs_ca:serial!>
+secret/nfs/ldap/tls/isolation/segments/cf/nfsv3driver_cert:
+    certificate: <!{meta.vault}/nfsv3driver_cert:certificate!>
+    combined: <!{meta.vault}/nfsv3driver_cert:combined!>
+    key: <!{meta.vault}/nfsv3driver_cert:key!>
+secret/nfs/ldap/tls/isolation/segments/cf/nfsv3driver_client_cert:
+    certificate: <!{meta.vault}/nfsv3driver_client_cert:certificate!>
+    combined: <!{meta.vault}/nfsv3driver_client_cert:combined!>
+    key: <!{meta.vault}/nfsv3driver_client_cert:key!>
+secret/nfs/ldap/tls/isolation/segments/cf/policy_server_asg_syncer_cc_client:
+    certificate: <!{meta.vault}/policy_server_asg_syncer_cc_client:certificate!>
+    combined: <!{meta.vault}/policy_server_asg_syncer_cc_client:combined!>
+    key: <!{meta.vault}/policy_server_asg_syncer_cc_client:key!>
+secret/nfs/ldap/tls/isolation/segments/cf/prom_scraper_metrics_tls:
+    certificate: <!{meta.vault}/prom_scraper_metrics_tls:certificate!>
+    combined: <!{meta.vault}/prom_scraper_metrics_tls:combined!>
+    key: <!{meta.vault}/prom_scraper_metrics_tls:key!>
+secret/nfs/ldap/tls/isolation/segments/cf/prom_scraper_scrape_tls:
+    certificate: <!{meta.vault}/prom_scraper_scrape_tls:certificate!>
+    combined: <!{meta.vault}/prom_scraper_scrape_tls:combined!>
+    key: <!{meta.vault}/prom_scraper_scrape_tls:key!>
+secret/nfs/ldap/tls/isolation/segments/cf/pxc_galera_ca:
+    certificate: <!{meta.vault}/pxc_galera_ca:certificate!>
+    combined: <!{meta.vault}/pxc_galera_ca:combined!>
+    crl: <!{meta.vault}/pxc_galera_ca:crl!>
+    key: <!{meta.vault}/pxc_galera_ca:key!>
+    serial: <!{meta.vault}/pxc_galera_ca:serial!>
+secret/nfs/ldap/tls/isolation/segments/cf/pxc_server_ca:
+    certificate: <!{meta.vault}/pxc_server_ca:certificate!>
+    combined: <!{meta.vault}/pxc_server_ca:combined!>
+    crl: <!{meta.vault}/pxc_server_ca:crl!>
+    key: <!{meta.vault}/pxc_server_ca:key!>
+    serial: <!{meta.vault}/pxc_server_ca:serial!>
+secret/nfs/ldap/tls/isolation/segments/cf/rlp_gateway_metrics_tls:
+    certificate: <!{meta.vault}/rlp_gateway_metrics_tls:certificate!>
+    combined: <!{meta.vault}/rlp_gateway_metrics_tls:combined!>
+    key: <!{meta.vault}/rlp_gateway_metrics_tls:key!>
+secret/nfs/ldap/tls/isolation/segments/cf/router_ca:
+    certificate: <!{meta.vault}/router_ca:certificate!>
+    combined: <!{meta.vault}/router_ca:combined!>
+    crl: <!{meta.vault}/router_ca:crl!>
+    key: <!{meta.vault}/router_ca:key!>
+    serial: <!{meta.vault}/router_ca:serial!>
+secret/nfs/ldap/tls/isolation/segments/cf/router_route_services_secret:
+    password: <!{meta.vault}/router_route_services_secret:password!>
+secret/nfs/ldap/tls/isolation/segments/cf/router_ssl:
+    certificate: <!{meta.vault}/router_ssl:certificate!>
+    combined: <!{meta.vault}/router_ssl:combined!>
+    key: <!{meta.vault}/router_ssl:key!>
+secret/nfs/ldap/tls/isolation/segments/cf/router_status_password:
+    password: <!{meta.vault}/router_status_password:password!>
+secret/nfs/ldap/tls/isolation/segments/cf/routing_api_ca:
+    certificate: <!{meta.vault}/routing_api_ca:certificate!>
+    combined: <!{meta.vault}/routing_api_ca:combined!>
+    crl: <!{meta.vault}/routing_api_ca:crl!>
+    key: <!{meta.vault}/routing_api_ca:key!>
+    serial: <!{meta.vault}/routing_api_ca:serial!>
+secret/nfs/ldap/tls/isolation/segments/cf/routing_api_database_password:
+    password: <!{meta.vault}/routing_api_database_password:password!>
+secret/nfs/ldap/tls/isolation/segments/cf/routing_api_tls:
+    certificate: <!{meta.vault}/routing_api_tls:certificate!>
+    combined: <!{meta.vault}/routing_api_tls:combined!>
+    key: <!{meta.vault}/routing_api_tls:key!>
+secret/nfs/ldap/tls/isolation/segments/cf/routing_api_tls_client:
+    certificate: <!{meta.vault}/routing_api_tls_client:certificate!>
+    combined: <!{meta.vault}/routing_api_tls_client:combined!>
+    key: <!{meta.vault}/routing_api_tls_client:key!>
+secret/nfs/ldap/tls/isolation/segments/cf/service_cf_internal_ca:
+    certificate: <!{meta.vault}/service_cf_internal_ca:certificate!>
+    combined: <!{meta.vault}/service_cf_internal_ca:combined!>
+    crl: <!{meta.vault}/service_cf_internal_ca:crl!>
+    key: <!{meta.vault}/service_cf_internal_ca:key!>
+    serial: <!{meta.vault}/service_cf_internal_ca:serial!>
+secret/nfs/ldap/tls/isolation/segments/cf/silk_ca:
+    certificate: <!{meta.vault}/silk_ca:certificate!>
+    combined: <!{meta.vault}/silk_ca:combined!>
+    crl: <!{meta.vault}/silk_ca:crl!>
+    key: <!{meta.vault}/silk_ca:key!>
+    serial: <!{meta.vault}/silk_ca:serial!>
+secret/nfs/ldap/tls/isolation/segments/cf/silk_controller:
+    certificate: <!{meta.vault}/silk_controller:certificate!>
+    combined: <!{meta.vault}/silk_controller:combined!>
+    key: <!{meta.vault}/silk_controller:key!>
+secret/nfs/ldap/tls/isolation/segments/cf/silk_daemon:
+    certificate: <!{meta.vault}/silk_daemon:certificate!>
+    combined: <!{meta.vault}/silk_daemon:combined!>
+    key: <!{meta.vault}/silk_daemon:key!>
+secret/nfs/ldap/tls/isolation/segments/cf/ssh_proxy_backends_tls:
+    certificate: <!{meta.vault}/ssh_proxy_backends_tls:certificate!>
+    combined: <!{meta.vault}/ssh_proxy_backends_tls:combined!>
+    key: <!{meta.vault}/ssh_proxy_backends_tls:key!>
+secret/nfs/ldap/tls/isolation/segments/cf/syslog_agent_api_tls:
+    certificate: <!{meta.vault}/syslog_agent_api_tls:certificate!>
+    combined: <!{meta.vault}/syslog_agent_api_tls:combined!>
+    key: <!{meta.vault}/syslog_agent_api_tls:key!>
+secret/nfs/ldap/tls/isolation/segments/cf/syslog_agent_log_cache_tls:
+    certificate: <!{meta.vault}/syslog_agent_log_cache_tls:certificate!>
+    combined: <!{meta.vault}/syslog_agent_log_cache_tls:combined!>
+    key: <!{meta.vault}/syslog_agent_log_cache_tls:key!>
+secret/nfs/ldap/tls/isolation/segments/cf/syslog_agent_metrics_tls:
+    certificate: <!{meta.vault}/syslog_agent_metrics_tls:certificate!>
+    combined: <!{meta.vault}/syslog_agent_metrics_tls:combined!>
+    key: <!{meta.vault}/syslog_agent_metrics_tls:key!>
+secret/nfs/ldap/tls/isolation/segments/cf/tcp_router_backend_tls:
+    certificate: <!{meta.vault}/tcp_router_backend_tls:certificate!>
+    combined: <!{meta.vault}/tcp_router_backend_tls:combined!>
+    key: <!{meta.vault}/tcp_router_backend_tls:key!>
+secret/nfs/ldap/tls/isolation/segments/cf/tcp_router_lb_health_tls:
+    certificate: <!{meta.vault}/tcp_router_lb_health_tls:certificate!>
+    combined: <!{meta.vault}/tcp_router_lb_health_tls:combined!>
+    key: <!{meta.vault}/tcp_router_lb_health_tls:key!>
+secret/nfs/ldap/tls/isolation/segments/cf/uaa_admin_client_secret:
+    password: <!{meta.vault}/uaa_admin_client_secret:password!>
+secret/nfs/ldap/tls/isolation/segments/cf/uaa_ca:
+    certificate: <!{meta.vault}/uaa_ca:certificate!>
+    combined: <!{meta.vault}/uaa_ca:combined!>
+    crl: <!{meta.vault}/uaa_ca:crl!>
+    key: <!{meta.vault}/uaa_ca:key!>
+    serial: <!{meta.vault}/uaa_ca:serial!>
+secret/nfs/ldap/tls/isolation/segments/cf/uaa_clients_cc-routing_secret:
+    password: <!{meta.vault}/uaa_clients_cc-routing_secret:password!>
+secret/nfs/ldap/tls/isolation/segments/cf/uaa_clients_cc-service-dashboards_secret:
+    password: <!{meta.vault}/uaa_clients_cc-service-dashboards_secret:password!>
+secret/nfs/ldap/tls/isolation/segments/cf/uaa_clients_cc_service_key_client_secret:
+    password: <!{meta.vault}/uaa_clients_cc_service_key_client_secret:password!>
+secret/nfs/ldap/tls/isolation/segments/cf/uaa_clients_cf_smoke_tests_secret:
+    password: <!{meta.vault}/uaa_clients_cf_smoke_tests_secret:password!>
+secret/nfs/ldap/tls/isolation/segments/cf/uaa_clients_cloud_controller_username_lookup_secret:
+    password: <!{meta.vault}/uaa_clients_cloud_controller_username_lookup_secret:password!>
+secret/nfs/ldap/tls/isolation/segments/cf/uaa_clients_doppler_secret:
+    password: <!{meta.vault}/uaa_clients_doppler_secret:password!>
+secret/nfs/ldap/tls/isolation/segments/cf/uaa_clients_gorouter_secret:
+    password: <!{meta.vault}/uaa_clients_gorouter_secret:password!>
+secret/nfs/ldap/tls/isolation/segments/cf/uaa_clients_network_policy_secret:
+    password: <!{meta.vault}/uaa_clients_network_policy_secret:password!>
+secret/nfs/ldap/tls/isolation/segments/cf/uaa_clients_routing_api_client_secret:
+    password: <!{meta.vault}/uaa_clients_routing_api_client_secret:password!>
+secret/nfs/ldap/tls/isolation/segments/cf/uaa_clients_ssh-proxy_secret:
+    password: <!{meta.vault}/uaa_clients_ssh-proxy_secret:password!>
+secret/nfs/ldap/tls/isolation/segments/cf/uaa_clients_tcp_emitter_secret:
+    password: <!{meta.vault}/uaa_clients_tcp_emitter_secret:password!>
+secret/nfs/ldap/tls/isolation/segments/cf/uaa_clients_tcp_router_secret:
+    password: <!{meta.vault}/uaa_clients_tcp_router_secret:password!>
+secret/nfs/ldap/tls/isolation/segments/cf/uaa_database_password:
+    password: <!{meta.vault}/uaa_database_password:password!>
+secret/nfs/ldap/tls/isolation/segments/cf/uaa_default_encryption_passphrase:
+    password: <!{meta.vault}/uaa_default_encryption_passphrase:password!>
+secret/nfs/ldap/tls/isolation/segments/cf/uaa_jwt_signing_cert:
+    certificate: <!{meta.vault}/uaa_jwt_signing_cert:certificate!>
+    combined: <!{meta.vault}/uaa_jwt_signing_cert:combined!>
+    key: <!{meta.vault}/uaa_jwt_signing_cert:key!>
+secret/nfs/ldap/tls/isolation/segments/cf/uaa_jwt_signing_key:
+    private: <!{meta.vault}/uaa_jwt_signing_key:private!>
+    public: <!{meta.vault}/uaa_jwt_signing_key:public!>
+secret/nfs/ldap/tls/isolation/segments/cf/uaa_login_saml:
+    certificate: <!{meta.vault}/uaa_login_saml:certificate!>
+    combined: <!{meta.vault}/uaa_login_saml:combined!>
+    key: <!{meta.vault}/uaa_login_saml:key!>
+secret/nfs/ldap/tls/isolation/segments/cf/uaa_ssl:
+    certificate: <!{meta.vault}/uaa_ssl:certificate!>
+    combined: <!{meta.vault}/uaa_ssl:combined!>
+    key: <!{meta.vault}/uaa_ssl:key!>

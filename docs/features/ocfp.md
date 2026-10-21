@@ -192,7 +192,7 @@ kit:
     - scs-integration            # Include Spring Cloud Services
     - prometheus-integration     # Include Prometheus metrics
     - nfs-volume-services        # Include NFS volume service
-    - nfs-ldap                   # Add LDAP support to NFS
+    - nfs-ldap                   # Add LDAP support to NFS (nfs-ldap-tls is the same under OCFP)
     - smb-volume-services        # Include SMB volume service
     - windows-diego-cells        # Add Windows Diego cells
     - cflinuxfs3                 # Add cflinuxfs3 stack support

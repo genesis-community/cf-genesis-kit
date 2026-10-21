@@ -1,0 +1,26 @@
+---
+kit:
+  name:    dev
+  version: 2.0.0
+  iaas:    pve
+  features:
+    - ocfp
+    - resolute
+    - isolation-segments
+
+genesis:
+  env: ocfp-isolation-segments
+
+params:
+  base_domain: cf.testing.examle
+  stemcell_version: "0.184"
+  haproxy_ips: test-ha-proxy-ips
+  isolation_segments:
+  - name: plain-group
+    azs:
+    - z1
+  - name: extra-certs-group
+    azs:
+    - z1
+    additional_trusted_certs:
+    - ((some-strange-cert.certificate))

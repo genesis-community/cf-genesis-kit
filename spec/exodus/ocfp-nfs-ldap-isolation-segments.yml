@@ -4,8 +4,8 @@ secret/config/ocfp-nfs-ldap-isolation-segments/ocf/fqdns:
   system: system.cf.testing.example
   apps: apps.cf.testing.example
 
-# The per-segment trusted-certs fragment needs meta.ocfp.certs.trusted, which
-# OCFP only defines when it trusts at least one CA.
+# An org CA, so the segment cells' trusted certificates take the list that
+# OCFP builds when it trusts at least one CA.
 secret/certs/org:
   ca: test-org-ca-certificate
 

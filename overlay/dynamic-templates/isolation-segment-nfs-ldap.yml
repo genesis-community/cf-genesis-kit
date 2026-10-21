@@ -10,4 +10,5 @@ instance_groups:
         ldap_port:         ((nfs-ldap-port))
         ldap_proto:        ((nfs-ldap-proto))
         ldap_user_fqdn:    ((nfs-ldap-fqdn))
+        ldap_ca_cert:      ((ldap_server_ssl.ca))
         allowed-in-source: ""

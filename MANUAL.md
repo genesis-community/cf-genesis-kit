@@ -142,7 +142,11 @@ HAProxy is deployed by default unless the environment file lists `no-haproxy`
 
 In an OCFP environment, `nfs-volume-services` on its own deploys the NFS broker and the Diego cell driver with no LDAP settings at all. When we add `nfs-ldap` or `nfs-ldap-tls`, the kit reads the LDAP connection from the `nfs/ldap` secret under the environment's Vault path, and that secret must hold the `user`, `pass`, `host`, `port`, `proto`, `fqdn`, and `ca` keys.
 
+Under OCFP, `nfs-ldap-tls` means the same thing as `nfs-ldap`. The kit always gives the drivers the secret's `ca` key as the LDAP server's CA, so both features connect over TLS, and neither one generates a CA of its own. Outside OCFP the two differ. There, `nfs-ldap` trusts the CA in the `ldap_server_ssl` CredHub credential, and `nfs-ldap-tls` trusts the `nfs-ldap-ca-cert` CA that the kit generates, unless `params.nfs-ldap-ca-cert` supplies one.
+
 Earlier releases turned LDAP on for every OCFP environment that enabled `nfs-volume-services`. An OCFP environment that relies on NFS LDAP must therefore add `nfs-ldap` or `nfs-ldap-tls` to its features before it upgrades, or the Diego cells lose their LDAP settings on the next deploy.
+
+Earlier releases also generated the `nfs-ldap-ca-cert` CA for an OCFP environment with `nfs-ldap-tls`, even though no cell trusted it. The kit no longer declares that variable, and BOSH does not delete credentials on its own, so the old CA stays in CredHub after the upgrade. Nothing reads it, and we can delete it once the new kit has deployed.
 
 ### Windows Support Options
 
@@ -150,7 +154,9 @@ Earlier releases turned LDAP on for every OCFP environment that enabled `nfs-vol
 
 ### Multi-Tenant Options
 
-- `isolation-segments` - Enables usage of [isolation segments](https://docs.cloudfoundry.org/adminguide/routing-is.html#overview) using minimal configuration. Supports nfs-volume-services, nfs-ldap and smb-volume-services features.
+- `isolation-segments` - Enables usage of [isolation segments](https://docs.cloudfoundry.org/adminguide/routing-is.html#overview) using minimal configuration. Supports the nfs-volume-services, nfs-ldap, nfs-ldap-tls, and smb-volume-services features.
+
+Upgrading from an earlier release changes the segment cells in two ways, and each one brings them in line with the main Diego cells. Outside OCFP, segment cells under `nfs-ldap` now trust the `ldap_server_ssl` CA, so their NFS drivers move to TLS on the next deploy. Under OCFP, segment cells now receive the trusted CAs themselves, where earlier releases handed them the unevaluated Vault lookup as text. Two combinations that used to fail the manifest merge now deploy, and they are OCFP segments with no trusted CA and non-OCFP segments with `nfs-ldap-tls`.
 
 ### Ubuntu Resolute Stemcells
 

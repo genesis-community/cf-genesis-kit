@@ -1,0 +1,27 @@
+---
+kit:
+  name:    dev
+  version: 2.1.2
+  features:
+  - isolation-segments
+  - nfs-volume-services
+  - nfs-ldap-tls
+  - no-haproxy
+
+genesis:
+  env: nfs-ldap-tls-isolation-segments
+
+params:
+  base_domain: cf.testing.example
+  isolation_segments:
+  - name: kit-ca-group
+    azs:
+    - z1
+  - name: own-ca-group
+    azs:
+    - z1
+    nfs-ldap-ca-cert: segment-ldap-ca-certificate
+
+  nfs-ldap-fqdn: cn=Users,dc=corp,dc=test,dc=com
+  nfs-ldap-host: ldap.myhost.com
+  nfs-ldap-service-user: ldap-user

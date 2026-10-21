@@ -1,0 +1,6 @@
+haproxy_ssl:
+  certificate: test-ssl-cert
+  private_key: test-ssl-private-key
+some-strange-cert:
+  certificate: second-additional-test-ssl-cert
+  private_key: second-additional-test-ssl-private-key

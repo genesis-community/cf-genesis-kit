@@ -4,5 +4,7 @@ instance_groups:
   - name: nfsv3driver
     properties:
       nfsv3driver:
-        ldap_ca_cert: (( grab meta.nfs-ldap-ca-cert || params.nfs-ldap-ca-cert ))
+        # The segment merge has no params, so defer the kit-wide CA to the
+        # deployment manifest unless the segment names its own.
+        ldap_ca_cert: (( grab meta.nfs-ldap-ca-cert || "(( grab params.nfs-ldap-ca-cert ))" ))
 

@@ -76,6 +76,8 @@ The parameters available are:
 | `tags` | Multiple placement tags (overrides tag) | |
 | `additional_trusted_certs` | Additional CA certificates to trust | |
 
+Under OCFP, the segment cells also trust every CA that the main Diego cells trust, such as the organization CA, the Blacksmith CA, and the external database CA. An OCFP environment that trusts none of those still deploys its segments, which then trust only the platform CAs and their own `additional_trusted_certs`.
+
 ## Managing Multiple Isolation Segments
 
 You can define multiple isolation segments in your environment:
@@ -122,6 +124,8 @@ kit:
     - nfs-volume-services
     - nfs-ldap  # or nfs-ldap-tls for TLS connections
 ```
+
+The segment cells get the same LDAP settings and the same LDAP CA as the main Diego cells. Outside OCFP, a segment that sets `nfs-ldap-ca-cert` with `nfs-ldap-tls` trusts that CA instead of the kit-wide one. Under OCFP, every cell takes its CA from the `ca` key of the `nfs/ldap` secret, so `nfs-ldap` and `nfs-ldap-tls` behave the same there.
 
 ### SMB Volume Services with Isolation Segments
 

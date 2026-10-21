@@ -232,6 +232,8 @@ OCFP (OpenSource Cloud Foundry Platform) deployments have special considerations
 
 4. **Keep NFS LDAP if you use it**. Earlier releases turned LDAP on for every OCFP environment that enabled `nfs-volume-services`, and LDAP is now opt-in. If your Diego cells mount NFS volumes through LDAP, add `nfs-ldap` or `nfs-ldap-tls` to the environment's features before you deploy the new kit, or the cells lose their LDAP settings.
 
+5. **Expect isolation segment cells to update**. Earlier releases handed segment cells the trusted CA list as unevaluated Vault lookups, so the cells never trusted the organization, Blacksmith, or external database CA. The new kit gives them the same CAs as the main Diego cells, which updates every segment cell on the first deploy. An environment that trusts none of those CAs used to fail the merge as soon as it enabled `isolation-segments`, and it now deploys.
+
 ### OCFP Upgrade Process
 
 1. **Update the kit**:
@@ -261,6 +263,15 @@ OCFP (OpenSource Cloud Foundry Platform) deployments have special considerations
    ```bash
    genesis do MY-ENV -- smoketest
    ```
+
+3. **Delete the unused NFS LDAP CA** if the environment uses `nfs-ldap-tls`. Earlier releases generated an `nfs-ldap-ca-cert` CA that no OCFP cell trusted, because every cell takes its LDAP CA from the `ca` key of the `nfs/ldap` secret. The kit no longer declares it, and BOSH leaves the old credential in CredHub, so we remove it by hand:
+   ```bash
+   credhub delete -n /DIRECTOR-NAME/MY-ENV-cf/nfs-ldap-ca-cert
+   ```
+
+## Upgrading Isolation Segments with NFS LDAP
+
+Outside OCFP, earlier releases gave isolation segment cells no LDAP CA under `nfs-ldap`, so their NFS drivers reached the LDAP server without TLS while the main Diego cells used TLS. The new kit gives the segment cells the `ldap_server_ssl` CA as well, which updates every segment cell on the first deploy. Segments with `nfs-ldap-tls` used to fail the manifest merge, and they now trust the kit's `nfs-ldap-ca-cert` CA, or the segment's own `nfs-ldap-ca-cert` when it sets one.
 
 ## Troubleshooting Upgrade Issues
 

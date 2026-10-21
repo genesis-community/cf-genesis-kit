@@ -828,24 +828,24 @@ sub _dynamic_isolation_segments {
 		push @iso_seg_merges, "overlay/dynamic-templates/isolation-segment-nfs.yml";
 		if ($self->_wants_nfs_ldap()) {
 			push @iso_seg_merges, "overlay/dynamic-templates/isolation-segment-nfs-ldap.yml";
+			# OCFP sets each segment's LDAP CA from Vault through the
+			# nfs-ldap-config fragment rendered below, so the TLS CA
+			# override applies outside OCFP only.
 			push @iso_seg_merges, "overlay/dynamic-templates/isolation-segment-nfs-ldap-tls.yml"
-				if ($self->want_feature("nfs-ldap-tls"));
-			push @iso_seg_merges, "ocfp/nfs-ldap-data.yml"
-				if ($self->want_feature("ocfp"));
+				if ($self->want_feature("nfs-ldap-tls") && !$self->want_feature("ocfp"));
 		}
 	}
 
 	push @iso_seg_merges, "overlay/dynamic-templates/isolation-segment-smb.yml"
 		if ($self->want_feature("smb-volume-services"));
 
-	if ($self->want_feature("ocfp")) {
-		push @iso_seg_merges, "ocfp/meta.yml";
-	} else {
-		# Supply the empty meta.ocfp.certs.trusted the per-segment
-		# additional-trusted-certs fragment defers a grab against. See the
-		# comment in that overlay for why the fragment cannot default it itself.
-		push @isolation_files, "overlay/isolation-segments-trusted-certs.yml";
-	}
+	push @iso_seg_merges, "ocfp/meta.yml"
+		if ($self->want_feature("ocfp"));
+
+	# Supply the empty meta.ocfp.certs.trusted the per-segment
+	# additional-trusted-certs fragment defers a grab against. See the
+	# comment in that overlay for why the fragment cannot default it itself.
+	push @isolation_files, "overlay/isolation-segments-trusted-certs.yml";
 
 	foreach my $group (@isolation_groups) {
 		info("  Processing isolation segment: %s", $group) if $ENV{GENESIS_DEBUG};
@@ -1845,7 +1845,9 @@ sub enable_nfs_volume_services {
 		"overlay/addons/nfs-ldap.yml"
 	) unless $self->want_feature("ocfp");
 
-	if ($self->want_feature("nfs-ldap-tls")) {
+	# OCFP always takes the LDAP CA from the ca key of the nfs/ldap secret
+	# (ocfp/nfs-ldap.yml), so the CA this overlay generates would go unused.
+	if ($self->want_feature("nfs-ldap-tls") && !$self->want_feature("ocfp")) {
 		$self->add_files("overlay/addons/nfs-ldap-tls.yml");
 
 		# Remove generative variable if user provided custom CA cert

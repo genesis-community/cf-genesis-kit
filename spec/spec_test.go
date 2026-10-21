@@ -281,6 +281,21 @@ var _ = Describe("Interal Kit", func() {
 		CredhubVars:   "isolation-segments-nfs",
 		CPI:           "aws",
 	})
+	Test(Environment{
+		Name:          "nfs-ldap-tls-isolation-segments",
+		CloudConfig:   "aws",
+		RuntimeConfig: "dns",
+		CredhubVars:   "nfs-ldap-tls",
+		CPI:           "aws",
+	})
+	Test(Environment{
+		Name:          "ocfp-isolation-segments",
+		CloudConfig:   "aws",
+		RuntimeConfig: "dns",
+		CPI:           "aws",
+		CredhubVars:   "ocfp-isolation-segments-addl-certs",
+		Exodus:        "ocfp-isolation-segments",
+	})
 	// VOLUME SERVICES
 	Test(Environment{
 		Name:          "ocfp-nfs-volume-services",
@@ -313,6 +328,14 @@ var _ = Describe("Interal Kit", func() {
 		CPI:           "aws",
 		CredhubVars:   "haproxy-tls",
 		Exodus:        "ocfp-nfs-ldap-isolation-segments",
+	})
+	Test(Environment{
+		Name:          "ocfp-nfs-tls-isolation-segments",
+		CloudConfig:   "aws",
+		RuntimeConfig: "dns",
+		CPI:           "aws",
+		CredhubVars:   "haproxy-tls",
+		Exodus:        "ocfp-nfs-tls-isolation-segments",
 	})
 	// Test(Environment{
 	// 	Focus:       true,
