@@ -1,4 +1,4 @@
-package Genesis::Hook::Addon::CF::Smoketest v3.2.0;
+package Genesis::Hook::Addon::CF::Smoketest v3.2.1;
 
 use v5.20;
 use warnings;    # Genesis min perl version is 5.20

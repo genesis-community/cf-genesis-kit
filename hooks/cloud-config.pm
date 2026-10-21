@@ -1,4 +1,4 @@
-package Genesis::Hook::CloudConfig::CF v3.2.0;
+package Genesis::Hook::CloudConfig::CF v3.2.1;
 
 use v5.20;
 use warnings;
