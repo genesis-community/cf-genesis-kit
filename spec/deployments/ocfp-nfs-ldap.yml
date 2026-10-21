@@ -1,0 +1,18 @@
+---
+kit:
+  name:    dev
+  version: 2.0.0
+  iaas:    pve
+  features:
+    - ocfp
+    - resolute
+    - nfs-volume-services
+    - nfs-ldap
+
+genesis:
+  env: ocfp-nfs-ldap
+
+params:
+  base_domain: cf.testing.examle
+  stemcell_version: "0.184"
+  haproxy_ips: test-ha-proxy-ips

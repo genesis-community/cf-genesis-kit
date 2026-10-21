@@ -1,0 +1,10 @@
+---
+secret/config/ocfp-nfs-isolation-segments/ocf/fqdns:
+  base: cf.testing.example
+  system: system.cf.testing.example
+  apps: apps.cf.testing.example
+
+# The per-segment trusted-certs fragment needs meta.ocfp.certs.trusted, which
+# OCFP only defines when it trusts at least one CA.
+secret/certs/org:
+  ca: test-org-ca-certificate

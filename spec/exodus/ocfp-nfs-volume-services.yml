@@ -1,0 +1,5 @@
+---
+secret/config/ocfp-nfs-volume-services/ocf/fqdns:
+  base: cf.testing.example
+  system: system.cf.testing.example
+  apps: apps.cf.testing.example
