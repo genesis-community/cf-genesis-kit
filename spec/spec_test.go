@@ -306,6 +306,14 @@ var _ = Describe("Interal Kit", func() {
 		CredhubVars:   "haproxy-tls",
 		Exodus:        "ocfp-nfs-isolation-segments",
 	})
+	Test(Environment{
+		Name:          "ocfp-nfs-ldap-isolation-segments",
+		CloudConfig:   "aws",
+		RuntimeConfig: "dns",
+		CPI:           "aws",
+		CredhubVars:   "haproxy-tls",
+		Exodus:        "ocfp-nfs-ldap-isolation-segments",
+	})
 	// Test(Environment{
 	// 	Focus:       true,
 	// 	Name:        "nfs-volume-services",

@@ -230,6 +230,8 @@ OCFP (OpenSource Cloud Foundry Platform) deployments have special considerations
 
 3. **Note any custom OCFP features** you have enabled
 
+4. **Keep NFS LDAP if you use it**. Earlier releases turned LDAP on for every OCFP environment that enabled `nfs-volume-services`, and LDAP is now opt-in. If your Diego cells mount NFS volumes through LDAP, add `nfs-ldap` or `nfs-ldap-tls` to the environment's features before you deploy the new kit, or the cells lose their LDAP settings.
+
 ### OCFP Upgrade Process
 
 1. **Update the kit**:

@@ -1,0 +1,20 @@
+---
+secret/config/ocfp-nfs-ldap-isolation-segments/ocf/fqdns:
+  base: cf.testing.example
+  system: system.cf.testing.example
+  apps: apps.cf.testing.example
+
+# The per-segment trusted-certs fragment needs meta.ocfp.certs.trusted, which
+# OCFP only defines when it trusts at least one CA.
+secret/certs/org:
+  ca: test-org-ca-certificate
+
+# Operator-provided LDAP settings that the nfs-ldap feature reads in OCFP mode.
+secret/ocfp/nfs/ldap/isolation/segments/cf/nfs/ldap:
+  user: ldap-user
+  pass: ldap-password
+  host: ldap.myhost.com
+  port: "389"
+  proto: tcp
+  fqdn: cn=Users,dc=corp,dc=test,dc=com
+  ca: test-ldap-ca-certificate

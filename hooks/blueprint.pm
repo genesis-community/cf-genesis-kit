@@ -830,7 +830,7 @@ sub _dynamic_isolation_segments {
 			push @iso_seg_merges, "overlay/dynamic-templates/isolation-segment-nfs-ldap.yml";
 			push @iso_seg_merges, "overlay/dynamic-templates/isolation-segment-nfs-ldap-tls.yml"
 				if ($self->want_feature("nfs-ldap-tls"));
-			push @iso_seg_merges, "overlay/dynamic-templates/isolation-segment-nfs-ldap-ocfp.yml", "ocfp/nfs-ldap-data.yml"
+			push @iso_seg_merges, "ocfp/nfs-ldap-data.yml"
 				if ($self->want_feature("ocfp"));
 		}
 	}

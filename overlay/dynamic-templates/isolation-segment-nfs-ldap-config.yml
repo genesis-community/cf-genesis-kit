@@ -18,6 +18,9 @@
   path: /instance_groups/name={{segment-name}}/jobs/name=nfsv3driver/properties/nfsv3driver/ldap_user_fqdn?
   value: (( grab meta.nfs.ldap.fqdn ))
 - type: replace
+  path: /instance_groups/name={{segment-name}}/jobs/name=nfsv3driver/properties/nfsv3driver/ldap_ca_cert?
+  value: (( grab meta.nfs.ldap.ca ))
+- type: replace
   path: /instance_groups/name={{segment-name}}/jobs/name=nfsv3driver/properties/nfsv3driver/allowed-in-source?
   value: ""
 

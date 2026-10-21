@@ -137,9 +137,12 @@ HAProxy is deployed by default unless the environment file lists `no-haproxy`
 
 - `nfs-volume-services` - Alias of `cf-deployment/operations/enable-nfs-volume-service`
 - `nfs-ldap` - Use LDAP to access NFS volume services (requires `nfs-volume-services` feature)
+- `nfs-ldap-tls` - Use LDAP over TLS to access NFS volume services, which implies `nfs-ldap` (requires `nfs-volume-services` feature)
 - `smb-volume-services` - Enable SMB volume service broker capabilities
 
 In an OCFP environment, `nfs-volume-services` on its own deploys the NFS broker and the Diego cell driver with no LDAP settings at all. When we add `nfs-ldap` or `nfs-ldap-tls`, the kit reads the LDAP connection from the `nfs/ldap` secret under the environment's Vault path, and that secret must hold the `user`, `pass`, `host`, `port`, `proto`, `fqdn`, and `ca` keys.
+
+Earlier releases turned LDAP on for every OCFP environment that enabled `nfs-volume-services`. An OCFP environment that relies on NFS LDAP must therefore add `nfs-ldap` or `nfs-ldap-tls` to its features before it upgrades, or the Diego cells lose their LDAP settings on the next deploy.
 
 ### Windows Support Options
 
