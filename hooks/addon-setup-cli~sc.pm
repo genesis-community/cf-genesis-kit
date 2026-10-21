@@ -71,15 +71,18 @@ sub perform {
 	# 3) Find the right download URL for our OS/ARCH, using jq
 	info("Resolving download URL for $os/$arch ...");
 	my $api       = 'https://api.github.com/repos/cloudfoundry-community/cf-targets-plugin/releases/latest';
-	my $asset     = "cf-targets-plugin-$os.$arch";
-	my $jq_filter = qq{.assets[] | select(.name=="$asset") | .browser_download_url};
+	# Upstream has named its assets cf-targets-plugin-linux-amd64, then
+	# cf-targets-plugin-linux.amd64, and from 2.3.0 cf-targets-plugin-2.3.0+linux.amd64,
+	# so match all three forms and take the first.
+	my $pattern   = "^cf-targets-plugin-([0-9.]+[+-])?${os}[.-]${arch}\$";
+	my $jq_filter = qq{[(.assets // [])[] | select(.name | test("$pattern")) | .browser_download_url][0] // empty};
 
 	my ($download_url) = run(
 	{ interactive => 0 },
 	"curl -s $api | jq -r '$jq_filter'"
 	);
 	chomp $download_url;
-	bail("Couldn’t find a $asset asset in release $tag") unless $download_url;
+	bail("Couldn't find a cf-targets-plugin asset for $os/$arch in release $tag") unless $download_url;
 
 	# 4) Download, chmod and install
     info("Downloading cf-targets #C{v$tag} from $download_url ...");
