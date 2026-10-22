@@ -4,3 +4,8 @@
 *.bak
 tmp
 .genesis-bin/
+
+# The blueprint writes generated fragments here, and they can hold resolved
+# secrets, so only the placeholder is tracked.
+overlay/dynamic/*
+!overlay/dynamic/.keep
