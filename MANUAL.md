@@ -156,7 +156,7 @@ Earlier releases also generated the `nfs-ldap-ca-cert` CA for an OCFP environmen
 
 - `isolation-segments` - Enables usage of [isolation segments](https://docs.cloudfoundry.org/adminguide/routing-is.html#overview) using minimal configuration. Supports the nfs-volume-services, nfs-ldap, nfs-ldap-tls, and smb-volume-services features.
 
-Upgrading from an earlier release changes the segment cells in two ways, and each one brings them in line with the main Diego cells. Outside OCFP, segment cells under `nfs-ldap` now trust the `ldap_server_ssl` CA, so their NFS drivers move to TLS on the next deploy. Under OCFP, segment cells now receive the trusted CAs themselves, where earlier releases handed them the unevaluated Vault lookup as text. Two combinations that used to fail the manifest merge now deploy, and they are OCFP segments with no trusted CA and non-OCFP segments with `nfs-ldap-tls`.
+Upgrading from an earlier release changes the segment cells in two ways, and each one brings them in line with the main Diego cells. Outside OCFP, segment cells under `nfs-ldap` now trust the `ldap_server_ssl` CA, so their NFS drivers move to TLS on the next deploy. Under OCFP, segment cells now receive the trusted CAs themselves, where earlier releases handed them the unevaluated Vault lookup as text. Two combinations that used to fail the manifest merge now deploy. These are OCFP segments with no trusted CA, and non-OCFP segments with `nfs-ldap-tls`.
 
 ### Ubuntu Resolute Stemcells
 
