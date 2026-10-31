@@ -658,9 +658,38 @@ sub _enable_resolute {
 		"Remove that parameter."
 	) if $stemcell_os ne 'ubuntu-resolute';
 
+	$self->_refuse_unpatched_garden_runc();
+
 	$self->add_files(
 		'overlay/addons/resolute.yml',
 		'overlay/addons/resolute-addons.yml',
+		'overlay/addons/resolute-garden-runc.yml',
+	);
+}
+
+# _refuse_unpatched_garden_runc - Bail when the cf-deployment tree pins a
+# garden-runc version that overlay/addons/resolute-garden-runc.yml has no
+# patched build of. The overlay replaces the whole release entry with a build
+# of one upstream version, so against any other tree it would silently move
+# garden-runc to a version that cf-deployment was never tested with. The tree
+# is whichever one is on disk at render time (vendored, or swapped in by a
+# cf-deployment-version-* feature), so read cf-deployment.yml rather than
+# trust the kit's version.
+sub _refuse_unpatched_garden_runc {
+	my ($self) = @_;
+
+	my $patched_version = '1.101.0';
+	my $manifest_path = $self->kit->path("cf-deployment/cf-deployment.yml");
+	my ($tree_version) = (-f $manifest_path ? slurp($manifest_path) : '')
+		=~ /^- name: garden-runc\n(?:  .*\n)*?  version: ["']?([^"'\s]+)/m;
+	return if ($tree_version // '') eq $patched_version;
+
+	bail(
+		"The #c{resolute} feature replaces garden-runc with a patched build of " .
+		"v%s, but the cf-deployment tree in use pins garden-runc #R{%s}.  The " .
+		"patched build would change the garden-runc version this cf-deployment " .
+		"was tested with, so the kit needs a patched build of that version first.",
+		$patched_version, $tree_version // 'nothing'
 	);
 }
 
