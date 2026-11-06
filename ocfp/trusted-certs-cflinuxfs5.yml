@@ -1,0 +1,9 @@
+instance_groups:
+- name: diego-cell
+  jobs:
+    - name: cflinuxfs5-rootfs-setup
+      properties:
+        cflinuxfs5-rootfs:
+          trusted_certs:
+            - (( append ))
+            - (( join "" meta.ocfp.certs.trusted ))

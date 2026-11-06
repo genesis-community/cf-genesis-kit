@@ -296,6 +296,22 @@ var _ = Describe("Interal Kit", func() {
 		CredhubVars:   "ocfp-isolation-segments-addl-certs",
 		Exodus:        "ocfp-isolation-segments",
 	})
+	// TRUSTED CERTIFICATES
+	Test(Environment{
+		Name:          "trust-blacksmith-ca",
+		CloudConfig:   "aws",
+		RuntimeConfig: "dns",
+		CPI:           "aws",
+		Exodus:        "trust-blacksmith-ca",
+	})
+	Test(Environment{
+		Name:          "ocfp-trusted-certs",
+		CloudConfig:   "aws",
+		RuntimeConfig: "dns",
+		CPI:           "aws",
+		CredhubVars:   "haproxy-tls",
+		Exodus:        "ocfp-trusted-certs",
+	})
 	// VOLUME SERVICES
 	Test(Environment{
 		Name:          "ocfp-nfs-volume-services",

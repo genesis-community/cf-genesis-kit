@@ -1,0 +1,11 @@
+---
+# An org CA and a Blacksmith CA, so OCFP trusts both CAs on every stack of
+# the Diego cells and the isolation segment cells.
+secret/config/ocfp-trusted-certs/ocf/fqdns:
+  base: cf.testing.example
+  system: system.cf.testing.example
+  apps: apps.cf.testing.example
+secret/certs/org:
+  ca: test-org-ca-certificate
+secret/exodus/ocfp-trusted-certs/blacksmith:
+  blacksmith_ca: test-blacksmith-ca-certificate

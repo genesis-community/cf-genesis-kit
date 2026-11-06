@@ -27,6 +27,10 @@ instance_groups:
     properties:
       cflinuxfs4-rootfs:
         trusted_certs: (( defer grab params.isolation_segments.{{segment-name}}.base_trusted_certs params.isolation_segments.{{segment-name}}.ocfp_trusted_certs params.isolation_segments.{{segment-name}}.additional_trusted_certs ))
+  - name: cflinuxfs5-rootfs-setup
+    properties:
+      cflinuxfs5-rootfs:
+        trusted_certs: (( defer grab params.isolation_segments.{{segment-name}}.base_trusted_certs params.isolation_segments.{{segment-name}}.ocfp_trusted_certs params.isolation_segments.{{segment-name}}.additional_trusted_certs ))
   - name: rep
     properties:
       containers:

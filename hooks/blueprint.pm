@@ -546,7 +546,8 @@ sub process_ocfp_features {
 	if ($trusted_certs_usage) {
 		$self->add_files(
 			"ocfp/trusted-certs.yml",
-			"ocfp/trusted-certs-cflinuxfs4.yml"
+			"ocfp/trusted-certs-cflinuxfs4.yml",
+			"ocfp/trusted-certs-cflinuxfs5.yml"
 		);
 		if ($self->want_feature('cflinuxfs3')) {
 			$self->add_files("ocfp/trusted-certs-cflinuxfs3.yml");

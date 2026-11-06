@@ -1,0 +1,5 @@
+---
+# A Blacksmith CA in the exodus store, so the Diego cells trust it on every
+# stack.
+secret/exodus/trust-blacksmith-ca/blacksmith:
+  blacksmith_ca: test-blacksmith-ca-certificate
