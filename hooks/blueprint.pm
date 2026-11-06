@@ -1423,7 +1423,7 @@ sub validate_classic_features {
 		'small-footprint',
 		'compiled-releases',
 		'resolute',
-		'cflinuxfs3', 'cflinuxfs4',
+		'cflinuxfs3', 'cflinuxfs4', 'cflinuxfs4-default',
 		'isolation-segments',
 		'ssh-proxy-on-routers',
 		'no-tcp-routers',
@@ -1560,7 +1560,7 @@ sub validate_ocfp_features {
 		'haproxy',
 		'no-haproxy', 'external-lb', # opt out of default-on haproxy
 		'self-signed',
-		'cflinuxfs3',
+		'cflinuxfs3', 'cflinuxfs4-default',
 		'isolation-segments',
 		'no-tcp-routers',
 		'stratos-integration',
@@ -1989,6 +1989,11 @@ sub _process_common_positional_features {
 
 	} elsif ($feature eq "cflinuxfs3") {
 		$self->add_files("operations/use-cflinuxfs3.yml");
+
+	# cflinuxfs5 is the default stack, and cflinuxfs4 stays installed beside
+	# it; this keeps cflinuxfs4 as the stack for apps that do not pin one.
+	} elsif ($feature eq "cflinuxfs4-default") {
+		$self->add_files("cf-deployment/operations/set-cflinuxfs4-default-stack.yml");
 
 	# Handle cf-deployment ops files
 	} elsif ($feature =~ /^cf-deployment\/operations\//) {

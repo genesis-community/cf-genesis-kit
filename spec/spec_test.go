@@ -155,6 +155,12 @@ var _ = Describe("Interal Kit", func() {
 		CPI:           "azure",
 	})
 	Test(Environment{
+		Name:          "cflinuxfs4-default",
+		CloudConfig:   "aws",
+		RuntimeConfig: "dns",
+		CPI:           "aws",
+	})
+	Test(Environment{
 		Name:          "no-tcp-routers",
 		CloudConfig:   "aws",
 		RuntimeConfig: "dns",
