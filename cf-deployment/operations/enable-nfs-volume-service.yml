@@ -142,6 +142,6 @@
   path: /releases/-
   value:
     name: nfs-volume
-    sha1: sha256:8fdd01c9fc2c16dee790546a99bf705d381bb5571f92411a51d47c712cdbdc3d
-    url: https://bosh.io/d/github.com/cloudfoundry/nfs-volume-release?v=7.71.0
-    version: 7.71.0
+    sha1: sha256:5fdc327576fbaa500032e41bc76e8c02f6a8f280700bb205fb948392399ac2c8
+    url: https://bosh.io/d/github.com/cloudfoundry/nfs-volume-release?v=7.75.0
+    version: 7.75.0
