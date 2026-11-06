@@ -89,7 +89,8 @@ Using features is a way to configure the kit to suit the requirements of your sp
 - `ssh-proxy-on-routers` - Moves the ssh-proxy from scheduler instance group to the router instance group, placing it on the edge network, and enabling scaling via scaling the routers.
 - `no-tcp-routers` - Removes the tcp-router instance group and associated resource allocations for systems that don't need tcp routes.
 - `uaa-admin-client` - Enables a UAA admin client for scripting/automation.
-- `cflinuxfs3` - Restore support for cflinuxfs3 to Diego cells and isolation segments (by default, only cflinuxfs4 is supported).
+- `cflinuxfs3` - Restore support for cflinuxfs3 to Diego cells and isolation segments (by default, only cflinuxfs5 and cflinuxfs4 are installed).
+- `cflinuxfs4-default` - Keep cflinuxfs4 as the default stack in place of cflinuxfs5. See [Runtime Stack Options](#runtime-stack-options).
 - `resolute` - **Experimental.** Deploy on the ubuntu-resolute stemcell instead of ubuntu-noble. See [Ubuntu Resolute Stemcells](#ubuntu-resolute-stemcells).
 
 ### Database Options
@@ -130,8 +131,12 @@ HAProxy is deployed by default unless the environment file lists `no-haproxy`
 
 ### Runtime Stack Options
 
-- `cflinuxfs3` - Add support for cflinuxfs3 (Ubuntu 18.04 LTS) stack
-- `cflinuxfs4` - Support cflinuxfs4 (Ubuntu 22.04 LTS) stack (default, automatically included)
+- `cflinuxfs3` - Add support for the cflinuxfs3 (Ubuntu 18.04 LTS) stack.
+- `cflinuxfs4-default` - Make cflinuxfs4 (Ubuntu 22.04 LTS) the default stack instead of cflinuxfs5. The feature applies upstream's `set-cflinuxfs4-default-stack.yml`, which sets both the default stack and the Docker staging stack to cflinuxfs4.
+
+Every Linux Diego cell and every isolation segment cell offers both cflinuxfs5 (Ubuntu 24.04 LTS) and cflinuxfs4 (Ubuntu 22.04 LTS), and cflinuxfs5 is the default. The kit gives both stacks the same trusted CAs. Those are the OCFP org and database CAs, the Blacksmith CA when the exodus store holds one, and the `additional_trusted_certs` of each isolation segment.
+
+Upgrading from a kit built on cf-deployment v60 or earlier moves the default stack from cflinuxfs4 to cflinuxfs5, and the new default applies to apps that we create after the upgrade. Cloud Controller records an app's stack when the app is created, so the apps we already run keep cflinuxfs4, and restaging them doesn't change that. A new app that we push without naming a stack lands on cflinuxfs5. That includes the new app that a blue-green deploy pushes under a fresh name, so the first blue-green deploy after the upgrade moves that app to cflinuxfs5. We move an existing app ourselves with `cf push APP -s cflinuxfs5`. If our apps aren't ready for Ubuntu 24.04, we add `cflinuxfs4-default` to the environment's features before we upgrade, and new apps keep landing on cflinuxfs4.
 
 ### Volume Service Options
 

@@ -1,3 +1,8 @@
+[Upgrade Notes]
+- cflinuxfs5 (Ubuntu 24.04 LTS) is now the default stack, because cf-deployment v61.0.0 made it the default and the kit follows upstream. cflinuxfs4 stays installed beside it on every Diego cell and isolation segment cell, and both stacks trust the same OCFP, Blacksmith, and isolation segment CAs.
+- The new default applies to apps that we create after the upgrade. Cloud Controller records an app's stack when the app is created, so the apps we already run keep cflinuxfs4, and restaging them doesn't change that. A new app that we push without naming a stack lands on cflinuxfs5, and so does the new app that a blue-green deploy pushes under a fresh name. We move an existing app ourselves with `cf push APP -s cflinuxfs5`.
+- To keep cflinuxfs4 as the default, we add the new `cflinuxfs4-default` feature to the environment before we upgrade.
+
 
 [Features]
 - Update to cf-deployment v.29.0.0:
