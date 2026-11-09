@@ -445,7 +445,7 @@ instance_groups:
   stemcell: default
   vm_type: ocfp-trusted-certs.cf.vm-nats
 - azs:
-  - (( grab params.cf_az || params.default_cf_az ))
+  - ocfp-trusted-certs-z1
   instances: 1
   jobs:
   - name: postgres
