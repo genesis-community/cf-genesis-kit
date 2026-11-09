@@ -56,29 +56,29 @@ sub build_self {
 }
 
 subtest 'a tree on the patched version passes' => sub {
-	my $self = build_self(manifest => releases_with_garden('1.101.0'));
+	my $self = build_self(manifest => releases_with_garden('1.105.0'));
 	ok(eval { $self->_refuse_unpatched_garden_runc(); 1 }, 'does not bail')
 		or diag $@;
 };
 
 subtest 'a tree on another version bails' => sub {
-	my $self = build_self(manifest => releases_with_garden('1.104.0'));
+	my $self = build_self(manifest => releases_with_garden('1.101.0'));
 	eval { $self->_refuse_unpatched_garden_runc() };
 	my $err = $@;
 	ok($err, 'bails');
-	like($err, qr/1\.104\.0/, 'names the version the tree pins');
-	like($err, qr/1\.101\.0/, 'names the patched version');
+	like($err, qr/1\.101\.0/, 'names the version the tree pins');
+	like($err, qr/1\.105\.0/, 'names the patched version');
 };
 
 subtest 'a quoted version is read' => sub {
-	(my $manifest = releases_with_garden('1.101.0')) =~ s/version: 1\.101\.0/version: "1.101.0"/;
+	(my $manifest = releases_with_garden('1.105.0')) =~ s/version: 1\.105\.0/version: "1.105.0"/;
 	my $self = build_self(manifest => $manifest);
 	ok(eval { $self->_refuse_unpatched_garden_runc(); 1 }, 'does not bail')
 		or diag $@;
 };
 
 subtest 'the next release entry is not read as garden-runc' => sub {
-	(my $manifest = releases_with_garden('1.101.0')) =~ s/^  version: 1\.101\.0\n//m;
+	(my $manifest = releases_with_garden('1.105.0')) =~ s/^  version: 1\.105\.0\n//m;
 	my $self = build_self(manifest => $manifest);
 	eval { $self->_refuse_unpatched_garden_runc() };
 	like($@, qr/nothing/, 'bails without borrowing go-buildpack 1.11.0');

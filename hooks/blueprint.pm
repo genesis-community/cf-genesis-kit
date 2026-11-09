@@ -679,7 +679,7 @@ sub _enable_resolute {
 sub _refuse_unpatched_garden_runc {
 	my ($self) = @_;
 
-	my $patched_version = '1.101.0';
+	my $patched_version = '1.105.0';
 	my $manifest_path = $self->kit->path("cf-deployment/cf-deployment.yml");
 	my ($tree_version) = (-f $manifest_path ? slurp($manifest_path) : '')
 		=~ /^- name: garden-runc\n(?:  .*\n)*?  version: ["']?([^"'\s]+)/m;

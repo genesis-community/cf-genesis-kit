@@ -4,20 +4,20 @@
 # Ubuntu 26.04 stacks the container's AppArmor label on unconfined, so
 # processes carry the label garden-default//&unconfined, and the stock
 # garden-default profile denies signals and ps between processes in the same
-# container.  This release is garden-runc v1.101.0 with only the garden job's
+# container.  This release is garden-runc v1.105.0 with only the garden job's
 # profile changed, so every package and every other job matches the upstream
 # build.  The upstream fix is https://github.com/cloudfoundry/garden-runc-release/pull/421.
 #
 # The resolute feature merges this file after every other release override,
 # so no compiled-release ops file can put the noble-compiled garden-runc back.
 # The feature also refuses to render when the cf-deployment tree pins a
-# garden-runc version other than 1.101.0, because this build only stands in for
+# garden-runc version other than 1.105.0, because this build only stands in for
 # that version.
 
 - type: replace
   path: /releases/name=garden-runc
   value:
     name: garden-runc
-    version: 1.101.0+fivetwenty.1
-    url: https://github.com/fivetwenty-io/garden-runc-release/releases/download/v1.101.0%2Bfivetwenty.1/garden-runc-1.101.0%2Bfivetwenty.1.tgz
-    sha1: 8587791366ff929cbe9a18254a13f81155ec8549
+    version: 1.105.0+fivetwenty.1
+    url: https://github.com/fivetwenty-io/garden-runc-release/releases/download/v1.105.0%2Bfivetwenty.1/garden-runc-1.105.0%2Bfivetwenty.1.tgz
+    sha1: 0a87cb618ab330b090cb940c962b81ee9a01989c
