@@ -167,7 +167,7 @@ The v2.x releases of the CF Genesis Kit represent a major architectural change, 
 
 ## Upgrading from v2.0.x to v2.5.x
 
-The v2.5.x releases introduce important changes, particularly around runtime stacks (changing from cflinuxfs3 to cflinuxfs4 as default).
+The v2.5.x releases introduce important changes, particularly around runtime stacks (changing from cflinuxfs3 to cflinuxfs4 as default). Kits built on cf-deployment v62 change the default again, as described in [Upgrading to cf-deployment v62](#upgrading-to-cf-deployment-v62).
 
 ### Pre-Upgrade Steps
 
@@ -187,7 +187,7 @@ The v2.5.x releases introduce important changes, particularly around runtime sta
 
 1. **Runtime stack changes**:
    
-   In v2.5.x, cflinuxfs4 is the default and only included stack. If you need to continue supporting cflinuxfs3, add:
+   In v2.5.x, cflinuxfs4 is the default and only included stack. Kits built on cf-deployment v62 install cflinuxfs5 as well and make it the default. If you need to continue supporting cflinuxfs3, add:
    
    ```yaml
    kit:
@@ -211,6 +211,12 @@ The v2.5.x releases introduce important changes, particularly around runtime sta
    ```
 
 2. **Plan for application migrations** to cflinuxfs4 if needed
+
+## Upgrading to cf-deployment v62
+
+Upgrading from a kit built on cf-deployment v60 or earlier moves the default stack from cflinuxfs4 to cflinuxfs5, and cflinuxfs4 stays installed on every Linux Diego cell and isolation segment cell. The new default applies only to apps that are created after the upgrade. Cloud Controller records an app's stack when the app is created, so the apps already running keep cflinuxfs4, and restaging them doesn't change that. Docker apps don't record a stack at all, so this applies only to buildpack apps. A rolling or canary push reuses the same app, so it keeps the stack that app already has, while the new app that a blue-green deploy pushes under a fresh name lands on cflinuxfs5.
+
+If your apps aren't ready for Ubuntu 24.04, add the `cflinuxfs4-default` feature to the environment before you upgrade, and new apps keep landing on cflinuxfs4. The older `cflinuxfs4` feature no longer changes anything, and it only prints a warning.
 
 ## Upgrading OCFP Deployments
 

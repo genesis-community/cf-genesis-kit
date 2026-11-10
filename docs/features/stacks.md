@@ -7,17 +7,22 @@ This guide covers the configuration and management of runtime stacks in Cloud Fo
 Runtime stacks are the root filesystems that provide the base operating environment for applications running on Cloud Foundry. The CF Genesis kit currently supports:
 
 - **CFLinuxFS3** - Based on Ubuntu Bionic 18.04 LTS
-- **CFLinuxFS4** - Based on Ubuntu Jammy 22.04 LTS (Default as of kit version 2.5.0)
+- **CFLinuxFS4** - Based on Ubuntu Jammy 22.04 LTS
+- **CFLinuxFS5** - Based on Ubuntu Noble 24.04 LTS (Default as of cf-deployment v62.0.0)
 
 ## Default Configuration
 
-As of version 2.5.0 of the CF Genesis Kit, CFLinuxFS4 is the default and only included stack. CFLinuxFS3 must be explicitly enabled if needed.
+Since the kit moved to cf-deployment v62.0.0, CFLinuxFS5 is the default stack, and CFLinuxFS4 stays installed beside it on every Linux Diego cell and isolation segment cell. CFLinuxFS3 must be explicitly enabled if needed.
+
+To keep CFLinuxFS4 as the default stack in place of CFLinuxFS5, add the `cflinuxfs4-default` feature to the environment. It applies upstream's `set-cflinuxfs4-default-stack.yml`, which sets both the default stack and the Docker staging stack to CFLinuxFS4. The older `cflinuxfs4` feature no longer changes anything, and it only prints a warning.
 
 ## Enabling Runtime Stacks
 
-### CFLinuxFS4 (Default)
+### CFLinuxFS5 (Default) and CFLinuxFS4
 
-CFLinuxFS4 is automatically included in all deployments, so no explicit configuration is needed.
+CFLinuxFS5 and CFLinuxFS4 are both included in all deployments, so no explicit configuration is needed. CFLinuxFS5 is the default.
+
+Cloud Controller records an app's stack when the app is created, so existing apps keep the stack they were created with, and restaging them doesn't change that. Docker apps don't record a stack at all, so this applies only to buildpack apps. A new app that is pushed without naming a stack lands on the default stack, and that includes the new app that a blue-green deploy pushes under a fresh name. A rolling or canary push reuses the same app, so it keeps the stack that app already has. To move an existing app, push it with `cf push APP -s cflinuxfs5`.
 
 ### CFLinuxFS3 (Legacy)
 
@@ -29,18 +34,21 @@ kit:
     - cflinuxfs3
 ```
 
-This will deploy Diego cells with both CFLinuxFS4 and CFLinuxFS3 support, allowing you to run applications on either stack.
+This will deploy Diego cells with CFLinuxFS3 support in addition to CFLinuxFS5 and CFLinuxFS4, allowing you to run applications on either stack.
 
 ## Managing Multiple Stacks
 
-When both stacks are enabled, you can specify which stack to use for an application:
+When more than one stack is installed, you can specify which stack to use for an application:
 
 ```bash
 # Deploy using CFLinuxFS3
 cf push my-app -s cflinuxfs3
 
-# Deploy using CFLinuxFS4 (default if not specified)
+# Deploy using CFLinuxFS4
 cf push my-app -s cflinuxfs4
+
+# Deploy using CFLinuxFS5 (default if not specified)
+cf push my-app -s cflinuxfs5
 ```
 
 ## Stack Migration Strategy
@@ -107,7 +115,7 @@ kit:
     - cflinuxfs3
     - trust-blacksmith-ca  # If using Blacksmith-generated certificates
 
-# Your certificates will be injected into both CFLinuxFS3 and CFLinuxFS4 runtimes
+# Your certificates will be injected into the CFLinuxFS3, CFLinuxFS4, and CFLinuxFS5 runtimes
 ```
 
 For OCFP deployments, use:
@@ -120,7 +128,7 @@ kit:
     - trust-blacksmith-ca
 ```
 
-Which will apply the trusted certificates to both stacks.
+Which will apply the trusted certificates to every installed stack.
 
 ## Isolation Segments and Stacks
 
@@ -135,7 +143,7 @@ kit:
 params:
   isolation_segments:
     - name: isolated-segment-1
-      # This segment will support both CFLinuxFS3 and CFLinuxFS4
+      # This segment will support CFLinuxFS3, CFLinuxFS4, and CFLinuxFS5
 ```
 
 ## Upgrading from Previous Kit Versions
@@ -146,6 +154,10 @@ In v1.x of the kit, CFLinuxFS2 was the default stack. When upgrading from v1.x t
 
 1. The stack will automatically be updated to CFLinuxFS3
 2. If your applications require CFLinuxFS2, they will need to be updated as it's no longer supported
+
+### From a kit on cf-deployment v60 or earlier to cf-deployment v62
+
+The default stack moves from CFLinuxFS4 to CFLinuxFS5, and CFLinuxFS4 stays installed. The new default applies only to apps that are created after the upgrade, because existing apps keep the stack they were created with. If your apps aren't ready for Ubuntu 24.04, add `cflinuxfs4-default` to the environment's features before you upgrade, and new apps keep landing on CFLinuxFS4.
 
 ### From v2.0-2.4 to v2.5+
 
@@ -175,4 +187,5 @@ In earlier v2.x versions, CFLinuxFS3 was the default stack. When upgrading to v2
 ## References
 
 - [Official Cloud Foundry Stack Documentation](https://docs.cloudfoundry.org/devguide/deploy-apps/stacks.html)
+- [CFLinuxFS5 Release Notes](https://github.com/cloudfoundry/cflinuxfs5/releases)
 - [CFLinuxFS4 Release Notes](https://github.com/cloudfoundry/cflinuxfs4/releases)

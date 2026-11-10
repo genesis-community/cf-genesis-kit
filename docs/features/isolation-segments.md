@@ -138,7 +138,7 @@ kit:
 
 ### Runtime Stack Support
 
-By default, isolation segments use CFLinuxFS4. To add CFLinuxFS3 support:
+By default, isolation segments offer both CFLinuxFS5 and CFLinuxFS4, and CFLinuxFS5 is the default stack. To keep CFLinuxFS4 as the default stack, add the `cflinuxfs4-default` feature. Existing apps keep the stack they were created with. To add CFLinuxFS3 support:
 
 ```yaml
 kit:
