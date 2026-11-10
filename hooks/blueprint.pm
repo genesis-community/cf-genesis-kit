@@ -174,6 +174,7 @@ sub process_classic_features {
 		v1-vm-types v2-nats-credentials
 		aws-blobstore-iam gcp-use-access-key
 		blobstore-suffix no-blobstore-suffix
+		cflinuxfs4
 		tls self-signed
 		isolation-segments
 		nfs-ldap nfs-ldap-tls
@@ -1531,9 +1532,20 @@ sub validate_classic_features {
 		'cf-deployment/operations/enable-nfs-ldap-tls' => ['nfs-ldap-tls'],
 	);
 
+	# cflinuxfs4 used to select the stack; it is still accepted, but it changes
+	# nothing now that cflinuxfs4 ships beside cflinuxfs5.
+	my @warnings = ();
+	push @warnings, sprintf(
+		"The #y{cflinuxfs4} feature no longer changes anything, because ".
+		"cflinuxfs4 is still installed alongside cflinuxfs5, which is now the ".
+		"default stack. To keep cflinuxfs4 as the default stack, use the ".
+		"#c{cflinuxfs4-default} feature instead."
+	) if grep { $_ eq 'cflinuxfs4' } $self->features;
+
 	$self->validate_features(
 		valid_features      => \@valid_features,
-		deprecated_features => \%deprecated_features
+		deprecated_features => \%deprecated_features,
+		warnings            => \@warnings
 	);
 }
 
