@@ -2522,7 +2522,6 @@ instance_groups:
         ca_cert: <!{credhub}:loggregator_tls_agent.ca!>
         cert: <!{credhub}:loggregator_tls_agent.certificate!>
         key: <!{credhub}:loggregator_tls_agent.private_key!>
-        use_v2_api: true
       tls:
         ca_cert: <!{credhub}:diego_rep_agent_v2.ca!>
         cert: <!{credhub}:diego_rep_agent_v2.certificate!>
@@ -2556,7 +2555,6 @@ instance_groups:
         ca_cert: <!{credhub}:loggregator_tls_agent.ca!>
         cert: <!{credhub}:loggregator_tls_agent.certificate!>
         key: <!{credhub}:loggregator_tls_agent.private_key!>
-        use_v2_api: true
       tcp:
         enabled: true
       uaa:

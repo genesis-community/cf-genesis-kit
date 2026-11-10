@@ -144,7 +144,6 @@ instance_groups:
       enable_consul_service_registration: false
       enable_declarative_healthcheck: true
       loggregator:
-        use_v2_api: true
         ca_cert: "((loggregator_tls_agent.ca))"
         cert: "((loggregator_tls_agent.certificate))"
         key: "((loggregator_tls_agent.private_key))"
@@ -164,7 +163,6 @@ instance_groups:
       bpm:
         enabled: true
       loggregator:
-        use_v2_api: true
         ca_cert: "((loggregator_tls_agent.ca))"
         cert: "((loggregator_tls_agent.certificate))"
         key: "((loggregator_tls_agent.private_key))"
