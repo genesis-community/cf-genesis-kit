@@ -1,6 +1,12 @@
 ---
 meta:
   stratos_domain: (( concat "console." params.apps_domain ))
+  stratos_system_domain: (( concat "console." params.system_domain ))
+  # The console is reachable both on its app route and on the system domain,
+  # where an operator expects to find a foundation's other service interfaces,
+  # so UAA has to accept a sign-in callback from either name. A UAA client
+  # takes several redirect URIs as one comma-separated string.
+  stratos_redirect_uris: (( concat "https://" meta.stratos_domain "/pp/v1/auth/sso_login_callback,https://" meta.stratos_system_domain "/pp/v1/auth/sso_login_callback" ))
 
 instance_groups:
 - name: uaa
@@ -11,7 +17,7 @@ instance_groups:
         clients:
           stratos_client:
             authorized-grant-types: authorization_code,client_credentials,refresh_token
-            redirect-uri: (( concat "https://" meta.stratos_domain "/pp/v1/auth/sso_login_callback" ))
+            redirect-uri: (( grab meta.stratos_redirect_uris ))
             autoapprove: true # Bypass users approval
             access-token-validity: 1200
             authorities: uaa.none

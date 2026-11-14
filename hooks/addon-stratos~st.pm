@@ -85,6 +85,116 @@ sub perform {
 	return $self->open_in_browser()        if ( $command eq 'open' );
 }
 
+# Resolve the CF API URL and the two domains the console needs.
+#
+# This addon is the only hook in the kit that reads a top-level `cf:` key, and
+# no OCFP environment file defines one -- those set `params.system_domain` and
+# `params.apps_domain`, which is the convention the rest of the kit follows. Read
+# `cf.*` first so an environment that does define it keeps working, then fall
+# back to `params.*`, and finally to the exodus data a successful CF deploy
+# writes. The api_domain exodus key already carries the full hostname, so the
+# system domain comes from stripping its leading `api.` label.
+sub _cf_endpoints {
+	my ($self) = @_;
+	my $env = $self->env;
+	my $data = eval { $self->exodus_data } || {};
+
+	my $system_domain =
+	     $env->lookup( 'cf.system_domain',     '' )
+	  || $env->lookup( 'params.system_domain', '' );
+	my $apps_domain =
+	     $env->lookup( 'cf.apps_domain',     '' )
+	  || $env->lookup( 'params.apps_domain', '' )
+	  || $data->{apps_domain}
+	  || '';
+
+	my $api_domain = $data->{api_domain} || '';
+	unless ($system_domain) {
+		( $system_domain = $api_domain ) =~ s/^api\.//;
+	}
+
+	my $api_url =
+	     $env->lookup( 'cf.api_url', '' )
+	  || ( $api_domain    ? "https://$api_domain"        : '' )
+	  || ( $system_domain ? "https://api.$system_domain" : '' );
+
+	return {
+		api_url       => $api_url,
+		system_domain => $system_domain,
+		apps_domain   => $apps_domain,
+	};
+}
+
+# Read a secret from the vault, generating and storing one the first time.
+#
+# The value is 32 bytes read from /dev/urandom and rendered as hex. The
+# previous implementation hashed rand(10000), which yields at most about
+# fourteen bits of entropy however long the hex string it produces happens to
+# look.
+sub _persistent_secret {
+	my ( $self, $path, $key, $description ) = @_;
+	my $env = $self->env;
+
+	# Ask for the key by name.  Service::Vault::get returns a hashref of every
+	# key at the path when no key is named, and an unreadable path comes back
+	# as an empty hashref rather than undef, so a pathwise read looks like a
+	# perfectly good secret and stringifies into the manifest as HASH(0x...).
+	my $existing = $env->vault->get( $env->secrets_base . $path, $key );
+	return $existing if defined($existing) && $existing ne '';
+
+	my $bytes;
+	if ( open my $urandom, '<:raw', '/dev/urandom' ) {
+		read $urandom, $bytes, 32;
+		close $urandom;
+	}
+	bail( "Could not read /dev/urandom to generate the Stratos %s", $description )
+	  unless defined($bytes) && length($bytes) == 32;
+
+	my $secret = unpack( 'H*', $bytes );
+	info( "Generating a new Stratos %s and storing it in the vault.", $description );
+	# set() takes key/value pairs; a lone value would be read as a bare key
+	# and send it looking for a controlling terminal to prompt on.
+	$env->vault->set( $env->secrets_base . $path, $key, $secret )
+	  or bail( "Failed to store the Stratos %s in the vault", $description );
+
+	return $secret;
+}
+
+# Resolve the console's database coordinates.
+#
+# The info path used to read these from the vault while the deploy path read
+# them from an exodus key that nothing in the kit ever writes, so the service
+# the deploy actually created was always built from the fallback defaults and
+# pointed at an empty hostname. Resolve them once, here, and let both paths
+# call it.
+#
+# Note that sslmode must be a value libpq accepts. The old deploy-path default
+# was "disabled", which Postgres rejects; the correct spelling is "disable".
+sub _stratos_db {
+	my ($self) = @_;
+	my $env = $self->env;
+
+	my %db = (
+		scheme   => $env->params->{db_scheme}   || 'postgres',
+		hostname => $env->params->{db_hostname} || '',
+		username => $env->params->{db_username} || 'stratos',
+		password => $env->params->{db_password} || 'stratos',
+		port     => $env->params->{db_port}     || 5432,
+		database => $env->params->{db_database} || 'stratos',
+		sslmode  => $env->params->{db_sslmode}  || 'disable',
+	);
+
+	return \%db unless $env->has_feature('ocfp');
+
+	my $base = $env->secrets_base . "stratos/db/stratos";
+	for my $field (qw/scheme hostname username password port database sslmode/) {
+		my $value = $env->vault->get("$base:$field");
+		$db{$field} = $value if defined($value) && $value ne '';
+	}
+
+	return \%db;
+}
+
 sub _get_stratos_info {
 	my ($self) = @_;
 	my $env = $self->env;
@@ -100,20 +210,21 @@ sub _get_stratos_info {
 	#$deployment_exists = grep { $_ eq $deployment_name } @deployments;
 
 	# Get Stratos information from environment
-	my $system_domain  = $env->lookup( 'cf.system_domain', '' );
-	my $apps_domain    = $env->lookup( 'cf.apps_domain',   '' );
+	my $endpoints      = $self->_cf_endpoints;
+	my $system_domain  = $endpoints->{system_domain};
+	my $apps_domain    = $endpoints->{apps_domain};
 	my $stratos_domain = '';
 	my $stratos_url    = '';
 
 	# Get CF configuration
-	my $cf_api      = $env->lookup( 'cf.api_url',          '' );
+	my $cf_api      = $endpoints->{api_url};
 	my $cf_org      = $env->lookup( 'stratos.cf_org',      'system' );
 	my $cf_space    = $env->lookup( 'stratos.cf_space',    'stratos' );
 	my $cf_app_name = $env->lookup( 'stratos.cf_app_name', 'apps' );
 
 	# Get Stratos specific configuration
 	# Command line version takes precedence over environment config
-	my $stratos_version = $self->{options}->{version} // $env->lookup( 'stratos.version', '4.9.2' );
+	my $stratos_version = $self->{options}->{version} // $env->lookup( 'stratos.version', '5.5.3' );
 	my $stratos_admin   = $env->lookup( 'stratos.admin_user', 'admin' );
 
 	# Get database connection information
@@ -121,38 +232,15 @@ sub _get_stratos_info {
 	# Default configuration
 	$stratos_domain = "console.${apps_domain}";
 	$stratos_url    = "https://${stratos_domain}";
-	my $stratos_db_scheme   = $env->params->{db_scheme}   || 'postgres';
-	my $stratos_db_hostname = $env->params->{db_hostname} || '';
-	my $stratos_db_username = $env->params->{db_username} || 'stratos';
-	my $stratos_db_password = $env->params->{db_password} || 'stratos';
-	my $stratos_db_port     = $env->params->{db_port}     || 5432;
-	my $stratos_db_database = $env->params->{db_database} || 'stratos';
-	my $stratos_db_sslmode  = $env->params->{db_sslmode}  || 'disabled';    # verify-ca
+	my $db = $self->_stratos_db;
 
 	# Check for OCFP requested feature
 	if ( $self->env->has_feature('ocfp') ) {
 
 		# Get Stratos configuration from vault.
 		# FIXME: Should we bail if not set?
-		$stratos_domain    = $env->ocfp_config_lookup("fqdns")->{stratos} || '';
-		$stratos_url       = "https://${stratos_domain}";
-		$stratos_db_scheme = $env->vault->get( $env->secrets_base . "stratos/db/stratos:scheme" )
-		  || 'postgres';
-		$stratos_db_hostname =
-		  $env->vault->get( $env->secrets_base . "stratos/db/stratos:hostname" )
-		  || '';
-		$stratos_db_username =
-		  $env->vault->get( $env->secrets_base . "stratos/db/stratos:username" )
-		  || 'stratos';
-		$stratos_db_password =
-		  $env->vault->get( $env->secrets_base . "stratos/db/stratos:password" )
-		  || 'stratos';
-		$stratos_db_port = $env->vault->get( $env->secrets_base . "stratos/db/stratos:port" )
-		  || 5432;
-		$stratos_db_database =
-		  $env->vault->get( $env->secrets_base . "stratos/db/stratos:database" )
-		  || 'stratos';
-		$stratos_db_sslmode = "disable";    # or "verify-ca"
+		$stratos_domain = $env->ocfp_config_lookup("fqdns")->{stratos} || '';
+		$stratos_url    = "https://${stratos_domain}";
 	}
 
 	# Determine if Stratos is deployed as a CF app
@@ -178,8 +266,10 @@ sub _get_stratos_info {
 	}
 
 	# FIXME: Should we bail or generate instead of "" if not set?
-	my $admin_password = $env->vault->get( $env->secrets_base . "stratos:admin_password" ) || "";
-	my $session_secret = $env->vault->get( $env->secrets_base . "stratos:session_secret" ) || "";
+	# Read the session secret from the path the deploy writes. It used to be
+	# read from stratos:session_secret and written to stratos/session_secret,
+	# so info reported an empty secret even right after a successful deploy.
+	my $session_secret = $env->vault->get( $env->secrets_base . "stratos/session_secret" ) || "";
 	my $data           = $self->exodus_data;
 
 	# FIXME: Should we bail if not set?
@@ -197,8 +287,6 @@ sub _get_stratos_info {
 		url                => $stratos_url,
 		version            => $stratos_version,
 		admin_user         => $stratos_admin,
-		admin_password     => $admin_password ? $admin_password : "",
-		has_admin_password => $admin_password ? 1               : 0,
 		session_secret     => $session_secret ? $session_secret : "",
 		cf_api             => $cf_api,
 		cf_org             => $cf_org,
@@ -210,15 +298,7 @@ sub _get_stratos_info {
 		stratos_domain     => $stratos_domain,
 
 		# Database configuration
-		db => {
-			scheme   => $stratos_db_scheme,
-			hostname => $stratos_db_hostname,
-			username => $stratos_db_username,
-			password => $stratos_db_password,
-			port     => $stratos_db_port,
-			database => $stratos_db_database,
-			sslmode  => $stratos_db_sslmode,
-		},
+		db => $db,
 
 		# UAA client information
 		client => {
@@ -280,7 +360,6 @@ sub display_info {
 		  "\nVersion: %s" .
 		  "\n\nAuthentication:" .
 		  "\n  Admin User: %s" .
-		  "\n  Admin Password: %s" .
 		  "\nUAA Client Details:" .
 		  "\n  Client ID: %s" .
 		  "\n  Client Secret: %s",
@@ -289,9 +368,6 @@ sub display_info {
 		$info->{url} ? $info->{url} : "Not configured",
 		$info->{version},
 		$info->{admin_user},
-		$info->{has_admin_password}
-		? $info->{admin_password}
-		: "Not found in vault",
 		$info->{client}->{id},
 		$info->{client}->{secret}
 	);
@@ -330,9 +406,9 @@ sub display_info {
 
 	# Show helpful commands
 	info("\nHelpful Commands:");
-	info( "  Open in browser: %s %s stratos open", $self->env->get_call_path_with_env() )
+	info( "  Open in browser: %s %s do stratos open", $self->env->get_call_path_with_env() )
 	  ;    # returns two strings
-	info( "  Deploy Stratos: %s %s stratos deploy", $self->env->get_call_path_with_env() )
+	info( "  Deploy Stratos: %s %s do stratos deploy", $self->env->get_call_path_with_env() )
 	  ;    # returns two strings
 
 	if ( $info->{is_cf_app_deployed} ) {
@@ -382,32 +458,38 @@ sub deploy_stratos {
 
 	# Get environment config and exodus data
 	my $data              = $self->exodus_data;
-	my $system_api_domain = $data->{cf}{api_url} || '';
+	my $endpoints = $self->_cf_endpoints;
+	my $system_api_domain = $endpoints->{api_url};
 	$system_api_domain =~ s/^https?:\/\///;    # Remove protocol
 
 	# Get database connection information
-	my $stratos_db_scheme   = $data->{stratos}{db}{scheme}   || 'postgres';
-	my $stratos_db_hostname = $data->{stratos}{db}{hostname} || '';
-	my $stratos_db_username = $data->{stratos}{db}{username} || 'stratos';
-	my $stratos_db_password = $data->{stratos}{db}{password} || 'stratos';
-	my $stratos_db_port     = $data->{stratos}{db}{port}     || 5432;
-	my $stratos_db_database = $data->{stratos}{db}{database} || 'stratos';
-	my $stratos_db_sslmode  = $data->{stratos}{db}{sslmode}  || 'disabled';
+	my $db                  = $self->_stratos_db;
+	my $stratos_db_scheme   = $db->{scheme};
+	my $stratos_db_hostname = $db->{hostname};
+	my $stratos_db_username = $db->{username};
+	my $stratos_db_password = $db->{password};
+	my $stratos_db_port     = $db->{port};
+	my $stratos_db_database = $db->{database};
+	my $stratos_db_sslmode  = $db->{sslmode};
+
+	bail(
+		    "No database hostname configured for Stratos. Write the console's "
+		  . "database coordinates to %sstratos/db/stratos before deploying.",
+		$env->secrets_base
+	) unless $stratos_db_hostname;
 
 	# Get or generate session store secret
 	my $stratos_session_store_sekret =
-	  $env->vault->get( $env->secrets_base . "stratos/session_secret" );
-	unless ($stratos_session_store_sekret) {
+	  $self->_persistent_secret( "stratos", "session_store", 'session store secret' );
 
-		# Generate session secret using Perl instead of shell command
-		my $random = rand(10000);
-		use Digest::SHA qw(sha256_hex);
-		$stratos_session_store_sekret = sha256_hex($random);
-
-		# FIXME: Should we bail if set fails?
-		$env->vault->set( $env->secrets_base . "stratos/session_secret",
-			$stratos_session_store_sekret );
-	}
+	# Jetstream encrypts the OAuth tokens it stores for each registered
+	# endpoint, and since 5.x the binary buildpack no longer defaults the key
+	# the way the old source buildpack did. It has to be stable across pushes:
+	# a new key makes every token already in the database undecryptable, which
+	# presents to the operator as a console that has silently forgotten its
+	# endpoints.
+	my $stratos_encryption_key =
+	  $self->_persistent_secret( "stratos", "encryption_key", 'encryption key' );
 
 	# FIXME: Should we bail if not set?
 	my $stratos_client        = $data->{"stratos_client"} || "";
@@ -423,13 +505,40 @@ sub deploy_stratos {
 	my $stratos_version = $options{version} // $info->{version};
 	info( "Using Stratos version: %s%s",
 		$stratos_version, $options{version} ? " (from command line)" : "" );
+	# Stratos renamed its CF bundle at v5.0.0, from stratos-ui- to stratos-cf-,
+	# so the asset name depends on the major version we are asking for.
+	my ($stratos_major) = $stratos_version =~ /^(\d+)/;
+	$stratos_major //= 0;
+	my $stratos_asset =
+	  ( $stratos_major >= 5 )
+	  ? "stratos-cf-v${stratos_version}.zip"
+	  : "stratos-ui-v${stratos_version}.zip";
 	my $stratos_releases_url =
-"https://github.com/cloudfoundry/stratos/releases/download/v${stratos_version}/stratos-ui-v${stratos_version}.zip";
+	  "https://github.com/cloudfoundry/stratos/releases/download/v${stratos_version}/${stratos_asset}";
 	my $stratos_sso_options = $env->lookup( 'stratos.sso_options', 'nosplash, logout' );
 
 	# Domain setup
-	my $apps_domain    = $env->lookup( 'cf.apps_domain', '' );
+	my $apps_domain    = $endpoints->{apps_domain};
 	my $stratos_domain = "console.${apps_domain}";
+
+	# On an OCFP environment the console hostname comes from the bloc's FQDN
+	# map in the vault, and ocfp/stratos.yml has already registered that exact
+	# hostname as the UAA client's redirect URI. The info path honours the map
+	# and this path did not, so a bloc whose map differs from console.<apps
+	# domain> would push a route that SSO refuses to redirect back to.
+	if ( $env->has_feature('ocfp') ) {
+		my $mapped = $env->ocfp_config_lookup("fqdns")->{stratos};
+		$stratos_domain = $mapped if $mapped;
+	}
+
+	# The console answers on the system domain as well as on its app route,
+	# because an operator looking for a foundation's service interfaces looks
+	# for them under system.<foundation>, next to shield, concourse, and the
+	# rest.  Stratos is an ordinary CF app rather than a BOSH deployment behind
+	# the ingress, so that second name is a second route on the app.
+	my $stratos_alt_domain = "console." . $endpoints->{system_domain};
+	$stratos_alt_domain = ''
+	  if !$endpoints->{system_domain} || $stratos_alt_domain eq $stratos_domain;
 
 	# Get file or download Stratos release
 	my $chdir = $tmp_dir;
@@ -438,40 +547,43 @@ sub deploy_stratos {
 	if ( $options{file} && -f $options{file} ) {
 		info( "Using provided Stratos file: %s", $options{file} );
 		run(
-			{interactive => 0},
-			{ onfailure => "Failed to unzip Stratos file" }, 'unzip', '-o', $options{file}
+			{ interactive => 0, onfailure => "Failed to unzip Stratos file" },
+			'unzip', '-o', $options{file}
 		);
 	}
 	else {
 		info( "Downloading Stratos %s...", $stratos_version );
+
+		# Download to a name we choose rather than the one wget derives from the
+		# URL. The two used to disagree over the version's leading "v", so the
+		# unzip that followed asked for a file that was never written.
 		run(
-			{interactive => 0},
-			{ onfailure => "Failed to download Stratos" }, 'wget', $stratos_releases_url
+			{ interactive => 0, onfailure => "Failed to download Stratos" },
+			'wget', '-O', 'stratos.zip', $stratos_releases_url
 		);
 		run(
-			{interactive => 0},
-			{ onfailure => "Failed to unzip Stratos" },
-			'unzip', '-o', "stratos-ui-${stratos_version}.zip"
+			{ interactive => 0, onfailure => "Failed to unzip Stratos" },
+			'unzip', '-o', 'stratos.zip'
 		);
-		unlink("stratos-ui-${stratos_version}.zip");
+		unlink('stratos.zip');
 	}
 
 	# Target the correct CF organization and space
 	info("Targeting CF organization 'system' and space 'stratos'...");
 	run(
-		{interactive => 0},
-		{ onfailure => "Failed to create space" },
+		{ interactive => 0, onfailure => "Failed to create space" },
 		'cf', 'create-space', '-o', 'system', 'stratos'
 	);
 	run(
-		{interactive => 0},
-		{ onfailure => "Failed to target space" },
+		{ interactive => 0, onfailure => "Failed to target space" },
 		'cf', 'target', '-o', 'system', '-s', 'stratos'
 	);
 
 	# The console's SSH terminal dials the platform's app SSH proxy from inside
 	# its own container, so the space needs an egress rule allowing it.
 	$self->_ensure_app_ssh_security_group($tmp_dir);
+	$self->_ensure_api_security_group( $tmp_dir, $endpoints->{api_url} );
+	$self->_ensure_db_security_group( $tmp_dir, $db );
 
 	# Configure database via CUPS
 	info("Configuring Stratos Database Connection via CUPS Services");
@@ -480,24 +592,23 @@ sub deploy_stratos {
 	# Check if service already exists
 	my ( $org_guid, $org_rc ) =
 	  run(
-			{interactive => 0},
-			{ stderr => 0 }, 'cf', 'org', 'system', '--guid'
+			{ interactive => 0, stderr => 0 },
+			'cf', 'org', 'system', '--guid'
 		);
 	bail("Failed to get organization GUID") if $org_rc != 0;
 	chomp($org_guid);
 
 	my ( $space_guid, $space_rc ) =
 	  run(
-			{interactive => 0},
-			{ stderr => 0 }, 'cf', 'space', 'stratos', '--guid'
+			{ interactive => 0, stderr => 0 },
+			'cf', 'space', 'stratos', '--guid'
 		);
 	bail("Failed to get space GUID") if $space_rc != 0;
 	chomp($space_guid);
 
 	# Check if service exists using CF API
 	my ( $svc_list, $svc_rc ) = run(
-		{interactive => 0},
-		{ stderr => 0 },
+		{ interactive => 0, stderr => 0 },
 		'cf', 'curl',
 		"/v3/service_instances?organization_guids=${org_guid}&space_guids=${space_guid}"
 	);
@@ -507,8 +618,8 @@ sub deploy_stratos {
 	my $svc_exists = '';
 	my ( $jq_out, $jq_rc ) =
 	  run(
-			{interactive => 0},
-			{ stderr => 0 }, 'jq', '-r', ".resources[]|select(.name|test(\"${svc_name}\"))|.name"
+			{ interactive => 0, stderr => 0 },
+			'jq', '-r', ".resources[]|select(.name|test(\"${svc_name}\"))|.name"
 		);
 	if ( $jq_rc == 0 ) {
 
@@ -520,8 +631,7 @@ sub deploy_stratos {
 		close $svc_fh;
 
 		( $svc_exists, $jq_rc ) = run(
-			{interactive => 0},
-			{ stderr => 0 },
+			{ interactive => 0, stderr => 0 },
 			'jq', '-r', ".resources[]|select(.name|test(\"${svc_name}\"))|.name",
 			$temp_svc_file
 		);
@@ -533,7 +643,7 @@ sub deploy_stratos {
 	open my $db_fh, '>', "$tmp_dir/db.yml"
 	  or bail("Could not create database config file: $!");
 	print $db_fh <<EOF;
-uri: "$stratos_db_scheme://"
+uri: "$stratos_db_scheme://$stratos_db_username:$stratos_db_password\@$stratos_db_hostname:$stratos_db_port/$stratos_db_database?sslmode=$stratos_db_sslmode"
 username: "$stratos_db_username"
 password: "$stratos_db_password"
 hostname: "$stratos_db_hostname"
@@ -545,8 +655,8 @@ EOF
 
 	my ( $db_json, $rc_db ) =
 	  run(
-			{interactive => 0},
-			{ stderr => 0 }, 'spruce', 'json', "$tmp_dir/db.yml"
+			{ interactive => 0, stderr => 0 },
+			'spruce', 'json', "$tmp_dir/db.yml"
 		);
 	bail("Failed to convert database config to JSON") if $rc_db != 0;
 	chomp($db_json);
@@ -562,16 +672,14 @@ EOF
 	if ( $svc_exists eq $svc_name ) {
 		info( "Service %s was found, updating existing cups service definition.", $svc_name );
 		run(
-			{interactive => 0},
-			{ onfailure => "Failed to update service" },
+			{ interactive => 0, onfailure => "Failed to update service" },
 			'cf', 'uups', $svc_name, '-p', $db_json_file
 		);
 	}
 	else {
 		info( "Service %s was not found, creating cups service definition.", $svc_name );
 		run(
-			{interactive => 0},
-			{ onfailure => "Failed to create service" },
+			{ interactive => 0, onfailure => "Failed to create service" },
 			'cf', 'cups', $svc_name, '-p', $db_json_file
 		);
 	}
@@ -580,13 +688,15 @@ EOF
 
 	# Create application manifest
 	info("Creating application manifest...");
+	my $sso_whitelist = join( ',',
+		"https://$stratos_domain/*",
+		$stratos_alt_domain ? "https://$stratos_alt_domain/*" : () );
 	open my $manifest, '>', "$tmp_dir/manifest.yml"
 	  or bail("Could not create manifest file: $!");
 	print $manifest <<EOF;
 ---
 applications:
 - name: apps
-  host: console
   health-check-type: port
   memory: $options{memory}
   disk_quota: $options{disk}
@@ -594,14 +704,19 @@ applications:
   buildpacks:
   - $options{buildpack}
   stack: $options{stack}
+  command: ./jetstream
+  routes:
+  - route: $stratos_domain
   env:
     CF_API_URL: https://$system_api_domain
     CF_CLIENT: $stratos_client
     CF_CLIENT_SECRET: $stratos_client_secret
     SESSION_STORE_SECRET: $stratos_session_store_sekret
     SSO_OPTIONS: $stratos_sso_options
-    SSO_WHITELIST: https://$stratos_domain/*
+    SSO_WHITELIST: $sso_whitelist
     SSO_LOGIN: "true"
+    DATABASE_PROVIDER: pgsql
+    ENCRYPTION_KEY: $stratos_encryption_key
     DB_SSL_MODE: $stratos_db_sslmode
   services:
   - console_db_tls_verify_ca
@@ -613,6 +728,23 @@ EOF
 	my ( $out, $rc, $err ) =
 	  run( { stderr => 0 }, 'cf', 'push', '-f', "$tmp_dir/manifest.yml" );
 	bail( "Failed to deploy Stratos: %s", $err || $out ) unless $rc == 0;
+
+	# Map the system-domain name after the push rather than listing it in the
+	# manifest, so that a foundation whose system domain is not available to
+	# the console's organization still ends up with a working app route
+	# instead of a push that fails outright.
+	if ($stratos_alt_domain) {
+		info( "Mapping the console onto %s...", $stratos_alt_domain );
+		my ( $map_out, $map_rc, $map_err ) = run(
+			{ stderr => 0 },   'cf',
+			'map-route',       $info->{cf_app_name},
+			$endpoints->{system_domain}, '--hostname', 'console'
+		);
+		warning(
+			"Could not map %s onto the console, which will answer on %s only: %s",
+			$stratos_alt_domain, $stratos_domain, $map_err || $map_out
+		) unless $map_rc == 0;
+	}
 
 	# Update the status in the info object
 	$info->{is_cf_app_deployed} = 1;
@@ -628,44 +760,32 @@ EOF
 	return $self->done();
 }
 
-sub _ensure_app_ssh_security_group {
-	my ( $self, $tmp_dir ) = @_;
+# Resolve a host to its IPv4 addresses, passing a literal address through
+# untouched rather than asking a resolver about it.
+sub _resolve_addrs {
+	my ( $self, $host ) = @_;
+	return ($host) if $host =~ /^\d+\.\d+\.\d+\.\d+$/;
+	my @entry = gethostbyname($host);
+	return map { inet_ntoa($_) } @entry[ 4 .. $#entry ];
+}
 
-	my $sg_name = 'stratos-app-ssh';
-
-	my ( $info_json, $rc ) =
-	  run( {interactive => 0, stderr => 0 }, 'cf', 'curl', '/v2/info' );
-	if ( $rc != 0 ) {
-		warning("Could not read /v2/info; skipping %s security group setup", $sg_name);
-		return;
-	}
-
-	my ($endpoint) = $info_json =~ /"app_ssh_endpoint":\s*"([^"]+)"/;
-	unless ($endpoint) {
-		warning("No app_ssh_endpoint advertised; skipping %s security group setup", $sg_name);
-		return;
-	}
-
-	my ( $host, $port ) = $endpoint =~ /^(.*?):(\d+)$/;
-	( $host, $port ) = ( $endpoint, 2222 ) unless $host;
-
-	my @addrs = gethostbyname($host);
-	@addrs = map { inet_ntoa($_) } @addrs[ 4 .. $#addrs ];
-	unless (@addrs) {
-		warning( "Could not resolve app SSH host '%s'; skipping %s security group setup",
-			$host, $sg_name );
-		return;
-	}
+# Create or update a security group and bind it to the console's space.
+#
+# An app container gets no egress to the BOSH network under the default
+# security groups, so anything the console has to reach on an internal address
+# needs a rule of its own.
+sub _apply_security_group {
+	my ( $self, $tmp_dir, $sg_name, $description, $addrs, $port, @lifecycles ) = @_;
 
 	my $rules = '[' . join(
 		',',
 		map {
 			sprintf(
 				'{"protocol":"tcp","destination":"%s","ports":"%s",'
-				  . '"description":"console access to the app SSH proxy"}',
-				$_, $port
+				  . '"description":"%s"}',
+				$_, $port, $description
 			)
-		} @addrs
+		} @$addrs
 	) . ']';
 
 	my $sg_file = "$tmp_dir/$sg_name.json";
@@ -674,44 +794,137 @@ sub _ensure_app_ssh_security_group {
 	print $sg_fh $rules;
 	close $sg_fh;
 
-	if ( run( {interactive => 0, passfail => 1, stderr => 0 }, 'cf', 'security-group', $sg_name ) ) {
+	if ( run( { interactive => 0, passfail => 1, stderr => 0 }, 'cf', 'security-group', $sg_name ) )
+	{
 		run(
-			{interactive => 0},
-			{ onfailure => "Failed to update security group $sg_name" },
+			{ interactive => 0, onfailure => "Failed to update security group $sg_name" },
 			'cf', 'update-security-group', $sg_name, $sg_file
 		);
 	}
 	else {
 		run(
-			{interactive => 0},
-			{ onfailure => "Failed to create security group $sg_name" },
+			{ interactive => 0, onfailure => "Failed to create security group $sg_name" },
 			'cf', 'create-security-group', $sg_name, $sg_file
 		);
 	}
 
-	run(
-		{interactive => 0},
-		{ onfailure => "Failed to bind security group $sg_name" },
-		'cf', 'bind-security-group', $sg_name, 'system',
-		'--space', 'stratos', '--lifecycle', 'running'
-	);
+	for my $lifecycle (@lifecycles) {
+		run(
+			{ interactive => 0, onfailure => "Failed to bind security group $sg_name" },
+			'cf', 'bind-security-group', $sg_name, 'system',
+			'--space', 'stratos', '--lifecycle', $lifecycle
+		);
+	}
 	unlink $sg_file;
+}
+
+sub _ensure_app_ssh_security_group {
+	my ( $self, $tmp_dir ) = @_;
+
+	my $sg_name = 'stratos-app-ssh';
+
+	my ( $info_json, $rc ) =
+	  run( { interactive => 0, stderr => 0 }, 'cf', 'curl', '/v2/info' );
+	if ( $rc != 0 ) {
+		warning( "Could not read /v2/info; skipping %s security group setup", $sg_name );
+		return;
+	}
+
+	my ($endpoint) = $info_json =~ /"app_ssh_endpoint":\s*"([^"]+)"/;
+	unless ($endpoint) {
+		warning( "No app_ssh_endpoint advertised; skipping %s security group setup", $sg_name );
+		return;
+	}
+
+	my ( $host, $port ) = $endpoint =~ /^(.*?):(\d+)$/;
+	( $host, $port ) = ( $endpoint, 2222 ) unless $host;
+
+	my @addrs = $self->_resolve_addrs($host);
+	unless (@addrs) {
+		warning( "Could not resolve app SSH host '%s'; skipping %s security group setup",
+			$host, $sg_name );
+		return;
+	}
+
+	$self->_apply_security_group( $tmp_dir, $sg_name,
+		'console access to the app SSH proxy',
+		\@addrs, $port, 'running' );
 
 	info( "Security group %s bound to system/stratos for app SSH proxy %s",
 		$sg_name, $endpoint );
 }
 
-sub _generate_password {
-	my ( $self, $length ) = @_;
-	$length ||= 16;
+# Open egress from the console's space to its database.
+#
+# An app container gets no egress to the BOSH network under the default
+# security groups, so jetstream's connection to a colocated Postgres is
+# refused outright. The rule is needed during staging as well as at runtime,
+# because the buildpack's own start-up check dials the database.
+# Open egress from the console's space to the Cloud Foundry API.
+#
+# The console talks to CF over the same public API route an operator uses, and
+# on a foundation whose ingress sits on an internal address that route resolves
+# to a destination the default security groups do not cover: public_networks
+# deliberately excludes the private ranges, and the load balancer is normally
+# in one. Diego rejects the blocked connection rather than dropping it, so the
+# symptom is jetstream exiting at start-up with "could not get the info for
+# Cloud Foundry ... connection refused", which reads like an API outage rather
+# than a policy decision.
+sub _ensure_api_security_group {
+	my ( $self, $tmp_dir, $api_url ) = @_;
 
-	my @chars =
-	  ( 'a' .. 'z', 'A' .. 'Z', '0' .. '9', '_', '-', '!', '@', '#', '$', '%', '^', '&', '*' );
-	my $password = '';
-	$password .= $chars[ int( rand( scalar @chars ) ) ] for ( 1 .. $length );
+	my $sg_name = 'stratos-api';
 
-	return $password;
+	my ( $scheme, $host, $port ) = $api_url =~ m{^(https?)://([^/:]+)(?::(\d+))?};
+	unless ($host) {
+		warning( "Could not parse the CF API URL '%s'; skipping %s security group setup",
+			$api_url, $sg_name );
+		return;
+	}
+	$port ||= ( $scheme eq 'http' ) ? 80 : 443;
+
+	my @addrs = $self->_resolve_addrs($host);
+	unless (@addrs) {
+		warning( "Could not resolve the CF API host '%s'; skipping %s security group setup",
+			$host, $sg_name );
+		return;
+	}
+
+	$self->_apply_security_group( $tmp_dir, $sg_name,
+		'console access to the Cloud Foundry API',
+		\@addrs, $port, 'running', 'staging' );
+
+	info( "Security group %s bound to system/stratos for the CF API %s:%s",
+		$sg_name, $host, $port );
 }
+
+sub _ensure_db_security_group {
+	my ( $self, $tmp_dir, $db ) = @_;
+
+	my $sg_name = 'stratos-db';
+	my $host    = $db->{hostname};
+	my $port    = $db->{port};
+
+	unless ( $host && $port ) {
+		warning( "No database host or port known; skipping %s security group setup", $sg_name );
+		return;
+	}
+
+	my @addrs = $self->_resolve_addrs($host);
+	unless (@addrs) {
+		warning( "Could not resolve database host '%s'; skipping %s security group setup",
+			$host, $sg_name );
+		return;
+	}
+
+	$self->_apply_security_group( $tmp_dir, $sg_name,
+		'console access to its database',
+		\@addrs, $port, 'running', 'staging' );
+
+	info( "Security group %s bound to system/stratos for database %s:%s",
+		$sg_name, $host, $port );
+}
+
 
 sub _to_yaml {
 	my ( $data, $indent ) = @_;
