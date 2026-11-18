@@ -795,9 +795,6 @@ vm_extensions:
 
 - `login` - Log into the Cloud Foundry instance as the admin.
 
-- `asg` - Generates application security group (ASG) definitions,
-  in JSON, which can then be fed into Cloud Foundry.
-
 - `smoketest` - Runs smoke tests to verify CF operation.
 
 ## History
