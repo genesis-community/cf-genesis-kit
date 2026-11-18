@@ -28,33 +28,27 @@ sub init {
 sub build_system_metrics_runtime {
 	my ($self) = @_;
 
-	# Check if CF deployment exists and has the required secrets
 	return ("", "skipped", "CF deployment has not been deployed yet") unless $self->deployed;
 
-	# Get exodus data directly from this CF deployment
-	my $exodus = $self->exodus_data;
+	# The agent authenticates with the system_metrics certificate, which
+	# upstream's add-system-metrics-agent ops file has the director generate
+	# in CredHub for this deployment, alongside the scraper that reads the
+	# agents.  Without that ops file there is no certificate to hand out.
+	return (
+		"", "skipped",
+		"The CF manifest defines no system_metrics certificate.  Add the " .
+		"cf-deployment/operations/addons/add-system-metrics-agent feature " .
+		"to build this runtime config."
+	) unless $self->env->manifest_lookup('variables.system_metrics', undef);
 
-	# Check for required system metrics secrets
-	my $required_secrets = [qw/system_metrics_ca_cert system_metrics_cert system_metrics_key/];
-	my @missing_secrets;
-	for my $secret (@$required_secrets) {
-		if (!$exodus->{$secret}) {
-			push @missing_secrets, $secret;
-		}
-	}
-
-	if (@missing_secrets) {
-		return (
-			"", "skipped",
-			"Missing required system metrics secrets in exodus data: " . join(", ", @missing_secrets)
-		);
-	}
-
-	# Get system metrics TLS configuration from exodus data with entombment
+	# Name the variable by its absolute CredHub path, so the director fills
+	# in the certificate when it deploys each VM.  No certificate or key is
+	# read here, and none is written into the runtime config.
+	my $variable = $self->env->credhub->base . 'system_metrics';
 	my $system_metrics_tls = {
-		ca_cert => $self->_get_exodus_secret('system_metrics_ca_cert'),
-		cert => $self->_get_exodus_secret('system_metrics_cert'),
-		key => $self->_get_exodus_secret('system_metrics_key')
+		ca_cert => "((${variable}.ca))",
+		cert    => "((${variable}.certificate))",
+		key     => "((${variable}.private_key))",
 	};
 
 	# Get user-provided excluded deployments with validation

@@ -798,6 +798,24 @@ vm_extensions:
 
 - `smoketest` - Runs smoke tests to verify CF operation.
 
+## Runtime Configs
+
+The kit builds one runtime config, `system_metrics`, which runs the `loggr-system-metrics-agent` on every other deployment of the director that deploys CF. We enable it under `bosh-configs.runtime`, and the post-deploy hook uploads it after each CF deploy:
+
+```yaml
+kit:
+  features:
+  - cf-deployment/operations/addons/add-system-metrics-agent
+
+bosh-configs:
+  runtime:
+    system_metrics:
+      params:
+        excluded_deployments: [blacksmith]
+```
+
+The agents use the `system_metrics` certificate that the upstream `add-system-metrics-agent` ops file has the director generate in CredHub for the CF deployment, so the build is skipped until the environment lists that feature. The runtime config names the certificate by its CredHub path, and the director fills it in as it deploys each VM, so no certificate or key leaves CredHub. The CF deployment itself is always excluded, because the ops file already runs the agent there, and each name under `excluded_deployments` is prefixed with the environment name unless it already carries it.
+
 ## History
 
 Version 2.5.x adds STACKIT support, changes default runtime stack to cflinuxfs4.
