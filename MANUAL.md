@@ -78,6 +78,7 @@ Using features is a way to configure the kit to suit the requirements of your sp
 ### General Features
 
 - `compiled-releases` - Use pre-compiled releases to speed up initial deploy time (alias of upstream `cf-deployment/operations/use-compiled-releases`).
+- `source-releases` - Deploy the kit's release overrides from source, so the director compiles them for its stemcell, in place of the kit's compiled releases. Windows cells are built from source releases as well.
 - `small-footprint` - Use the minimal number of VMs and only 1 AZ to deploy CF.
 - `enable-service-discovery` - Enables bosh-dns support on Diego cells.
 - `app-autoscaler-integration` - Add a UAA client for the app autoscaler (must be deployed via [cf-app-autoscaler-genesis-kit](https://github.com/genesis-community/cf-app-autoscaler-genesis-kit)).

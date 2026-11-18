@@ -169,7 +169,7 @@ sub process_classic_features {
 	# dispatch chain, where they fall through to its "Unknown feature" bail.
 	my @direct_features = qw{
 		bare partitioned-network
-		compiled-releases resolute
+		compiled-releases source-releases resolute
 		small-footprint cf-deployment/operations/scale-to-one-az
 		v1-vm-types v2-nats-credentials
 		aws-blobstore-iam gcp-use-access-key
@@ -1423,6 +1423,7 @@ sub validate_classic_features {
 		'self-signed',
 		'small-footprint',
 		'compiled-releases',
+		'source-releases',
 		'resolute',
 		'cflinuxfs3', 'cflinuxfs4', 'cflinuxfs4-default',
 		'isolation-segments',

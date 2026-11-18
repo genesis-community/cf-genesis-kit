@@ -231,6 +231,14 @@ var _ = Describe("Interal Kit", func() {
 		RuntimeConfig: "dns",
 		CPI:           "aws",
 	})
+	// source-releases keeps the releases uncompiled, so the director
+	// compiles them, in place of the kit's compiled-release overrides.
+	Test(Environment{
+		Name:          "source-releases",
+		CloudConfig:   "aws",
+		RuntimeConfig: "dns",
+		CPI:           "aws",
+	})
 	Test(Environment{
 		Name:          "resolute",
 		CloudConfig:   "aws",
